@@ -33,6 +33,19 @@ if(WIN32)
 endif()
 add_test(NAME math COMMAND sdlgf_math_test)
 
+# --- Text layout/rasterisation (SDL_ttf), checked against the golden images and GDI measurements ----
+add_executable(sdlgf_text_test
+    text_test.cpp
+    "${CMAKE_SOURCE_DIR}/core/Text.cpp"
+    "${CMAKE_SOURCE_DIR}/core/Platform.cpp"
+)
+target_include_directories(sdlgf_text_test PRIVATE "${CMAKE_SOURCE_DIR}/core" "${CMAKE_CURRENT_SOURCE_DIR}/golden")
+target_compile_definitions(sdlgf_text_test PRIVATE
+    SDLGF_ASSET_DIR="${CMAKE_SOURCE_DIR}/demo"
+    SDLGF_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
+target_link_libraries(sdlgf_text_test PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3)
+add_test(NAME text COMMAND sdlgf_text_test)
+
 # --- Application window + InputManager, headless (SDL "dummy" video driver) ---------
 add_executable(sdlgf_input_test input_test.cpp)
 target_link_libraries(sdlgf_input_test PRIVATE sdlgf::core)

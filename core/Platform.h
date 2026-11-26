@@ -113,4 +113,15 @@ namespace sdlgf::Platform {
 	/// points become U+FFFD.
 	/// </summary>
 	std::string WideToUtf8(std::wstring_view wide);
+
+	/// <summary>
+	/// Decodes a platform wide string (UTF-16 or UTF-32) to Unicode code points. Unpaired
+	/// surrogates / invalid values become U+FFFD.
+	/// </summary>
+	std::u32string WideToUtf32(std::wstring_view wide);
+
+	/// <summary>
+	/// Encodes Unicode code points as UTF-8. Invalid values become U+FFFD.
+	/// </summary>
+	std::string Utf32ToUtf8(std::u32string_view codePoints);
 }

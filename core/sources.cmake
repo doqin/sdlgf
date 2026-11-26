@@ -36,6 +36,7 @@ set(SDLGF_CORE_SOURCES
     InputManager.cpp
     Platform.cpp
     Keys.cpp
+    Text.cpp
     CrashHandler.cpp
     IScene.cpp
     ISprite.cpp

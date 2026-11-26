@@ -7,6 +7,8 @@ renderer is tested against these files: same scene in, same pixels out.
 |---|---|
 | `text_<font><size>.png` | 15 rows of text per font/size actually used by the game: Latin, Vietnamese, diacritics, punctuation, `&`, multi-line, word wrap (`SetMaxWidth`), colour, alpha, bold, outlines, camera zoom 2x/1.5x, fractional position. Non-antialiased, so only a handful of colours. |
 | `text_metrics.txt` | `GetWidth()`/`GetHeight()` that `ID3DXFont` (`DT_CALCRECT`) reported for every row. |
+| `text_probe.png`, `probe_metrics.txt` | 22 layout edge cases (empty string, spaces, newlines, tabs, word wrap, a word wider than the box, ...) drawn and measured at 135OpenPixel 13 px. |
+| `text_cases.h` | The text rows, probes and font list behind all of the above, shared by the generator and the tests. |
 | `sprites.png` | `StaticSprite` (integer/fractional position, scale 1/2/2.5/3, flip, rotation, alpha, tint, stretch, source rect), `AnimatedSprite` frames, `NineSliceSprite` at four sizes/scales, zoomed offset camera. |
 | `primitives.png` | Lines (1 px, thick), rectangles, ellipses, triangles, textured polygons (incl. UVs outside [0,1]), scissor test; left half opaque, right half with alpha blending; instant and camera variants. |
 | `map_*.png` | `Map` tile layers (`labinside.tmx` at two cameras, `tutorial.tmx`). |
@@ -19,6 +21,11 @@ All images are opaque RGB, on a `0x303030` background.
   is a normal glyph, so text layout needs no prefix handling.
 * Text is rendered without antialiasing (GDI `NONANTIALIASED_QUALITY`).
 * Line height equals the font's cell height (13/26/39 px for the 135OpenPixel sizes).
+* Layout rules measured from the probes: a trailing `\n` adds no line; `\r`, `\t` and other control
+  characters have no width; trailing spaces are not part of a line's width; with word wrap a space
+  that does not fit moves to the *start* of the next line (and stays visible there); a word after
+  the first on a line also needs room for the space that follows it; a word wider than the box breaks
+  between characters; GDI draws no ink left of a glyph's pen position.
 
 ## Regenerating
 

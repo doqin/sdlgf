@@ -166,12 +166,37 @@ static void TestMatchesWin32()
 }
 #endif
 
+static void TestUtf32()
+{
+	CHECK(sdlgf::Platform::WideToUtf32(L"").empty());
+	CHECK(sdlgf::Platform::WideToUtf32(L"A\u0110") == std::u32string(U"A\u0110"));
+	CHECK(sdlgf::Platform::WideToUtf32(WideFromCodePoint(0x1F600)) == std::u32string(1, U'\U0001F600'));   // one code point, not two units
+	CHECK(sdlgf::Platform::Utf32ToUtf8(U"A\u0110\u1EA3") == "A\xC4\x90\xE1\xBA\xA3");
+	CHECK(sdlgf::Platform::Utf32ToUtf8(std::u32string(1, U'\U0001F600')) == "\xF0\x9F\x98\x80");
+	// invalid scalar values become U+FFFD instead of producing malformed UTF-8
+	CHECK(sdlgf::Platform::Utf32ToUtf8(std::u32string(1, static_cast<char32_t>(0xD800))) == "\xEF\xBF\xBD");
+	CHECK(sdlgf::Platform::Utf32ToUtf8(std::u32string(1, static_cast<char32_t>(0x110000))) == "\xEF\xBF\xBD");
+	// lone surrogate in a UTF-16 wstring
+	if (sizeof(wchar_t) == 2) {
+		CHECK(sdlgf::Platform::WideToUtf32(std::wstring(1, static_cast<wchar_t>(0xD800))) == std::u32string(1, U'\uFFFD'));
+	}
+	// every scalar value round-trips wide -> UTF-32 -> UTF-8 -> wide
+	for (char32_t cp = 0; cp <= 0x10FFFF; cp += 7) {
+		if (cp >= 0xD800 && cp <= 0xDFFF) continue;
+		const std::wstring w = WideFromCodePoint(cp);
+		const std::u32string u = sdlgf::Platform::WideToUtf32(w);
+		if (u.size() != 1 || u[0] != cp) { CHECK(!"wide -> utf32"); break; }
+		if (Utf8ToWide(sdlgf::Platform::Utf32ToUtf8(u)) != w) { CHECK(!"utf32 -> utf8 -> wide"); break; }
+	}
+}
+
 int main()
 {
 	TestTicks();
 	TestKnownVectors();
 	TestInvalidInput();
 	TestRoundTripAllCodePoints();
+	TestUtf32();
 #if defined(_WIN32)
 	TestMatchesWin32();
 #endif

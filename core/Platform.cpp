@@ -195,3 +195,24 @@ std::string sdlgf::Platform::WideToUtf8(std::wstring_view wide)
 	}
 	return out;
 }
+
+std::u32string sdlgf::Platform::WideToUtf32(std::wstring_view wide)
+{
+	std::u32string out;
+	out.reserve(wide.size());
+	for (size_t i = 0; i < wide.size();) {
+		out += DecodeWide(wide, i);
+	}
+	return out;
+}
+
+std::string sdlgf::Platform::Utf32ToUtf8(std::u32string_view codePoints)
+{
+	std::string out;
+	out.reserve(codePoints.size());
+	for (const char32_t cp : codePoints) {
+		const bool valid = cp <= 0x10FFFF && !(cp >= 0xD800 && cp <= 0xDFFF);
+		AppendUtf8(out, valid ? cp : kReplacement);
+	}
+	return out;
+}

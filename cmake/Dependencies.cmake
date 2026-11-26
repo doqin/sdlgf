@@ -34,7 +34,26 @@ FetchContent_Declare(tmxlite
     EXCLUDE_FROM_ALL
 )
 
-FetchContent_MakeAvailable(SDL3 tmxlite)
+# --- SDL_ttf ----------------------------------------------------------------
+# Text rendering. Only FreeType is needed (vendored as a git submodule of SDL_ttf);
+# HarfBuzz (complex-script shaping) and PlutoSVG (colour emoji) are switched off.
+# Everything is linked statically (SDL_ttf otherwise looks for the shared SDL3 target).
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
+set(SDLTTF_HARFBUZZ OFF CACHE BOOL "" FORCE)
+set(SDLTTF_PLUTOSVG OFF CACHE BOOL "" FORCE)
+set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLTTF_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(SDL3_ttf
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+    GIT_TAG        release-3.2.2
+    GIT_SHALLOW    TRUE
+    GIT_SUBMODULES external/freetype
+    EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(SDL3)
+FetchContent_MakeAvailable(SDL3_ttf tmxlite)
 
 # tmxlite only defines TMXLITE_STATIC for its own Debug/Release flags and does
 # not export it, so consumers would try to dllimport the symbols.

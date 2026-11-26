@@ -335,8 +335,8 @@ void Demo::BossWorldScene::OnInit()
 	});
 
 	auto audio = sdlgf::AudioManager::GetInstance();
-	audio->Load("hack_fail", "assets/audio/access_denied.wav");
-	audio->Load("hack_success", "assets/audio/access_granted.wav");
+	audio->Load("hack_fail", "assets/audio/access_denied.ogg");
+	audio->Load("hack_success", "assets/audio/access_granted.ogg");
 
 	gateTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	gateTexture->LoadTexture(L"assets/gate.png");

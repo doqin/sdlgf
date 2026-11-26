@@ -16,7 +16,7 @@ Linux (xem danh sách thư viện cần cài trong job `linux` của `.github/wo
 ```
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
-build/bin/demo
+build/bin/Release/demo
 ```
 
 Tuỳ chọn: `-DSDLGF_TESTING=ON` (vào thẳng `DebugScene`), `-DSDLGF_COPY_ASSETS=OFF`, `-DSDLGF_BUILD_TESTS=OFF`.
@@ -28,6 +28,15 @@ Phát hành bản build: chạy workflow `Portable build` bằng `workflow_dispa
 Cửa sổ, vòng lặp, input, đồ hoạ (SDL_Renderer), chữ (SDL_ttf) và âm thanh (SDL3 audio) đều chạy trên SDL3; file âm thanh đọc được dạng `.wav` hoặc `.ogg` (Ogg Vorbis, giải mã bằng SDL_mixer, tải và build từ source cùng các thư viện khác); không còn Direct3D 9 / DirectInput / XAudio2. CI build và chạy test trên Windows và Linux.
 
 Các file Visual Studio cũ (`.vcxproj`, `.slnx`) đã được xoá; dùng CMake (Visual Studio mở được thư mục CMake trực tiếp).
+
+# Phát triển trong VSCodium (CMake Tools + clangd)
+
+Đã cấu hình sẵn trong repo: `CMakePresets.json` và `.vscode/{settings,launch,tasks,extensions}.json`.
+
+- Extension: `ms-vscode.cmake-tools`, `llvm-vs-code-extensions.vscode-clangd`, và `webfreak.debug` (Native Debug — dùng gdb; VSCodium không cài được `ms-vscode.cpptools` từ Open VSX nên không dùng được `cppdbg` / nút debug của CMake Tools).
+- Mở thư mục là CMake Tools tự configure theo preset `linux` (Ninja, Release, build vào `build/` — đúng như README, executable ở `build/bin/Release/demo`). Muốn debug có debug info thì chọn preset `linux-debug` (`build/debug`, `-g`, không bật `SDLGF_TESTING`; thêm `-DSDLGF_TESTING=ON` nếu muốn vào thẳng DebugScene, executable ở `build/debug/bin/Debug/demo`); preset này build các thư viện phụ thêm một lần nữa và tốn thêm ~900 MB trong `build/debug`.
+- `CMakeLists.txt` bật `CMAKE_EXPORT_COMPILE_COMMANDS`; mỗi lần configure, CMake Tools chép `compile_commands.json` của preset đang chọn ra thư mục gốc repo (`cmake.copyCompileCommands`, file này bị git bỏ qua) và clangd đọc file đó. Đổi preset (`linux` ↔ `linux-debug`) thì clangd đổi theo: `_DEBUG` (bật các khối `#ifdef _DEBUG`), `NDEBUG`, `SDLGF_TESTING`... Với Debug trên Linux, `core/CMakeLists.txt` tự định nghĩa `_DEBUG` (MSVC thì tự có). clangd dùng PCH (`cmake_pch.hxx`) do CMake sinh, nên preset đó phải được build ít nhất một lần (chỉ configure thì clangd báo thiếu file PCH).
+- Task: `cmake: build` (Ctrl+Shift+B, targets `all`), `run: demo`, `test: ctest (build/)`; F5 chạy các cấu hình trong `launch.json`.
 
 # Thành viên làm đồ án
 24520763 - Nguyễn Tuấn Khang

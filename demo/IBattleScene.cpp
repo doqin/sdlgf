@@ -37,8 +37,7 @@ namespace {
 	constexpr float HiddenPileX = -10000.f;
 	constexpr float HiddenPileY = -10000.f;
 
-	void HidePileCard(const std::shared_ptr<Demo::ICard>& card)
-	{
+	void HidePileCard(const std::shared_ptr<Demo::ICard>& card) {
 		if (!card) {
 			return;
 		}
@@ -55,8 +54,7 @@ namespace {
 
 	// Turns left on a modifier the combatant already carries, skipping expired ones the way
 	// ICombatant::TriggerEffects does. 0 when it is not there at all.
-	int ActiveModifierDuration(const Demo::ICombatant& combatant, Demo::ModifierType type)
-	{
+	int ActiveModifierDuration(const Demo::ICombatant& combatant, Demo::ModifierType type) {
 		for (const auto& mod : combatant.GetModifiers()) {
 			if (mod.type == type && mod.duration > 0) {
 				return mod.duration;
@@ -83,10 +81,9 @@ namespace {
 	constexpr float PADDING_X = 20.0f;
 	constexpr float PADDING_Y = 30.0f;
 
-}
+} // namespace
 
-void Demo::IBattleScene::StartBattle()
-{
+void Demo::IBattleScene::StartBattle() {
 	// Reset Gear
 	currentGearCooldown = 0;
 	if (player->HasGearEquipped(5)) {
@@ -142,26 +139,24 @@ void Demo::IBattleScene::StartBattle()
 	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 	if (!customBGMName.empty()) {
 		sdlgf::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
-	}
-	else {
+	} else {
 		sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("battle_bgm", 0.3f, 1.5f);
 	}
 
 	if (battleEventType == EventType::Gold) {
 		targetTokenTurn = Demo::RNG::Range(1, 3);
-	}
-	else {
+	} else {
 		targetTokenTurn = -1;
 	}
-
 }
 
-void Demo::IBattleScene::LockRandomCard(int turns)
-{
+void Demo::IBattleScene::LockRandomCard(int turns) {
 	std::vector<std::shared_ptr<ICard>> visibleCards;
 
-	for (auto& card : this->cardHand) if (!card->IsLocked()) visibleCards.push_back(card);
-	for (auto& card : this->queuedToDraw) if (!card->IsLocked()) visibleCards.push_back(card);
+	for (auto& card : this->cardHand)
+		if (!card->IsLocked()) visibleCards.push_back(card);
+	for (auto& card : this->queuedToDraw)
+		if (!card->IsLocked()) visibleCards.push_back(card);
 
 	// Lock a visible (hand/queued) card first
 	if (!visibleCards.empty()) {
@@ -173,7 +168,8 @@ void Demo::IBattleScene::LockRandomCard(int turns)
 
 	// Otherwise fall back to locking a card still in the draw pile
 	std::vector<std::shared_ptr<ICard>> hiddenCards;
-	for (auto& card : this->drawPile) if (!card->IsLocked()) hiddenCards.push_back(card);
+	for (auto& card : this->drawPile)
+		if (!card->IsLocked()) hiddenCards.push_back(card);
 
 	if (!hiddenCards.empty()) {
 		int randIdx = RNG::Range(0, static_cast<int>(hiddenCards.size() - 1));
@@ -182,8 +178,7 @@ void Demo::IBattleScene::LockRandomCard(int turns)
 	}
 }
 
-void Demo::IBattleScene::WireEnemyCallbacks(const std::shared_ptr<IEnemy>& enemy)
-{
+void Demo::IBattleScene::WireEnemyCallbacks(const std::shared_ptr<IEnemy>& enemy) {
 	if (!enemy) {
 		return;
 	}
@@ -192,12 +187,11 @@ void Demo::IBattleScene::WireEnemyCallbacks(const std::shared_ptr<IEnemy>& enemy
 		if (spawned) {
 			this->pendingEnemies.push_back(std::move(spawned));
 		}
-		});
+	});
 	enemy->SetOnRequestVisionDebuff([this](int turns) { this->ApplyVisionDebuff(turns); });
 }
 
-void Demo::IBattleScene::FlushPendingEnemies()
-{
+void Demo::IBattleScene::FlushPendingEnemies() {
 	if (pendingEnemies.empty()) {
 		return;
 	}
@@ -217,8 +211,7 @@ void Demo::IBattleScene::FlushPendingEnemies()
 	enemyLayoutInitialized = false;
 }
 
-void Demo::IBattleScene::CollectDeadEnemies()
-{
+void Demo::IBattleScene::CollectDeadEnemies() {
 	for (size_t i = 0; i < enemies.size(); ++i) {
 		if (enemies[i]->IsDead() && enemies[i]->IsDoneAttacking()) {
 			battleGoldReward += enemies[i]->GetGoldReward();
@@ -230,8 +223,7 @@ void Demo::IBattleScene::CollectDeadEnemies()
 	}
 }
 
-void Demo::IBattleScene::OnAllEnemiesDefeated()
-{
+void Demo::IBattleScene::OnAllEnemiesDefeated() {
 	if (isBattleEnding) {
 		return;
 	}
@@ -258,9 +250,11 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		for (const auto& cardId : battleCardDrops) {
 			player->AddCardToInventory(cardId);
 			auto it = std::find_if(grouped.begin(), grouped.end(),
-				[&](const auto& entry) { return entry.first == cardId; });
-			if (it != grouped.end()) it->second++;
-			else grouped.push_back({ cardId, 1 });
+								   [&](const auto& entry) { return entry.first == cardId; });
+			if (it != grouped.end())
+				it->second++;
+			else
+				grouped.push_back({cardId, 1});
 		}
 
 		std::wstring cardList;
@@ -290,19 +284,17 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 		// scene here would destroy the command before CustomCommand::Execute returns.
 		pendingReturnToPreviousScene = true;
 		markFinished();
-		}));
+	}));
 }
 
-void Demo::IBattleScene::DrawCardsNow(int amount)
-{
+void Demo::IBattleScene::DrawCardsNow(int amount) {
 	if (amount <= 0) {
 		return;
 	}
 	DrawCards(static_cast<size_t>(amount), true);
 }
 
-void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
-{
+void Demo::IBattleScene::DrawCards(size_t count, bool midTurn) {
 	auto app = sdlgf::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
@@ -329,7 +321,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 				if (statement) {
 					this->ReturnCardToHand(statement);
 				}
-				});
+			});
 			draggable->DetachParent();
 			// Hidden cards skip IDraggable::Update, so a card in flight cannot be grabbed and
 			// dropped into a block for free. DrawWorld still draws queuedToDraw directly.
@@ -349,8 +341,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 			std::make_shared<sdlgf::CustomCommand>([this, card](std::function<void(void)> markFinished) {
 				this->LandDrawnCard(card);
 				markFinished();
-			})
-		};
+			})};
 		cardAnimCommands.push_back(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	}
 
@@ -362,9 +353,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 	}
 }
 
-
-void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
-{
+void Demo::IBattleScene::ShuffleDiscardIntoDrawPile() {
 	if (discardPile.empty()) {
 		return;
 	}
@@ -379,8 +368,7 @@ void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
 	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.6f);
 }
 
-void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
-{
+void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded() {
 	if (currentTurn == 0 || currentTurn % 3 != 1 || playedPile.empty()) {
 		return;
 	}
@@ -400,8 +388,7 @@ void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
 	playedPile.clear();
 }
 
-void Demo::IBattleScene::MoveExecutedHandCardsToPlayedPile()
-{
+void Demo::IBattleScene::MoveExecutedHandCardsToPlayedPile() {
 	for (size_t i = 0; i < cardHand.size(); ++i) {
 		auto parent = cardHand[i]->GetParent();
 		if (parent.has_value() && parent.value().lock().get() == handContainer.get()) {
@@ -413,8 +400,7 @@ void Demo::IBattleScene::MoveExecutedHandCardsToPlayedPile()
 	}
 }
 
-void Demo::IBattleScene::MoveDepletedCardsToNullifiedPile()
-{
+void Demo::IBattleScene::MoveDepletedCardsToNullifiedPile() {
 	auto drain = [this](std::vector<std::shared_ptr<ICard>>& pile) {
 		for (size_t i = 0; i < pile.size(); ++i) {
 			if (!pile[i]->IsDepleted()) {
@@ -425,15 +411,14 @@ void Demo::IBattleScene::MoveDepletedCardsToNullifiedPile()
 			pile.erase(pile.begin() + i);
 			--i;
 		}
-		};
+	};
 	// Played cards keep running from inside the block, so detaching them here is what
 	// actually stops a depleted card from executing again next turn.
 	drain(playedPile);
 	drain(cardHand);
 }
 
-bool Demo::IBattleScene::CanPlaceCardInBlock(const std::shared_ptr<ICard>& card) const
-{
+bool Demo::IBattleScene::CanPlaceCardInBlock(const std::shared_ptr<ICard>& card) const {
 	if (!card) {
 		return false;
 	}
@@ -456,8 +441,7 @@ bool Demo::IBattleScene::CanPlaceCardInBlock(const std::shared_ptr<ICard>& card)
 	return GetAvailableEnergy() >= cost;
 }
 
-void Demo::IBattleScene::ReturnCardToHand(const std::shared_ptr<IStatementCard>& card)
-{
+void Demo::IBattleScene::ReturnCardToHand(const std::shared_ptr<IStatementCard>& card) {
 	if (!card) {
 		return;
 	}
@@ -469,11 +453,10 @@ void Demo::IBattleScene::ReturnCardToHand(const std::shared_ptr<IStatementCard>&
 			handContainer->StoreCard(card);
 		}
 		markFinished();
-		}));
+	}));
 }
 
-void Demo::IBattleScene::MoveNonPersistentCardsToDiscardPile()
-{
+void Demo::IBattleScene::MoveNonPersistentCardsToDiscardPile() {
 	// Runs after the depleted sweep, so a card that is both depleted and non-persistent is
 	// already gone to the nullified pile - depletion is permanent, non-persistence is not.
 	// As with depleted cards, detaching from the block is what stops them executing again.
@@ -488,8 +471,7 @@ void Demo::IBattleScene::MoveNonPersistentCardsToDiscardPile()
 	}
 }
 
-void Demo::IBattleScene::FinishInitBlockExecution()
-{
+void Demo::IBattleScene::FinishInitBlockExecution() {
 	if (!initBlockCard) {
 		return;
 	}
@@ -507,8 +489,7 @@ void Demo::IBattleScene::FinishInitBlockExecution()
 		if (handIt != cardHand.end()) {
 			committedEnergy += static_cast<int>(card->GetCost());
 			cardHand.erase(handIt);
-		}
-		else {
+		} else {
 			auto playedIt = std::find(playedPile.begin(), playedPile.end(), card);
 			if (playedIt != playedPile.end()) {
 				playedPile.erase(playedIt);
@@ -527,15 +508,13 @@ void Demo::IBattleScene::FinishInitBlockExecution()
 		// uses left and keep resolving for free.
 		if (card->IsDepleted()) {
 			nullifiedPile.push_back(card);
-		}
-		else {
+		} else {
 			discardPile.push_back(card);
 		}
 	}
 }
 
-void Demo::IBattleScene::MoveInitBlockCardsToDiscardPile()
-{
+void Demo::IBattleScene::MoveInitBlockCardsToDiscardPile() {
 	if (!initBlockCard) {
 		return;
 	}
@@ -555,15 +534,13 @@ void Demo::IBattleScene::MoveInitBlockCardsToDiscardPile()
 		HidePileCard(card);
 		if (card->IsDepleted()) {
 			nullifiedPile.push_back(card);
-		}
-		else {
+		} else {
 			discardPile.push_back(card);
 		}
 	}
 }
 
-void Demo::IBattleScene::MoveHandCardsToDiscardPile()
-{
+void Demo::IBattleScene::MoveHandCardsToDiscardPile() {
 	for (size_t i = 0; i < cardHand.size(); ++i) {
 		if (cardHand[i]->IsLocked()) {
 			continue;
@@ -580,26 +557,29 @@ void Demo::IBattleScene::MoveHandCardsToDiscardPile()
 	}
 }
 
-const std::vector<std::shared_ptr<Demo::ICard>>& Demo::IBattleScene::GetPile(PileKind kind) const
-{
+const std::vector<std::shared_ptr<Demo::ICard>>& Demo::IBattleScene::GetPile(PileKind kind) const {
 	switch (kind) {
-	case PileKind::Discard:   return discardPile;
-	case PileKind::Nullified: return nullifiedPile;
-	default:                  return drawPile;
+	case PileKind::Discard:
+		return discardPile;
+	case PileKind::Nullified:
+		return nullifiedPile;
+	default:
+		return drawPile;
 	}
 }
 
-std::wstring Demo::IBattleScene::GetPileName(PileKind kind)
-{
+std::wstring Demo::IBattleScene::GetPileName(PileKind kind) {
 	switch (kind) {
-	case PileKind::Discard:   return Tr(L"Discard Pile");
-	case PileKind::Nullified: return Tr(L"Nullified Pile");
-	default:                  return Tr(L"Draw Pile");
+	case PileKind::Discard:
+		return Tr(L"Discard Pile");
+	case PileKind::Nullified:
+		return Tr(L"Nullified Pile");
+	default:
+		return Tr(L"Draw Pile");
 	}
 }
 
-void Demo::IBattleScene::OpenPileView(PileKind kind)
-{
+void Demo::IBattleScene::OpenPileView(PileKind kind) {
 	viewedPile = kind;
 	currentPilePage = 0;
 	state = State::PlayerViewPile;
@@ -607,8 +587,7 @@ void Demo::IBattleScene::OpenPileView(PileKind kind)
 	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
 }
 
-void Demo::IBattleScene::ClosePileView()
-{
+void Demo::IBattleScene::ClosePileView() {
 	// Drop anything the view queued this frame before its cards are destroyed.
 	draggableManager->ClearQueuedDraws();
 	for (auto& card : pileViewCards) {
@@ -620,8 +599,7 @@ void Demo::IBattleScene::ClosePileView()
 	state = State::PlayerAttack;
 }
 
-void Demo::IBattleScene::RefreshPileView()
-{
+void Demo::IBattleScene::RefreshPileView() {
 	// Paging destroys the current page's cards, same hazard as closing the view.
 	draggableManager->ClearQueuedDraws();
 	for (auto& card : pileViewCards) {
@@ -684,8 +662,7 @@ void Demo::IBattleScene::RefreshPileView()
 	}
 }
 
-float Demo::IBattleScene::LayOutPileButtons(float screenWidth, float buttonY)
-{
+float Demo::IBattleScene::LayOutPileButtons(float screenWidth, float buttonY) {
 	const float sidePadding = 20.f;
 	const float total = PILE_BUTTON_SIZE * 3.f + PILE_BUTTON_GAP * 2.f;
 	const float x = screenWidth / 2.f - sidePadding - total;
@@ -697,8 +674,7 @@ float Demo::IBattleScene::LayOutPileButtons(float screenWidth, float buttonY)
 	return x;
 }
 
-void Demo::IBattleScene::BeginNextTurn()
-{
+void Demo::IBattleScene::BeginNextTurn() {
 	if (currentGearCooldown > 0) currentGearCooldown--;
 	++currentTurn;
 	MovePlayedPileToDiscardPileIfNeeded();
@@ -732,8 +708,7 @@ void Demo::IBattleScene::BeginNextTurn()
 	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 }
 
-void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const
-{
+void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const {
 	const auto app = sdlgf::Application::GetInstance();
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
 	// Same baseline PlayerAttackUpdate uses for the action bar and the discard strip, so the
@@ -743,13 +718,12 @@ void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const
 	bottom = actionBarY - ENEMY_GRID_BOTTOM_PAD;
 }
 
-std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
-{
+std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const {
 	std::vector<sdlgf::Vec2> slots;
 	if (enemies.empty()) {
 		return slots;
 	}
-	slots.resize(enemies.size(), sdlgf::Vec2{ 0.f, 0.f });
+	slots.resize(enemies.size(), sdlgf::Vec2{0.f, 0.f});
 
 	const auto app = sdlgf::Application::GetInstance();
 	const float screenWidth = static_cast<float>(app->GetScreenWidth());
@@ -766,12 +740,13 @@ std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
 	// anything wider.
 	const float defaultColumnCentreLimit = ENEMY_GRID_LEFT_EDGE_X + 64.f;
 	const int maxColumns = (std::max)(1, static_cast<int>(
-		std::floor((rightColumnX - defaultColumnCentreLimit) / ENEMY_GRID_COLUMN_PITCH)) + 1);
+											 std::floor((rightColumnX - defaultColumnCentreLimit) / ENEMY_GRID_COLUMN_PITCH)) +
+											 1);
 
 	auto bodyHeight = [this](size_t index) {
 		const auto& enemy = enemies[index];
 		return enemy ? (std::max)(1.f, enemy->GetBodyHeight()) : 1.f;
-		};
+	};
 	auto columnWidth = [this](const std::vector<size_t>& column) {
 		float widest = 0.f;
 		for (size_t index : column) {
@@ -779,7 +754,7 @@ std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
 			widest = (std::max)(widest, enemy ? enemy->GetBodyWidth() : 0.f);
 		}
 		return widest;
-		};
+	};
 	// Distance from the first centre in a column to the last.
 	auto columnSpan = [&](const std::vector<size_t>& column) {
 		float span = 0.f;
@@ -787,17 +762,17 @@ std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
 			span += (bodyHeight(column[k - 1]) + bodyHeight(column[k])) / 2.f + ENEMY_GRID_ROW_GAP;
 		}
 		return span;
-		};
+	};
 	// A tall enemy at either end of the column eats into the room the rest can use.
 	auto columnTop = [&](const std::vector<size_t>& column) {
 		return (std::max)(centreTop, -screenHeight / 2.f + bodyHeight(column.front()) / 2.f);
-		};
+	};
 	auto availableSpan = [&](const std::vector<size_t>& column) {
 		if (column.empty()) {
 			return 0.f;
 		}
 		return (std::max)(0.f, (bandBottom - bodyHeight(column.back()) / 2.f) - columnTop(column));
-		};
+	};
 
 	// Fill a column top-to-bottom until the next enemy would not fit, then start a new one to
 	// the left. Walking `enemies` in order keeps the assignment stable: appending an enemy
@@ -852,18 +827,17 @@ std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
 		const float squeeze = (span > available && span > 0.f) ? available / span : 1.f;
 
 		float y = columnTop(column) + (available - span * squeeze) / 2.f;
-		slots[column.front()] = sdlgf::Vec2{ columnX, y };
+		slots[column.front()] = sdlgf::Vec2{columnX, y};
 		for (size_t k = 1; k < column.size(); ++k) {
 			y += ((bodyHeight(column[k - 1]) + bodyHeight(column[k])) / 2.f + ENEMY_GRID_ROW_GAP) * squeeze;
-			slots[column[k]] = sdlgf::Vec2{ columnX, y };
+			slots[column[k]] = sdlgf::Vec2{columnX, y};
 		}
 	}
 
 	return slots;
 }
 
-void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
-{
+void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState) {
 	if (enemies.empty()) {
 		return;
 	}
@@ -878,8 +852,8 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 
 	// PlayerAttack is the phase the player reads and clicks through, so it gets the full grid.
 	const std::vector<sdlgf::Vec2> gridSlots = (targetState != State::PlayerStandBy && targetState != State::EnemyAttack)
-		? BuildEnemyGridSlots()
-		: std::vector<sdlgf::Vec2>{};
+												   ? BuildEnemyGridSlots()
+												   : std::vector<sdlgf::Vec2>{};
 
 	// The standby row and the off-screen attack queue keep their single-line arrangement, but
 	// both used to run off the edge once enough enemies were alive. Clamp their pitch to fit.
@@ -904,13 +878,11 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 			const float totalWidth = (enemyCount > 1) ? (enemyCount - 1) * rowSpacing : 0.f;
 			targetX = -totalWidth / 2.f + i * rowSpacing;
 			targetY = centerLineY;
-		}
-		else if (targetState == State::EnemyAttack) {
+		} else if (targetState == State::EnemyAttack) {
 			const float totalHeight = (enemyCount > 1) ? (enemyCount - 1) * queueSpacing : 0.f;
 			targetX = screenWidth / 1.5f;
 			targetY = -totalHeight / 2.f + i * queueSpacing;
-		}
-		else {
+		} else {
 			targetX = gridSlots[i].x;
 			targetY = gridSlots[i].y;
 		}
@@ -920,8 +892,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	}
 }
 
-void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
-{
+void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy) {
 
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
@@ -943,31 +914,28 @@ void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.2f);
 }
 
-void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
-{
+void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea() {
 	enemyCards.erase(std::remove_if(enemyCards.begin(), enemyCards.end(), [&](const std::shared_ptr<EnemyCard>& enemyCard) {
-		if (!enemyCard || enemyCard->IsDragging()) {
-			return false;
-		}
-		auto [x, y] = enemyCard->GetWorldPosition();
-		if (IsInEnemyCardRemoveArea(x, y)) {
-			if (auto manager = enemyCard->GetDraggableManager().lock()) {
-				manager->Remove(enemyCard);
-			}
-			return true;
-		}
-		return false;
-		}), enemyCards.end());
+						 if (!enemyCard || enemyCard->IsDragging()) {
+							 return false;
+						 }
+						 auto [x, y] = enemyCard->GetWorldPosition();
+						 if (IsInEnemyCardRemoveArea(x, y)) {
+							 if (auto manager = enemyCard->GetDraggableManager().lock()) {
+								 manager->Remove(enemyCard);
+							 }
+							 return true;
+						 }
+						 return false;
+					 }),
+					 enemyCards.end());
 }
 
-bool Demo::IBattleScene::IsInEnemyCardRemoveArea(float x, float y) const
-{
-	return x >= enemyCardRemoveAreaX && x <= enemyCardRemoveAreaX + enemyCardRemoveAreaWidth
-		&& y >= enemyCardRemoveAreaY && y <= enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
+bool Demo::IBattleScene::IsInEnemyCardRemoveArea(float x, float y) const {
+	return x >= enemyCardRemoveAreaX && x <= enemyCardRemoveAreaX + enemyCardRemoveAreaWidth && y >= enemyCardRemoveAreaY && y <= enemyCardRemoveAreaY + enemyCardRemoveAreaHeight;
 }
 
-bool Demo::IBattleScene::IsDraggingEnemyCardOverRemoveArea()
-{
+bool Demo::IBattleScene::IsDraggingEnemyCardOverRemoveArea() {
 	for (const auto& enemyCard : enemyCards) {
 		if (!enemyCard || !enemyCard->IsDragging()) {
 			continue;
@@ -982,14 +950,12 @@ bool Demo::IBattleScene::IsDraggingEnemyCardOverRemoveArea()
 	return false;
 }
 
-bool Demo::IBattleScene::IsDraggingAnyEnemyCard() const
-{
+bool Demo::IBattleScene::IsDraggingAnyEnemyCard() const {
 	return std::any_of(enemyCards.begin(), enemyCards.end(),
-		[](const std::shared_ptr<EnemyCard>& enemyCard) { return enemyCard && enemyCard->IsDragging(); });
+					   [](const std::shared_ptr<EnemyCard>& enemyCard) { return enemyCard && enemyCard->IsDragging(); });
 }
 
-void Demo::IBattleScene::RefreshItemMenu()
-{
+void Demo::IBattleScene::RefreshItemMenu() {
 	buffItems.clear();
 
 	auto& inventory = player->GetInventoryItems().GetSlots();
@@ -1024,8 +990,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 	float startY = -targetHeight / 2.0f + PADDING_Y + 40.0f;
 
 	int displayIndex = 0;
-	for (int i = startIndex; i < endIndex; i++)
-	{
+	for (int i = startIndex; i < endIndex; i++) {
 		int originalIndex = validIndices[i];
 		auto slot = inventory[originalIndex];
 		auto blueprint = Demo::ItemData::GetInstance()->GetItemBlueprint(slot.itemID);
@@ -1042,7 +1007,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 		btn->SetLocalPosition(baseX, baseY);
 		btn->Update(0);
 
-		btn->SetSpriteRects({ blueprint->GetItemRect() });
+		btn->SetSpriteRects({blueprint->GetItemRect()});
 
 		btn->SetOnReleaseLeft([this, slot, blueprint](sdlgf::ITrigger* thisObj) {
 			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, slot, blueprint](std::function<void(void)> markFinished) {
@@ -1050,13 +1015,11 @@ void Demo::IBattleScene::RefreshItemMenu()
 					int turnsLeft = player->GetInventoryItems().GetItemLockedTurns(slot.itemID);
 					popUpMessage->ShowMessage(Tr(L"This item is banned for ") + std::to_wstring(turnsLeft) + L" more turn(s)!");
 					sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
-				}
-				else if (player->GetInventoryItems().ConsumeItem(slot.itemID)) {
+				} else if (player->GetInventoryItems().ConsumeItem(slot.itemID)) {
 					for (auto& mod : blueprint->GetModifiers()) {
 						if (mod.type == Demo::ModifierType::HealHP) {
 							battlePlayer->Heal(mod.value);
-						}
-						else {
+						} else {
 							battlePlayer->AddModifier(mod.type, mod.duration, mod.value, mod.isBuff, mod.delayTurns);
 						}
 					}
@@ -1069,8 +1032,8 @@ void Demo::IBattleScene::RefreshItemMenu()
 					this->QueueToEnemyAttack(0);
 				}
 				markFinished();
-				}));
-			});
+			}));
+		});
 
 		buffItems.push_back(btn);
 		displayIndex++;
@@ -1084,8 +1047,7 @@ void Demo::IBattleScene::RefreshItemMenu()
 	transformManager->UpdateAll();
 }
 
-void Demo::IBattleScene::RegisterActiveItem(const ConsumableItem& item)
-{
+void Demo::IBattleScene::RegisterActiveItem(const ConsumableItem& item) {
 	std::vector<ModifierType> lingering;
 	int turns = 0;
 	for (const auto& mod : item.GetModifiers()) {
@@ -1108,18 +1070,15 @@ void Demo::IBattleScene::RegisterActiveItem(const ConsumableItem& item)
 		}
 	}
 
-	activeItems.push_back({
-		item.GetID(),
-		item.GetName(),
-		item.GetDescription(),
-		item.GetItemRect(),
-		std::move(lingering),
-		turns
-		});
+	activeItems.push_back({item.GetID(),
+						   item.GetName(),
+						   item.GetDescription(),
+						   item.GetItemRect(),
+						   std::move(lingering),
+						   turns});
 }
 
-int Demo::IBattleScene::GetActiveItemTurnsLeft(const ActiveItemEffect& entry) const
-{
+int Demo::IBattleScene::GetActiveItemTurnsLeft(const ActiveItemEffect& entry) const {
 	int turns = 0;
 	for (const auto& mod : battlePlayer->GetModifiers()) {
 		if (mod.duration <= 0) continue;
@@ -1132,23 +1091,20 @@ int Demo::IBattleScene::GetActiveItemTurnsLeft(const ActiveItemEffect& entry) co
 	return (std::min)(turns, entry.turnsRemaining);
 }
 
-void Demo::IBattleScene::TickActiveItems()
-{
-	for (auto it = activeItems.begin(); it != activeItems.end(); ) {
+void Demo::IBattleScene::TickActiveItems() {
+	for (auto it = activeItems.begin(); it != activeItems.end();) {
 		--it->turnsRemaining;
 		// The second test catches effects that ended early - block eaten by a hit, Vulnerable
 		// cleared by poison - rather than by running out of turns.
 		if (it->turnsRemaining <= 0 || GetActiveItemTurnsLeft(*it) <= 0) {
 			it = activeItems.erase(it);
-		}
-		else {
+		} else {
 			++it;
 		}
 	}
 }
 
-void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime) {
 	auto app = sdlgf::Application::GetInstance();
 	// Set position so that it's updated if screen is resized
 	const float buttonY = app->GetScreenHeight() / 2.f - 50 - attackButton->GetHeight();
@@ -1174,8 +1130,7 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 	FlushPendingEnemies();
 }
 
-void Demo::IBattleScene::LayoutAttackRowButtons()
-{
+void Demo::IBattleScene::LayoutAttackRowButtons() {
 	auto app = sdlgf::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
@@ -1195,8 +1150,7 @@ void Demo::IBattleScene::LayoutAttackRowButtons()
 	enemyCardRemoveAreaY = buttonY;
 
 	const float leftX = -screenWidth / 2.f + sidePadding;
-	const float totalItemsWidth = backButton->GetWidth() + gearButton->GetWidth()
-		+ executeButton->GetWidth() + runInitButton->GetWidth() + enemyCardRemoveAreaWidth;
+	const float totalItemsWidth = backButton->GetWidth() + gearButton->GetWidth() + executeButton->GetWidth() + runInitButton->GetWidth() + enemyCardRemoveAreaWidth;
 	const float availableWidth = (pileButtonsX - sidePadding) - leftX;
 	const float spacing = (std::max)(sidePadding, (availableWidth - totalItemsWidth) / 4.f);
 
@@ -1211,8 +1165,7 @@ void Demo::IBattleScene::LayoutAttackRowButtons()
 	runInitButton->SetLocalPosition(runInitX, buttonY);
 }
 
-void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime) {
 
 	if (battleEventType == EventType::Energy && enemies.size() < 2 && !isFlawlessCompleted) {
 		battleEventType = EventType::None;
@@ -1265,8 +1218,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
 			if (!bp || currentGearCooldown > 0) {
 				gearButton->SetState(Demo::IButton::ButtonState::DISABLED);
-			}
-			else {
+			} else {
 				if (gearButton->GetState() == Demo::IButton::ButtonState::DISABLED) {
 					gearButton->SetState(Demo::IButton::ButtonState::IDLE);
 				}
@@ -1291,16 +1243,14 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 	FlushPendingEnemies();
 }
 
-void Demo::IBattleScene::StartAttackCountdown(std::shared_ptr<std::vector<std::shared_ptr<IEnemy>>> attackingEnemies)
-{
+void Demo::IBattleScene::StartAttackCountdown(std::shared_ptr<std::vector<std::shared_ptr<IEnemy>>> attackingEnemies) {
 	isAttackCountdownActive = true;
 	attackCountdownNumber = 3;
 	attackCountdownTimer = ATTACK_COUNTDOWN_STEP_SECONDS;
 	countdownAttackingEnemies = attackingEnemies;
 }
 
-bool Demo::IBattleScene::UpdateAttackCountdown(unsigned long long deltaTime)
-{
+bool Demo::IBattleScene::UpdateAttackCountdown(unsigned long long deltaTime) {
 	if (!isAttackCountdownActive) {
 		return false;
 	}
@@ -1317,8 +1267,7 @@ bool Demo::IBattleScene::UpdateAttackCountdown(unsigned long long deltaTime)
 	return false;
 }
 
-void Demo::IBattleScene::DrawAttackCountdown(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawAttackCountdown(unsigned long long deltaTime) {
 	if (!isAttackCountdownActive) {
 		return;
 	}
@@ -1361,8 +1310,7 @@ void Demo::IBattleScene::DrawAttackCountdown(unsigned long long deltaTime)
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime) {
 	if (!visionDebuffActive || !battlePlayer) {
 		return;
 	}
@@ -1375,8 +1323,7 @@ void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
 	float clearRadius = finalClearRadius;
 	if (isAttackCountdownActive) {
 		const float totalCountdownDuration = 3.f * ATTACK_COUNTDOWN_STEP_SECONDS;
-		const float elapsed = static_cast<float>(3 - attackCountdownNumber) * ATTACK_COUNTDOWN_STEP_SECONDS
-			+ (ATTACK_COUNTDOWN_STEP_SECONDS - attackCountdownTimer);
+		const float elapsed = static_cast<float>(3 - attackCountdownNumber) * ATTACK_COUNTDOWN_STEP_SECONDS + (ATTACK_COUNTDOWN_STEP_SECONDS - attackCountdownTimer);
 		float progress = totalCountdownDuration > 0.f ? elapsed / totalCountdownDuration : 1.f;
 		progress = (std::max)(0.f, (std::min)(1.f, progress));
 		clearRadius = outerRadius + (finalClearRadius - outerRadius) * progress;
@@ -1397,7 +1344,7 @@ void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
 			const float cx = px + std::cos(angle) * wedgeCenterDist;
 			const float cy = py + std::sin(angle) * wedgeCenterDist;
 			gd->DrawRectangle(camera, cx, cy, wedgeLength, wedgeWidth, angle,
-				1.f, 1.f, wedgeLength * 0.5f, wedgeWidth * 0.5f, overlayColor, true);
+							  1.f, 1.f, wedgeLength * 0.5f, wedgeWidth * 0.5f, overlayColor, true);
 		}
 	}
 
@@ -1420,15 +1367,14 @@ void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
 			const float cx = px + std::cos(angle) * bandCenterDist;
 			const float cy = py + std::sin(angle) * bandCenterDist;
 			gd->DrawRectangle(camera, cx, cy, bandLength, bandWidth, angle,
-				1.f, 1.f, bandLength * 0.5f, bandWidth * 0.5f, bandColor, true);
+							  1.f, 1.f, bandLength * 0.5f, bandWidth * 0.5f, bandColor, true);
 		}
 	}
 
 	gd->SetAlphaBlending(false);
 }
 
-std::vector<std::shared_ptr<Demo::IBlockCard>> Demo::IBattleScene::GetBlockCards() const
-{
+std::vector<std::shared_ptr<Demo::IBlockCard>> Demo::IBattleScene::GetBlockCards() const {
 	std::vector<std::shared_ptr<IBlockCard>> blocks;
 	if (mainBlockCard) {
 		blocks.push_back(mainBlockCard);
@@ -1439,23 +1385,20 @@ std::vector<std::shared_ptr<Demo::IBlockCard>> Demo::IBattleScene::GetBlockCards
 	return blocks;
 }
 
-std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeyboardCandidates()
-{
+std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeyboardCandidates() {
 	std::vector<KeyboardNavigator::Candidate> candidates;
 
 	auto addButton = [&](std::shared_ptr<IButton> button) {
 		if (!button) {
 			return;
 		}
-		candidates.push_back({
-			button,
-			button->GetWorldX(),
-			button->GetWorldY(),
-			(float)button->GetWidth(),
-			(float)button->GetHeight(),
-			[button]() { button->Activate(); }
-			});
-		};
+		candidates.push_back({button,
+							  button->GetWorldX(),
+							  button->GetWorldY(),
+							  (float)button->GetWidth(),
+							  (float)button->GetHeight(),
+							  [button]() { button->Activate(); }});
+	};
 
 	switch (state) {
 	case State::PlayerStandBy: {
@@ -1499,14 +1442,12 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 			if (orphaned && statementCard->IsDragging()) {
 				continue; // mid mouse-drag
 			}
-			candidates.push_back({
-				statementCard,
-				statementCard->GetWorldX(),
-				statementCard->GetWorldY(),
-				(float)statementCard->GetWidth(),
-				(float)statementCard->GetHeight(),
-				[this, statementCard]() { pickedUpCard = statementCard; placementSlotIndex = 0; }
-				});
+			candidates.push_back({statementCard,
+								  statementCard->GetWorldX(),
+								  statementCard->GetWorldY(),
+								  (float)statementCard->GetWidth(),
+								  (float)statementCard->GetHeight(),
+								  [this, statementCard]() { pickedUpCard = statementCard; placementSlotIndex = 0; }});
 		}
 
 		// StatementCards already queued in either block can also be targeted, to reorder them,
@@ -1519,24 +1460,20 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 					continue;
 				}
 
-				candidates.push_back({
-					placedStatementCard,
-					placedStatementCard->GetWorldX(),
-					placedStatementCard->GetWorldY(),
-					(float)placedStatementCard->GetWidth(),
-					(float)placedStatementCard->GetHeight(),
-					[this, placedStatementCard]() { pickedUpCard = placedStatementCard; placementSlotIndex = 0; }
-					});
+				candidates.push_back({placedStatementCard,
+									  placedStatementCard->GetWorldX(),
+									  placedStatementCard->GetWorldY(),
+									  (float)placedStatementCard->GetWidth(),
+									  (float)placedStatementCard->GetHeight(),
+									  [this, placedStatementCard]() { pickedUpCard = placedStatementCard; placementSlotIndex = 0; }});
 			}
 
-			candidates.push_back({
-				block,
-				block->GetWorldX(),
-				block->GetWorldY(),
-				(float)block->GetWidth(),
-				(float)block->GetHeight(),
-				[this]() { isDraggingBlockCardViaKeyboard = true; }
-				});
+			candidates.push_back({block,
+								  block->GetWorldX(),
+								  block->GetWorldY(),
+								  (float)block->GetWidth(),
+								  (float)block->GetHeight(),
+								  [this]() { isDraggingBlockCardViaKeyboard = true; }});
 		}
 
 		for (auto& enemy : enemies) {
@@ -1548,22 +1485,20 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 				continue;
 			}
 			// The trigger uses a center origin, so its top-left (not the enemy's own world position) is the correct bound.
-			candidates.push_back({
-				enemy,
-				trigger->GetWorldX() - trigger->GetOriginX(),
-				trigger->GetWorldY() - trigger->GetOriginY(),
-				trigger->GetWidth(),
-				trigger->GetHeight(),
-				[this, enemy]() {
-					CreateEnemyCard(enemy);
-					// Skip having to separately navigate to the freshly spawned card - go straight
-					// into placement mode so the player immediately picks a target or discards it.
-					if (!enemyCards.empty()) {
-						pickedUpCard = enemyCards.back();
-						placementSlotIndex = 0;
-					}
-				}
-				});
+			candidates.push_back({enemy,
+								  trigger->GetWorldX() - trigger->GetOriginX(),
+								  trigger->GetWorldY() - trigger->GetOriginY(),
+								  trigger->GetWidth(),
+								  trigger->GetHeight(),
+								  [this, enemy]() {
+									  CreateEnemyCard(enemy);
+									  // Skip having to separately navigate to the freshly spawned card - go straight
+									  // into placement mode so the player immediately picks a target or discards it.
+									  if (!enemyCards.empty()) {
+										  pickedUpCard = enemyCards.back();
+										  placementSlotIndex = 0;
+									  }
+								  }});
 		}
 
 		for (auto& enemyCard : enemyCards) {
@@ -1572,14 +1507,12 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 			if (!parent.has_value()) continue;
 			if (enemyCard->IsDragging()) continue;
 
-			candidates.push_back({
-				enemyCard,
-				enemyCard->GetWorldX(),
-				enemyCard->GetWorldY(),
-				(float)enemyCard->GetWidth(),
-				(float)enemyCard->GetHeight(),
-				[this, enemyCard]() { pickedUpCard = enemyCard; placementSlotIndex = 0; }
-				});
+			candidates.push_back({enemyCard,
+								  enemyCard->GetWorldX(),
+								  enemyCard->GetWorldY(),
+								  (float)enemyCard->GetWidth(),
+								  (float)enemyCard->GetHeight(),
+								  [this, enemyCard]() { pickedUpCard = enemyCard; placementSlotIndex = 0; }});
 		}
 
 		break;
@@ -1622,20 +1555,18 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 			const bool inHand = parent.has_value() && parent.value().lock().get() == handContainer.get();
 			if (!inHand) continue;
 
-			candidates.push_back({
-							statementCard,
-							statementCard->GetWorldX(), statementCard->GetWorldY(),
-							(float)statementCard->GetWidth(), (float)statementCard->GetHeight(),
-							[this, statementCard]() {
-								statementCard->SetRetained(true);
-								auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(player->GetEquippedActiveGearID());
-								if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
-								this->pickedUpCard.reset();
-								this->state = State::PlayerAttack;
-								this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained!"), 1.5f);
-								sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
-							}
-				});
+			candidates.push_back({statementCard,
+								  statementCard->GetWorldX(), statementCard->GetWorldY(),
+								  (float)statementCard->GetWidth(), (float)statementCard->GetHeight(),
+								  [this, statementCard]() {
+									  statementCard->SetRetained(true);
+									  auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(player->GetEquippedActiveGearID());
+									  if (bp) this->currentGearCooldown = bp->maxCooldownTurns;
+									  this->pickedUpCard.reset();
+									  this->state = State::PlayerAttack;
+									  this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained!"), 1.5f);
+									  sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+								  }});
 		}
 		break;
 	}
@@ -1646,8 +1577,7 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 	return candidates;
 }
 
-void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime) {
 	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = SettingsManager::GetInstance();
 
@@ -1675,16 +1605,20 @@ void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime)
 		}
 
 		int slotDirX = 0, slotDirY = 0;
-		if (inpMan->KeyDown(keyLeft)) slotDirX = -1;
-		else if (inpMan->KeyDown(keyRight)) slotDirX = 1;
-		if (inpMan->KeyDown(keyUp)) slotDirY = -1;
-		else if (inpMan->KeyDown(keyDown)) slotDirY = 1;
+		if (inpMan->KeyDown(keyLeft))
+			slotDirX = -1;
+		else if (inpMan->KeyDown(keyRight))
+			slotDirX = 1;
+		if (inpMan->KeyDown(keyUp))
+			slotDirY = -1;
+		else if (inpMan->KeyDown(keyDown))
+			slotDirY = 1;
 
 		if (slotDirX != 0 || slotDirY != 0) {
 			std::vector<std::pair<float, float>> positions;
 			positions.reserve(slots.size());
 			for (auto& slot : slots) {
-				positions.push_back({ slot.x, slot.y });
+				positions.push_back({slot.x, slot.y});
 			}
 			const int best = KeyboardNavigator::PickDirectional(
 				slots[placementSlotIndex].x, slots[placementSlotIndex].y,
@@ -1746,8 +1680,7 @@ void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime)
 	keyboardNavigator.Navigate(deltaTime, CollectKeyboardCandidates());
 }
 
-std::vector<Demo::IBattleScene::PlacementSlot> Demo::IBattleScene::CollectPlacementSlots()
-{
+std::vector<Demo::IBattleScene::PlacementSlot> Demo::IBattleScene::CollectPlacementSlots() {
 	std::vector<PlacementSlot> slots;
 	if (!pickedUpCard) {
 		return slots;
@@ -1766,10 +1699,8 @@ std::vector<Demo::IBattleScene::PlacementSlot> Demo::IBattleScene::CollectPlacem
 			const float slotHeight = (float)statementCard->GetHeight();
 			for (size_t index = 0; index <= otherCount; ++index) {
 				auto [slotX, slotY] = block->GetStatementSlotWorldPosition(index, statementCard);
-				slots.push_back({
-					slotX, slotY, slotWidth, slotHeight,
-					[this, statementCard, index, block]() { PlaceStatementCardAt(statementCard, index, block); }
-					});
+				slots.push_back({slotX, slotY, slotWidth, slotHeight,
+								 [this, statementCard, index, block]() { PlaceStatementCardAt(statementCard, index, block); }});
 			}
 		}
 
@@ -1780,11 +1711,9 @@ std::vector<Demo::IBattleScene::PlacementSlot> Demo::IBattleScene::CollectPlacem
 		const bool isInHand = parent.has_value() && parent.value().lock().get() == handContainer.get();
 		if (!isInHand) {
 			const float handDropHeight = handContainer->GetMaxHeight() > 0 ? (float)handContainer->GetMaxHeight() : 100.f;
-			slots.push_back({
-				handContainer->GetWorldX(), handContainer->GetWorldY() + (float)handContainer->GetHeight(),
-				(float)handContainer->GetWidth(), handDropHeight,
-				[this, statementCard]() { PlaceStatementCardInHand(statementCard); }
-				});
+			slots.push_back({handContainer->GetWorldX(), handContainer->GetWorldY() + (float)handContainer->GetHeight(),
+							 (float)handContainer->GetWidth(), handDropHeight,
+							 [this, statementCard]() { PlaceStatementCardInHand(statementCard); }});
 		}
 		return slots;
 	}
@@ -1796,25 +1725,22 @@ std::vector<Demo::IBattleScene::PlacementSlot> Demo::IBattleScene::CollectPlacem
 				if (!statement || !statement->CanAcceptEnemyCard()) {
 					continue;
 				}
-				slots.push_back({
-					statement->GetWorldX(), statement->GetWorldY(), (float)statement->GetWidth(), (float)statement->GetHeight(),
-					[this, enemyCard, statement]() { PlaceEnemyCardOn(enemyCard, statement); }
-					});
+				slots.push_back({statement->GetWorldX(), statement->GetWorldY(), (float)statement->GetWidth(), (float)statement->GetHeight(),
+								 [this, enemyCard, statement]() { PlaceEnemyCardOn(enemyCard, statement); }});
 			}
 		}
 		slots.push_back({
 			enemyCardRemoveAreaX, enemyCardRemoveAreaY, enemyCardRemoveAreaWidth, enemyCardRemoveAreaHeight,
 			[this, enemyCard]() { DiscardEnemyCard(enemyCard); },
 			true // the discard bar is drawn in the UI pass
-			});
+		});
 		return slots;
 	}
 
 	return slots;
 }
 
-void Demo::IBattleScene::PlaceStatementCardAt(std::shared_ptr<IStatementCard> card, size_t index, std::shared_ptr<IBlockCard> block)
-{
+void Demo::IBattleScene::PlaceStatementCardAt(std::shared_ptr<IStatementCard> card, size_t index, std::shared_ptr<IBlockCard> block) {
 	if (!card || !block || block->IsExecuting()) {
 		return;
 	}
@@ -1840,13 +1766,11 @@ void Demo::IBattleScene::PlaceStatementCardAt(std::shared_ptr<IStatementCard> ca
 			block->InsertStatementCardAt(card, index);
 			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
-			})
-	};
+		})};
 	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
-void Demo::IBattleScene::PlaceStatementCardInHand(std::shared_ptr<IStatementCard> card)
-{
+void Demo::IBattleScene::PlaceStatementCardInHand(std::shared_ptr<IStatementCard> card) {
 	if (!card) {
 		return;
 	}
@@ -1865,13 +1789,11 @@ void Demo::IBattleScene::PlaceStatementCardInHand(std::shared_ptr<IStatementCard
 			handContainer->StoreCard(card);
 			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
-			})
-	};
+		})};
 	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
-void Demo::IBattleScene::PlaceEnemyCardOn(std::shared_ptr<EnemyCard> card, std::shared_ptr<IStatementCard> destination)
-{
+void Demo::IBattleScene::PlaceEnemyCardOn(std::shared_ptr<EnemyCard> card, std::shared_ptr<IStatementCard> destination) {
 	if (!card || !destination) {
 		return;
 	}
@@ -1889,13 +1811,11 @@ void Demo::IBattleScene::PlaceEnemyCardOn(std::shared_ptr<EnemyCard> card, std::
 			destination->AttachEnemyCard(card);
 			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
-			})
-	};
+		})};
 	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
-void Demo::IBattleScene::DiscardEnemyCard(std::shared_ptr<EnemyCard> card)
-{
+void Demo::IBattleScene::DiscardEnemyCard(std::shared_ptr<EnemyCard> card) {
 	if (!card) {
 		return;
 	}
@@ -1908,14 +1828,13 @@ void Demo::IBattleScene::DiscardEnemyCard(std::shared_ptr<EnemyCard> card)
 	enemyCards.erase(std::remove(enemyCards.begin(), enemyCards.end(), card), enemyCards.end());
 }
 
-void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime) {
 	isTransitioning = true;
 	// Use shared_ptr to share state between multiple commands in the MultiCommand
 	auto attackingEnemies = std::make_shared<std::vector<std::shared_ptr<IEnemy>>>();
 	std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
 
-		//trigger effects: poison
+		// trigger effects: poison
 		std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 			for (auto& enemy : this->enemies) {
 				enemy->TriggerEffects(TickPhase::EndOfTurn);
@@ -1979,10 +1898,10 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 				}
 			}
 			markFinished();
-			}),
+		}),
 		std::make_shared<sdlgf::DelayCommand>(0.5f),
-			// Enemies say the ability lines they cast at the start of the turn while they are still on
-			// screen - the next command slides them off to the attack queue.
+		// Enemies say the ability lines they cast at the start of the turn while they are still on
+		// screen - the next command slides them off to the attack queue.
 		std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 			this->abilityLinesSaid = false;
 			for (auto& enemy : this->enemies) {
@@ -1991,22 +1910,22 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 			this->abilitySpeechStartMs = sdlgf::Platform::GetTicksMs();
 			this->abilitySpeechQuietSinceMs = this->abilitySpeechStartMs;
 			markFinished();
-			}),
-			// ...and the turn waits until every enemy has finished talking, plus a short beat.
-			std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
-				if (!this->abilityLinesSaid) {
-					markFinished();
-					return;
-				}
-				const unsigned long long now = sdlgf::Platform::GetTicksMs();
-				const bool anySpeaking = std::any_of(this->enemies.begin(), this->enemies.end(),
-					[](const std::shared_ptr<IEnemy>& enemy) { return enemy && !enemy->IsDead() && enemy->IsSpeaking(); });
-				if (anySpeaking) this->abilitySpeechQuietSinceMs = now;
-				const bool quietLongEnough = !anySpeaking && now - this->abilitySpeechQuietSinceMs >= ABILITY_SPEECH_PAUSE_MS;
-				if (quietLongEnough || now - this->abilitySpeechStartMs >= ABILITY_SPEECH_TIMEOUT_MS) {
-					markFinished();
-				}
-				}),
+		}),
+		// ...and the turn waits until every enemy has finished talking, plus a short beat.
+		std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
+			if (!this->abilityLinesSaid) {
+				markFinished();
+				return;
+			}
+			const unsigned long long now = sdlgf::Platform::GetTicksMs();
+			const bool anySpeaking = std::any_of(this->enemies.begin(), this->enemies.end(),
+												 [](const std::shared_ptr<IEnemy>& enemy) { return enemy && !enemy->IsDead() && enemy->IsSpeaking(); });
+			if (anySpeaking) this->abilitySpeechQuietSinceMs = now;
+			const bool quietLongEnough = !anySpeaking && now - this->abilitySpeechQuietSinceMs >= ABILITY_SPEECH_PAUSE_MS;
+			if (quietLongEnough || now - this->abilitySpeechStartMs >= ABILITY_SPEECH_TIMEOUT_MS) {
+				markFinished();
+			}
+		}),
 		std::make_shared<sdlgf::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
 			// Wait for enemies that died from statuses to finish animations
 			for (auto& enemy : this->enemies) {
@@ -2029,45 +1948,40 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 
 			if (attackingEnemies->empty()) {
 
-				//even if the enemy is stunned, poison effect on player still hits
+				// even if the enemy is stunned, poison effect on player still hits
 				this->battlePlayer->TriggerEffects(TickPhase::EndOfTurn);
 
 				std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
 					std::make_shared<sdlgf::DelayCommand>(0.8f),
 					std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished2) {
-						if (this->battlePlayer->IsDead())
-						{
+						if (this->battlePlayer->IsDead()) {
 							this->isDefeatSequence = true;
 							this->defeatElapsedMs = 0.f;
 							this->defeatFadeAlpha = 0.f;
 							this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"You were defeated"), 1.5f);
-						}
-						else
-						{
+						} else {
 							this->BeginNextTurn();
 							this->state = State::PlayerStandBy;
 							this->QueueEnemyLayoutTransition(State::PlayerStandBy);
 							this->lastEnemyLayoutState = State::PlayerStandBy;
 							this->enemyLayoutInitialized = true;
 						}
-					this->isTransitioning = false;
-					markFinished2();
-					})
-				};
+						this->isTransitioning = false;
+						markFinished2();
+					})};
 				this->commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 				markFinished();
 				return;
 			}
-			//Tokens
+			// Tokens
 			this->state = State::EnemyAttack;
 			this->tokensSpawnedThisTurn = 0;
 
-			//Energy Tokens 
+			// Energy Tokens
 			if (this->battleEventType == EventType::Energy) {
 				if (this->isFlawlessCompleted) {
 					this->isFlawlessChallengeActive = false;
-				}
-				else if (this->enemies.size() >= 2) {
+				} else if (this->enemies.size() >= 2) {
 					this->isFlawlessChallengeActive = true;
 					this->startingHealthForFlawless = this->battlePlayer->GetHealth();
 					this->startingDefenseForFlawless = this->battlePlayer->GetTemporaryDefense();
@@ -2076,21 +1990,18 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 						this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"FLAWLESS CHALLENGE!"), 2.0f);
 						sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.8f);
 					}
-				}
-				else {
+				} else {
 					this->isFlawlessChallengeActive = false;
 					this->battleEventType = EventType::None;
 					this->currentEnergyPieces = 0;
 				}
-			}
-			else {
+			} else {
 				this->isFlawlessChallengeActive = false;
 			}
-			//Gold Tokens
+			// Gold Tokens
 			if (this->currentTurn == this->targetTokenTurn) {
-				this->maxTokensThisTurn = Demo::RNG::Range(3, 6); //3-6 tokens
-			}
-			else {
+				this->maxTokensThisTurn = Demo::RNG::Range(3, 6); // 3-6 tokens
+			} else {
 				this->maxTokensThisTurn = 0;
 			}
 			this->QueueEnemyLayoutTransition(State::EnemyAttack);
@@ -2103,14 +2014,12 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 
 			this->isTransitioning = false;
 			markFinished();
-		})
-	};
+		})};
 	commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	return;
 }
 
-void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime) {
 	float targetWidth = itemMenuBackground->GetTargetWidth();
 	float targetHeight = itemMenuBackground->GetTargetHeight();
 
@@ -2137,8 +2046,7 @@ void Demo::IBattleScene::PlayerOpenItemsUpdate(unsigned long long deltaTime)
 	FlushPendingEnemies();
 }
 
-void Demo::IBattleScene::PlayerViewPileUpdate(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerViewPileUpdate(unsigned long long deltaTime) {
 	const float targetHeight = itemMenuBackground->GetTargetHeight();
 
 	closePileViewButton->SetLocalPosition(-closePileViewButton->GetWidth() / 2.0f, targetHeight / 2.0f + 15.0f);
@@ -2157,8 +2065,7 @@ void Demo::IBattleScene::PlayerViewPileUpdate(unsigned long long deltaTime)
 	FlushPendingEnemies();
 }
 
-bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
-{
+bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime) {
 	if (isDefeatSequence) {
 		defeatElapsedMs += static_cast<float>(deltaTime);
 		if (defeatElapsedMs >= 1000.f) {
@@ -2181,8 +2088,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 					bossDeaths->AddDeath(bossId);
 					if (bossDeaths->GetDeaths(bossId) >= BossHintDeaths(bossId)) {
 						hint = Tr(L"Hint: ") + GetBossHint(bossId);
-						if ((bossId == "TrojanEnemy" || bossId == "KeyeproEnemy")
-							&& QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman") != QuestState::Completed) {
+						if ((bossId == "TrojanEnemy" || bossId == "KeyeproEnemy") && QuestManager::GetInstance()->GetQuestState("SecretBoss_Pacman") != QuestState::Completed) {
 							hint += L"\n" + Tr(L"Tip: a secret area hides west of Cloud Canopy. Its boss drops gear that helps here.");
 						}
 					}
@@ -2190,9 +2096,8 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 
 				if (SaveGameState::HasSaveFile()) {
 					std::vector<std::pair<std::wstring, std::function<void()>>> popupBtns = {
-						{ L"Yes(Y)", [this]() { pendingDefeatReloadSave = true; } },
-						{ L"No(N)", [this]() { pendingDefeatMainMenuTransition = true; } }
-					};
+						{L"Yes(Y)", [this]() { pendingDefeatReloadSave = true; }},
+						{L"No(N)", [this]() { pendingDefeatMainMenuTransition = true; }}};
 					const std::wstring question = Tr(L"Load your last savepoint?");
 
 					// With a hint, reuse the stepped icon popup with the boss that just won animating
@@ -2202,15 +2107,13 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 						auto portraitTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 						portraitTex->LoadTexture(portrait.sheet);
 						PopupManager::GetInstance()->ShowWithSideIcon("stepped_red", L"DEFEATED",
-							hint + L"\n\n" + question, popupBtns, portraitTex,
-							sdlgf::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
-							(std::min)(128.0f, static_cast<float>(game->GetVirtualHeight()) * 0.18f));
-					}
-					else {
+																	  hint + L"\n\n" + question, popupBtns, portraitTex,
+																	  sdlgf::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
+																	  (std::min)(128.0f, static_cast<float>(game->GetVirtualHeight()) * 0.18f));
+					} else {
 						PopupManager::GetInstance()->Show("basic_ghost", L"DEFEATED", question, popupBtns);
 					}
-				}
-				else {
+				} else {
 					pendingDefeatMainMenuTransition = true;
 				}
 			}
@@ -2221,7 +2124,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 	battlePlayer->Update(deltaTime);
 	if (!isAttackCountdownActive) {
 
-		//spawn token logic
+		// spawn token logic
 		if (battleEventType == EventType::Gold && currentTurn == targetTokenTurn && tokensSpawnedThisTurn < maxTokensThisTurn) {
 			tokenSpawnTimer += deltaTime;
 			if (tokenSpawnTimer > 2500.f) {
@@ -2235,9 +2138,9 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 			}
 		}
 
-		//collect and delete junk logic
+		// collect and delete junk logic
 		auto playerCollider = battlePlayer->GetCollider().lock();
-		for (auto it = activeTokens.begin(); it != activeTokens.end(); ) {
+		for (auto it = activeTokens.begin(); it != activeTokens.end();) {
 			auto token = *it;
 			token->Update(deltaTime);
 
@@ -2248,8 +2151,10 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				}
 			}
 
-			if (token->IsDone()) it = activeTokens.erase(it);
-			else ++it;
+			if (token->IsDone())
+				it = activeTokens.erase(it);
+			else
+				++it;
 		}
 	}
 	if (battlePlayer->IsDead()) {
@@ -2303,7 +2208,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 			float currentHP = battlePlayer->GetHealth();
 			float currentDef = battlePlayer->GetTemporaryDefense();
 
-			//check flawless
+			// check flawless
 			if (currentHP >= startingHealthForFlawless && currentDef >= startingDefenseForFlawless) {
 				float angle = Demo::RNG::Range(0.f, 6.28318f);
 				float distance = Demo::RNG::Range(80.f, 150.f);
@@ -2318,7 +2223,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				const float padding = 16.f;
 				const float limit = battleHalfSize - padding;
 
-				//anti corner camping 
+				// anti corner camping
 				if (spawnX < -limit || spawnX > limit || spawnY < -limit || spawnY > limit) {
 					spawnX = battlePlayer->GetWorldX() - dx;
 					spawnY = battlePlayer->GetWorldY() - dy;
@@ -2360,15 +2265,13 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				activeTokens.clear();
 				isTransitioning = false;
 				markFinished();
-			})
-		};
+			})};
 		commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	}
 	return false;
 }
 
-void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 
 	// The buttons sit inside the HP panel, so it goes down first. Its content bottom lines up with
@@ -2384,8 +2287,7 @@ void Demo::IBattleScene::PlayerStandByDraw(unsigned long long deltaTime)
 	attackButton->Draw(gd, deltaTime);
 }
 
-void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime) {
 	if (mainBlockCard->IsExecuting() || (initBlockCard && initBlockCard->IsExecuting()) || isTransitioning) return;
 	auto gd = game->GetGraphicsDevice();
 	const float outline = 2.0f;
@@ -2396,8 +2298,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		enemyCardRemoveAreaWidth + (outline * 2),
 		enemyCardRemoveAreaHeight + (outline * 2),
 		sdlgf::ColorF(0.f, 0.f, 0.f, 1.f),
-		true
-	);
+		true);
 
 	gd->DrawRectangle(
 		this->camera,
@@ -2406,8 +2307,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		enemyCardRemoveAreaWidth,
 		enemyCardRemoveAreaHeight,
 		sdlgf::ColorF(0.7f, 0.1f, 0.1f, 1.0f),
-		true
-	);
+		true);
 
 	if (IsDraggingAnyEnemyCard()) {
 		const unsigned long long tick = sdlgf::Platform::GetTicksMs();
@@ -2437,8 +2337,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime) {
 	fontSprite->Begin();
 	fontSprite->SetColor(0xFFFFFFFF);
 	fontSprite->SetOutline(true, 0xFF000000, 2.f);
@@ -2469,7 +2368,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 		executeButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		runInitButton->Draw(game->GetGraphicsDevice(), deltaTime);
 		DrawPileButtons(deltaTime);
-		//gear's button tooltip
+		// gear's button tooltip
 		if (gearButton->GetTrigger()->IsHovering(deltaTime) || (keyboardNavigator.IsInKeyboardMode() && keyboardNavigator.GetTarget() == gearButton)) {
 			int eqID = player->GetEquippedActiveGearID();
 			auto bp = eqID != -1 ? Demo::ItemData::GetInstance()->GetGearBlueprint(eqID) : nullptr;
@@ -2481,8 +2380,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 				if (currentGearCooldown > 0) {
 					tooltipText += L"\n(Cooldown: " + std::to_wstring(currentGearCooldown) + L" turns)";
 				}
-			}
-			else {
+			} else {
 				tooltipText = Tr(L"No Active Gear Equipped");
 			}
 
@@ -2502,8 +2400,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 
 			fontSprite->SetPosition(
 				gearButton->GetWorldX() + (gearButton->GetWidth() - fontSprite->GetWidth()) / 2.f,
-				gearButton->GetWorldY() - 30.f
-			);
+				gearButton->GetWorldY() - 30.f);
 
 			fontSprite->Draw(this->uiCamera, deltaTime);
 			fontSprite->End();
@@ -2514,8 +2411,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 	DrawKeyboardPlacementUI(deltaTime);
 }
 
-void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime) {
 	itemMenuBackground->Begin();
 	itemMenuBackground->Draw(this->uiCamera, deltaTime);
 	itemMenuBackground->End();
@@ -2635,13 +2531,12 @@ void Demo::IBattleScene::PlayerOpenItemsDraw(unsigned long long deltaTime)
 	fontSprite->SetOutline(false);
 }
 
-void Demo::IBattleScene::DrawPileButtons(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawPileButtons(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 	const std::pair<std::shared_ptr<IconButton>, PileKind> buttons[] = {
-		{ drawPileButton,      PileKind::Draw },
-		{ discardPileButton,   PileKind::Discard },
-		{ nullifiedPileButton, PileKind::Nullified },
+		{drawPileButton, PileKind::Draw},
+		{discardPileButton, PileKind::Discard},
+		{nullifiedPileButton, PileKind::Nullified},
 	};
 
 	for (auto& [button, kind] : buttons) {
@@ -2663,8 +2558,7 @@ void Demo::IBattleScene::DrawPileButtons(unsigned long long deltaTime)
 	fontSprite->SetOutline(false);
 }
 
-void Demo::IBattleScene::PlayerViewPileDraw(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::PlayerViewPileDraw(unsigned long long deltaTime) {
 	itemMenuBackground->Begin();
 	itemMenuBackground->Draw(this->uiCamera, deltaTime);
 	itemMenuBackground->End();
@@ -2718,8 +2612,7 @@ void Demo::IBattleScene::PlayerViewPileDraw(unsigned long long deltaTime)
 	fontSprite->SetOutline(false);
 }
 
-void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 	const float battleHalfSize = battleBoxSize * 0.5f;
 	gd->SetAlphaBlending(true);
@@ -2727,16 +2620,15 @@ void Demo::IBattleScene::EnemyAttackDraw(unsigned long long deltaTime)
 	DrawHealthAndDefenseBar(y, gd);
 }
 
-void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, float>& out)
-{
+void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, float>& out) {
 	out.clear();
 	if (!battlePlayer) return;
 
 	VirtualBattleState state;
 	state.Initialize(battlePlayer, enemies);
 
-	//run the simulation
-	const std::array<std::shared_ptr<IBlockCard>, 2> blocks = { initBlockCard, mainBlockCard };
+	// run the simulation
+	const std::array<std::shared_ptr<IBlockCard>, 2> blocks = {initBlockCard, mainBlockCard};
 	for (const auto& block : blocks) {
 		if (!block) continue;
 		for (const auto& weak : block->GetStatementCards()) {
@@ -2746,7 +2638,7 @@ void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, floa
 		}
 	}
 
-	//cal the dmg
+	// cal the dmg
 	for (const auto& enemy : enemies) {
 		if (!enemy || enemy->IsDead()) continue;
 
@@ -2768,13 +2660,10 @@ void Demo::IBattleScene::ComputeProjectedDamage(std::unordered_map<IEnemy*, floa
 	}
 }
 
-void Demo::IBattleScene::DrawProjectedDamage(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawProjectedDamage(unsigned long long deltaTime) {
 	// Mid-execution the total would sit at its pre-execution value while the damage actually
 	// lands, reading as though the hits were not counting. Hide it until the program settles.
-	if (isExecutingAttacks || isExecutingInit
-		|| (mainBlockCard && mainBlockCard->IsExecuting())
-		|| (initBlockCard && initBlockCard->IsExecuting())) {
+	if (isExecutingAttacks || isExecutingInit || (mainBlockCard && mainBlockCard->IsExecuting()) || (initBlockCard && initBlockCard->IsExecuting())) {
 		return;
 	}
 	if (!fontSprite) {
@@ -2820,8 +2709,7 @@ void Demo::IBattleScene::DrawProjectedDamage(unsigned long long deltaTime)
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsDevice* gd, const float extraH, const float minContentW)
-{
+void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsDevice* gd, const float extraH, const float minContentW) {
 	// Same look as the overworld PlayerHUD panel, trimmed to an HP row. The panel keeps the old
 	// bar's bottom edge (y + 20) so the layout around it does not move. extraH / minContentW
 	// reserve room under the HP row (e.g. for the standby buttons, which the caller positions).
@@ -2837,8 +2725,8 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsD
 
 	const float hp = battlePlayer->GetHealth();
 	const std::wstring hpValue = std::to_wstring(static_cast<int>(hp));
-	const int cellCount = static_cast<int>((std::max)({ static_cast<size_t>(2), hpValue.size(),
-		std::to_wstring(static_cast<int>(battlePlayer->GetMaxHealth())).size() }));
+	const int cellCount = static_cast<int>((std::max)({static_cast<size_t>(2), hpValue.size(),
+													   std::to_wstring(static_cast<int>(battlePlayer->GetMaxHealth())).size()}));
 	const float groupW = cellCount * CELL_W + (cellCount + 1) * CELL_BORDER;
 
 	fontSprite->SetText(Tr(L"HP"));
@@ -2903,7 +2791,7 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsD
 		const float cellX = groupX + CELL_BORDER + static_cast<float>(blanks + j) * (CELL_W + CELL_BORDER);
 		fontSprite->SetText(std::wstring(1, hpValue[j]));
 		fontSprite->SetPosition(cellX + (CELL_W - fontSprite->GetWidth()) / 2.f,
-			rowY + CELL_BORDER + (CELL_H - fontSprite->GetHeight()) / 2.f);
+								rowY + CELL_BORDER + (CELL_H - fontSprite->GetHeight()) / 2.f);
 		fontSprite->Draw(this->uiCamera, 0);
 	}
 	fontSprite->End();
@@ -2923,14 +2811,13 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsD
 		activeTooltipText = std::move(itemTooltip);
 	}
 
-	//draw tooltip after
+	// draw tooltip after
 	if (isTooltipActive) {
 		DrawTooltip(activeTooltipText, screenX, screenY, gd);
 	}
 }
 
-void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, sdlgf::GraphicsDevice* gd)
-{
+void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, sdlgf::GraphicsDevice* gd) {
 	fontSprite->SetText(std::move(activeTooltipText));
 	float tooltipWidth = fontSprite->GetWidth() + 8.f;
 	float tooltipHeight = fontSprite->GetHeight() + 8.f;
@@ -2956,8 +2843,7 @@ void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float scre
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, sdlgf::GraphicsDevice* gd)
-{
+void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, sdlgf::GraphicsDevice* gd) {
 	auto modifiers = battlePlayer->GetModifiers();
 	auto modY = y - 48.f;
 
@@ -2977,8 +2863,7 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, sdlgf::
 		const float rowY = modY - 8.f;
 		const float rowWidth = statusRenderer->DrawRow(this->uiCamera, 0, x, rowY, *status);
 
-		bool isHovered = mouseX >= x && mouseX <= x + rowWidth
-			&& mouseY >= rowY && mouseY <= rowY + StatusRenderer::ROW_HEIGHT;
+		bool isHovered = mouseX >= x && mouseX <= x + rowWidth && mouseY >= rowY && mouseY <= rowY + StatusRenderer::ROW_HEIGHT;
 		if (isHovered) {
 			isTooltipActive = true;
 			activeTooltipText = status->Tooltip();
@@ -2987,14 +2872,13 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, sdlgf::
 		modY -= 32.f;
 	}
 
-	//draw tooltip after
+	// draw tooltip after
 	if (isTooltipActive) {
 		DrawTooltip(activeTooltipText, screenX, screenY, gd);
 	}
 }
 
-std::wstring Demo::IBattleScene::DrawActiveItems(const float barRightX, const float y)
-{
+std::wstring Demo::IBattleScene::DrawActiveItems(const float barRightX, const float y) {
 	if (activeItems.empty() || !activeItemIcon) return L"";
 
 	// Item art is 23x35, drawn 1:1 here - about as tall as the health and defense bars together,
@@ -3057,8 +2941,7 @@ std::wstring Demo::IBattleScene::DrawActiveItems(const float barRightX, const fl
 	return tooltip;
 }
 
-void Demo::IBattleScene::Init()
-{
+void Demo::IBattleScene::Init() {
 	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<sdlgf::TransformManager>();
@@ -3090,13 +2973,13 @@ void Demo::IBattleScene::Init()
 	goldTex->LoadTexture(L"assets/gold-token.png");
 
 	goldTokenUI = std::make_shared<sdlgf::StaticSprite>(goldTex.get());
-	goldTokenUI->SetSrcRect({ 7, 7, 26, 26 });
+	goldTokenUI->SetSrcRect({7, 7, 26, 26});
 	goldTokenUI->SetScale(1.5f, 1.5f);
 
 	attackBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
-	attackBuffIcon->SetSrcRect({ .left = 112, .top = 240, .right = 128, .bottom = 256 });
+	attackBuffIcon->SetSrcRect({.left = 112, .top = 240, .right = 128, .bottom = 256});
 	defenseBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
-	defenseBuffIcon->SetSrcRect({ .left = 96, .top = 240, .right = 112, .bottom = 256 });
+	defenseBuffIcon->SetSrcRect({.left = 96, .top = 240, .right = 112, .bottom = 256});
 	// Src rect is set per entry in DrawActiveItems - one sprite serves every item in the row.
 	activeItemIcon = std::make_shared<sdlgf::StaticSprite>(itemsTex.get());
 	// Create buttons
@@ -3111,67 +2994,51 @@ void Demo::IBattleScene::Init()
 			}
 			QueueEnemyLayoutTransition(State::PlayerAttack);
 			lastEnemyLayoutState = State::PlayerAttack;
-			//lock card message
+			// lock card message
 			if (this->pendingLockMessage) {
 				this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Enemy locked a card!"), 2.0f);
 				this->pendingLockMessage = false;
 			}
-			//popUpMessage->QueueMessage(&commandBuffer, Tr(L"Click on the enemy sprite to create an Enemy Card and drag it to your attacking card to target it!"), 2.5f);
+			// popUpMessage->QueueMessage(&commandBuffer, Tr(L"Click on the enemy sprite to create an Enemy Card and drag it to your attacking card to target it!"), 2.5f);
 			markFinished();
-			}));
+		}));
 		isExecutingAttacks = false;
-		});
-	attackButton->SetSpriteRects({
-		{
-			.left = 0,
-			.top = 48,
-			.right = 48,
-			.bottom = 64
-		},
-		{
-			.left = 0,
-			.top = 64,
-			.right = 48,
-			.bottom = 80
-		},
-		{
-			.left = 0,
-			.top = 80,
-			.right = 48,
-			.bottom = 96
-		}
-		});
+	});
+	attackButton->SetSpriteRects({{.left = 0,
+								   .top = 48,
+								   .right = 48,
+								   .bottom = 64},
+								  {.left = 0,
+								   .top = 64,
+								   .right = 48,
+								   .bottom = 80},
+								  {.left = 0,
+								   .top = 80,
+								   .right = 48,
+								   .bottom = 96}});
 	attackButton->SetSpriteScale(2.f, 2.f);
 
 	itemsButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	itemsButton->SetSpriteRects({
-		{
-			.left = 0,
-			.top = 96,
-			.right = 48,
-			.bottom = 112
-		},
-		{
-			.left = 0,
-			.top = 112,
-			.right = 48,
-			.bottom = 128
-		},
-		{
-			.left = 0,
-			.top = 128,
-			.right = 48,
-			.bottom = 144
-		}
-		});
+	itemsButton->SetSpriteRects({{.left = 0,
+								  .top = 96,
+								  .right = 48,
+								  .bottom = 112},
+								 {.left = 0,
+								  .top = 112,
+								  .right = 48,
+								  .bottom = 128},
+								 {.left = 0,
+								  .top = 128,
+								  .right = 48,
+								  .bottom = 144}});
 	itemsButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->RefreshItemMenu();
 			this->state = State::PlayerOpenItems;
-			//turn off volume or play sfx volume when open a menu here
+			// turn off volume or play sfx volume when open a menu here
 			markFinished();
-			}));
-		});
+		}));
+	});
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	fleeButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3192,50 +3059,45 @@ void Demo::IBattleScene::Init()
 					auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
 					auto audio = sdlgf::AudioManager::GetInstance();
 
-					if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
-					else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
-					else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
-					else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
+					if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene))
+						audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
+					else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene))
+						audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
+					else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene))
+						audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
+					else if (dynamic_cast<Demo::BossWorldScene*>(prevScene))
+						audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
 
 					sceMan->RemoveScene(sceMan->GetIndex());
 					sceMan->GoToPrevious();
 					markFinished2();
-					}));
-			}
-			else {
+				}));
+			} else {
 				popUpMessage->QueueMessage(&commandBuffer, Tr(L"You failed to flee!"));
 				commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 					this->QueueToEnemyAttack(0);
 					commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished2) {
 						isFleeing = false;
 						markFinished2();
-						}));
-					markFinished();
 					}));
+					markFinished();
+				}));
 			}
 			markFinished();
-			}));
-		});
-	fleeButton->SetSpriteRects({
-		{
-			.left = 48,
-			.top = 96,
-			.right = 96,
-			.bottom = 112
-		},
-		{
-			.left = 48,
-			.top = 112,
-			.right = 96,
-			.bottom = 128
-		},
-		{
-			.left = 48,
-			.top = 128,
-			.right = 96,
-			.bottom = 144
-		}
-		});
+		}));
+	});
+	fleeButton->SetSpriteRects({{.left = 48,
+								 .top = 96,
+								 .right = 96,
+								 .bottom = 112},
+								{.left = 48,
+								 .top = 112,
+								 .right = 96,
+								 .bottom = 128},
+								{.left = 48,
+								 .top = 128,
+								 .right = 96,
+								 .bottom = 144}});
 	fleeButton->SetSpriteScale(2.f, 2.f);
 	backButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	backButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3246,50 +3108,34 @@ void Demo::IBattleScene::Init()
 				enemy->SetState(true);
 			}
 			markFinished();
-			}));
-		});
-	backButton->SetSpriteRects({
-		{
-			.left = 96,
-			.top = 48,
-			.right = 144,
-			.bottom = 64
-		},
-		{
-			.left = 96,
-			.top = 64,
-			.right = 144,
-			.bottom = 80
-		},
-		{
-			.left = 96,
-			.top = 80,
-			.right = 144,
-			.bottom = 96
-		}
-		});
+		}));
+	});
+	backButton->SetSpriteRects({{.left = 96,
+								 .top = 48,
+								 .right = 144,
+								 .bottom = 64},
+								{.left = 96,
+								 .top = 64,
+								 .right = 144,
+								 .bottom = 80},
+								{.left = 96,
+								 .top = 80,
+								 .right = 144,
+								 .bottom = 96}});
 	backButton->SetSpriteScale(2.f, 2.f);
 	executeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	executeButton->SetSpriteRects({
-		{
-			.left = 96,
-			.top = 96,
-			.right = 144,
-			.bottom = 112
-		},
-		{
-			.left = 96,
-			.top = 112,
-			.right = 144,
-			.bottom = 128
-		},
-		{
-			.left = 96,
-			.top = 128,
-			.right = 144,
-			.bottom = 144
-		}
-		});
+	executeButton->SetSpriteRects({{.left = 96,
+									.top = 96,
+									.right = 144,
+									.bottom = 112},
+								   {.left = 96,
+									.top = 112,
+									.right = 144,
+									.bottom = 128},
+								   {.left = 96,
+									.top = 128,
+									.right = 144,
+									.bottom = 144}});
 	executeButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		// commandBuffer.Clear() below would also wipe a queued victory/flee return-to-previous-
 		// scene command if the battle is already ending - refuse instead of stranding the player.
@@ -3301,17 +3147,14 @@ void Demo::IBattleScene::Init()
 		if (!queuedToDraw.empty()) {
 			popUpMessage->ShowMessage(Tr(L"Still drawing"));
 			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
-		}
-		else if (usedEnergy > energy) {
+		} else if (usedEnergy > energy) {
 			popUpMessage->ShowMessage(Tr(L"Not enough energy"));
 			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
-		}
-		else if (mainBlockCard && !mainBlockCard->IsExecuting()) {
+		} else if (mainBlockCard && !mainBlockCard->IsExecuting()) {
 			// Anything still queued in init runs first, so its targets have to be complete too -
 			// otherwise the turn would stall halfway with the main block never reached.
 			const bool runInitFirst = initBlockCard && !initBlockCard->GetStatementCards().empty();
-			if (!mainBlockCard->HasAllRequiredTargets()
-				|| (runInitFirst && !initBlockCard->HasAllRequiredTargets())) {
+			if (!mainBlockCard->HasAllRequiredTargets() || (runInitFirst && !initBlockCard->HasAllRequiredTargets())) {
 				// Repeats fold into the line already on screen, so pressing this a dozen times
 				// reads as one message counting up rather than a dozen queued pop-ups.
 				popUpMessage->ShowMessage(Tr(L"Some cards are missing a target!"));
@@ -3325,21 +3168,18 @@ void Demo::IBattleScene::Init()
 				isExecutingInit = true;
 				executeAfterInit = true;
 				initBlockCard->StartExecution();
-			}
-			else {
+			} else {
 				isExecutingAttacks = true;
 				mainBlockCard->StartExecution();
 			}
 		}
-		});
+	});
 	executeButton->SetSpriteScale(2.f, 2.f);
 
 	runInitButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	runInitButton->SetSpriteRects({
-		{.left = 48, .top = 48, .right = 96, .bottom = 64 },
-		{.left = 48, .top = 64, .right = 96, .bottom = 80 },
-		{.left = 48, .top = 80, .right = 96, .bottom = 96 }
-		});
+	runInitButton->SetSpriteRects({{.left = 48, .top = 48, .right = 96, .bottom = 64},
+								   {.left = 48, .top = 64, .right = 96, .bottom = 80},
+								   {.left = 48, .top = 80, .right = 96, .bottom = 96}});
 	runInitButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (!initBlockCard || initBlockCard->GetStatementCards().empty()) {
 			return;
@@ -3366,18 +3206,18 @@ void Demo::IBattleScene::Init()
 		}
 		isExecutingInit = true;
 		initBlockCard->StartExecution();
-		});
+	});
 	runInitButton->SetSpriteScale(2.f, 2.f);
 
 	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
+	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
 
 	gearButton = std::make_shared<IconButton>(transformManager, 0, 0, 16.f * 2.f, 16.f * 2.f, uiSheetTex);
 	gearButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(272, 400, 16, 16, 4));
 	gearButton->SetSpriteScale(2.f, 2.f);
 	gearButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OnGearButtonClicked();
-		});
+	});
 	gearButton->Init(&this->uiCamera);
 
 	// Pile buttons. Each group of three frames on the sheet is idle / hover / pressed.
@@ -3386,35 +3226,33 @@ void Demo::IBattleScene::Init()
 	drawPileButton->SetSpriteScale(3.f, 3.f);
 	drawPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Draw);
-		});
+	});
 
 	discardPileButton = std::make_shared<IconButton>(transformManager, 0, 0, PILE_BUTTON_SIZE, PILE_BUTTON_SIZE, uiSheetTex);
 	discardPileButton->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 160, 16, 16, 3));
 	discardPileButton->SetSpriteScale(3.f, 3.f);
 	discardPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Discard);
-		});
+	});
 
 	nullifiedPileButton = std::make_shared<IconButton>(transformManager, 0, 0, PILE_BUTTON_SIZE, PILE_BUTTON_SIZE, uiSheetTex);
 	nullifiedPileButton->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(240, 160, 16, 16, 3));
 	nullifiedPileButton->SetSpriteScale(3.f, 3.f);
 	nullifiedPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Nullified);
-		});
+	});
 
 	closePileViewButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	closePileViewButton->SetSpriteRects({
-		{.left = 96, .top = 48, .right = 144, .bottom = 64 },
-		{.left = 96, .top = 64, .right = 144, .bottom = 80 },
-		{.left = 96, .top = 80, .right = 144, .bottom = 96 }
-		});
+	closePileViewButton->SetSpriteRects({{.left = 96, .top = 48, .right = 144, .bottom = 64},
+										 {.left = 96, .top = 64, .right = 144, .bottom = 80},
+										 {.left = 96, .top = 80, .right = 144, .bottom = 96}});
 	closePileViewButton->SetSpriteScale(2.f, 2.f);
 	closePileViewButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->ClosePileView();
-		});
+	});
 
 	btnPilePrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L"<", 3);
-	btnPilePrevPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
+	btnPilePrevPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPilePrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPilePrevPage->SetTextColor(0xFF111111);
 	btnPilePrevPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3422,10 +3260,10 @@ void Demo::IBattleScene::Init()
 			currentPilePage--;
 			RefreshPileView();
 		}
-		});
+	});
 
 	btnPileNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L">", 3);
-	btnPileNextPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
+	btnPileNextPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPileNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnPileNextPage->SetTextColor(0xFF111111);
 	btnPileNextPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3433,39 +3271,31 @@ void Demo::IBattleScene::Init()
 			currentPilePage++;
 			RefreshPileView();
 		}
-		});
+	});
 
 	closeItemMenuButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
 	closeItemMenuButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
 			markFinished();
-			}));
-		});
-	closeItemMenuButton->SetSpriteRects({
-		{
-			.left = 96,
-			.top = 48,
-			.right = 144,
-			.bottom = 64
-		},
-		{
-			.left = 96,
-			.top = 64,
-			.right = 144,
-			.bottom = 80
-		},
-		{
-			.left = 96,
-			.top = 80,
-			.right = 144,
-			.bottom = 96
-		}
-		});
+		}));
+	});
+	closeItemMenuButton->SetSpriteRects({{.left = 96,
+										  .top = 48,
+										  .right = 144,
+										  .bottom = 64},
+										 {.left = 96,
+										  .top = 64,
+										  .right = 144,
+										  .bottom = 80},
+										 {.left = 96,
+										  .top = 80,
+										  .right = 144,
+										  .bottom = 96}});
 	closeItemMenuButton->SetSpriteScale(2.f, 2.f);
 
 	btnPrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L"<", 3);
-	btnPrevPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
+	btnPrevPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPrevPage->SetTextColor(0xFF111111);
 	btnPrevPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3473,10 +3303,10 @@ void Demo::IBattleScene::Init()
 			currentItemPage--;
 			RefreshItemMenu();
 		}
-		});
+	});
 
 	btnNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L">", 3);
-	btnNextPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
+	btnNextPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnNextPage->SetTextColor(0xFF111111);
 	btnNextPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
@@ -3484,7 +3314,7 @@ void Demo::IBattleScene::Init()
 			currentItemPage++;
 			RefreshItemMenu();
 		}
-		});
+	});
 
 	// Init buttons
 	attackButton->Init(&this->uiCamera);
@@ -3512,28 +3342,22 @@ void Demo::IBattleScene::Init()
 	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	fontSprite->SetColor(0xFFFFFFFF);
 	energyIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
-	energyIcon->SetSrcRect({
-		.left = 96,
-		.top = 0,
-		.right = 112,
-		.bottom = 16
-		});
+	energyIcon->SetSrcRect({.left = 96,
+							.top = 0,
+							.right = 112,
+							.bottom = 16});
 	energyIcon->SetScale(2.f);
 	hourglassIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
-	hourglassIcon->SetSrcRect({
-		.left = 112,
-		.top = 0,
-		.right = 128,
-		.bottom = 16
-		});
+	hourglassIcon->SetSrcRect({.left = 112,
+							   .top = 0,
+							   .right = 128,
+							   .bottom = 16});
 	hourglassIcon->SetScale(2.f);
-
 
 	itemMenuBackground = std::make_shared<sdlgf::NineSliceSprite>(
 		tempTex.get(),
-		RECT{ 0, 0, 45, 45 },
-		8, 8, 8, 8
-	);
+		RECT{0, 0, 45, 45},
+		8, 8, 8, 8);
 
 	auto app = sdlgf::Application::GetInstance();
 	float screenW = static_cast<float>(app->GetScreenWidth());
@@ -3551,8 +3375,7 @@ void Demo::IBattleScene::Init()
 		auto newCard = CardRegistry::Get().Create(cardId, transformManager, draggableManager, game->GetGraphicsDevice(), &camera);
 		if (newCard) {
 			drawPile.push_back(newCard);
-		}
-		else {
+		} else {
 			// CardRegistry::Create returns null for an id it does not recognise (renamed/removed card,
 			// typo, stale save). Dropping it silently makes the deck - and every draw - short.
 			sdlgf::Platform::DebugLog(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
@@ -3589,8 +3412,7 @@ void Demo::IBattleScene::Init()
 		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleTop),
 		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleBottom),
 		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleBorder, battleHeight, battleLeft, battleTop),
-		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleBorder, battleHeight, battleRight, battleTop)
-	};
+		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleBorder, battleHeight, battleRight, battleTop)};
 
 	for (auto& bound : bounds) {
 		bound->SetOrigin(0.f, 0.f);
@@ -3601,7 +3423,7 @@ void Demo::IBattleScene::Init()
 	// Init pop up message
 	popUpMessage = std::make_shared<PopUpMessage>(transformManager, game);
 	popUpMessage->Init(game->GetGraphicsDevice(), &camera);
-	//popUpMessage->ToggleHistory();
+	// popUpMessage->ToggleHistory();
 
 	// Init popup
 	auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
@@ -3613,16 +3435,16 @@ void Demo::IBattleScene::Init()
 	battleMenu = std::make_shared<BattleMenu>(game, transformManager, &uiCamera);
 	battleMenu->Init(font.get());
 
-	//Init BGM
+	// Init BGM
 	auto audio = sdlgf::AudioManager::GetInstance();
 	audio->Load("battle_I", "assets/audio/battle_I.ogg");
 	audio->Load("battle_I_intro", "assets/audio/battle_I_intro.ogg");
 	audio->Load("battle_boss", "assets/audio/battle_boss.ogg");
 
-	//intro plays once, then the main track loops
+	// intro plays once, then the main track loops
 	audio->RegisterIntroLoop("battle_bgm", "battle_I_intro", "battle_I");
 
-	//token sfx
+	// token sfx
 	audio->Load("token_collect1", "assets/audio/token-collect-01.ogg");
 	audio->Load("token_collect2", "assets/audio/token-collect-02.ogg");
 	audio->Load("token_collect3", "assets/audio/token-collect-03.ogg");
@@ -3630,19 +3452,15 @@ void Demo::IBattleScene::Init()
 	audio->Load("token_collect5", "assets/audio/token-collect-05.ogg");
 	audio->Load("token_collect6", "assets/audio/token-collect-06.ogg");
 
-	audio->RegisterBank("token_collect", {
-		"token_collect1", "token_collect2", "token_collect3",
-		"token_collect4", "token_collect5", "token_collect6"
-		});
+	audio->RegisterBank("token_collect", {"token_collect1", "token_collect2", "token_collect3",
+										  "token_collect4", "token_collect5", "token_collect6"});
 
 	audio->Load("token_spawn1", "assets/audio/token-spawn-01.ogg");
 	audio->Load("token_spawn2", "assets/audio/token-spawn-02.ogg");
 	audio->Load("token_spawn3", "assets/audio/token-spawn-03.ogg");
 	audio->Load("token_spawn4", "assets/audio/token-spawn-04.ogg");
 
-	audio->RegisterBank("token_spawn", {
-		"token_spawn1", "token_spawn2", "token_spawn3", "token_spawn4"
-		});
+	audio->RegisterBank("token_spawn", {"token_spawn1", "token_spawn2", "token_spawn3", "token_spawn4"});
 
 	transformManager->RebuildHierarchy();
 	DamageTextManager::GetInstance()->Init(this->game);
@@ -3660,8 +3478,7 @@ void Demo::IBattleScene::Init()
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
-void Demo::IBattleScene::Update(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::Update(unsigned long long deltaTime) {
 	auto inpMan = sdlgf::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
@@ -3706,10 +3523,14 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
 		auto audio = sdlgf::AudioManager::GetInstance();
 
-		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
-		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
-		else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene)) audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
-		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
+		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene))
+			audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
+		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene))
+			audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
+		else if (dynamic_cast<Demo::ThreadAlleyScene*>(prevScene))
+			audio->PlayBGM_Fade("bgm_arcade", 0.2f, 1.0f);
+		else if (dynamic_cast<Demo::BossWorldScene*>(prevScene))
+			audio->PlayBGM_Fade("bgm_bossworld", 0.3f, 1.0f);
 
 		sceMan->RemoveScene(sceMan->GetIndex());
 		sceMan->GoToPrevious();
@@ -3756,7 +3577,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 				if (!weak.expired()) return true;
 			}
 			return false;
-			};
+		};
 		tctx.cardInBlock = blockHasCard(mainBlockCard) || blockHasCard(initBlockCard);
 		tctx.enemyCardExists = !enemyCards.empty();
 		for (const auto& enemyCard : enemyCards) {
@@ -3819,9 +3640,8 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 			CollectDeadEnemies();
 			if (enemies.empty()) {
 				OnAllEnemiesDefeated();
-			}
-			else {
-				//battlePlayer->SetLocalPosition(0, 0);
+			} else {
+				// battlePlayer->SetLocalPosition(0, 0);
 			}
 		}
 	}
@@ -3861,8 +3681,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	const float dimStep = BACKGROUND_DIM_SPEED * (deltaTime / 1000.f);
 	if (backgroundDimAlpha < targetDim) {
 		backgroundDimAlpha = (std::min)(targetDim, backgroundDimAlpha + dimStep);
-	}
-	else if (backgroundDimAlpha > targetDim) {
+	} else if (backgroundDimAlpha > targetDim) {
 		backgroundDimAlpha = (std::max)(targetDim, backgroundDimAlpha - dimStep);
 	}
 
@@ -3874,8 +3693,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 	commandBuffer.Update(deltaTime);
 }
 
-void Demo::IBattleScene::DrawKeyboardReticleUI(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawKeyboardReticleUI(unsigned long long deltaTime) {
 	if (!keyboardNavigator.IsInKeyboardMode() || !keyboardNavigator.GetTarget()) {
 		return;
 	}
@@ -3887,8 +3705,7 @@ void Demo::IBattleScene::DrawKeyboardReticleUI(unsigned long long deltaTime)
 	Demo::DrawKeyboardTargetReticle(gd, uiCamera, button->GetWorldX(), button->GetWorldY(), (float)button->GetWidth(), (float)button->GetHeight(), sdlgf::Platform::GetTicksMs());
 }
 
-void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime) {
 	if (!keyboardNavigator.IsInKeyboardMode()) {
 		return;
 	}
@@ -3930,8 +3747,7 @@ void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
 	keyboardNavigator.Draw(gd, camera, CollectKeyboardCandidates());
 }
 
-void Demo::IBattleScene::DrawKeyboardPlacementUI(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawKeyboardPlacementUI(unsigned long long deltaTime) {
 	if (!keyboardNavigator.IsInKeyboardMode() || !pickedUpCard) {
 		return;
 	}
@@ -3959,15 +3775,13 @@ void Demo::IBattleScene::DrawKeyboardPlacementUI(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 
 	if (gd->BeginDraw()) {
 		if (customBackgroundDraw) {
 			customBackgroundDraw(gd, deltaTime);
-		}
-		else {
+		} else {
 			/* Cool wave grid effect */
 			auto app = sdlgf::Application::GetInstance();
 			float screenWidth = static_cast<float>(app->GetScreenWidth());
@@ -4078,15 +3892,16 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::DrawUI(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 
+#ifdef _DEBUG
 	CreateImGuiBattleDebugFrame([this]() {
 		for (auto& enemy : enemies) {
 			if (enemy && !enemy->IsDead()) enemy->TakeDamage(999999.f, true);
 		}
 	});
+#endif
 
 	if (gd->BeginDraw()) {
 		auto screenW = (float)game->GetVirtualWidth();
@@ -4131,13 +3946,13 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			break;
 		}
 
-		//tokens ui
+		// tokens ui
 		auto app = sdlgf::Application::GetInstance();
 
 		float startX = -screenW / 2.f + 20.f;
 		float drawY = screenH / 2.f - 20.f - 32.f - 80.f;
 
-		//token's icon
+		// token's icon
 		if (battleEventType == EventType::Gold) {
 			goldTokenUI->SetPosition(startX, drawY);
 			goldTokenUI->Begin();
@@ -4153,20 +3968,21 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			fontSprite->Draw(this->uiCamera, deltaTime);
 			fontSprite->End();
 			fontSprite->SetOutline(false);
-		}
-		else if (battleEventType == EventType::Energy) {
-			if (currentEnergyPieces == 0) energyTokenUI->SetSrcRect({ 7, 2, 25, 31 });
-			else if (currentEnergyPieces == 1) energyTokenUI->SetSrcRect({ 38, 2, 57, 31 });
-			else energyTokenUI->SetSrcRect({ 72, 2, 90, 31 });
+		} else if (battleEventType == EventType::Energy) {
+			if (currentEnergyPieces == 0)
+				energyTokenUI->SetSrcRect({7, 2, 25, 31});
+			else if (currentEnergyPieces == 1)
+				energyTokenUI->SetSrcRect({38, 2, 57, 31});
+			else
+				energyTokenUI->SetSrcRect({72, 2, 90, 31});
 
 			energyTokenUI->SetPosition(startX, drawY);
 
-			//disable
+			// disable
 			if (isFlawlessCompleted) {
 				energyTokenUI->SetColor(COLOR_ARGB(255, 120, 120, 120));
 				fontSprite->SetColor(COLOR_ARGB(255, 150, 150, 150));
-			}
-			else {
+			} else {
 				energyTokenUI->SetColor(COLOR_ARGB(255, 255, 255, 255));
 				fontSprite->SetColor(0xFFFFFFFF);
 			}
@@ -4186,7 +4002,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			fontSprite->SetOutline(false);
 		}
 
-		//tooltip
+		// tooltip
 		if (state == State::PlayerStandBy || state == State::PlayerAttack) {
 			auto [mouseXSc, mouseYSc] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
 			auto [mouseWX, mouseWY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, mouseXSc, mouseYSc);
@@ -4198,13 +4014,11 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 				if (battleEventType == EventType::Gold) {
 					showTooltip = true;
 					tooltipText = Tr(L"Gold Event\nSurvive and grab the gold tokens!");
-				}
-				else if (battleEventType == EventType::Energy) {
+				} else if (battleEventType == EventType::Energy) {
 					showTooltip = true;
 					if (isFlawlessCompleted) {
 						tooltipText = Tr(L"Challenge Completed!\n+1 Energy gained this battle.");
-					}
-					else {
+					} else {
 						tooltipText = Tr(L"Flawless Challenge\nEvade perfectly to gain pieces.\n2 Pieces = +1 Energy next turn.");
 					}
 				}
@@ -4238,13 +4052,12 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			}
 		}
 
-
 		DrawKeyboardReticleUI(deltaTime);
 
 		if (battleTutorial && battleTutorial->IsPanelVisible()) {
 			battleTutorial->Draw(gd, this->uiCamera, fontSprite.get(),
-				static_cast<float>(game->GetVirtualWidth()),
-				static_cast<float>(game->GetVirtualHeight()), deltaTime);
+								 static_cast<float>(game->GetVirtualWidth()),
+								 static_cast<float>(game->GetVirtualHeight()), deltaTime);
 		}
 
 		if (battleMenu) {
@@ -4276,8 +4089,10 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 		if (!keyboardNavigator.IsInKeyboardMode()) {
 			sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
+#ifdef _DEBUG
 		ImGui::Render();
 		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gd->GetRenderer());
+#endif
 		gd->EndDraw();
 	}
 }
@@ -4311,8 +4126,7 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 		sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Gained 1 Energy!"), 1.5f);
 
-	}
-	else if (gearID == 2) { // Data Extractor
+	} else if (gearID == 2) { // Data Extractor
 		if (drawPile.empty() && discardPile.empty()) {
 			popUpMessage->QueueMessage(&commandBuffer, Tr(L"No cards left to draw!"), 1.5f);
 			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
@@ -4322,8 +4136,7 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 		currentGearCooldown = bp->maxCooldownTurns;
 		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Drew 1 card!"), 1.5f);
 
-	}
-	else if (gearID == 3) { // Memory Locker
+	} else if (gearID == 3) { // Memory Locker
 		bool hasValidCard = false;
 		for (auto& card : cardHand) {
 			auto statementCard = std::dynamic_pointer_cast<IStatementCard>(card);
@@ -4361,7 +4174,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 		return;
 	}
 
-	//hard-code mouse click handler, dirty hack. Pls dont do this
+	// hard-code mouse click handler, dirty hack. Pls dont do this
 	if (inpMan->MousePress(sdlgf::InputManager::MouseButton::Left)) {
 		auto [mouseXSc, mouseYSc] = inpMan->GetVirtualAbsoluteMousePos(&this->camera);
 		auto [mouseWX, mouseWY] = sdlgf::Utils::WindowToWorldCoords(this->camera, mouseXSc, mouseYSc);
@@ -4399,8 +4212,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 	FlushPendingEnemies();
 }
 
-void Demo::IBattleScene::UpdateCardAnimations(unsigned long long deltaTime)
-{
+void Demo::IBattleScene::UpdateCardAnimations(unsigned long long deltaTime) {
 	// Indexed with a strong reference: a command may append to the list while it runs.
 	for (size_t i = 0; i < cardAnimCommands.size(); ++i) {
 		auto command = cardAnimCommands[i];
@@ -4408,12 +4220,11 @@ void Demo::IBattleScene::UpdateCardAnimations(unsigned long long deltaTime)
 	}
 	cardAnimCommands.erase(
 		std::remove_if(cardAnimCommands.begin(), cardAnimCommands.end(),
-			[](const std::shared_ptr<sdlgf::ICommand>& command) { return command->IsFinished(); }),
+					   [](const std::shared_ptr<sdlgf::ICommand>& command) { return command->IsFinished(); }),
 		cardAnimCommands.end());
 }
 
-void Demo::IBattleScene::LandDrawnCard(const std::shared_ptr<ICard>& card)
-{
+void Demo::IBattleScene::LandDrawnCard(const std::shared_ptr<ICard>& card) {
 	auto it = std::find(queuedToDraw.begin(), queuedToDraw.end(), card);
 	if (it == queuedToDraw.end()) {
 		return;
@@ -4428,8 +4239,7 @@ void Demo::IBattleScene::LandDrawnCard(const std::shared_ptr<ICard>& card)
 	}
 }
 
-void Demo::IBattleScene::SettleCardAnimations()
-{
+void Demo::IBattleScene::SettleCardAnimations() {
 	cardAnimCommands.clear();
 	// Copy: LandDrawnCard erases from queuedToDraw.
 	const auto inFlight = queuedToDraw;
@@ -4438,9 +4248,7 @@ void Demo::IBattleScene::SettleCardAnimations()
 	}
 }
 
-
-std::shared_ptr<Demo::IEnemy> Demo::IBattleScene::PickSpeaker(bool forTaunt)
-{
+std::shared_ptr<Demo::IEnemy> Demo::IBattleScene::PickSpeaker(bool forTaunt) {
 	std::vector<std::shared_ptr<IEnemy>> candidates;
 	for (auto& enemy : enemies) {
 		if (!enemy || enemy->IsDead()) continue;

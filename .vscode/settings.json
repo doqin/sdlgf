@@ -1,0 +1,40 @@
+{
+	"cmake.useCMakePresets": "always",
+	"cmake.configureOnOpen": true,
+	"cmake.exportCompileCommandsFile": true,
+	"cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
+	"cmake.ctest.parallelJobs": 0,
+	"cmake.options.statusBarVisibility": "visible",
+	"cmake.loggingLevel": "info",
+
+	"clangd.path": "/usr/sbin/clangd",
+	"clangd.fallbackFlags": [
+		"-std=c++23"
+	],
+	"clangd.arguments": [
+		"--background-index",
+		"--all-scopes-completion",
+		"--completion-style=detailed",
+		"--header-insertion=never",
+		"--pch-storage=memory",
+		"--query-driver=/usr/bin/c++,/usr/bin/g++,/usr/bin/gcc,/usr/sbin/g++",
+		"-j=4"
+	],
+	"C_Cpp.intelliSenseEngine": "disabled",
+
+	"files.associations": {
+		"*.h": "cpp",
+		"*.hxx": "cpp",
+		"*.tpp": "cpp"
+	},
+
+	"search.exclude": {
+		"**/build": true,
+		"**/_deps/**": true,
+		"**/includes/taskflow/**": true,
+		"**/demo/misc/**": true
+	},
+	"files.watcherExclude": {
+		"**/build/**": true
+	}
+}

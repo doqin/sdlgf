@@ -1,0 +1,30 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Debug demo (gdb)",
+			"type": "gdb",
+			"request": "launch",
+			"target": "${workspaceFolder}/build/bin/Release/demo",
+			"cwd": "${workspaceFolder}/build/bin/Release",
+			"valuesFormatting": "parseText",
+			"preLaunchTask": "cmake: build"
+		},
+		{
+			"name": "Debug demo (gdb, build/debug)",
+			"type": "gdb",
+			"request": "launch",
+			"target": "${workspaceFolder}/build/debug/bin/Debug/demo",
+			"cwd": "${workspaceFolder}/build/debug/bin/Debug",
+			"valuesFormatting": "parseText"
+		},
+		{
+			"name": "Debug audio test (gdb)",
+			"type": "gdb",
+			"request": "launch",
+			"target": "${workspaceFolder}/build/bin/Release/sdlgf_audio_test",
+			"cwd": "${workspaceFolder}/build",
+			"valuesFormatting": "parseText"
+		}
+	]
+}

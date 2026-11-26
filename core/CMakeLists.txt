@@ -13,6 +13,12 @@ target_precompile_headers(sdlgf_core PRIVATE "${CMAKE_SOURCE_DIR}/includes/pch.h
 
 target_compile_definitions(sdlgf_core PUBLIC UNICODE _UNICODE NOMINMAX)
 
+# MSVC defines _DEBUG itself for /MDd; other compilers don't, and the demo's debug overlay
+# (FPS title, ImGui battle window) is guarded by #ifdef _DEBUG.
+if(NOT MSVC)
+    target_compile_definitions(sdlgf_core PUBLIC $<$<CONFIG:Debug>:_DEBUG>)
+endif()
+
 target_link_libraries(sdlgf_core PUBLIC
     tmxlite
     SDL3::SDL3

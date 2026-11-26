@@ -21,7 +21,7 @@ namespace {
 		if (r.hasReward) popup->ShowMessage(L"(+) " + r.rewardMessage, 5.0f);
 		if (!r.hintMessage.empty()) popup->ShowMessage(r.hintMessage, 5.0f);
 	}
-}
+} // namespace
 
 Demo::WorldSceneBase::WorldSceneBase(Game* game, std::shared_ptr<sdlgf::SaveManager> sm, UINT sw, UINT sh)
 	: IScene(sw, sh), game(game), saveManager(sm) {
@@ -36,8 +36,7 @@ void Demo::WorldSceneBase::Init() {
 	}
 }
 
-void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t* mapFile)
-{
+void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t* mapFile) {
 	camera.SetZoom(2.0f);
 	transformManager = std::make_shared<sdlgf::TransformManager>();
 	colliderManager = std::make_shared<sdlgf::ColliderManager>();
@@ -45,7 +44,7 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	camera.SetPosition(playerX, playerY);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
 	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
+	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
 	player->InitGearAnim(gearTex);
 	drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
 	commandBuffer = std::make_shared<sdlgf::CommandBuffer>();
@@ -91,8 +90,7 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	ItemData::GetInstance()->LoadData();
 }
 
-void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
-{
+void Demo::WorldSceneBase::Update(unsigned long long deltaTime) {
 	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
 
 	if (!hasSeenChapterIntro && !isTransitioning) {
@@ -117,8 +115,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 					if (r.quantity > 1) msg += L" x" + std::to_wstring(r.quantity);
 					msg += L"  ";
 				}
-			}
-			else if (r.type == ChestRewardType::CARD) {
+			} else if (r.type == ChestRewardType::CARD) {
 				std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 				msg += wid + L"  ";
 			}
@@ -126,7 +123,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		auto [sw, sh] = camera.GetScreenResolution();
 		currentConversation = std::make_shared<IConversation>(
 			std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
-		currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+		currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 	};
 
 	auto inpMan = sdlgf::InputManager::GetInstance();
@@ -155,10 +152,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 				CloseFullMap();
 				mapClosedThisFrame = true;
 			}
-		}
-		else if (!isTransitioning && !currentConversation && !IsSubsceneModalActive()
-			&& !PopupManager::GetInstance()->IsActive() && !(inventoryMenu && inventoryMenu->IsOpen())
-			&& inpMan->KeyDown(settings->GetKeybind("OPEN_MAP"))) {
+		} else if (!isTransitioning && !currentConversation && !IsSubsceneModalActive() && !PopupManager::GetInstance()->IsActive() && !(inventoryMenu && inventoryMenu->IsOpen()) && inpMan->KeyDown(settings->GetKeybind("OPEN_MAP"))) {
 			fullMapOpen = true;
 		}
 	}
@@ -178,9 +172,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	}
 
 	// First-gear walkthrough: one popup page at a time, after the "Gear Obtained!" popup has been dismissed.
-	if (gearTutorialPage >= 0 && PlayerGlobalData::GetInstance()->GetPendingGearPopups().empty()
-		&& !isTransitioning && !currentConversation && !IsSubsceneModalActive()
-		&& !PopupManager::GetInstance()->IsActive()) {
+	if (gearTutorialPage >= 0 && PlayerGlobalData::GetInstance()->GetPendingGearPopups().empty() && !isTransitioning && !currentConversation && !IsSubsceneModalActive() && !PopupManager::GetInstance()->IsActive()) {
 		const std::wstring toggleKey = SettingsManager::GetInstance()->GetKeybindDisplayName("TOGGLE_GEAR");
 		const std::wstring pages[] = {
 			Tr(L"Gears come in two kinds. Passive gears give a permanent bonus while equipped. Active gears can be triggered during battle."),
@@ -190,28 +182,27 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 		};
 		const int pageCount = static_cast<int>(sizeof(pages) / sizeof(pages[0]));
 		const bool last = gearTutorialPage == pageCount - 1;
-		std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { last ? Tr(L"Got it!") : Tr(L"Next"), nullptr } };
+		std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {{last ? Tr(L"Got it!") : Tr(L"Next"), nullptr}};
 		PopupManager::GetInstance()->Show("stepped_gold",
-			Tr(L"Gear Tutorial") + L" (" + std::to_wstring(gearTutorialPage + 1) + L"/" + std::to_wstring(pageCount) + L")",
-			pages[gearTutorialPage], buttons);
+										  Tr(L"Gear Tutorial") + L" (" + std::to_wstring(gearTutorialPage + 1) + L"/" + std::to_wstring(pageCount) + L")",
+										  pages[gearTutorialPage], buttons);
 		gearTutorialPage = last ? -1 : gearTutorialPage + 1;
 	}
 
 	// Announce freshly obtained gears one at a time, once any dialogue / other popup is out of the way.
 	auto& pendingGears = PlayerGlobalData::GetInstance()->GetPendingGearPopups();
-	if (!pendingGears.empty() && !isTransitioning && !currentConversation && !IsSubsceneModalActive()
-		&& !PopupManager::GetInstance()->IsActive()) {
+	if (!pendingGears.empty() && !isTransitioning && !currentConversation && !IsSubsceneModalActive() && !PopupManager::GetInstance()->IsActive()) {
 		int gearID = pendingGears.front();
 		pendingGears.erase(pendingGears.begin());
 		auto bp = ItemData::GetInstance()->GetGearBlueprint(gearID);
 		if (bp) {
-			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = { { Tr(L"OK"), nullptr } };
+			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {{Tr(L"OK"), nullptr}};
 			if (!PlayerGlobalData::GetInstance()->HasSeenGearTutorial()) {
 				PlayerGlobalData::GetInstance()->SetSeenGearTutorial(true);
 				gearTutorialPage = 0;
 			}
 			PopupManager::GetInstance()->ShowWithIcon("stepped_gold", Tr(L"Gear Obtained!"), Tr(bp->name),
-				buttons, gearTex, bp->frames);
+													  buttons, gearTex, bp->frames);
 		}
 	}
 
@@ -289,8 +280,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 							if (r.quantity > 1) msg += L" x" + std::to_wstring(r.quantity);
 							msg += L"  ";
 						}
-					}
-					else if (r.type == ChestRewardType::CARD) {
+					} else if (r.type == ChestRewardType::CARD) {
 						std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 						msg += wid + L"  ";
 					}
@@ -298,7 +288,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 				auto [sw, sh] = camera.GetScreenResolution();
 				currentConversation = std::make_shared<IConversation>(
 					std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
-				currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+				currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 			}
 		}
 	}
@@ -325,8 +315,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	transformManager->UpdateAll();
 	if (!isGamePaused) map->UpdateAreas(player->GetCollider().lock()->GetWorldX(), player->GetCollider().lock()->GetWorldY());
 
-	if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && !inventoryMenu->IsTutorialActive()
-		&& inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
+	if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && !inventoryMenu->IsTutorialActive() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
 		draggableManager->Update(deltaTime);
 	}
 
@@ -340,8 +329,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	commandBuffer->Update(deltaTime);
 }
 
-void Demo::WorldSceneBase::DrawWorld(unsigned long long deltaTime)
-{
+void Demo::WorldSceneBase::DrawWorld(unsigned long long deltaTime) {
 	auto gd = game->GetGraphicsDevice();
 	if (gd->BeginDraw()) {
 
@@ -351,24 +339,24 @@ void Demo::WorldSceneBase::DrawWorld(unsigned long long deltaTime)
 		std::vector<DepthNode> depthNodes;
 
 		for (auto& savePoint : savePoints) {
-			depthNodes.push_back({ savePoint->GetWorldY(), [&, savePoint]() { savePoint->Draw(camera, deltaTime); } });
+			depthNodes.push_back({savePoint->GetWorldY(), [&, savePoint]() { savePoint->Draw(camera, deltaTime); }});
 		}
 		for (auto& shopPoint : shopPoints) {
-			depthNodes.push_back({ shopPoint->GetWorldY(), [&, shopPoint]() { shopPoint->Draw(camera, deltaTime); } });
+			depthNodes.push_back({shopPoint->GetWorldY(), [&, shopPoint]() { shopPoint->Draw(camera, deltaTime); }});
 		}
 		for (auto& healingPoint : healingPoints) {
-			depthNodes.push_back({ healingPoint->GetWorldY(), [&, healingPoint]() { healingPoint->Draw(camera, deltaTime); } });
+			depthNodes.push_back({healingPoint->GetWorldY(), [&, healingPoint]() { healingPoint->Draw(camera, deltaTime); }});
 		}
 		for (auto& chest : treasureChests) {
-			depthNodes.push_back({ chest->GetWorldY(), [&, chest]() { chest->Draw(camera, deltaTime); } });
+			depthNodes.push_back({chest->GetWorldY(), [&, chest]() { chest->Draw(camera, deltaTime); }});
 		}
 		for (auto& enemy : mapEnemies) {
-			depthNodes.push_back({ enemy->GetWorldY(), [&, enemy]() { enemy->Draw(&camera, deltaTime); } });
+			depthNodes.push_back({enemy->GetWorldY(), [&, enemy]() { enemy->Draw(&camera, deltaTime); }});
 		}
 		for (auto& npc : mapNPCs) {
-			depthNodes.push_back({ npc->GetWorldY(), [&, npc]() { npc->Draw(camera, deltaTime); } });
+			depthNodes.push_back({npc->GetWorldY(), [&, npc]() { npc->Draw(camera, deltaTime); }});
 		}
-		if (player) depthNodes.push_back({ player->GetWorldY(), [&]() { player->Draw(deltaTime); } });
+		if (player) depthNodes.push_back({player->GetWorldY(), [&]() { player->Draw(deltaTime); }});
 
 		OnDrawWorld(depthNodes, deltaTime);
 
@@ -381,9 +369,10 @@ void Demo::WorldSceneBase::DrawWorld(unsigned long long deltaTime)
 	}
 }
 
-void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
-{
+void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime) {
+#ifdef _DEBUG
 	CreateImGuiDebugFrame(player, game);
+#endif
 	auto gd = game->GetGraphicsDevice();
 
 	if (gd->BeginDraw()) {
@@ -399,7 +388,7 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		if (playerHUD) playerHUD->Draw(gd, deltaTime);
 		if (ShowMiniMap() && !fullMapOpen && !(inventoryMenu && inventoryMenu->IsOpen()) && player) {
 			mapView.DrawMini(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
-				player->GetWorldX(), player->GetWorldY(), BuildMapMarkers());
+							 player->GetWorldX(), player->GetWorldY(), BuildMapMarkers());
 		}
 		if (inventoryMenu) inventoryMenu->Draw(gd, deltaTime);
 		if (draggableManager && inventoryMenu && inventoryMenu->IsOpen() && inventoryMenu->GetCurrentTab() == Demo::InventoryMenu::Tab::DECK) {
@@ -427,9 +416,8 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 				travelHits = {};
 				WorldSceneBase* shown = travelWorlds[travelTab];
 				shown->mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
-					shown->BuildMapMarkers(shown == this), closeKey, &ui, &travelHits);
-			}
-			else {
+										shown->BuildMapMarkers(shown == this), closeKey, &ui, &travelHits);
+			} else {
 				mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(), BuildMapMarkers(), closeKey);
 			}
 		}
@@ -452,14 +440,15 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 			chapterTitleUI->Draw(&this->uiCamera, deltaTime);
 		}
 
+#ifdef _DEBUG
 		ImGui::Render();
 		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gd->GetRenderer());
+#endif
 		gd->EndDraw();
 	}
 }
 
-void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>& chest)
-{
+void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>& chest) {
 	auto given = chest->Open(player.get());
 	if (given.empty()) return;
 	std::wstring msg = Tr(L"You found: ");
@@ -471,8 +460,7 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 				if (r.quantity > 1) msg += L" x" + std::to_wstring(r.quantity);
 				msg += L"  ";
 			}
-		}
-		else if (r.type == ChestRewardType::CARD) {
+		} else if (r.type == ChestRewardType::CARD) {
 			std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 			msg += wid + L"  ";
 		}
@@ -480,24 +468,23 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 	auto [sw, sh] = camera.GetScreenResolution();
 	currentConversation = std::make_shared<IConversation>(
 		std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
-	currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
+	currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 }
 
-std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers(bool includePlayer) const
-{
+std::vector<Demo::MapView::Marker> Demo::WorldSceneBase::BuildMapMarkers(bool includePlayer) const {
 	using K = MapView::MarkerKind;
 	std::vector<MapView::Marker> markers;
-	for (auto& p : savePoints) markers.push_back({ K::Save, p->GetWorldX(), p->GetWorldY(), !p->IsUnlocked(), p->GetId() });
-	for (auto& p : shopPoints) markers.push_back({ K::Shop, p->GetWorldX(), p->GetWorldY() });
-	for (auto& p : healingPoints) markers.push_back({ K::Heal, p->GetWorldX(), p->GetWorldY() });
-	for (auto& c : treasureChests) markers.push_back({ K::Chest, c->GetWorldX(), c->GetWorldY(), c->GetIsOpened() });
-	for (auto& n : mapNPCs) markers.push_back({ K::Npc, n->GetWorldX(), n->GetWorldY() });
+	for (auto& p : savePoints) markers.push_back({K::Save, p->GetWorldX(), p->GetWorldY(), !p->IsUnlocked(), p->GetId()});
+	for (auto& p : shopPoints) markers.push_back({K::Shop, p->GetWorldX(), p->GetWorldY()});
+	for (auto& p : healingPoints) markers.push_back({K::Heal, p->GetWorldX(), p->GetWorldY()});
+	for (auto& c : treasureChests) markers.push_back({K::Chest, c->GetWorldX(), c->GetWorldY(), c->GetIsOpened()});
+	for (auto& n : mapNPCs) markers.push_back({K::Npc, n->GetWorldX(), n->GetWorldY()});
 	for (const auto& layer : portalLayers) {
 		for (const auto& area : map->GetAreas(layer)) {
-			markers.push_back({ K::Portal, area.x + area.width / 2.f, area.y + area.height / 2.f });
+			markers.push_back({K::Portal, area.x + area.width / 2.f, area.y + area.height / 2.f});
 		}
 	}
-	if (player && includePlayer) markers.push_back({ K::Player, player->GetWorldX(), player->GetWorldY() });
+	if (player && includePlayer) markers.push_back({K::Player, player->GetWorldX(), player->GetWorldY()});
 	return markers;
 }
 
@@ -506,18 +493,15 @@ void Demo::WorldSceneBase::SetChapterTitle(const std::wstring& title, const std:
 	chapterSubtitle = subtitle;
 }
 
-void Demo::WorldSceneBase::AddDepthNode(std::vector<DepthNode>& nodes, float y, std::function<void()> drawCall)
-{
-	nodes.push_back({ y, std::move(drawCall) });
+void Demo::WorldSceneBase::AddDepthNode(std::vector<DepthNode>& nodes, float y, std::function<void()> drawCall) {
+	nodes.push_back({y, std::move(drawCall)});
 }
 
-void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm, float bgmVol)
-{
+void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm, float bgmVol) {
 	TransitionToScene(static_cast<int>(game->GetSceneManager()->GetIndex()) + sceneOffset, targetX, targetY, bgm, bgmVol);
 }
 
-void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol, bool fastTravel)
-{
+void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol, bool fastTravel) {
 	if (isTransitioning) return;
 	isTransitioning = true;
 
@@ -540,12 +524,11 @@ void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, floa
 		sceMan->GoToScene(sceneIndex);
 		isTransitioning = false;
 		markFinished();
-		}));
+	}));
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
-void Demo::WorldSceneBase::OpenTravelMap()
-{
+void Demo::WorldSceneBase::OpenTravelMap() {
 	if (isTransitioning) return;
 	travelWorlds.clear();
 	auto sceMan = game->GetSceneManager();
@@ -553,7 +536,7 @@ void Demo::WorldSceneBase::OpenTravelMap()
 		auto* world = dynamic_cast<WorldSceneBase*>(sceMan->GetScene(i));
 		if (!world) continue;
 		const bool visited = std::any_of(world->savePoints.begin(), world->savePoints.end(),
-			[](const std::shared_ptr<SavePoint>& sp) { return sp->IsUnlocked(); });
+										 [](const std::shared_ptr<SavePoint>& sp) { return sp->IsUnlocked(); });
 		if (world == this || visited) {
 			if (world == this) travelTab = static_cast<int>(travelWorlds.size());
 			travelWorlds.push_back(world);
@@ -567,14 +550,12 @@ void Demo::WorldSceneBase::OpenTravelMap()
 	fullMapOpen = true;
 }
 
-void Demo::WorldSceneBase::CloseFullMap()
-{
+void Demo::WorldSceneBase::CloseFullMap() {
 	fullMapOpen = false;
 	travelMapOpen = false;
 }
 
-void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
-{
+void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime) {
 	if (travelInputGraceMs > 0.f) travelInputGraceMs -= static_cast<float>(deltaTime);
 	travelHoverTab = -1;
 	if (PopupManager::GetInstance()->IsActive() || isTransitioning) return;
@@ -623,11 +604,17 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
 	auto inside = [&](const MapView::Rect& r) { return mx >= r.x0 && mx <= r.x1 && my >= r.y0 && my <= r.y1; };
 
 	for (size_t i = 0; i < travelHits.tabs.size(); ++i) {
-		if (inside(travelHits.tabs[i])) { travelHoverTab = static_cast<int>(i); break; }
+		if (inside(travelHits.tabs[i])) {
+			travelHoverTab = static_cast<int>(i);
+			break;
+		}
 	}
 	const MapView::SaveHit* hoveredSave = nullptr;
 	for (const auto& hit : travelHits.saves) {
-		if (!hit.locked && inside(hit.rect)) { hoveredSave = &hit; break; }
+		if (!hit.locked && inside(hit.rect)) {
+			hoveredSave = &hit;
+			break;
+		}
 	}
 	// Moving the mouse onto a save point selects it; otherwise the keyboard selection stays
 	if (hoveredSave) travelHoverId = hoveredSave->id;
@@ -657,27 +644,24 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
 	if (hoveredSave) travelToSelected();
 }
 
-std::pair<float, float> Demo::WorldSceneBase::FindSpawnNear(const SavePoint& point) const
-{
+std::pair<float, float> Demo::WorldSceneBase::FindSpawnNear(const SavePoint& point) const {
 	const float px = point.GetWorldX(), py = point.GetWorldY();
 	// The player's whole footprint has to be on floor, not just one point
 	auto clear = [&](float x, float y) {
 		constexpr float kPad = 10.f;
-		return mapView.IsWalkable(x, y) && mapView.IsWalkable(x - kPad, y) && mapView.IsWalkable(x + kPad, y)
-			&& mapView.IsWalkable(x, y - kPad) && mapView.IsWalkable(x, y + kPad);
+		return mapView.IsWalkable(x, y) && mapView.IsWalkable(x - kPad, y) && mapView.IsWalkable(x + kPad, y) && mapView.IsWalkable(x, y - kPad) && mapView.IsWalkable(x, y + kPad);
 	};
 	// Prefer in front of the point, then sideways, then behind, widening the search each ring
-	for (float r : { 32.f, 48.f, 64.f, 96.f }) {
-		const float offsets[][2] = { {0, r}, {r, 0}, {-r, 0}, {r, r}, {-r, r}, {0, -r}, {r, -r}, {-r, -r} };
+	for (float r : {32.f, 48.f, 64.f, 96.f}) {
+		const float offsets[][2] = {{0, r}, {r, 0}, {-r, 0}, {r, r}, {-r, r}, {0, -r}, {r, -r}, {-r, -r}};
 		for (const auto& o : offsets) {
-			if (clear(px + o[0], py + o[1])) return { px + o[0], py + o[1] };
+			if (clear(px + o[0], py + o[1])) return {px + o[0], py + o[1]};
 		}
 	}
 	return point.GetSpawnPosition();
 }
 
-void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint& target)
-{
+void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint& target) {
 	const std::string sceneId = world->GetSaveID();
 	const auto* info = SaveGameState::GetSceneInfo(sceneId);
 	const std::wstring worldName = info ? Tr(info->displayName) : std::wstring(L"?");
@@ -685,35 +669,31 @@ void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint&
 	const bool sameScene = world == this;
 
 	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
-		{ Tr(L"Travel"), [this, sceneId, info, spawn, sameScene]() {
-			const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(sceneId);
-			if (sceneIndex < 0) return;
-			CloseFullMap();
-			// Don't restart the music when hopping between save points of the same world
-			TransitionToScene(sceneIndex, spawn.first, spawn.second,
-				(info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f, true);
-		}},
-		{ Tr(L"Cancel"), nullptr }
-	};
+		{Tr(L"Travel"), [this, sceneId, info, spawn, sameScene]() {
+			 const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(sceneId);
+			 if (sceneIndex < 0) return;
+			 CloseFullMap();
+			 // Don't restart the music when hopping between save points of the same world
+			 TransitionToScene(sceneIndex, spawn.first, spawn.second,
+							   (info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f, true);
+		 }},
+		{Tr(L"Cancel"), nullptr}};
 	PopupManager::GetInstance()->Show("basic_blackwhite", Tr(L"FAST TRAVEL"), Tr(L"Travel to this save point in ") + worldName + L"?", buttons);
 }
 
 void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
-	std::vector<std::string> types, bool isRand, bool isGlobal,
-	std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDraw,
-	int tokenChance, const std::string& questEvent, const std::string& questId)
-{
+										 std::vector<std::string> types, bool isRand, bool isGlobal,
+										 std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDraw,
+										 int tokenChance, const std::string& questEvent, const std::string& questId) {
 	auto enemy = EnemyFactory::CreateMapEnemy(
 		x, y, id, types, isRand, isGlobal, "battle_loop", bgDraw,
-		transformManager, game, colliderManager.get(), player
-	);
+		transformManager, game, colliderManager.get(), player);
 
 	Demo::EventType generatedEvent = Demo::EventType::None;
 	if (static_cast<int>(Demo::RNG::Range(1, 100)) <= tokenChance) {
 		if (enemy->GetEncounterData().enemyTypes.size() >= 2) {
 			generatedEvent = (Demo::RNG::Range(1, 100) <= 50) ? Demo::EventType::Gold : Demo::EventType::Energy;
-		}
-		else {
+		} else {
 			generatedEvent = Demo::EventType::Gold;
 		}
 	}
@@ -743,7 +723,7 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 					auto result = QuestManager::GetInstance()->NotifyEvent(questEvent, questId, this->player.get());
 					ShowQuestResult(this->popUpMessage.get(), result);
 				}
-				});
+			});
 
 			sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 			sceMan->GoToNext();
@@ -758,15 +738,13 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 	mapEnemies.push_back(enemy);
 }
 
-void Demo::WorldSceneBase::GenerateSaveData(nlohmann::json& outData)
-{
+void Demo::WorldSceneBase::GenerateSaveData(nlohmann::json& outData) {
 	player->GenerateSaveData(outData["player"]);
 	auto pos = camera.GetPosition();
 	outData["camera"] = {
 		{"x", pos.x},
 		{"y", pos.y},
-		{"zoom", camera.GetZoom()}
-	};
+		{"zoom", camera.GetZoom()}};
 	outData["hasSeenChapterIntro"] = hasSeenChapterIntro;
 	mapView.Save(outData["mapFog"]);
 
@@ -781,16 +759,14 @@ void Demo::WorldSceneBase::GenerateSaveData(nlohmann::json& outData)
 			{"respawnTimer", enemy->GetRespawnTimer()},
 			{"eventType", static_cast<int>(enemy->GetEncounterData().eventType)},
 			{"enemyTypes", enemy->GetEncounterData().enemyTypes},
-			{"enemyHps", enemy->GetEncounterData().enemyHps}
-		};
+			{"enemyHps", enemy->GetEncounterData().enemyHps}};
 	}
 	outData["mapEnemies"] = enemiesState;
 
 	OnGenerateSaveData(outData);
 }
 
-void Demo::WorldSceneBase::RestoreSaveData(const nlohmann::json& inData)
-{
+void Demo::WorldSceneBase::RestoreSaveData(const nlohmann::json& inData) {
 	player->RestoreSaveData(inData["player"]);
 	camera.SetPosition(inData["camera"]["x"], inData["camera"]["y"]);
 	camera.SetZoom(inData["camera"]["zoom"]);

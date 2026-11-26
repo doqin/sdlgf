@@ -9,8 +9,7 @@
 #include <iterator>
 #include "SettingsManager.h"
 #include "SplashScene.h"
-void Demo::Game::Init()
-{
+void Demo::Game::Init() {
 	srand(static_cast<unsigned int>(time(NULL)));
 	IGame::Init();
 	SettingsManager::GetInstance()->LoadSettings();
@@ -57,12 +56,12 @@ void Demo::Game::Init()
 	audio->Load("step_vinyl3", "assets/audio/step_vinyl3.ogg");
 	audio->Load("step_vinyl4", "assets/audio/step_vinyl4.ogg");
 
-	audio->RegisterBank("step_default", { "step_d1", "step_d2", "step_d3", "step_d4" });
-	audio->RegisterBank("step_leaves", { "step_l1", "step_l2", "step_l3", "step_l4" });
-	audio->RegisterBank("step_metal", { "step_m1", "step_m2", "step_m3", "step_m4", "step_m5" });
-	audio->RegisterBank("step_dirt", { "step_dirt1", "step_dirt2", "step_dirt3", "step_dirt4", "step_dirt5" });
-	audio->RegisterBank("step_concrete", { "step_concrete1", "step_concrete2", "step_concrete3", "step_concrete4" });
-	audio->RegisterBank("step_vinyl", { "step_vinyl1", "step_vinyl2", "step_vinyl3", "step_vinyl4" });
+	audio->RegisterBank("step_default", {"step_d1", "step_d2", "step_d3", "step_d4"});
+	audio->RegisterBank("step_leaves", {"step_l1", "step_l2", "step_l3", "step_l4"});
+	audio->RegisterBank("step_metal", {"step_m1", "step_m2", "step_m3", "step_m4", "step_m5"});
+	audio->RegisterBank("step_dirt", {"step_dirt1", "step_dirt2", "step_dirt3", "step_dirt4", "step_dirt5"});
+	audio->RegisterBank("step_concrete", {"step_concrete1", "step_concrete2", "step_concrete3", "step_concrete4"});
+	audio->RegisterBank("step_vinyl", {"step_vinyl1", "step_vinyl2", "step_vinyl3", "step_vinyl4"});
 
 	audio->Load("shop_buy", "assets/audio/buy_item.ogg");
 	audio->Load("error", "assets/audio/error.ogg");
@@ -73,7 +72,7 @@ void Demo::Game::Init()
 	audio->Load("card_draw4", "assets/audio/card_draw4.ogg");
 	audio->Load("card_draw5", "assets/audio/card_draw5.ogg");
 
-	audio->RegisterBank("card_draw", { "card_draw1", "card_draw2", "card_draw3", "card_draw4", "card_draw5" });
+	audio->RegisterBank("card_draw", {"card_draw1", "card_draw2", "card_draw3", "card_draw4", "card_draw5"});
 
 	audio->Load("hurt1", "assets/audio/hurt1.ogg");
 	audio->Load("hurt2", "assets/audio/hurt2.ogg");
@@ -81,7 +80,7 @@ void Demo::Game::Init()
 	audio->Load("hurt4", "assets/audio/hurt4.ogg");
 	audio->Load("hurt5", "assets/audio/hurt5.ogg");
 
-	audio->RegisterBank("take_dmg", { "hurt1", "hurt2", "hurt3", "hurt4", "hurt5" });
+	audio->RegisterBank("take_dmg", {"hurt1", "hurt2", "hurt3", "hurt4", "hurt5"});
 
 	audio->Load("player_dead", "assets/audio/dead.ogg");
 	audio->Load("coin_gather", "assets/audio/coins_gather.ogg");
@@ -90,14 +89,14 @@ void Demo::Game::Init()
 	audio->Load("card_snap2", "assets/audio/card_snap2.ogg");
 	audio->Load("card_snap3", "assets/audio/card_snap3.ogg");
 	audio->Load("card_snap4", "assets/audio/card_snap4.ogg");
-	audio->RegisterBank("card_snap", { "card_snap1", "card_snap2", "card_snap3", "card_snap4" });
+	audio->RegisterBank("card_snap", {"card_snap1", "card_snap2", "card_snap3", "card_snap4"});
 
 	audio->Load("dialog_voice1", "assets/audio/dialog_voice1.ogg");
 	audio->Load("dialog_voice2", "assets/audio/dialog_voice2.ogg");
 	audio->Load("dialog_voice3", "assets/audio/dialog_voice3.ogg");
 	audio->Load("dialog_voice4", "assets/audio/dialog_voice4.ogg");
 	audio->Load("dialog_voice5", "assets/audio/dialog_voice5.ogg");
-	audio->RegisterBank("dialog_voice", { "dialog_voice1", "dialog_voice2", "dialog_voice3", "dialog_voice4", "dialog_voice5" });
+	audio->RegisterBank("dialog_voice", {"dialog_voice1", "dialog_voice2", "dialog_voice3", "dialog_voice4", "dialog_voice5"});
 
 	audio->Load("bleep1", "assets/audio/bleeps/bleep001.ogg");
 	audio->Load("bleep2", "assets/audio/bleeps/bleep002.ogg");
@@ -134,7 +133,7 @@ void Demo::Game::Init()
 	audio->Load("power_up2", "assets/audio/power_up2.ogg");
 	audio->Load("power_up3", "assets/audio/power_up3.ogg");
 
-	audio->RegisterBank("power_up", { "power_up1", "power_up2", "power_up3" });
+	audio->RegisterBank("power_up", {"power_up1", "power_up2", "power_up3"});
 
 	audio->Load("checkpoint", "assets/audio/checkpoint.ogg");
 	audio->Load("quest_active", "assets/audio/quest_active.ogg");
@@ -142,19 +141,19 @@ void Demo::Game::Init()
 	audio->Load("projectile_spawn", "assets/audio/projectile_spawn.ogg");
 	audio->Load("projectile_launch", "assets/audio/projectile_launch.ogg");
 
-	//load maps bgm
+	// load maps bgm
 	audio->Load("bgm_tutorial", "assets/audio/tutorial-loop.ogg");
 	audio->Load("bgm_sky", "assets/audio/sky-loop.ogg");
 	audio->Load("bgm_secret", "assets/audio/secret-loop.ogg");
 	audio->Load("bgm_boss", "assets/audio/boss-loop.ogg");
 
-	//boss world dynamic music: shared base plus one layer per island group
+	// boss world dynamic music: shared base plus one layer per island group
 	audio->Load("bossworld_base", "assets/audio/bossworld-base.ogg");
 	audio->Load("bossworld_island12", "assets/audio/bossworld-island12.ogg");
 	audio->Load("bossworld_island3", "assets/audio/bossworld-island3.ogg");
 	audio->Load("bossworld_island4", "assets/audio/bossworld-island4.ogg");
-	audio->RegisterStemSet("bgm_bossworld", { "bossworld_base", "bossworld_island12", "bossworld_island3", "bossworld_island4" });
-	audio->SetActiveStems("bgm_bossworld", { 0, 1 }, 0.0f);
+	audio->RegisterStemSet("bgm_bossworld", {"bossworld_base", "bossworld_island12", "bossworld_island3", "bossworld_island4"});
+	audio->SetActiveStems("bgm_bossworld", {0, 1}, 0.0f);
 	audio->Load("bgm_arcade", "assets/audio/arcade-music-loop.ogg");
 
 	auto app = sdlgf::Application::GetInstance();
@@ -164,11 +163,11 @@ void Demo::Game::Init()
 	sdlgf::Font::AddFont(L"assets/cardpixel-top.ttf");
 	sdlgf::Font::AddFont(L"assets/cardpixel-bottom.ttf");
 	sdlgf::Font::AddFont(L"assets/135openpixel-v2-3.ttf");
-	//Load cursor textures
+	// Load cursor textures
 	auto input = sdlgf::InputManager::GetInstance();
 	auto gd = GetGraphicsDevice();
 
-	//hotspot (hX, hY) must be multiplied by the scale factor
+	// hotspot (hX, hY) must be multiplied by the scale factor
 	input->AddCursor(sdlgf::InputManager::CursorType::CURSOR, gd, L"assets/cursor.png", 0.2f, 0.0f, 0.0f);
 	input->AddCursor(sdlgf::InputManager::CursorType::POINTER, gd, L"assets/pointer.png", 0.2f, 0.0f, 0.0f);
 	input->AddCursor(sdlgf::InputManager::CursorType::CLICK, gd, L"assets/click.png", 0.2f, 4.0f, 6.0f);
@@ -184,8 +183,7 @@ void Demo::Game::Init()
 	this->sceneManager->GoToNext();
 }
 
-void Demo::Game::Update(unsigned long long deltaTime)
-{
+void Demo::Game::Update(unsigned long long deltaTime) {
 	IGame::Update(deltaTime);
 
 #ifdef _DEBUG

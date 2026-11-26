@@ -371,3 +371,6 @@ dist/
 /build*/
 /out/
 /CMakeUserPresets.json
+
+# clangd: copy of the active CMake preset's compile database (see .clangd)
+/compile_commands.json

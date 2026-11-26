@@ -1,24 +1,22 @@
-﻿#include "pch.h"
-#include "Debug.h"
+﻿#include "Debug.h"
 #include "MainFont.h"
 #include "MapEnemy.h"
-#include "WorldSceneBase.h"
 #include "PlayerGlobalData.h"
+#include "WorldSceneBase.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
+#include "pch.h"
 #include <string>
-#include "backends/imgui_impl_sdlrenderer3.h"
-#include "backends/imgui_impl_sdl3.h"
 
 bool Demo::Pointable::isDrawing = false;
 std::shared_ptr<sdlgf::Font> Demo::Pointable::font = nullptr;
 std::shared_ptr<sdlgf::FontSprite> Demo::Pointable::fontSprite = nullptr;
 
-void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
-{
+void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game) {
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
-#ifdef _DEBUG
 	ImGui::NewFrame();
 	ImGui::Begin("Debug Info");
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
@@ -109,15 +107,13 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 	ImGui::Checkbox("Ignore Collision", &player->ignoreCollisions);
 	ImGui::Checkbox("Draw World Position", &Demo::Pointable::isDrawing);
 	ImGui::End();
-#endif
 	ImGui::EndFrame();
 }
 
-void Demo::CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEnemies)
-{
+void Demo::CreateImGuiBattleDebugFrame(
+	const std::function<void()>& onKillAllEnemies) {
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
-#ifdef _DEBUG
 	ImGui::NewFrame();
 	ImGui::Begin("Battle Debug");
 	ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
@@ -125,15 +121,17 @@ void Demo::CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEne
 		onKillAllEnemies();
 	}
 	ImGui::End();
-#endif
 	ImGui::EndFrame();
 }
 
-void Demo::Pointable::DrawPosition(unsigned long long deltaTime, sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera) const
-{
-	if (!isDrawing) return;
+void Demo::Pointable::DrawPosition(unsigned long long deltaTime,
+								   sdlgf::GraphicsDevice* gd,
+								   const sdlgf::Camera& camera) const {
+	if (!isDrawing)
+		return;
 	if (!font) {
-		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName, Demo::kMainFontSize);
+		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName,
+											 Demo::kMainFontSize);
 	}
 	if (!fontSprite) {
 		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());

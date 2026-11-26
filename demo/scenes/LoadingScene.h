@@ -35,6 +35,7 @@ namespace Demo {
 		size_t nextStep = 0;
 		bool drawnSinceLastWork = false;
 		float elapsedSeconds = 0.0f;
+		float waitMs = 0.0f;        // artificial pause left before the next piece of work
 		std::wstring statusLabel;   // what is being done now
 		std::wstring shownLabel;    // what the fade-in currently applies to
 		float labelFade = 0.0f;     // 0..1 opacity of the step text

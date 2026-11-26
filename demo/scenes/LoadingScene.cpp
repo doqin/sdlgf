@@ -4,11 +4,22 @@
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace Demo {
 	namespace {
 		constexpr unsigned long long kUploadBudgetMs = 4;
 		constexpr float kLabelFadeMs = 300.0f;
+
+		// Developer knob: SDLGF_LOADING_STEP_MS=<ms> pauses that long before every step (and before
+		// finishing), so the loading screen can be looked at even when everything is cached.
+		float ArtificialStepDelayMs() {
+			static const float delay = [] {
+				const char* value = std::getenv("SDLGF_LOADING_STEP_MS");
+				return value ? static_cast<float>((std::max)(0, std::atoi(value))) : 0.0f;
+			}();
+			return delay;
+		}
 		// Same colour as TransitionCommand's pillars, so the screen stays seamless around loading
 		constexpr sdlgf::Color kBackground = 0xFF000000;
 		constexpr float kMargin = 28.0f;       // throbber centre's distance from the screen corner
@@ -30,6 +41,7 @@ namespace Demo {
 		text = std::make_shared<sdlgf::FontSprite>(font);
 		loader = std::make_unique<sdlgf::AssetLoader>(gd->GetAssets());
 		loader->Request(assets);
+		waitMs = ArtificialStepDelayMs();
 		statusLabel = Tr(L"Loading");
 	}
 
@@ -45,6 +57,10 @@ namespace Demo {
 		labelFade = (std::min)(1.0f, labelFade + static_cast<float>(deltaTime) / kLabelFadeMs);
 		throbberFade = (std::min)(1.0f, throbberFade + static_cast<float>(deltaTime) / kLabelFadeMs);
 
+		if (waitMs > 0.0f) {
+			waitMs -= static_cast<float>(deltaTime);
+			return;
+		}
 		if (!drawnSinceLastWork) return; // show the current state before doing more work
 		drawnSinceLastWork = false;
 
@@ -57,6 +73,7 @@ namespace Demo {
 			statusLabel = step.label;
 			++nextStep;
 			step.run();
+			waitMs = ArtificialStepDelayMs();
 			return;
 		}
 		// Everything is built. Release the loader's references only after the objects that needed the

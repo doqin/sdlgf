@@ -15,19 +15,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install DirectX SDK (June 2010)
-        run: choco install directx-sdk -y --no-progress
-
-      - uses: microsoft/setup-msbuild@v2
-
-      - name: Stage tmxlite import lib where core.vcxproj expects it
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force external/release/tmxlite | Out-Null
-          Copy-Item external/tmxlite.lib external/release/tmxlite/
+      - name: Configure (CMake)
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 
       - name: Build demo (Release x64)
-        run: msbuild demo/demo.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:SolutionDir="${{ github.workspace }}\"
+        run: cmake --build build --config Release --parallel
 
       - name: Package portable folder
         shell: pwsh

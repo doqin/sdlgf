@@ -367,3 +367,8 @@ FodyWeavers.xsd
 
 # Portable packaging output
 dist/
+
+# CMake build trees
+/build*/
+/out/
+/CMakeUserPresets.json

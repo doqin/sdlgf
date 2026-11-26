@@ -1,5 +1,5 @@
 #pragma once
-#include "C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include\d3dx9.h"
+#include <d3dx9.h>
 #include <tuple>
 namespace DX9GF {
 	class Camera {

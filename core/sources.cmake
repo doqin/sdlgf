@@ -1,0 +1,43 @@
+# Source list for the core library (mirrors the ClCompile items of core.vcxproj).
+set(SDLGF_CORE_SOURCES
+    DX9GFApplication.cpp
+    DX9GFCamera.cpp
+    DX9GFDebug.cpp
+    DX9GFExtras/DX9GFColliderManager.cpp
+    DX9GFExtras/DX9GFParticleSystem.cpp
+    DX9GFExtras/DX9GFCommandBuffer.cpp
+    DX9GFExtras/DX9GFConcurrentCommand.cpp
+    DX9GFExtras/DX9GFCustomCommand.cpp
+    DX9GFExtras/DX9GFDelayCommand.cpp
+    DX9GFExtras/DX9GFDestroyObjectCommand.cpp
+    DX9GFExtras/DX9GFEllipseCollider.cpp
+    DX9GFExtras/DX9GFEllipseTrigger.cpp
+    DX9GFExtras/DX9GFGoToCommand.cpp
+    DX9GFExtras/DX9GFICollider.cpp
+    DX9GFExtras/DX9GFICommand.cpp
+    DX9GFExtras/DX9GFIGameObject.cpp
+    DX9GFExtras/DX9GFITrigger.cpp
+    DX9GFExtras/DX9GFMap.cpp
+    DX9GFExtras/DX9GFMapLayer.cpp
+    DX9GFExtras/DX9GFMultiCommand.cpp
+    DX9GFExtras/DX9GFPlaySoundCommand.cpp
+    DX9GFExtras/DX9GFRectangleCollider.cpp
+    DX9GFExtras/DX9GFRectangleTrigger.cpp
+    DX9GFExtras/DX9GFRotateCommand.cpp
+    DX9GFExtras/DX9GFSaveManager.cpp
+    DX9GFExtras/DX9GFSetCameraPositionCommand.cpp
+    DX9GFExtras/DX9GFSetPositionCommand.cpp
+    DX9GFExtras/DX9GFTransformManager.cpp
+    DX9GFExtras/DX9GFZoomCameraCommand.cpp
+    DX9GFFont.cpp
+    DX9GFGraphicsDevice.cpp
+    DX9GFIGame.cpp
+    DX9GFInputManager.cpp
+    DX9GFIScene.cpp
+    DX9GFISprite.cpp
+    DX9GFSceneManager.cpp
+    DX9GFSprites.cpp
+    DX9GFTexture.cpp
+    DX9GFUtils.cpp
+    DX9GFAudioManager.cpp
+)

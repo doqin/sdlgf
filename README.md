@@ -25,7 +25,7 @@ Chạy test: `ctest --test-dir build -C Release --output-on-failure`
 
 Phát hành bản build: chạy workflow `Portable build` bằng `workflow_dispatch` và nhập `version` (ví dụ `0.1.0`, không có chữ `v`); workflow sẽ build, test, đóng gói, tạo tag `v0.1.0` và publish GitHub Release kèm hai file: `sdlgf-demo.zip` (Windows x64) và `sdlgf-demo-linux-x86_64.tar.gz` (Linux x64, giải nén rồi chạy `./demo`). Release chỉ được tạo khi cả job Windows lẫn Linux đều thành công. Chỉ chạy được từ nhánh `master`, và tag `v<version>` đó phải chưa tồn tại. Push một tag `v*` cũng publish release như cũ.
 
-Cửa sổ, vòng lặp, input, đồ hoạ (SDL_Renderer), chữ (SDL_ttf) và âm thanh (SDL3 audio) đều chạy trên SDL3; file âm thanh đọc được dạng `.wav` hoặc `.ogg` (Ogg Vorbis, giải mã bằng SDL_mixer, tải và build từ source cùng các thư viện khác); không còn Direct3D 9 / DirectInput / XAudio2. CI build và chạy test trên Windows và Linux. Trên Linux mới chỉ build và chạy test tự động (âm thanh dùng driver "dummy"). **Dự án chưa được chạy thử trên một máy Linux thật**: chưa ai mở demo bằng cửa sổ, loa và chuột thật, nên các phần phụ thuộc nền tảng (hiển thị, âm thanh, ẩn con trỏ chuột tuỳ biến...) có thể còn lỗi chỉ xuất hiện trên Linux.
+Cửa sổ, vòng lặp, input, đồ hoạ (SDL_Renderer), chữ (SDL_ttf) và âm thanh (SDL3 audio) đều chạy trên SDL3; file âm thanh đọc được dạng `.wav` hoặc `.ogg` (Ogg Vorbis, giải mã bằng SDL_mixer, tải và build từ source cùng các thư viện khác); không còn Direct3D 9 / DirectInput / XAudio2. CI build và chạy test trên Windows và Linux.
 
 Các file Visual Studio cũ (`.vcxproj`, `.slnx`) đã được xoá; dùng CMake (Visual Studio mở được thư mục CMake trực tiếp).
 

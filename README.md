@@ -25,7 +25,7 @@ Chạy test: `ctest --test-dir build -C Release --output-on-failure`
 
 Cửa sổ, vòng lặp, input, đồ hoạ (SDL_Renderer), chữ (SDL_ttf) và âm thanh (SDL3 audio) đều chạy trên SDL3; không còn Direct3D 9 / DirectInput / XAudio2. CI build và chạy test trên Windows và Linux. Trên Linux mới chỉ build và chạy test tự động (âm thanh dùng driver "dummy"); chưa chạy thử demo bằng cửa sổ và loa thật.
 
-Các file `.vcxproj`/`.slnx` cũ sẽ bị xoá ở bước dọn dẹp cuối của quá trình port.
+Các file Visual Studio cũ (`.vcxproj`, `.slnx`) đã được xoá; dùng CMake (Visual Studio mở được thư mục CMake trực tiếp).
 
 # Thành viên làm đồ án
 24520763 - Nguyễn Tuấn Khang

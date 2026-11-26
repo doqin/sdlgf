@@ -1,5 +1,4 @@
-# Source list for the core library (started as the ClCompile items of core.vcxproj;
-# this file is now the source of truth).
+# Source list for the core library.
 set(SDLGF_CORE_SOURCES
     Application.cpp
     Camera.cpp

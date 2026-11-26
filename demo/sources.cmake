@@ -1,4 +1,4 @@
-# Source list for the demo game (mirrors the ClCompile items of demo.vcxproj).
+# Source list for the demo game.
 set(SDLGF_DEMO_SOURCES
     cards/core/StatementEffects.cpp
     cards/registry/CardRegistry.cpp

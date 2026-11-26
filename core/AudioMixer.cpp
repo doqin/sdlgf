@@ -26,15 +26,16 @@ namespace {
 			if (error) *error = what;
 			return nullptr;
 		};
-		// MIX_Init is reference counted and cheap to repeat; the matching MIX_Quit runs below.
-		if (!MIX_Init()) {
+		// Initialised once and kept for the life of the process (decoders are stateless between
+		// files; tearing the library down after every file only costs time). Loading happens on the
+		// main thread, and MIX_Init is not thread safe.
+		static const bool initialised = MIX_Init();
+		if (!initialised) {
 			return fail(std::string("cannot initialise SDL_mixer: ") + SDL_GetError());
 		}
 		MIX_AudioDecoder* decoder = MIX_CreateAudioDecoder(utf8Path.c_str(), 0);
 		if (!decoder) {
-			const std::string reason = SDL_GetError();
-			MIX_Quit();
-			return fail("cannot read audio: " + reason);
+			return fail(std::string("cannot read audio: ") + SDL_GetError());
 		}
 
 		const SDL_AudioSpec target{ SDL_AUDIO_S16, 2, sdlgf::kMixRate };
@@ -48,7 +49,6 @@ namespace {
 			sound->samples.insert(sound->samples.end(), chunk.begin(), chunk.begin() + bytes / sizeof(std::int16_t));
 		}
 		MIX_DestroyAudioDecoder(decoder);
-		MIX_Quit();
 
 		if (!failure.empty()) return fail(failure);
 		if (sound->samples.empty()) return fail("audio file contains no samples");

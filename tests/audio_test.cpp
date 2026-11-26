@@ -10,7 +10,9 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -406,14 +408,31 @@ static void TestManager()
 
 int main()
 {
+	// Report what killed the test: on Windows an uncaught exception otherwise just shows up as
+	// exit code 0xc0000409 in the CI log, with no message.
+	std::set_terminate([] {
+		std::fputs("audio_test: std::terminate called (uncaught exception)\n", stderr);
+		std::abort();
+	});
+
 	g_dir = std::filesystem::temp_directory_path() / "sdlgf_audio_test";
 	std::filesystem::remove_all(g_dir);
 	std::filesystem::create_directories(g_dir);
 
-	TestDecoding();
-	TestOgg();
-	TestMixer();
-	TestManager();
+	try {
+		std::fputs("audio_test: decoding\n", stderr);
+		TestDecoding();
+		std::fputs("audio_test: ogg\n", stderr);
+		TestOgg();
+		std::fputs("audio_test: mixer\n", stderr);
+		TestMixer();
+		std::fputs("audio_test: manager\n", stderr);
+		TestManager();
+	}
+	catch (const std::exception& e) {
+		std::fprintf(stderr, "audio_test: uncaught exception: %s\n", e.what());
+		return 1;
+	}
 
 	std::filesystem::remove_all(g_dir);
 	if (g_failures == 0) std::puts("audio_test: all tests passed");

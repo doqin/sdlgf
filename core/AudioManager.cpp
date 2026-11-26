@@ -1,70 +1,9 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "AudioManager.h"
+#include "Platform.h"
+#include <SDL3/SDL.h>
 #include <cmath>
 #include <algorithm>
-
-// chunk structure of WAV files
-#pragma pack(push, 1)
-struct ChunkHeader {
-	char id[4];
-	DWORD size;
-};
-#pragma pack(pop)
-
-bool sdlgf::LoadWavFromResource(int resourceID, sdlgf::SoundBuffer& out_audio)
-{
-	//find embedded resource in this project by its ID
-	HRSRC hResInfo = FindResource(NULL, MAKEINTRESOURCE(resourceID), L"WAVE");
-	if (hResInfo == NULL)
-		return false;
-
-	//load resource
-	HGLOBAL hResData = LoadResource(NULL, hResInfo);
-	if (hResData == NULL)
-		return false;
-
-	//lock the resource to point the pointer into resource data
-	void* pResourceData = LockResource(hResData);
-	DWORD resourceSize = SizeofResource(NULL, hResInfo);
-	if (pResourceData == NULL)
-		return false;
-
-	//embedded resource can't use mmio, gotta use this technique (just use for pcm wav)
-
-	BYTE* pData = (BYTE*)pResourceData;
-	DWORD offset = 12; //skip "RIFF", size, "WAVE"
-
-	bool foundFmt = false;
-	bool foundData = false;
-
-	while (offset < resourceSize) {
-		ChunkHeader* header = (ChunkHeader*)(pData + offset);
-		offset += sizeof(ChunkHeader);
-
-		if (strncmp(header->id, "fmt ", 4) == 0) {
-			//take rate and channels,... from file
-			memcpy(&out_audio.wfx, pData + offset, (header->size < sizeof(WAVEFORMATEX)) ? header->size : sizeof(WAVEFORMATEX)); //avoid include lib
-			foundFmt = true;
-		}
-		else if (strncmp(header->id, "data", 4) == 0) {
-			//take raw audio data from file
-			out_audio.audioRawData.resize(header->size);
-			memcpy(out_audio.audioRawData.data(), pData + offset, header->size);
-
-			//set the buffer on
-			out_audio.buffer.AudioBytes = header->size;
-			out_audio.buffer.pAudioData = out_audio.audioRawData.data();
-			out_audio.buffer.Flags = XAUDIO2_END_OF_STREAM;
-
-			foundData = true;
-			break;
-		}
-
-		offset += header->size;
-	}
-
-	return foundFmt && foundData;
-}
 
 sdlgf::AudioManager* sdlgf::AudioManager::instance = nullptr;
 
@@ -85,39 +24,61 @@ void sdlgf::AudioManager::DestroyInstance()
 	}
 }
 
+void SDLCALL sdlgf::AudioManager::StreamCallback(void* userdata, SDL_AudioStream* stream, int additionalAmount, int totalAmount)
+{
+	// Runs on SDL's audio thread: the device wants `additionalAmount` more bytes
+	AudioManager* self = static_cast<AudioManager*>(userdata);
+	constexpr int kFrameBytes = 2 * static_cast<int>(sizeof(float));
+	int frames = additionalAmount / kFrameBytes;
+	static thread_local std::vector<float> scratch;
+	while (frames > 0) {
+		const int chunk = (std::min)(frames, 4096);
+		scratch.resize(static_cast<size_t>(chunk) * 2);
+		self->mixer.Render(scratch.data(), chunk);
+		SDL_PutAudioStreamData(stream, scratch.data(), chunk * kFrameBytes);
+		frames -= chunk;
+	}
+}
+
 bool sdlgf::AudioManager::Init()
 {
-	//turn on COM of Windows
-	if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED)))
+	if (stream != nullptr) return true;
+	if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+		sdlgf::Platform::DebugLog(std::string("Audio unavailable: ") + SDL_GetError() + "\n");
 		return false;
-
-	if (FAILED(XAudio2Create(&pEngine, 0, XAUDIO2_DEFAULT_PROCESSOR)))
+	}
+	const SDL_AudioSpec spec{ SDL_AUDIO_F32, 2, kMixRate };
+	stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, &AudioManager::StreamCallback, this);
+	if (stream == nullptr) {
+		sdlgf::Platform::DebugLog(std::string("Could not open an audio device: ") + SDL_GetError() + "\n");
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 		return false;
-
-	if (FAILED(pEngine->CreateMasteringVoice(&pMasterVoice)))
-		return false;
-
+	}
+	SDL_ResumeAudioStreamDevice(stream);
 	return true;
 }
 
-void sdlgf::AudioManager::Load(std::string name, int resID)
+void sdlgf::AudioManager::Load(std::string name, const std::string& path)
 {
 	if (cache.count(name)) return;
-	SoundBuffer* ad = new SoundBuffer();
-	if (LoadWavFromResource(resID, *ad))
-	{
-		cache[name] = ad;
+	std::string error;
+	auto sound = LoadSoundFile(path, &error);
+	if (!sound) {
+		sdlgf::Platform::DebugLog("Could not load sound '" + name + "' from '" + path + "': " + error + "\n");
+		return;
 	}
-	else
-	{
-		delete ad;
-	}
+	cache[name] = std::move(sound);
+}
+
+bool sdlgf::AudioManager::IsFinished(const ActiveVoice* av) const
+{
+	return av->stopped || mixer.IsFinished(av->voice);
 }
 
 void sdlgf::AudioManager::ApplyVoiceVolume(ActiveVoice* av)
 {
 	float typeVol = (av->type == AudioType::MUSIC) ? currentMusicVolume : currentSfxVolume;
-	av->pVoice->SetVolume(av->baseVolume * av->fadeMul * av->stemLevel * typeVol * currentMasterVolume);
+	mixer.SetGain(av->voice, av->baseVolume * av->fadeMul * av->stemLevel * typeVol * currentMasterVolume);
 }
 
 void sdlgf::AudioManager::Play(std::string name, bool loop, float volume, AudioType type)
@@ -133,55 +94,26 @@ sdlgf::ActiveVoice* sdlgf::AudioManager::PlayInternal(std::string name, bool loo
 	}
 
 	//can't find sound name from cache
-	if (!cache.count(name)) return nullptr;
+	auto soundIt = cache.find(name);
+	if (soundIt == cache.end()) return nullptr;
 
 	// Init() can fail on machines with no audio device (VMs, RDP sessions,
-	// sandbox). pEngine stays null then - stay silent instead of crashing
-	// on the first Play call.
-	if (pEngine == nullptr) return nullptr;
+	// sandbox). stream stays null then - stay silent instead of piling up voices
+	if (stream == nullptr) return nullptr;
 
-	SoundBuffer* data = cache[name];
-
-	//create a callback for this turn
-	sdlgf::VoiceCallback* cb = new VoiceCallback();
-	IXAudio2SourceVoice* pVoice = nullptr;
-
-	if (FAILED(pEngine->CreateSourceVoice(&pVoice, &data->wfx, 0, XAUDIO2_DEFAULT_FREQ_RATIO, cb, NULL, NULL)))
-	{
-		delete cb;
-		return nullptr;
+	//optional intro: played once first, the main sound follows gaplessly
+	std::shared_ptr<const Sound> intro;
+	if (!introName.empty()) {
+		auto introIt = cache.find(introName);
+		if (introIt != cache.end()) intro = introIt->second;
 	}
 
-	//set the loop
-	if (loop == true)
-	{
-		//for background music to loop(?)
-		data->buffer.LoopCount = XAUDIO2_LOOP_INFINITE;
-	}
-	else
-	{
-		//for normal sound
-		data->buffer.LoopCount = 0;
-	}
-
-	ActiveVoice* av = new ActiveVoice{ name, pVoice, cb, type, volume };
+	Voice* voice = mixer.AddVoice(soundIt->second, intro, loop, 0.0f, startNow);
+	ActiveVoice* av = new ActiveVoice{ name, voice, type, volume };
 	av->group = group;
 	av->fadeMul = fadeMul;
 	av->fadeFrom = fadeMul;
 	ApplyVoiceVolume(av);
-	//optional intro: queued first and played once, the main buffer follows gaplessly
-	auto introIt = introName.empty() ? cache.end() : cache.find(introName);
-	if (introIt != cache.end())
-	{
-		XAUDIO2_BUFFER introBuffer = introIt->second->buffer;
-		introBuffer.LoopCount = 0;
-		introBuffer.Flags = 0; //the stream continues into the main buffer
-		introBuffer.pContext = cb; //non-null context marks "not the final buffer" for OnBufferEnd
-		pVoice->SubmitSourceBuffer(&introBuffer);
-	}
-	//play the sound
-	pVoice->SubmitSourceBuffer(&data->buffer);
-	if (startNow) pVoice->Start(0);
 
 	//save into list to control it easily
 	activeVoices.push_back(av);
@@ -197,7 +129,7 @@ void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
 		if (progress > 1.0f) progress = 1.0f;
 
 		for (auto av : activeVoices) {
-			if (av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
+			if (av->type == AudioType::MUSIC && !IsFinished(av)) {
 
 				if (av->group == fadingOutSound) {
 					av->fadeMul = av->fadeFrom * (1.0f - progress);
@@ -223,7 +155,7 @@ void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
 	//crossfade the stems of any playing stem set towards their active state
 	const float dt = deltaTime / 1000.0f;
 	for (auto av : activeVoices) {
-		if (av->stemIndex < 0 || av->pCallback->isFinished) continue;
+		if (av->stemIndex < 0 || IsFinished(av)) continue;
 		auto setIt = stemSets.find(av->group);
 		if (setIt == stemSets.end()) continue;
 		const StemSet& set = setIt->second;
@@ -238,10 +170,9 @@ void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
 
 	for (auto it = activeVoices.begin(); it != activeVoices.end(); )
 	{
-		if ((*it)->pCallback->isFinished) //finished sound should be destroyed
+		if (IsFinished(*it)) //finished sound should be destroyed
 		{
-			(*it)->pVoice->DestroyVoice();
-			delete (*it)->pCallback;
+			mixer.RemoveVoice((*it)->voice);
 			delete (*it);
 			it = activeVoices.erase(it);
 		}
@@ -256,10 +187,10 @@ void sdlgf::AudioManager::Stop(std::string name)
 {
 	for (auto av : activeVoices)
 	{
-		if ((av->name == name || av->group == name) && !av->pCallback->isFinished)
+		if ((av->name == name || av->group == name) && !IsFinished(av))
 		{
-			av->pVoice->Stop();
-			av->pCallback->isFinished = true;
+			mixer.Stop(av->voice);
+			av->stopped = true;
 		}
 	}
 }
@@ -268,36 +199,28 @@ void sdlgf::AudioManager::StopAll()
 {
 	for (auto av : activeVoices)
 	{
-		if (!av->pCallback->isFinished)
+		if (!IsFinished(av))
 		{
-			av->pVoice->Stop();
-			av->pCallback->isFinished = true;
+			mixer.Stop(av->voice);
+			av->stopped = true;
 		}
 	}
 }
 
 void sdlgf::AudioManager::Shutdown() {
-	//destroy playing sound
-	for (auto av : activeVoices)
-	{
-		av->pVoice->Stop();
-		av->pVoice->DestroyVoice();
-		delete av->pCallback;
-		delete av;
+	//closing the device first guarantees the audio thread is no longer inside the mixer
+	if (stream != nullptr) {
+		SDL_DestroyAudioStream(stream);
+		stream = nullptr;
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	}
+
+	//destroy playing sound
+	for (auto av : activeVoices) delete av;
 	activeVoices.clear();
+	mixer.Clear();
 	soundBanks.clear();
-
-	//clear the cache
-	for (auto& pair : cache) delete pair.second;
 	cache.clear();
-
-	//free what it need to be freed
-	if (pMasterVoice)
-		pMasterVoice->DestroyVoice();
-	if (pEngine)
-		pEngine->Release();
-	CoUninitialize();
 }
 
 void sdlgf::AudioManager::SetMasterVolume(float volume)
@@ -354,7 +277,7 @@ void sdlgf::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 	if (!activeVoices.empty()) {
 		bool isAlreadyPlaying = false;
 		for (auto av : activeVoices) {
-			if (av->group == name && av->type == AudioType::MUSIC && !av->pCallback->isFinished) {
+			if (av->group == name && av->type == AudioType::MUSIC && !IsFinished(av)) {
 				isAlreadyPlaying = true;
 				break;
 			}
@@ -372,14 +295,14 @@ void sdlgf::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 	fadingOutSound = "";
 	float loudest = -1.0f;
 	for (auto av : activeVoices) {
-		if (av->type == AudioType::MUSIC && !av->pCallback->isFinished && av->fadeMul > loudest) {
+		if (av->type == AudioType::MUSIC && !IsFinished(av) && av->fadeMul > loudest) {
 			loudest = av->fadeMul;
 			fadingOutSound = av->group;
 		}
 	}
 	//any other music left over from an interrupted fade is cut
 	for (auto av : activeVoices) {
-		if (av->type != AudioType::MUSIC || av->pCallback->isFinished) continue;
+		if (av->type != AudioType::MUSIC || IsFinished(av)) continue;
 		if (av->group == fadingOutSound) av->fadeFrom = av->fadeMul;
 		else Stop(av->group);
 	}
@@ -407,10 +330,10 @@ void sdlgf::AudioManager::PlayStemSet(std::string setName, float volume)
 		ApplyVoiceVolume(av);
 		started.push_back(av);
 	}
-	//start every stem in one operation set so they are sample-aligned
-	const UINT32 opSet = 1;
-	for (auto av : started) av->pVoice->Start(0, opSet);
-	if (pEngine) pEngine->CommitChanges(opSet);
+	//start every stem in the same mixer pass so they are sample-aligned
+	std::vector<Voice*> voices;
+	for (auto av : started) voices.push_back(av->voice);
+	mixer.StartTogether(voices);
 }
 
 void sdlgf::AudioManager::RegisterIntroLoop(std::string name, std::string introName, std::string loopName)

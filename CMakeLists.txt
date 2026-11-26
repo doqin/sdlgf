@@ -6,14 +6,13 @@ project(sdlgf
     LANGUAGES CXX
 )
 
-# Mid-port: window, input and rendering are SDL3 now, but audio is still XAudio2, so
-# the build is Windows-only until that is replaced; this guard goes away then.
+# Window, input, rendering, text and audio are SDL3 now, but the code has only ever been built
+# and tested on Windows (MSVC): the crash handler, the Win32 type stand-ins and the CI are
+# Windows-specific. Remove this guard when a Linux/macOS build has been tried.
 if(NOT WIN32)
     message(FATAL_ERROR
-        "sdlgf is mid-port: the code still depends on Win32/DirectX and only "
-        "builds on Windows for now.")
+        "sdlgf has only been built on Windows so far (see the comment above this check).")
 endif()
-enable_language(RC)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "MainMenu.h"
-#include "resource.h"
 #include "IconButton.h"
 #include "SettingsScene.h"
 #include "ThreadAlleyScene.h"
@@ -415,7 +414,7 @@ namespace Demo
 
 		auto audio = sdlgf::AudioManager::GetInstance();
 
-		audio->Load("bgm_sky", IDR_BGM_SKY);
+		audio->Load("bgm_sky", "assets/audio/sky-loop.wav");
 		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
 
 		//render one-off snapshots of the featured maps for the background pentagons

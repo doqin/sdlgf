@@ -2,7 +2,6 @@
 #include "MimicEnemy.h"
 #include "LocalizationManager.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 void Demo::MimicEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {

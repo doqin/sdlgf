@@ -10,7 +10,6 @@
 #include "DamageTextManager.h"
 #include "GameItems.h"
 #include "TransitionCommand.h"
-#include "resource.h"
 #include "TutorialWorldScene.h"
 #include "SecretPuzzleScene.h"
 #include "ThreadAlleyScene.h"
@@ -3616,30 +3615,30 @@ void Demo::IBattleScene::Init()
 
 	//Init BGM
 	auto audio = sdlgf::AudioManager::GetInstance();
-	audio->Load("battle_I", IDR_BGM_BATTLE_I);
-	audio->Load("battle_I_intro", IDR_BGM_BATTLE_I_INTRO);
-	audio->Load("battle_boss", IDR_BGM_BAT_BOSS);
+	audio->Load("battle_I", "assets/audio/battle_I.wav");
+	audio->Load("battle_I_intro", "assets/audio/battle_I_intro.wav");
+	audio->Load("battle_boss", "assets/audio/battle_boss.wav");
 
 	//intro plays once, then the main track loops
 	audio->RegisterIntroLoop("battle_bgm", "battle_I_intro", "battle_I");
 
 	//token sfx
-	audio->Load("token_collect1", IDR_TOKEN_COLLECT1);
-	audio->Load("token_collect2", IDR_TOKEN_COLLECT2);
-	audio->Load("token_collect3", IDR_TOKEN_COLLECT3);
-	audio->Load("token_collect4", IDR_TOKEN_COLLECT4);
-	audio->Load("token_collect5", IDR_TOKEN_COLLECT5);
-	audio->Load("token_collect6", IDR_TOKEN_COLLECT6);
+	audio->Load("token_collect1", "assets/audio/token-collect-01.wav");
+	audio->Load("token_collect2", "assets/audio/token-collect-02.wav");
+	audio->Load("token_collect3", "assets/audio/token-collect-03.wav");
+	audio->Load("token_collect4", "assets/audio/token-collect-04.wav");
+	audio->Load("token_collect5", "assets/audio/token-collect-05.wav");
+	audio->Load("token_collect6", "assets/audio/token-collect-06.wav");
 
 	audio->RegisterBank("token_collect", {
 		"token_collect1", "token_collect2", "token_collect3",
 		"token_collect4", "token_collect5", "token_collect6"
 		});
 
-	audio->Load("token_spawn1", IDR_TOKEN_SPAWN1);
-	audio->Load("token_spawn2", IDR_TOKEN_SPAWN2);
-	audio->Load("token_spawn3", IDR_TOKEN_SPAWN3);
-	audio->Load("token_spawn4", IDR_TOKEN_SPAWN4);
+	audio->Load("token_spawn1", "assets/audio/token-spawn-01.wav");
+	audio->Load("token_spawn2", "assets/audio/token-spawn-02.wav");
+	audio->Load("token_spawn3", "assets/audio/token-spawn-03.wav");
+	audio->Load("token_spawn4", "assets/audio/token-spawn-04.wav");
 
 	audio->RegisterBank("token_spawn", {
 		"token_spawn1", "token_spawn2", "token_spawn3", "token_spawn4"

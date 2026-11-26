@@ -2,7 +2,6 @@
 #include "WarlockEnemy.h"
 #include "LocalizationManager.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 void Demo::WarlockEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {

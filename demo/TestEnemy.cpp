@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "TestEnemy.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 void Demo::TestEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)

@@ -12,7 +12,6 @@
 #include "Game.h"
 #include <vector>
 #include <cmath>
-#include "resource.h"
 #include "PopupManager.h"
 #include "EncounterGenerator.h"
 #include "EnemyFactory.h"
@@ -336,8 +335,8 @@ void Demo::BossWorldScene::OnInit()
 	});
 
 	auto audio = sdlgf::AudioManager::GetInstance();
-	audio->Load("hack_fail", IDR_TERMINAL_DENIED);
-	audio->Load("hack_success", IDR_TERMINAL_GRANTED);
+	audio->Load("hack_fail", "assets/audio/access_denied.wav");
+	audio->Load("hack_success", "assets/audio/access_granted.wav");
 
 	gateTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	gateTexture->LoadTexture(L"assets/gate.png");

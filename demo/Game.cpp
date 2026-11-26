@@ -5,7 +5,6 @@
 #include "MainMenu.h"
 #include "SettingsScene.h"
 #include "AudioManager.h"
-#include "resource.h"
 #include <cwchar>
 #include <iterator>
 #include "SettingsManager.h"
@@ -21,42 +20,42 @@ void Demo::Game::Init()
 	audio->Init();
 
 	// Load sound effects
-	audio->Load("btn_hover", IDR_WAV_HOVER);
-	audio->Load("btn_click", IDR_WAV_CLICK);
-	audio->Load("open_inv", IDR_WAVE_OPEN_INV);
-	audio->Load("close_inv", IDR_WAVE_CLOSE_INV);
+	audio->Load("btn_hover", "assets/audio/button-hover.wav");
+	audio->Load("btn_click", "assets/audio/button-click.wav");
+	audio->Load("open_inv", "assets/audio/inventory_open.wav");
+	audio->Load("close_inv", "assets/audio/inventory_close.wav");
 
-	audio->Load("step_d1", IDR_STEP_D1);
-	audio->Load("step_d2", IDR_STEP_D2);
-	audio->Load("step_d3", IDR_STEP_D3);
-	audio->Load("step_d4", IDR_STEP_D4);
+	audio->Load("step_d1", "assets/audio/step_default1.wav");
+	audio->Load("step_d2", "assets/audio/step_default2.wav");
+	audio->Load("step_d3", "assets/audio/step_default3.wav");
+	audio->Load("step_d4", "assets/audio/step_default4.wav");
 
-	audio->Load("step_l1", IDR_STEP_L1);
-	audio->Load("step_l2", IDR_STEP_L2);
-	audio->Load("step_l3", IDR_STEP_L3);
-	audio->Load("step_l4", IDR_STEP_L4);
+	audio->Load("step_l1", "assets/audio/step_leaves1.wav");
+	audio->Load("step_l2", "assets/audio/step_leaves2.wav");
+	audio->Load("step_l3", "assets/audio/step_leaves3.wav");
+	audio->Load("step_l4", "assets/audio/step_leaves4.wav");
 
-	audio->Load("step_m1", IDR_STEP_M1);
-	audio->Load("step_m2", IDR_STEP_M2);
-	audio->Load("step_m3", IDR_STEP_M3);
-	audio->Load("step_m4", IDR_STEP_M4);
-	audio->Load("step_m5", IDR_STEP_M5);
+	audio->Load("step_m1", "assets/audio/step_metal1.wav");
+	audio->Load("step_m2", "assets/audio/step_metal2.wav");
+	audio->Load("step_m3", "assets/audio/step_metal3.wav");
+	audio->Load("step_m4", "assets/audio/step_metal4.wav");
+	audio->Load("step_m5", "assets/audio/step_metal5.wav");
 
-	audio->Load("step_dirt1", IDR_STEP_DIR1);
-	audio->Load("step_dirt2", IDR_STEP_DIR2);
-	audio->Load("step_dirt3", IDR_STEP_DIR3);
-	audio->Load("step_dirt4", IDR_STEP_DIR4);
-	audio->Load("step_dirt5", IDR_STEP_DIR5);
+	audio->Load("step_dirt1", "assets/audio/step_dirt1.wav");
+	audio->Load("step_dirt2", "assets/audio/step_dirt2.wav");
+	audio->Load("step_dirt3", "assets/audio/step_dirt3.wav");
+	audio->Load("step_dirt4", "assets/audio/step_dirt4.wav");
+	audio->Load("step_dirt5", "assets/audio/step_dirt5.wav");
 
-	audio->Load("step_concrete1", IDR_STEP_C1);
-	audio->Load("step_concrete2", IDR_STEP_C2);
-	audio->Load("step_concrete3", IDR_STEP_C3);
-	audio->Load("step_concrete4", IDR_STEP_C4);
+	audio->Load("step_concrete1", "assets/audio/step_concrete1.wav");
+	audio->Load("step_concrete2", "assets/audio/step_concrete2.wav");
+	audio->Load("step_concrete3", "assets/audio/step_concrete3.wav");
+	audio->Load("step_concrete4", "assets/audio/step_concrete4.wav");
 
-	audio->Load("step_vinyl1", IDR_STEP_V1);
-	audio->Load("step_vinyl2", IDR_STEP_V2);
-	audio->Load("step_vinyl3", IDR_STEP_V3);
-	audio->Load("step_vinyl4", IDR_STEP_V4);
+	audio->Load("step_vinyl1", "assets/audio/step_vinyl1.wav");
+	audio->Load("step_vinyl2", "assets/audio/step_vinyl2.wav");
+	audio->Load("step_vinyl3", "assets/audio/step_vinyl3.wav");
+	audio->Load("step_vinyl4", "assets/audio/step_vinyl4.wav");
 
 	audio->RegisterBank("step_default", { "step_d1", "step_d2", "step_d3", "step_d4" });
 	audio->RegisterBank("step_leaves", { "step_l1", "step_l2", "step_l3", "step_l4" });
@@ -65,98 +64,98 @@ void Demo::Game::Init()
 	audio->RegisterBank("step_concrete", { "step_concrete1", "step_concrete2", "step_concrete3", "step_concrete4" });
 	audio->RegisterBank("step_vinyl", { "step_vinyl1", "step_vinyl2", "step_vinyl3", "step_vinyl4" });
 
-	audio->Load("shop_buy", IDR_SHOP_BUY);
-	audio->Load("error", IDR_WAV_ERROR);
+	audio->Load("shop_buy", "assets/audio/buy_item.wav");
+	audio->Load("error", "assets/audio/error.wav");
 
-	audio->Load("card_draw1", IDR_CARD_DRAW1);
-	audio->Load("card_draw2", IDR_CARD_DRAW2);
-	audio->Load("card_draw3", IDR_CARD_DRAW3);
-	audio->Load("card_draw4", IDR_CARD_DRAW4);
-	audio->Load("card_draw5", IDR_CARD_DRAW5);
+	audio->Load("card_draw1", "assets/audio/card_draw1.wav");
+	audio->Load("card_draw2", "assets/audio/card_draw2.wav");
+	audio->Load("card_draw3", "assets/audio/card_draw3.wav");
+	audio->Load("card_draw4", "assets/audio/card_draw4.wav");
+	audio->Load("card_draw5", "assets/audio/card_draw5.wav");
 
 	audio->RegisterBank("card_draw", { "card_draw1", "card_draw2", "card_draw3", "card_draw4", "card_draw5" });
 
-	audio->Load("hurt1", IDR_HURT1);
-	audio->Load("hurt2", IDR_HURT2);
-	audio->Load("hurt3", IDR_HURT3);
-	audio->Load("hurt4", IDR_HURT4);
-	audio->Load("hurt5", IDR_HURT5);
+	audio->Load("hurt1", "assets/audio/hurt1.wav");
+	audio->Load("hurt2", "assets/audio/hurt2.wav");
+	audio->Load("hurt3", "assets/audio/hurt3.wav");
+	audio->Load("hurt4", "assets/audio/hurt4.wav");
+	audio->Load("hurt5", "assets/audio/hurt5.wav");
 
 	audio->RegisterBank("take_dmg", { "hurt1", "hurt2", "hurt3", "hurt4", "hurt5" });
 
-	audio->Load("player_dead", IDR_PLAYER_DEAD);
-	audio->Load("coin_gather", IDR_COIN_GATHER);
+	audio->Load("player_dead", "assets/audio/dead.wav");
+	audio->Load("coin_gather", "assets/audio/coins_gather.wav");
 
-	audio->Load("card_snap1", IDR_CARD_SNAP);
-	audio->Load("card_snap2", IDR_CARD_SNAP2);
-	audio->Load("card_snap3", IDR_CARD_SNAP3);
-	audio->Load("card_snap4", IDR_CARD_SNAP4);
+	audio->Load("card_snap1", "assets/audio/card_snap.wav");
+	audio->Load("card_snap2", "assets/audio/card_snap2.wav");
+	audio->Load("card_snap3", "assets/audio/card_snap3.wav");
+	audio->Load("card_snap4", "assets/audio/card_snap4.wav");
 	audio->RegisterBank("card_snap", { "card_snap1", "card_snap2", "card_snap3", "card_snap4" });
 
-	audio->Load("dialog_voice1", IDR_DIALOG_VOICE1);
-	audio->Load("dialog_voice2", IDR_DIALOG_VOICE2);
-	audio->Load("dialog_voice3", IDR_DIALOG_VOICE3);
-	audio->Load("dialog_voice4", IDR_DIALOG_VOICE4);
-	audio->Load("dialog_voice5", IDR_DIALOG_VOICE5);
+	audio->Load("dialog_voice1", "assets/audio/dialog_voice1.wav");
+	audio->Load("dialog_voice2", "assets/audio/dialog_voice2.wav");
+	audio->Load("dialog_voice3", "assets/audio/dialog_voice3.wav");
+	audio->Load("dialog_voice4", "assets/audio/dialog_voice4.wav");
+	audio->Load("dialog_voice5", "assets/audio/dialog_voice5.wav");
 	audio->RegisterBank("dialog_voice", { "dialog_voice1", "dialog_voice2", "dialog_voice3", "dialog_voice4", "dialog_voice5" });
 
-	audio->Load("bleep1", IDR_BLEEP1);
-	audio->Load("bleep2", IDR_BLEEP2);
-	audio->Load("bleep3", IDR_BLEEP3);
-	audio->Load("bleep4", IDR_BLEEP4);
-	audio->Load("bleep5", IDR_BLEEP5);
-	audio->Load("bleep6", IDR_BLEEP6);
-	audio->Load("bleep7", IDR_BLEEP7);
-	audio->Load("bleep8", IDR_BLEEP8);
-	audio->Load("bleep9", IDR_BLEEP9);
-	audio->Load("bleep10", IDR_BLEEP10);
-	audio->Load("bleep11", IDR_BLEEP11);
-	audio->Load("bleep12", IDR_BLEEP12);
-	audio->Load("bleep13", IDR_BLEEP13);
-	audio->Load("bleep14", IDR_BLEEP14);
-	audio->Load("bleep15", IDR_BLEEP15);
-	audio->Load("bleep16", IDR_BLEEP16);
-	audio->Load("bleep17", IDR_BLEEP17);
-	audio->Load("bleep18", IDR_BLEEP18);
-	audio->Load("bleep19", IDR_BLEEP19);
-	audio->Load("bleep20", IDR_BLEEP20);
-	audio->Load("bleep21", IDR_BLEEP21);
-	audio->Load("bleep22", IDR_BLEEP22);
-	audio->Load("bleep23", IDR_BLEEP23);
-	audio->Load("bleep24", IDR_BLEEP24);
-	audio->Load("bleep25", IDR_BLEEP25);
-	audio->Load("bleep26", IDR_BLEEP26);
-	audio->Load("bleep27", IDR_BLEEP27);
-	audio->Load("bleep28", IDR_BLEEP28);
-	audio->Load("bleep29", IDR_BLEEP29);
-	audio->Load("bleep30", IDR_BLEEP30);
+	audio->Load("bleep1", "assets/audio/bleeps/bleep001.wav");
+	audio->Load("bleep2", "assets/audio/bleeps/bleep002.wav");
+	audio->Load("bleep3", "assets/audio/bleeps/bleep003.wav");
+	audio->Load("bleep4", "assets/audio/bleeps/bleep004.wav");
+	audio->Load("bleep5", "assets/audio/bleeps/bleep005.wav");
+	audio->Load("bleep6", "assets/audio/bleeps/bleep006.wav");
+	audio->Load("bleep7", "assets/audio/bleeps/bleep007.wav");
+	audio->Load("bleep8", "assets/audio/bleeps/bleep008.wav");
+	audio->Load("bleep9", "assets/audio/bleeps/bleep009.wav");
+	audio->Load("bleep10", "assets/audio/bleeps/bleep010.wav");
+	audio->Load("bleep11", "assets/audio/bleeps/bleep011.wav");
+	audio->Load("bleep12", "assets/audio/bleeps/bleep012.wav");
+	audio->Load("bleep13", "assets/audio/bleeps/bleep013.wav");
+	audio->Load("bleep14", "assets/audio/bleeps/bleep014.wav");
+	audio->Load("bleep15", "assets/audio/bleeps/bleep015.wav");
+	audio->Load("bleep16", "assets/audio/bleeps/bleep016.wav");
+	audio->Load("bleep17", "assets/audio/bleeps/bleep017.wav");
+	audio->Load("bleep18", "assets/audio/bleeps/bleep018.wav");
+	audio->Load("bleep19", "assets/audio/bleeps/bleep019.wav");
+	audio->Load("bleep20", "assets/audio/bleeps/bleep020.wav");
+	audio->Load("bleep21", "assets/audio/bleeps/bleep021.wav");
+	audio->Load("bleep22", "assets/audio/bleeps/bleep022.wav");
+	audio->Load("bleep23", "assets/audio/bleeps/bleep023.wav");
+	audio->Load("bleep24", "assets/audio/bleeps/bleep024.wav");
+	audio->Load("bleep25", "assets/audio/bleeps/bleep025.wav");
+	audio->Load("bleep26", "assets/audio/bleeps/bleep026.wav");
+	audio->Load("bleep27", "assets/audio/bleeps/bleep027.wav");
+	audio->Load("bleep28", "assets/audio/bleeps/bleep028.wav");
+	audio->Load("bleep29", "assets/audio/bleeps/bleep029.wav");
+	audio->Load("bleep30", "assets/audio/bleeps/bleep030.wav");
 
-	audio->Load("power_up1", IDR_POWERUP1);
-	audio->Load("power_up2", IDR_POWERUP2);
-	audio->Load("power_up3", IDR_POWERUP3);
+	audio->Load("power_up1", "assets/audio/power_up1.wav");
+	audio->Load("power_up2", "assets/audio/power_up2.wav");
+	audio->Load("power_up3", "assets/audio/power_up3.wav");
 
 	audio->RegisterBank("power_up", { "power_up1", "power_up2", "power_up3" });
 
-	audio->Load("checkpoint", IDR_CHECKPOINT);
-	audio->Load("quest_active", IDR_QUEST_ACTIVE);
-	audio->Load("quest_completed", IDR_QUEST_COMPLETED);
-	audio->Load("projectile_spawn", IDR_SFX_PROJECTILE_SPAWN);
-	audio->Load("projectile_launch", IDR_SFX_PROJECTILE_LAUNCH);
+	audio->Load("checkpoint", "assets/audio/checkpoint.wav");
+	audio->Load("quest_active", "assets/audio/quest_active.wav");
+	audio->Load("quest_completed", "assets/audio/quest_completed.wav");
+	audio->Load("projectile_spawn", "assets/audio/projectile_spawn.wav");
+	audio->Load("projectile_launch", "assets/audio/projectile_launch.wav");
 
 	//load maps bgm
-	audio->Load("bgm_tutorial", IDR_BGM_TUTORIAL);
-	audio->Load("bgm_sky", IDR_BGM_SKY);
-	audio->Load("bgm_secret", IDR_BGM_SECRET);
-	audio->Load("bgm_boss", IDR_BGM_BOSS);
+	audio->Load("bgm_tutorial", "assets/audio/tutorial-loop.wav");
+	audio->Load("bgm_sky", "assets/audio/sky-loop.wav");
+	audio->Load("bgm_secret", "assets/audio/secret-loop.wav");
+	audio->Load("bgm_boss", "assets/audio/boss-loop.wav");
 
 	//boss world dynamic music: shared base plus one layer per island group
-	audio->Load("bossworld_base", IDR_BGM_BOSSWORLD_BASE);
-	audio->Load("bossworld_island12", IDR_BGM_BOSSWORLD_ISLAND12);
-	audio->Load("bossworld_island3", IDR_BGM_BOSSWORLD_ISLAND3);
-	audio->Load("bossworld_island4", IDR_BGM_BOSSWORLD_ISLAND4);
+	audio->Load("bossworld_base", "assets/audio/bossworld-base.wav");
+	audio->Load("bossworld_island12", "assets/audio/bossworld-island12.wav");
+	audio->Load("bossworld_island3", "assets/audio/bossworld-island3.wav");
+	audio->Load("bossworld_island4", "assets/audio/bossworld-island4.wav");
 	audio->RegisterStemSet("bgm_bossworld", { "bossworld_base", "bossworld_island12", "bossworld_island3", "bossworld_island4" });
 	audio->SetActiveStems("bgm_bossworld", { 0, 1 }, 0.0f);
-	audio->Load("bgm_arcade", IDR_BGM_ARCADE);
+	audio->Load("bgm_arcade", "assets/audio/arcade-music-loop.wav");
 
 	auto app = sdlgf::Application::GetInstance();
 	sdlgf::Font::AddFont(L"assets/arcade-among-2-r46pv.ttf");

@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "Player.h"
-#include "resource.h"
 #include "DamageTextManager.h"
 #include "SettingsManager.h"
 #include "IDraggable.h"

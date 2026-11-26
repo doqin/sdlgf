@@ -2,7 +2,6 @@
 #include "CreditsScene.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
-#include "resource.h"
 #include "InputManager.h"
 #include <algorithm>
 #include "Keys.h"

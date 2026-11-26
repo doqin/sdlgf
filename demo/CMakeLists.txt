@@ -1,6 +1,6 @@
 include(sources.cmake)
 
-add_executable(sdlgf_demo WIN32 ${SDLGF_DEMO_SOURCES} demo.rc)
+add_executable(sdlgf_demo WIN32 ${SDLGF_DEMO_SOURCES})
 set_target_properties(sdlgf_demo PROPERTIES OUTPUT_NAME demo)
 
 target_include_directories(sdlgf_demo PRIVATE

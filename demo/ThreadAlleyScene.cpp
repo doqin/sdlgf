@@ -10,7 +10,6 @@
 #include "MainMenu.h"
 #include "SaveGameState.h"
 #include "TransitionCommand.h"
-#include "resource.h"
 #include "PopupManager.h"
 #include "EncounterGenerator.h"
 #include "EnemyFactory.h"

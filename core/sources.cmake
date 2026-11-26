@@ -45,4 +45,5 @@ set(SDLGF_CORE_SOURCES
     Texture.cpp
     Utils.cpp
     AudioManager.cpp
+    AudioMixer.cpp
 )

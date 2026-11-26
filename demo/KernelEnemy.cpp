@@ -2,7 +2,6 @@
 #include "KernelEnemy.h"
 #include "LocalizationManager.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 const float PI = 3.14159265359f;

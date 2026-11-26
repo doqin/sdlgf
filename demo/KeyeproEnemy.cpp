@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "KeyeproEnemy.h"
 #include "LocalizationManager.h"
-#include "resource.h"
 #include "KeyeEnemy.h"
 #include "PopUpMessage.h"
 #include "RNG.h"

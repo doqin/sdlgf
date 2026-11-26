@@ -18,8 +18,6 @@ target_link_libraries(sdlgf_core PUBLIC
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf
     SDL3_image::SDL3_image
-    xaudio2 winmm
-    legacy_stdio_definitions
 )
 
 if(MSVC)

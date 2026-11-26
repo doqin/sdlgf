@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "SettingsScene.h"
-#include "resource.h"
 #include "IconButton.h"
 #include "SettingsManager.h"
 #include "MainFont.h"

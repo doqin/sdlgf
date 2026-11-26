@@ -1,6 +1,6 @@
 <#
  Assembles a fully portable folder + zip of the demo (no installs needed on the user's PC).
- Bundles: everything the CMake build puts next to demo.exe (demo.exe, D3DX9_43.dll, assets),
+ Bundles: everything the CMake build puts next to demo.exe (demo.exe, assets),
  plus app-local VC++ runtime DLLs.
  Run after: cmake -S . -B build -A x64 ; cmake --build build --config Release
 #>
@@ -17,7 +17,7 @@ if (-not (Test-Path (Join-Path $BuildDir "demo.exe"))) { throw "demo.exe not fou
 Remove-Item $OutDir -Recurse -Force -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $OutDir | Out-Null
 
-# 1. game exe, D3DX9_43.dll and assets, exactly as the CMake build lays them out
+# 1. game exe and assets, exactly as the CMake build lays them out
 #    (the game loads "assets/..." relative to the exe folder)
 Copy-Item (Join-Path $BuildDir "*") $OutDir -Recurse
 

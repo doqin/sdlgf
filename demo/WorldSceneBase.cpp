@@ -6,7 +6,6 @@
 #include "MainMenu.h"
 #include "SaveGameState.h"
 #include "TransitionCommand.h"
-#include "resource.h"
 #include "PopupManager.h"
 #include "QuestManager.h"
 #include "EnemyFactory.h"

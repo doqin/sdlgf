@@ -56,6 +56,11 @@ target_compile_definitions(sdlgf_render_test PRIVATE
 target_link_libraries(sdlgf_render_test PRIVATE sdlgf::core)
 add_test(NAME render COMMAND sdlgf_render_test "${CMAKE_BINARY_DIR}/render_test_out")
 
+# --- Audio: WAV decoding, software mixer, AudioManager on SDL's dummy audio driver --------------
+add_executable(sdlgf_audio_test audio_test.cpp)
+target_link_libraries(sdlgf_audio_test PRIVATE sdlgf::core)
+add_test(NAME audio COMMAND sdlgf_audio_test)
+
 # --- Application window + InputManager, headless (SDL "dummy" video driver) ---------
 add_executable(sdlgf_input_test input_test.cpp)
 target_link_libraries(sdlgf_input_test PRIVATE sdlgf::core)

@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "CupidEnemy.h"
 #include "LocalizationManager.h"
-#include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
 const float PI = 3.14159265359f;

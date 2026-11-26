@@ -2,7 +2,6 @@
 #include "DemonEyeEnemy.h"
 #include "LocalizationManager.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 void Demo::DemonEyeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)

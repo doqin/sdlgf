@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "PlayerHUD.h"
 #include "LocalizationManager.h"
-#include "resource.h"
 
 namespace {
 	constexpr float PANEL_MIN_SIZE = 150.0f;

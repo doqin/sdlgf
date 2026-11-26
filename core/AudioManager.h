@@ -1,47 +1,13 @@
-﻿#pragma once
-#include <windows.h>
-#include <xaudio2.h>
-#include <mmsystem.h>
-#include <vector>
-#include <string>
+#pragma once
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
+#include "AudioMixer.h"
+
+struct SDL_AudioStream;
 
 namespace sdlgf {
-	struct SoundBuffer
-	{
-		//using XAudio2 instead of directsound
-		WAVEFORMATEX wfx{}; //sample rate, channels,...
-		std::vector <BYTE> audioRawData; //raw data
-		XAUDIO2_BUFFER buffer; //audio buffering to avoid disk I/O latency
-
-		SoundBuffer()
-		{
-			ZeroMemory(&buffer, sizeof(XAUDIO2_BUFFER));
-		}
-	};
-
-	class VoiceCallback : public IXAudio2VoiceCallback
-	{
-	public:
-		bool isFinished = false; //finish voice flag
-
-		//play last sound byte will trigger XAudio2 to use this function
-		void STDMETHODCALLTYPE OnBufferEnd(void* pBufferContext) override
-		{
-			//a buffer with a context is an intro that is followed by more audio, not the end of the sound
-			if (pBufferContext) return;
-			isFinished = true;
-		}
-
-		//Interface must-have function
-		void STDMETHODCALLTYPE OnVoiceProcessingPassStart(UINT32) override {}
-		void STDMETHODCALLTYPE OnVoiceProcessingPassEnd() override {}
-		void STDMETHODCALLTYPE OnStreamEnd() override {}
-		void STDMETHODCALLTYPE OnBufferStart(void*) override {}
-		void STDMETHODCALLTYPE OnLoopEnd(void*) override {}
-		void STDMETHODCALLTYPE OnVoiceError(void*, HRESULT) override {}
-	};
-
 	enum class AudioType 
 	{
 		SFX,
@@ -51,8 +17,7 @@ namespace sdlgf {
 	struct ActiveVoice
 	{
 		std::string name; //identify
-		IXAudio2SourceVoice* pVoice;
-		VoiceCallback* pCallback;
+		Voice* voice;     //owned by the mixer
 		AudioType type;
 		float baseVolume; //save the volume level when play
 		std::string group; //music fades act on a whole group (a stem set's voices share its name)
@@ -61,6 +26,7 @@ namespace sdlgf {
 		int stemIndex = -1; //>= 0 when this voice is one stem of a stem set
 		float stemT = 1.0f; //0..1 progress of this stem towards active
 		float stemLevel = 1.0f; //equal-power curve of stemT
+		bool stopped = false; //Stop() was called
 	};
 
 	//dynamic music: every stem loops in sync, inactive ones sit at silence
@@ -71,20 +37,18 @@ namespace sdlgf {
 		float fadeTime = 2.0f;
 	};
 
-	//music that plays an intro once, then loops the main track (same wave format required)
+	//music that plays an intro once, then loops the main track
 	struct IntroLoop
 	{
 		std::string intro;
 		std::string loop;
 	};
 
-	bool LoadWavFromResource(int resourceID, SoundBuffer& out_audio);
-
 	class AudioManager {
 	private:
-		IXAudio2* pEngine = nullptr;              //control XAudio2
-		IXAudio2MasteringVoice* pMasterVoice = nullptr; //output
-		std::map<std::string, SoundBuffer*> cache; //cache will save the loaded file (avoid disk loading latency)
+		SDL_AudioStream* stream = nullptr;        //the output device; null when there is no audio device
+		Mixer mixer;                              //called from the audio thread, see Init
+		std::map<std::string, std::shared_ptr<const Sound>> cache; //cache will save the loaded files (avoid disk loading latency)
 		std::map<std::string, std::vector<std::string>> soundBanks;
 		std::vector<ActiveVoice*> activeVoices; //list of playing sound
 		std::map<std::string, StemSet> stemSets;
@@ -93,6 +57,8 @@ namespace sdlgf {
 		ActiveVoice* PlayInternal(std::string name, bool loop, float volume, AudioType type, std::string group, float fadeMul, bool startNow, const std::string& introName = "");
 		void PlayStemSet(std::string setName, float volume);
 		void ApplyVoiceVolume(ActiveVoice* av);
+		bool IsFinished(const ActiveVoice* av) const;
+		static void StreamCallback(void* userdata, SDL_AudioStream* stream, int additionalAmount, int totalAmount);
 
 		//settings manager will push values to these vars
 		float currentMasterVolume = 1.0f;
@@ -115,16 +81,22 @@ namespace sdlgf {
 	public:
 		static AudioManager* GetInstance();
 		static void DestroyInstance();
+		/// Opens the default audio device. Returns false when there is none (the game then runs
+		/// silently: every Play call does nothing).
 		bool Init();
 
-		//load sound from file to cache
-		void Load(std::string name, int resID);
+		/// Loads a WAV file (UTF-8 path relative to the working directory) into the cache under
+		/// `name`. Failures are logged and the name stays unknown, so Play(name) does nothing.
+		void Load(std::string name, const std::string& path);
+		bool HasSound(const std::string& name) const { return cache.count(name) != 0; }
 
 		void Play(std::string name, bool loop = false, float volume = 1.0f, AudioType type = AudioType::SFX);
 		void Update(unsigned long long deltaTime);
 		void Stop(std::string name);
 		void StopAll();
 		void Shutdown();
+		/// Voices currently playing or waiting to be cleaned up by Update (for tests).
+		size_t GetActiveVoiceCount() const { return activeVoices.size(); }
 
 		//set game volume
 		void SetMasterVolume(float volume);

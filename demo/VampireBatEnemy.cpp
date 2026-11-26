@@ -2,7 +2,6 @@
 #include "VampireBatEnemy.h"
 #include "LocalizationManager.h"
 #include "PopUpMessage.h"
-#include "resource.h"
 #include "RNG.h"
 
 void Demo::VampireBatEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {

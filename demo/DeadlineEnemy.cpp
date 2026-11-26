@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "DeadlineEnemy.h"
 #include "LocalizationManager.h"
-#include "resource.h"
 #include "RNG.h"
 #include "PopUpMessage.h"
 #include <algorithm>

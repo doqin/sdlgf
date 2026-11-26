@@ -85,7 +85,7 @@ namespace sdlgf {
 		/// silently: every Play call does nothing).
 		bool Init();
 
-		/// Loads a WAV file (UTF-8 path relative to the working directory) into the cache under
+		/// Loads a WAV or OGG file (UTF-8 path relative to the working directory) into the cache under
 		/// `name`. Failures are logged and the name stays unknown, so Play(name) does nothing.
 		void Load(std::string name, const std::string& path);
 		bool HasSound(const std::string& name) const { return cache.count(name) != 0; }

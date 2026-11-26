@@ -1,4 +1,4 @@
-// Tests for the audio path: WAV decoding/conversion, the software mixer (looping, intro -> loop,
+// Tests for the audio path: WAV and OGG decoding/conversion, the software mixer (looping, intro -> loop,
 // aligned stems, gain, stop), and AudioManager driving a real SDL audio device (the "dummy"
 // driver, which consumes audio in real time without making a sound).
 #include "AudioManager.h"
@@ -155,6 +155,74 @@ static void TestDecoding()
 		error.clear();
 		CHECK(LoadSoundFile(notWav, &error) == nullptr);
 		CHECK(!error.empty());
+	}
+}
+
+// Ogg Vorbis goes through SDL_mixer. The fixtures (tests/audio) are libvorbis q4 encodes of sine
+// waves: the mono one has amplitude 0.5 (peak ~16384); the stereo one was upmixed by ffmpeg with
+// its -3 dB pan law, so it peaks near 0.36 (~11700; ffmpeg's own volumedetect reports -8.9 dB).
+// A correct decode also keeps the length of the source.
+static void TestOgg()
+{
+	std::string error;
+	const auto peak = [](const Sound& sound) {
+		int p = 0;
+		for (std::int16_t v : sound.samples) p = (std::max)(p, std::abs(static_cast<int>(v)));
+		return p;
+	};
+
+	// 44.1 kHz mono, 0.5 s: resampled to the mix rate and widened to stereo
+	{
+		auto sound = LoadSoundFile(std::string(SDLGF_AUDIO_FIXTURE_DIR) + "/tone_44k_mono.ogg", &error);
+		CHECK(sound != nullptr);
+		if (sound) {
+			CHECK(Near(static_cast<int>(sound->Frames()), 24000, 48));
+			CHECK(sound->samples.size() % 2 == 0);
+			CHECK(Near(peak(*sound), 16384, 2500));
+			bool channelsMatch = true;
+			for (size_t i = 0; i + 1 < sound->samples.size(); i += 2) channelsMatch &= sound->samples[i] == sound->samples[i + 1];
+			CHECK(channelsMatch);
+		}
+	}
+	// 48 kHz stereo, 0.25 s: already in the mix format
+	{
+		auto sound = LoadSoundFile(std::string(SDLGF_AUDIO_FIXTURE_DIR) + "/tone_48k_stereo.ogg", &error);
+		CHECK(sound != nullptr);
+		if (sound) {
+			CHECK(Near(static_cast<int>(sound->Frames()), 12000, 48));
+			CHECK(Near(peak(*sound), 11700, 1500));
+		}
+	}
+	// the extension check is case-insensitive: .OGG must not fall into the WAV reader
+	{
+		const std::string upper = (g_dir / "TONE.OGG").string();
+		std::filesystem::copy_file(std::string(SDLGF_AUDIO_FIXTURE_DIR) + "/tone_48k_stereo.ogg", upper);
+		CHECK(LoadSoundFile(upper, &error) != nullptr);
+	}
+	// bad input is reported, not thrown
+	{
+		error.clear();
+		CHECK(LoadSoundFile((g_dir / "does-not-exist.ogg").string(), &error) == nullptr);
+		CHECK(!error.empty());
+		const std::string notOgg = (g_dir / "text.ogg").string();
+		std::ofstream(notOgg) << "this is not an ogg file";
+		error.clear();
+		CHECK(LoadSoundFile(notOgg, &error) == nullptr);
+		CHECK(!error.empty());
+	}
+	// a decoded OGG plays through the mixer like any other sound
+	{
+		auto sound = LoadSoundFile(std::string(SDLGF_AUDIO_FIXTURE_DIR) + "/tone_48k_stereo.ogg", &error);
+		CHECK(sound != nullptr);
+		if (sound) {
+			Mixer mixer;
+			mixer.AddVoice(sound, nullptr, false, 1.0f, true);
+			std::vector<float> out(static_cast<size_t>(sound->Frames()) * 2 + 2000);
+			mixer.Render(out.data(), static_cast<int>(out.size() / 2));
+			float maxSample = 0;
+			for (float v : out) maxSample = (std::max)(maxSample, std::fabs(v));
+			CHECK(maxSample > 0.3f && maxSample < 0.7f);
+		}
 	}
 }
 
@@ -343,6 +411,7 @@ int main()
 	std::filesystem::create_directories(g_dir);
 
 	TestDecoding();
+	TestOgg();
 	TestMixer();
 	TestManager();
 

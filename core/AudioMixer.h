@@ -1,5 +1,5 @@
 #pragma once
-// Software mixer behind AudioManager: decodes WAV files to one common format and mixes any number
+// Software mixer behind AudioManager: decodes WAV/OGG files to one common format and mixes any number
 // of voices into a float stereo buffer. It knows nothing about audio devices (AudioManager feeds
 // its output to SDL), so it can be tested by rendering to memory.
 //
@@ -22,8 +22,9 @@ namespace sdlgf {
 		std::size_t Frames() const { return samples.size() / 2; }
 	};
 
-	/// Reads a WAV file (8/16/24/32-bit PCM, float, ADPCM; any channel count SDL supports) and
-	/// converts it. Returns null and fills `error` on failure. `utf8Path` is relative to the
+	/// Reads an audio file and converts it. WAV (8/16/24/32-bit PCM, float, ADPCM; any channel
+	/// count SDL supports) is read by SDL; every other extension (Ogg Vorbis) is decoded by
+	/// SDL_mixer. Returns null and fills `error` on failure. `utf8Path` is relative to the
 	/// working directory.
 	std::shared_ptr<const Sound> LoadSoundFile(const std::string& utf8Path, std::string* error = nullptr);
 

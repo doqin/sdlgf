@@ -89,8 +89,39 @@ FetchContent_Declare(SDL3_image
     EXCLUDE_FROM_ALL
 )
 
+# --- SDL_mixer --------------------------------------------------------------
+# Used only to decode compressed audio (Ogg Vorbis) into memory through MIX_AudioDecoder; the
+# game keeps its own software mixer (core/AudioMixer) for playback, stems and gapless intros.
+# Only the built-in WAVE decoder and stb_vorbis are enabled: nothing vendored, no extra
+# libraries, so no git submodules are fetched and no shared libraries are loaded at runtime.
+set(SDLMIXER_VENDORED OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_DEPS_SHARED OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_AIFF OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_VOC OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_AU OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_FLAC OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_GME OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MOD OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MP3 OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_MIDI OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_OPUS OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_WAVPACK OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_VORBIS_STB ON CACHE BOOL "" FORCE)
+set(SDLMIXER_VORBIS_VORBISFILE OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_VORBIS_TREMOR OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_TESTS OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLMIXER_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(SDL3_mixer
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+    GIT_TAG        release-3.2.4
+    GIT_SHALLOW    TRUE
+    GIT_SUBMODULES ""
+    EXCLUDE_FROM_ALL
+)
+
 FetchContent_MakeAvailable(SDL3)
-FetchContent_MakeAvailable(SDL3_image SDL3_ttf tmxlite)
+FetchContent_MakeAvailable(SDL3_image SDL3_ttf SDL3_mixer tmxlite)
 
 # tmxlite only defines TMXLITE_STATIC for its own Debug/Release flags and does
 # not export it, so consumers would try to dllimport the symbols.

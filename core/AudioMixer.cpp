@@ -1,8 +1,61 @@
 #include "pch.h"
 #include "AudioMixer.h"
 #include <SDL3/SDL.h>
+#include <SDL3_mixer/SDL_mixer.h>
 #include <algorithm>
+#include <cctype>
 #include <cstring>
+
+namespace {
+	bool HasExtension(const std::string& path, const char* ext)
+	{
+		const size_t n = std::strlen(ext);
+		if (path.size() < n) return false;
+		for (size_t i = 0; i < n; ++i) {
+			const char c = path[path.size() - n + i];
+			if (std::tolower(static_cast<unsigned char>(c)) != ext[i]) return false;
+		}
+		return true;
+	}
+
+	// Decodes a whole file through SDL_mixer's decoder (Ogg Vorbis, ...) straight into the mixer's
+	// format, so no separate conversion pass is needed. The decoder resamples and remixes itself.
+	std::shared_ptr<const sdlgf::Sound> DecodeWithMixer(const std::string& utf8Path, std::string* error)
+	{
+		const auto fail = [&](const std::string& what) -> std::shared_ptr<const sdlgf::Sound> {
+			if (error) *error = what;
+			return nullptr;
+		};
+		// MIX_Init is reference counted and cheap to repeat; the matching MIX_Quit runs below.
+		if (!MIX_Init()) {
+			return fail(std::string("cannot initialise SDL_mixer: ") + SDL_GetError());
+		}
+		MIX_AudioDecoder* decoder = MIX_CreateAudioDecoder(utf8Path.c_str(), 0);
+		if (!decoder) {
+			const std::string reason = SDL_GetError();
+			MIX_Quit();
+			return fail("cannot read audio: " + reason);
+		}
+
+		const SDL_AudioSpec target{ SDL_AUDIO_S16, 2, sdlgf::kMixRate };
+		auto sound = std::make_shared<sdlgf::Sound>();
+		std::vector<std::int16_t> chunk(sdlgf::kMixRate); // 0.5 s of stereo per read
+		std::string failure;
+		for (;;) {
+			const int bytes = MIX_DecodeAudio(decoder, chunk.data(), static_cast<int>(chunk.size() * sizeof(std::int16_t)), &target);
+			if (bytes < 0) { failure = std::string("cannot decode audio: ") + SDL_GetError(); break; }
+			if (bytes == 0) break;
+			sound->samples.insert(sound->samples.end(), chunk.begin(), chunk.begin() + bytes / sizeof(std::int16_t));
+		}
+		MIX_DestroyAudioDecoder(decoder);
+		MIX_Quit();
+
+		if (!failure.empty()) return fail(failure);
+		if (sound->samples.empty()) return fail("audio file contains no samples");
+		sound->samples.shrink_to_fit();
+		return sound;
+	}
+}
 
 std::shared_ptr<const sdlgf::Sound> sdlgf::LoadSoundFile(const std::string& utf8Path, std::string* error)
 {
@@ -10,6 +63,11 @@ std::shared_ptr<const sdlgf::Sound> sdlgf::LoadSoundFile(const std::string& utf8
 		if (error) *error = what;
 		return nullptr;
 	};
+
+	// Anything that is not a WAV (.ogg, ...) is decoded by SDL_mixer.
+	if (!HasExtension(utf8Path, ".wav")) {
+		return DecodeWithMixer(utf8Path, error);
+	}
 
 	SDL_AudioSpec source{};
 	Uint8* data = nullptr;

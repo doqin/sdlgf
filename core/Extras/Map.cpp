@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Map.h"
 #include "../Utils.h"
+#include <cstring>
 #include <filesystem>
 #include <algorithm>
 #include <cctype>
@@ -164,12 +165,10 @@ void sdlgf::Map::Draw(const Camera& camera)
 	// D3D9 offsets pixel centers from texel centers by half a pixel
 	// ("Directly Mapping Texels to Pixels"). Shift the view by -0.5 so
 	// point-sampled UVs land inside texels instead of on their boundaries.
-	D3DXMATRIX matView;
-	D3DXMatrixTranslation(&matView, -0.5f, -0.5f, 0.0f);
-	D3DXMATRIX matProj;
-	D3DXMatrixOrthoOffCenterLH(
-		&matProj,
-		0.0f,
+	sdlgf::Mat4 matView;
+	matView = sdlgf::Mat4::Translation(-0.5f, -0.5f, 0.0f);
+	sdlgf::Mat4 matProj;
+	matProj = sdlgf::Mat4::OrthoOffCenterLH(0.0f,
 		static_cast<float>(screenWidth),
 		static_cast<float>(screenHeight),
 		0.0f,
@@ -177,9 +176,14 @@ void sdlgf::Map::Draw(const Camera& camera)
 		1.0f
 	);
 	auto matCamera = camera.GetTransformMatrix();
-	device->SetTransform(D3DTS_WORLD, &matCamera);
-	device->SetTransform(D3DTS_VIEW, &matView);
-	device->SetTransform(D3DTS_PROJECTION, &matProj);
+	// The legacy device takes D3DX matrices; Mat4 has the same layout. Removed with the D3D9 backend.
+	D3DXMATRIX d3dWorld, d3dView, d3dProj;
+	std::memcpy(&d3dWorld, &matCamera, sizeof(d3dWorld));
+	std::memcpy(&d3dView, &matView, sizeof(d3dView));
+	std::memcpy(&d3dProj, &matProj, sizeof(d3dProj));
+	device->SetTransform(D3DTS_WORLD, &d3dWorld);
+	device->SetTransform(D3DTS_VIEW, &d3dView);
+	device->SetTransform(D3DTS_PROJECTION, &d3dProj);
 
 	device->SetRenderState(D3DRS_ZENABLE, D3DZB_FALSE);
 	device->SetRenderState(D3DRS_LIGHTING, FALSE);

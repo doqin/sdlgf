@@ -41,7 +41,7 @@ namespace Demo
 				float startX = -vw / 2.0f;
 				float startY = -vh / 2.0f;
 				gd->SetAlphaBlending(true);
-				gd->DrawRectangle(*camera, startX, startY, static_cast<float>(vw), static_cast<float>(vh), D3DCOLOR_ARGB(a, 255, 255, 255), true);
+				gd->DrawRectangle(*camera, startX, startY, static_cast<float>(vw), static_cast<float>(vh), COLOR_ARGB(a, 255, 255, 255), true);
 				gd->SetAlphaBlending(false);
 			}
 		}
@@ -133,7 +133,7 @@ namespace Demo
 
 		gd->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF242234, true);
 
-		const D3DCOLOR polyColor = 0xFF9cdb43;
+		const sdlgf::Color polyColor = 0xFF9cdb43;
 		const int RING_COUNT = 3;
 		const float TWO_PI_OVER_5 = 2.0f * 3.14159f / 5.0f;
 
@@ -163,7 +163,7 @@ namespace Demo
 
 			int baseAlpha = 6 + static_cast<int>(sizeFactor) * 4;
 			int alpha = std::clamp(static_cast<int>(baseAlpha + std::sinf(timeAcc * 1.3f + i * 2.1f) * 8.0f), 3, 55);
-			D3DCOLOR fillerColor = D3DCOLOR_ARGB(alpha, 0x9c, 0xdb, 0x43);
+			sdlgf::Color fillerColor = COLOR_ARGB(alpha, 0x9c, 0xdb, 0x43);
 
 			float prevX = bx + std::cosf(angle) * glitchSize;
 			float prevY = by + std::sinf(angle) * glitchSize;
@@ -199,8 +199,8 @@ namespace Demo
 			float angle = timeAcc * 0.1f + i;
 			float size = baseSize + std::sinf(timeAcc * 2.0f + i) * 5.0f;
 
-			std::vector<D3DXVECTOR2> points;
-			std::vector<D3DXVECTOR2> uvs;
+			std::vector<sdlgf::Vec2> points;
+			std::vector<sdlgf::Vec2> uvs;
 			points.reserve(5);
 			uvs.reserve(5);
 
@@ -218,10 +218,10 @@ namespace Demo
 				float vAngle = angle + v * TWO_PI_OVER_5;
 				float vx = cx + std::cosf(vAngle) * size;
 				float vy = cy + std::sinf(vAngle) * size;
-				points.push_back(D3DXVECTOR2(vx, vy));
+				points.push_back(sdlgf::Vec2(vx, vy));
 
 				float canonicalAngle = v * TWO_PI_OVER_5; // no `angle` term - keeps the crop from spinning with the window
-				uvs.push_back(D3DXVECTOR2(
+				uvs.push_back(sdlgf::Vec2(
 					panU + std::cosf(canonicalAngle) * uvRadius,
 					panV + std::sinf(canonicalAngle) * uvRadius));
 			}
@@ -286,7 +286,7 @@ namespace Demo
 			btn->SetSpriteScale(2.f, 2.f);
 			btn->SetAutoResize(true, 16.f);
 			btn->SetTextScale(1.f, 1.f);
-			btn->SetTextColor(D3DCOLOR_XRGB(0, 0, 0));
+			btn->SetTextColor(COLOR_XRGB(0, 0, 0));
 			btn->SetTextOutline(false);
 			btn->SetDynamicTextGetter([english]() { return Tr(english); });
 			};

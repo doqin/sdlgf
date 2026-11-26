@@ -30,8 +30,8 @@ namespace Demo {
         //main menu music starts during the splash and carries into the menu
         sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 3.0f);
 
-        logo1Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
-        logo2Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
+        logo1Sprite->SetColor(COLOR_ARGB(0, 255, 255, 255));
+        logo2Sprite->SetColor(COLOR_ARGB(0, 255, 255, 255));
     }
 
     void SplashScene::Update(unsigned long long deltaTime) {
@@ -75,8 +75,8 @@ namespace Demo {
         int a1 = std::clamp(static_cast<int>(alpha1), 0, 255);
         int a2 = std::clamp(static_cast<int>(alpha2), 0, 255);
 
-        logo1Sprite->SetColor(D3DCOLOR_ARGB(a1, 255, 255, 255));
-        logo2Sprite->SetColor(D3DCOLOR_ARGB(a2, 255, 255, 255));
+        logo1Sprite->SetColor(COLOR_ARGB(a1, 255, 255, 255));
+        logo2Sprite->SetColor(COLOR_ARGB(a2, 255, 255, 255));
 
         camera.Update();
     }

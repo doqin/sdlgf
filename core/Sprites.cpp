@@ -3,7 +3,17 @@
 #include "GraphicsDevice.h"
 #include <DxErr.h>
 #include <d3dx9.h>
+#include <cstring>
 #include <stdexcept>
+
+// Legacy D3DX sprites take D3DX types; our Mat4/Vec3 have the same layout. Removed with the D3D9 backend.
+static_assert(sizeof(sdlgf::Mat4) == sizeof(D3DXMATRIX), "Mat4 must match D3DXMATRIX");
+static void SetSpriteTransform(ID3DXSprite* sprite, const sdlgf::Mat4& m)
+{
+	D3DXMATRIX d;
+	std::memcpy(&d, &m, sizeof(d));
+	sprite->SetTransform(&d);
+}
 
 static void ApplyPixelArtSamplerState(IDirect3DDevice9* device)
 {
@@ -63,7 +73,7 @@ void sdlgf::StaticSprite::Draw(const Camera& camera, unsigned long long deltaTim
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
 	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
-	p_sprite->SetTransform(&matFinal);
+	SetSpriteTransform(p_sprite, matFinal);
 	p_sprite->Draw(
 		texture->GetRawTexture(),
 		hasSrc ? &src : nullptr,
@@ -159,7 +169,7 @@ void sdlgf::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaT
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
 	D3DXVECTOR3 zeroPos(0.0f, 0.0f, 0.0f);
-	p_sprite->SetTransform(&matFinal);
+	SetSpriteTransform(p_sprite, matFinal);
 	p_sprite->Draw(
 		texture->GetRawTexture(),
 		p_src,
@@ -200,7 +210,7 @@ void sdlgf::FontSprite::SetText(const std::wstring& text)
 	this->text = text;
 }
 
-void sdlgf::FontSprite::SetColor(D3DCOLOR color)
+void sdlgf::FontSprite::SetColor(sdlgf::Color color)
 {
 	this->color = color;
 }
@@ -210,7 +220,7 @@ void sdlgf::FontSprite::SetBold(bool bold)
 	this->isBold = bold;
 }
 
-void sdlgf::FontSprite::SetOutline(bool outline, D3DCOLOR color, float thickness)
+void sdlgf::FontSprite::SetOutline(bool outline, sdlgf::Color color, float thickness)
 {
 	this->isOutline = outline;
 	this->outlineColor = color;
@@ -268,27 +278,27 @@ void sdlgf::FontSprite::Draw(const Camera& camera, unsigned long long deltaTime)
 				matOffsetWorld._41 += x;
 				matOffsetWorld._42 += y;
 				auto matOffsetFinal = matOffsetWorld * matCamera;
-				p_sprite->SetTransform(&matOffsetFinal);
+				SetSpriteTransform(p_sprite, matOffsetFinal);
 				font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, outlineColor);
 
 				if (isBold) {
 					matOffsetWorld._41 += 1.0f;
 					matOffsetFinal = matOffsetWorld * matCamera;
-					p_sprite->SetTransform(&matOffsetFinal);
+					SetSpriteTransform(p_sprite, matOffsetFinal);
 					font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, outlineColor);
 				}
 			}
 		}
 	}
 
-	p_sprite->SetTransform(&matFinal);
+	SetSpriteTransform(p_sprite, matFinal);
 	font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, color);
 
 	if (isBold) {
 		auto matOffsetWorld = matWorld;
 		matOffsetWorld._41 += 1.0f; // Offset X by 1
 		auto matOffsetFinal = matOffsetWorld * matCamera;
-		p_sprite->SetTransform(&matOffsetFinal);
+		SetSpriteTransform(p_sprite, matOffsetFinal);
 		font->GetRawFont()->DrawText(p_sprite, text.c_str(), -1, &rect, format, color);
 	}
 }
@@ -376,13 +386,13 @@ void sdlgf::NineSliceSprite::Draw(const Camera& camera, unsigned long long delta
 
 			RECT pSrc = { (LONG)srcX[col], (LONG)srcY[row], (LONG)srcX[col + 1], (LONG)srcY[row + 1] };
 
-			D3DXMATRIX matPatchScale, matPatchTrans;
-			D3DXMatrixScaling(&matPatchScale, dW / sW, dH / sH, 1.0f);
-			D3DXMatrixTranslation(&matPatchTrans, dstX[col], dstY[row], 0.0f);
+			sdlgf::Mat4 matPatchScale, matPatchTrans;
+			matPatchScale = sdlgf::Mat4::Scaling(dW / sW, dH / sH, 1.0f);
+			matPatchTrans = sdlgf::Mat4::Translation(dstX[col], dstY[row], 0.0f);
 
-			D3DXMATRIX matFinal = matPatchScale * matPatchTrans * matWorld * matCamera;
+			sdlgf::Mat4 matFinal = matPatchScale * matPatchTrans * matWorld * matCamera;
 
-			p_sprite->SetTransform(&matFinal);
+			SetSpriteTransform(p_sprite, matFinal);
 			p_sprite->Draw(texture->GetRawTexture(), &pSrc, nullptr, &zeroPos, color);
 		}
 	}

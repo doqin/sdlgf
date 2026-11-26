@@ -52,7 +52,7 @@ namespace sdlgf {
 		std::wstring text;
 		bool isBold = false;
 		bool isOutline = false;
-		D3DCOLOR outlineColor = 0xFF000000;
+		sdlgf::Color outlineColor = 0xFF000000;
 		float outlineThickness = 1.0f;
 		float maxWidth = 0.f;
 		void BuildTextRect(RECT& rect, DWORD& format, bool measure) const;
@@ -61,9 +61,9 @@ namespace sdlgf {
 		~FontSprite();
 		void SetText(std::wstring&& text);
 		void SetText(const std::wstring& text);
-		void SetColor(D3DCOLOR color);
+		void SetColor(sdlgf::Color color);
 		void SetBold(bool bold);
-		void SetOutline(bool outline, D3DCOLOR color = 0xFF000000, float thickness = 1.0f);
+		void SetOutline(bool outline, sdlgf::Color color = 0xFF000000, float thickness = 1.0f);
 		LONG GetWidth() const;
 		LONG GetHeight() const;
 		void Begin() override;

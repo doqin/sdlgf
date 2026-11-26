@@ -7,7 +7,7 @@
 namespace {
 	constexpr float ICON_ADVANCE = 36.f;   // 32px icon plus a gap
 	constexpr float TEXT_GAP = 4.f;
-	constexpr D3DCOLOR TURNS_COLOR = 0xFFE0E0E0;
+	constexpr sdlgf::Color TURNS_COLOR = 0xFFE0E0E0;
 	// The turns use the card font (tools/build_cardpixel_font.py), whose capitals are only 6 pixels
 	// tall - small next to the main font's, but still at the same pixel scale as the icons and the
 	// big number. Its cell is 9 design pixels, so size 18 is 2 screen pixels per design pixel, the
@@ -158,7 +158,7 @@ Demo::StatusRenderer::StatusRenderer(sdlgf::GraphicsDevice* graphicsDevice) : gr
 }
 
 float Demo::StatusRenderer::DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-	const std::wstring& text, float x, float y, D3DCOLOR color, float outline) {
+	const std::wstring& text, float x, float y, sdlgf::Color color, float outline) {
 	sprite.SetText(text);
 	sprite.SetColor(color);
 	sprite.SetOutline(true, 0xFF000000, outline);

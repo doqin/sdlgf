@@ -105,7 +105,7 @@ void Demo::SpamEnemy::PatternInboxFlood(float projDamage)
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, x, SPAWN_Y)
-						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetVelocity(BULLET_SPEED)
 						.SetDecayTime(4.f)
 						.SetDamage(projDamage)
@@ -137,7 +137,7 @@ void Demo::SpamEnemy::PatternChainLetter(float projDamage)
 			if (auto lock = this->player.lock()) {
 				for (int a = 0; a < ARMS; a++) {
 					float dirAngle = *angle + a * (SPAM_PI * 2.f / ARMS);
-					D3DXVECTOR2 dir(std::cos(dirAngle), std::sin(dirAngle));
+					sdlgf::Vec2 dir(std::cos(dirAngle), std::sin(dirAngle));
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, 0.f, 0.f)
@@ -177,7 +177,7 @@ void Demo::SpamEnemy::PatternMassMailer(float projDamage)
 				float baseAngle = std::atan2(py - spawnY, px - spawnX);
 				for (int i = 0; i < FAN; i++) {
 					float ang = baseAngle + (i - FAN / 2) * SPREAD;
-					D3DXVECTOR2 dir(std::cos(ang), std::sin(ang));
+					sdlgf::Vec2 dir(std::cos(ang), std::sin(ang));
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, spawnX, spawnY)
@@ -217,7 +217,7 @@ void Demo::SpamEnemy::PatternPopupAds(float projDamage)
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, spawnX, spawnY)
-						.SetTrajectory(D3DXVECTOR2(-std::cos(ang), -std::sin(ang)))
+						.SetTrajectory(sdlgf::Vec2(-std::cos(ang), -std::sin(ang)))
 						.SetHoming(TURN_SPEED)
 						.SetDelay(TELEGRAPH)
 						.SetVelocity(BULLET_SPEED)
@@ -242,9 +242,9 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 	constexpr float WARN_TIME = 1.3f;
 	constexpr float FIRE_TIME = 0.9f;
 	constexpr float BEAM_GAP = 1.7f;
-	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(150, 255, 170, 70);
-	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(120, 255, 120, 20);
-	constexpr D3DCOLOR CORE_COLOR = 0xFFFFFFFF;
+	constexpr sdlgf::Color WARN_COLOR = COLOR_ARGB(150, 255, 170, 70);
+	constexpr sdlgf::Color GLOW_COLOR = COLOR_ARGB(120, 255, 120, 20);
+	constexpr sdlgf::Color CORE_COLOR = 0xFFFFFFFF;
 
 	const int beams = RNG::Range(3, 4);
 	for (int b = 0; b < beams; b++) {
@@ -273,7 +273,7 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, RNG::Range(-120.f, 120.f), -260.f)
-						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetVelocity(150.f)
 						.SetDecayTime(4.f)
 						.SetDamage(projDamage)

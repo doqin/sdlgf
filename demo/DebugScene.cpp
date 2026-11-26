@@ -69,7 +69,7 @@ void Demo::DebugScene::Init()
 	uiButtons.push_back(btnTextExit);
 
 	// Test TextButton setter
-	btnTextExit->SetBackgroundColors(D3DXCOLOR(0.8f, 0, 0, 1), D3DXCOLOR(1, 0, 0, 1), D3DXCOLOR(0, 1, 0, 1))
+	btnTextExit->SetBackgroundColors(sdlgf::ColorF(0.8f, 0, 0, 1), sdlgf::ColorF(1, 0, 0, 1), sdlgf::ColorF(0, 1, 0, 1))
 		->SetTextColors(0xFFFFA500, 0xFF000000, 0xFFFFFFFF);
 
 	btnTextExit->Init(&camera);

@@ -28,7 +28,7 @@ namespace Demo
 
 		game->GetGraphicsDevice()->DrawRectangle(0.0f, 0.0f, sw, sh, 0xFF000000, true);
 
-		const D3DCOLOR polyColor = 0xFF9cdb43;
+		const sdlgf::Color polyColor = 0xFF9cdb43;
 
 		static float timeAcc = 0.0f;
 		timeAcc += static_cast<float>(deltaTime) * 0.001f;
@@ -64,7 +64,7 @@ namespace Demo
 		float sh = static_cast<float>(game->GetVirtualHeight());
 
 		gd->SetAlphaBlending(true);
-		gd->DrawRectangle(uiCamera, -sw / 2.f, -sh / 2.f, sw, sh, D3DCOLOR_ARGB(200, 0, 0, 0), true);
+		gd->DrawRectangle(uiCamera, -sw / 2.f, -sh / 2.f, sw, sh, COLOR_ARGB(200, 0, 0, 0), true);
 		gd->SetAlphaBlending(false);
 	}
 

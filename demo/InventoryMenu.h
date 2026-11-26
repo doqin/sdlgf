@@ -65,9 +65,9 @@ namespace Demo {
 		bool isItemsDirty = true;
 		std::wstring hoverDescription = L"";
 		std::wstring itemStatusText;
-		D3DCOLOR itemStatusColor = 0xFFFFFFFF;
+		sdlgf::Color itemStatusColor = 0xFFFFFFFF;
 		float itemStatusTimer = 0.0f;
-		void ShowItemStatus(const std::wstring& text, D3DCOLOR color);
+		void ShowItemStatus(const std::wstring& text, sdlgf::Color color);
 		void UseItemOutsideCombat(int itemID, const ConsumableItem& item);
 
 		// Tab Gear

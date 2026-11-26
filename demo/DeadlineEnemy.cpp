@@ -127,9 +127,9 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 	constexpr float BEAM_LENGTH = 300.f;
 	constexpr float WARN_TIME = 0.8f;
-	constexpr D3DCOLOR WARN_COLOR = D3DCOLOR_ARGB(160, 255, 60, 60);
-	constexpr D3DCOLOR GLOW_COLOR = D3DCOLOR_ARGB(120, 200, 20, 20);
-	constexpr D3DCOLOR CORE_COLOR = 0xFFFFFFFF;
+	constexpr sdlgf::Color WARN_COLOR = COLOR_ARGB(160, 255, 60, 60);
+	constexpr sdlgf::Color GLOW_COLOR = COLOR_ARGB(120, 200, 20, 20);
+	constexpr sdlgf::Color CORE_COLOR = 0xFFFFFFFF;
 
 	const int WAVE_SHOTS = 22;
 	const float SHOT_DELAY = 0.16f;
@@ -183,7 +183,7 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 
 					float spawnX = RNG::Range(range.minX, range.maxX);
 					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, -220.f)
-						.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetWave(45.f, 5.0f)
 						.SetVelocity(280.f)
 						.SetDecayTime(3.5f)

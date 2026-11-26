@@ -184,7 +184,7 @@ void Demo::PopUpMessage::Draw(unsigned long long deltaTime)
 		const int alpha = static_cast<int>((std::max)(0.f, (std::min)(255.f, line.alpha)));
 		if (alpha <= 0) continue;
 
-		const D3DCOLOR alphaBits = static_cast<D3DCOLOR>(alpha) << 24;
+		const sdlgf::Color alphaBits = static_cast<sdlgf::Color>(alpha) << 24;
 		fontSprite->SetText(line.displayText);
 		fontSprite->SetColor(alphaBits | (TEXT_COLOR & 0x00FFFFFF));
 		fontSprite->SetOutline(true, alphaBits, 2.f);

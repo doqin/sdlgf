@@ -112,7 +112,7 @@ void MainScene::Update(unsigned long long deltaTime)
 		camera.SetZoom(camera.GetZoom() + dScroll / static_cast<float>(1000));
 		rect->Update(deltaTime);
 	}
-	fontSpriteArial->Rotate(D3DXToRadian(0.1f * deltaTime));
+	fontSpriteArial->Rotate(sdlgf::ToRadians(0.1f * deltaTime));
 	// Using task flow because I can't create a parallel programming system better than them (T_T)
 	tf::Executor executor;
 	tf::Taskflow taskflow;

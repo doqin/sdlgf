@@ -32,7 +32,7 @@ namespace {
 		std::string name;
 	};
 
-	Canvas BeginCanvas(sdlgf::GraphicsDevice* gd, const std::string& name, UINT w, UINT h, D3DCOLOR clear)
+	Canvas BeginCanvas(sdlgf::GraphicsDevice* gd, const std::string& name, UINT w, UINT h, sdlgf::Color clear)
 	{
 		Canvas c{ gd, std::make_shared<sdlgf::Texture>(gd), w, h, name };
 		c.target->CreateRenderTarget(w, h);
@@ -90,7 +90,7 @@ namespace {
 	struct TextRow {
 		const char* id;
 		const wchar_t* text;
-		D3DCOLOR color = 0xFFFFFFFF;
+		sdlgf::Color color = 0xFFFFFFFF;
 		bool bold = false;
 		bool outline = false;
 		float outlineThickness = 1.0f;
@@ -167,7 +167,7 @@ namespace {
 		sdlgf::Camera cam = IdentityCamera(w, h);
 		const RECT tokenRect = { 0, 0, 12, 12 };
 
-		struct Item { float x, y, sx, sy, rot; D3DCOLOR color; bool flipH; };
+		struct Item { float x, y, sx, sy, rot; sdlgf::Color color; bool flipH; };
 		const std::vector<Item> items = {
 			{ 8,    8,    1,    1,   0.0f,  0xFFFFFFFF, false },  // integer position
 			{ 28.5f, 8.25f, 1,  1,   0.0f,  0xFFFFFFFF, false },  // fractional position
@@ -253,9 +253,9 @@ namespace {
 			const bool blend = pass == 1;
 			const float ox = blend ? 240.0f : 0.0f;
 			gd->SetAlphaBlending(blend);
-			const D3DCOLOR a = blend ? 0x80FF0000 : 0xFFFF0000;
-			const D3DCOLOR b = blend ? 0x8000FF00 : 0xFF00FF00;
-			const D3DCOLOR c = blend ? 0x800080FF : 0xFF0080FF;
+			const sdlgf::Color a = blend ? 0x80FF0000 : 0xFFFF0000;
+			const sdlgf::Color b = blend ? 0x8000FF00 : 0xFF00FF00;
+			const sdlgf::Color c = blend ? 0x800080FF : 0xFF0080FF;
 
 			// instant (screen-space) draws
 			gd->DrawLine(ox + 8, 8, ox + 100, 8, a);                    // horizontal 1px
@@ -285,11 +285,11 @@ namespace {
 
 		// textured polygon (as used for the map previews), alpha blending left in the last state
 		gd->SetAlphaBlending(true);
-		std::vector<D3DXVECTOR2> pts = { {20, 220}, {120, 210}, {150, 290}, {40, 300} };
-		std::vector<D3DXVECTOR2> uvs = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
+		std::vector<sdlgf::Vec2> pts = { {20, 220}, {120, 210}, {150, 290}, {40, 300} };
+		std::vector<sdlgf::Vec2> uvs = { {0, 0}, {1, 0}, {1, 1}, {0, 1} };
 		gd->DrawTexturedPolygon(pts, uvs, token.get());
-		std::vector<D3DXVECTOR2> pts2 = { {200, 220}, {300, 220}, {350, 270}, {250, 300}, {190, 270} };
-		std::vector<D3DXVECTOR2> uvs2 = { {0.1f, 0}, {0.9f, 0}, {1.4f, 0.5f}, {0.5f, 1.2f}, {-0.2f, 0.6f} };  // outside [0,1]: clamp
+		std::vector<sdlgf::Vec2> pts2 = { {200, 220}, {300, 220}, {350, 270}, {250, 300}, {190, 270} };
+		std::vector<sdlgf::Vec2> uvs2 = { {0.1f, 0}, {0.9f, 0}, {1.4f, 0.5f}, {0.5f, 1.2f}, {-0.2f, 0.6f} };  // outside [0,1]: clamp
 		gd->DrawTexturedPolygon(pts2, uvs2, token.get(), 0xFFFF8080);
 
 		// scissor test

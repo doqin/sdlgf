@@ -56,28 +56,28 @@ namespace Demo
 				{
 				case TextType::TakeDamage:
 					pool[i].displayText = L"-" + FormatDamageNumber(damageValue);
-					pool[i].displayColor = D3DCOLOR_ARGB(255, 255, 0, 0);
+					pool[i].displayColor = COLOR_ARGB(255, 255, 0, 0);
 					pool[i].velocityY = -0.05f;
 					pool[i].textSize = 1.0f;
 					break;
 
 				case TextType::Heal:
 					pool[i].displayText = L"+" + FormatDamageNumber(damageValue);
-					pool[i].displayColor = D3DCOLOR_ARGB(255, 0, 255, 0);
+					pool[i].displayColor = COLOR_ARGB(255, 0, 255, 0);
 					pool[i].velocityY = -0.02f;
 					pool[i].textSize = 1.0f;
 					break;
 
 				case TextType::Critical:
 					pool[i].displayText = L"-" + FormatDamageNumber(damageValue) + L"!";
-					pool[i].displayColor = D3DCOLOR_ARGB(255, 255, 165, 0);
+					pool[i].displayColor = COLOR_ARGB(255, 255, 165, 0);
 					pool[i].velocityY = -0.08f;
 					pool[i].textSize = 1.5f;
 					break;
 
 				case TextType::Dodge:
 					pool[i].displayText = Tr(L"Miss");
-					pool[i].displayColor = D3DCOLOR_ARGB(255, 200, 200, 200);
+					pool[i].displayColor = COLOR_ARGB(255, 200, 200, 200);
 					pool[i].velocityY = -0.04f;
 					pool[i].textSize = 0.8f;
 					break;
@@ -118,9 +118,9 @@ namespace Demo
 		{
 			if (pool[i].isActive)
 			{
-				D3DCOLOR addColor = pool[i].displayColor & 0x00FFFFFF;
+				sdlgf::Color addColor = pool[i].displayColor & 0x00FFFFFF;
 				int alpha = (int)pool[i].alpha << 24;
-				D3DCOLOR finalColor = addColor | alpha;
+				sdlgf::Color finalColor = addColor | alpha;
 
 				fontSprite->SetColor(finalColor);
 				fontSprite->SetOutline(true, alpha);

@@ -50,7 +50,7 @@ namespace Demo {
 		// Reveals another digit when wrongGuesses reaches the next HINT_DIGIT_AFTER step.
 		void UpdateHints();
 		// The hint rows to draw (text and colour), in order.
-		std::vector<std::pair<std::wstring, D3DCOLOR>> GetHintLines() const;
+		std::vector<std::pair<std::wstring, sdlgf::Color>> GetHintLines() const;
 
 		ScoredGuess Score(const std::wstring& guess) const;
 		void Submit();

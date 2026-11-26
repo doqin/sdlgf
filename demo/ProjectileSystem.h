@@ -50,7 +50,7 @@ namespace Demo {
 		float shardColliderHeight = 0.f;
 		// Common
 		ProjectileBehavior behavior = ProjectileBehavior::Straight;
-		D3DXVECTOR2 trajectory{ 1.f, 0.f };
+		sdlgf::Vec2 trajectory{ 1.f, 0.f };
 		float velocity = 0.f;
 		float delay = 0.f;
 		float decayTime = UNSPECIFIED;
@@ -137,7 +137,7 @@ namespace Demo {
 			x(x),
 			y(y) {}
 
-		ProjectileDesc& SetTrajectory(D3DXVECTOR2 trajectory);
+		ProjectileDesc& SetTrajectory(sdlgf::Vec2 trajectory);
 		ProjectileDesc& SetTargetPosition(float targetX, float targetY);
 		ProjectileDesc& SetVelocity(float velocity);
 		ProjectileDesc& SetDelay(float delay);
@@ -188,9 +188,9 @@ namespace Demo {
 		// Render
 		float warnThickness = 2.f;
 		float glowThickness = 16.f;
-		D3DCOLOR warnColor = D3DCOLOR_ARGB(150, 255, 100, 100);
-		D3DCOLOR glowColor = D3DCOLOR_ARGB(120, 255, 20, 147);
-		D3DCOLOR coreColor = 0xFFFFFFFF;
+		sdlgf::Color warnColor = COLOR_ARGB(150, 255, 100, 100);
+		sdlgf::Color glowColor = COLOR_ARGB(120, 255, 20, 147);
+		sdlgf::Color coreColor = 0xFFFFFFFF;
 		// Status effect on hit
 		bool hasStatusEffect = false;
 		bool randomizeStatusEffect = false;
@@ -213,7 +213,7 @@ namespace Demo {
 		LaserDesc& SetFireTime(float fireTime);
 		LaserDesc& SetDamage(float damage);
 		LaserDesc& SetGlowThickness(float glowThickness);
-		LaserDesc& SetColors(D3DCOLOR warnColor, D3DCOLOR glowColor, D3DCOLOR coreColor);
+		LaserDesc& SetColors(sdlgf::Color warnColor, sdlgf::Color glowColor, sdlgf::Color coreColor);
 		LaserDesc& SetStatusEffect(ModifierType type, float value, int duration);
 		LaserDesc& SetRandomStatusEffect(
 			ModifierType typeA, float valueA, int durationA,
@@ -240,7 +240,7 @@ namespace Demo {
 		};
 		struct MotionComponent {
 			ProjectileBehavior behavior;
-			D3DXVECTOR2 trajectory;
+			sdlgf::Vec2 trajectory;
 			float velocity;
 			float turnSpeed;
 			float amplitude, frequency;
@@ -273,8 +273,8 @@ namespace Demo {
 			bool statusApplied = false;
 			// Indicator colours, resolved once at spawn from the status effect(s). The alt colour
 			// only differs from the main one for a randomized effect, where the two alternate.
-			D3DCOLOR statusColor = 0xFFFFFFFF;
-			D3DCOLOR altStatusColor = 0xFFFFFFFF;
+			sdlgf::Color statusColor = 0xFFFFFFFF;
+			sdlgf::Color altStatusColor = 0xFFFFFFFF;
 		};
 		struct SplitComponent {
 			ProjectileSplitTrigger trigger;
@@ -305,7 +305,7 @@ namespace Demo {
 			float x, y, angle, length;
 			float thickness, warnThickness, glowThickness;
 			float delay, warnTime, fireTime, elapsed;
-			D3DCOLOR warnColor, glowColor, coreColor;
+			sdlgf::Color warnColor, glowColor, coreColor;
 		};
 
 		// One batch per unique (texture, frames, frame rate, origin); every

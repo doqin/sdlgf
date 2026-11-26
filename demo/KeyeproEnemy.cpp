@@ -231,7 +231,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 				projectiles.Spawn(
 					lock,
 					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, 320, startY)
-					.SetTrajectory(D3DXVECTOR2(-1, 0))
+					.SetTrajectory(sdlgf::Vec2(-1, 0))
 					.SetWave(50.f, 4.f)
 					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
@@ -255,7 +255,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 				projectiles.Spawn(
 					lock,
 					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, -320, startY)
-					.SetTrajectory(D3DXVECTOR2(1, 0))
+					.SetTrajectory(sdlgf::Vec2(1, 0))
 					.SetWave(50.f, 4.f)
 					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
@@ -431,7 +431,7 @@ void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 	for (int wave = 0; wave < WAVE_COUNT; wave++) {
 		for (int i = 0; i < BULLET_COUNT; i++) {
 			float angle = BASE_ANGLE - SPREAD_ANGLE / 2 + ANGLE_INCREMENT * i;
-			D3DXVECTOR2 dir{ std::cos(angle), std::sin(angle) };
+			sdlgf::Vec2 dir{ std::cos(angle), std::sin(angle) };
 			float jitterAngle = RNG::Range(0.f, 360.f) * (3.14159265f / 180.f);
 			float jitterDist = std::sqrt(RNG::Range(0.f, 1.f)) * JITTER_RADIUS;
 			float jitterX = std::cos(jitterAngle) * jitterDist;

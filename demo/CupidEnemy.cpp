@@ -116,7 +116,7 @@ void Demo::CupidEnemy::PatternHeartWave(float projDamage)
 
 		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BULLET_SPEED, START_X, START_Y, DECAY_TIME, currentAngle](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
-				D3DXVECTOR2 dir(std::cos(currentAngle), std::sin(currentAngle));
+				sdlgf::Vec2 dir(std::cos(currentAngle), std::sin(currentAngle));
 
 				projectiles.Spawn(
 					lock,
@@ -158,7 +158,7 @@ void Demo::CupidEnemy::PatternHomingArrow(float projDamage)
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(arrowTexture.get(), 8, 8, 16, 16, finalX, finalY)
-						.SetTrajectory(D3DXVECTOR2(0, 1))
+						.SetTrajectory(sdlgf::Vec2(0, 1))
 						.SetHoming(TURN_SPEED)
 						.SetDelay(0.f)
 						.SetDecayTime(3.f)
@@ -201,7 +201,7 @@ void Demo::CupidEnemy::PatternHeartNova(float projDamage)
 
 					for (int i = 0; i < BULLET_PER_ARC; i++) {
 						float currentAngle = startAngle + i * angleStep + angleOffset + *angleShift;
-						D3DXVECTOR2 dir(std::cos(currentAngle), std::sin(currentAngle));
+						sdlgf::Vec2 dir(std::cos(currentAngle), std::sin(currentAngle));
 
 						projectiles.Spawn(
 							lock,

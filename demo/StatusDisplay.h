@@ -18,7 +18,7 @@ namespace Demo {
 		RECT iconRect{ 0, 0, 0, 0 };
 		bool hasStrength = false;
 		int strength = 0;
-		D3DCOLOR color = 0xFFFFFFFF;
+		sdlgf::Color color = 0xFFFFFFFF;
 		int duration = 0;
 
 		// "Spark (2 turns remaining)" over the description.
@@ -52,6 +52,6 @@ namespace Demo {
 		std::shared_ptr<sdlgf::FontSprite> smallSprite;
 
 		float DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-			const std::wstring& text, float x, float y, D3DCOLOR color, float outline);
+			const std::wstring& text, float x, float y, sdlgf::Color color, float outline);
 	};
 }

@@ -7,12 +7,12 @@
 #include <array>
 
 namespace {
-	constexpr D3DCOLOR COLOR_CORRECT = 0xFF55FF55;
-	constexpr D3DCOLOR COLOR_MISPLACED = 0xFFFFD700;
-	constexpr D3DCOLOR COLOR_ABSENT = 0xFF808080;
-	constexpr D3DCOLOR COLOR_PENDING = 0xFFFFFFFF;
-	constexpr D3DCOLOR PANEL_BG = 0xEE141410;
-	constexpr D3DCOLOR PANEL_BORDER = 0xFF55FF55;
+	constexpr sdlgf::Color COLOR_CORRECT = 0xFF55FF55;
+	constexpr sdlgf::Color COLOR_MISPLACED = 0xFFFFD700;
+	constexpr sdlgf::Color COLOR_ABSENT = 0xFF808080;
+	constexpr sdlgf::Color COLOR_PENDING = 0xFFFFFFFF;
+	constexpr sdlgf::Color PANEL_BG = 0xEE141410;
+	constexpr sdlgf::Color PANEL_BORDER = 0xFF55FF55;
 
 	constexpr float PANEL_W = 300.0f;
 	constexpr float ROW_H = 26.0f;
@@ -132,9 +132,9 @@ namespace Demo {
 		}
 	}
 
-	std::vector<std::pair<std::wstring, D3DCOLOR>> PasswordMenu::GetHintLines() const
+	std::vector<std::pair<std::wstring, sdlgf::Color>> PasswordMenu::GetHintLines() const
 	{
-		std::vector<std::pair<std::wstring, D3DCOLOR>> lines;
+		std::vector<std::pair<std::wstring, sdlgf::Color>> lines;
 		for (int pos : revealedPositions) {
 			lines.push_back({ Tr(L"HINT: digit ") + std::to_wstring(pos + 1) + Tr(L" is ") + std::wstring(1, password[pos]),
 				COLOR_PENDING });
@@ -197,7 +197,7 @@ namespace Demo {
 		float panelY = -panelH / 2.0f;
 
 		gd->SetAlphaBlending(true);
-		gd->DrawRectangle(*uiCamera, -sw / 2.0f, -sh / 2.0f, sw, sh, D3DCOLOR_ARGB(165, 0, 0, 0), true);
+		gd->DrawRectangle(*uiCamera, -sw / 2.0f, -sh / 2.0f, sw, sh, COLOR_ARGB(165, 0, 0, 0), true);
 		gd->DrawRectangle(*uiCamera, panelX, panelY, PANEL_W, panelH, PANEL_BG, true);
 		gd->DrawRectangle(*uiCamera, panelX, panelY, PANEL_W, panelH, PANEL_BORDER, false);
 		gd->SetAlphaBlending(false);
@@ -212,7 +212,7 @@ namespace Demo {
 			Tr(L"YELLOW: wrong place"),
 			Tr(L"GREY: not in the code"),
 		};
-		const D3DCOLOR legendColor[] = { COLOR_PENDING, COLOR_CORRECT, COLOR_MISPLACED, COLOR_ABSENT };
+		const sdlgf::Color legendColor[] = { COLOR_PENDING, COLOR_CORRECT, COLOR_MISPLACED, COLOR_ABSENT };
 		const float legendX = panelX + PANEL_W + LEGEND_GAP;
 		const float legendY = panelY;
 		float legendW = 0.0f;
@@ -237,7 +237,7 @@ namespace Demo {
 		fontSprite->Begin();
 		fontSprite->SetOutline(true, 0xFF000000, 2.f);
 
-		auto drawCentered = [&](const std::wstring& text, float y, D3DCOLOR color, float scale) {
+		auto drawCentered = [&](const std::wstring& text, float y, sdlgf::Color color, float scale) {
 			fontSprite->SetScale(scale, scale);
 			fontSprite->SetColor(color);
 			fontSprite->SetText(text);
@@ -255,7 +255,7 @@ namespace Demo {
 			float startX = -(CODE_LENGTH - 1) * DIGIT_SPACING / 2.0f;
 			fontSprite->SetScale(1.2f, 1.2f);
 			for (int i = 0; i < CODE_LENGTH; i++) {
-				D3DCOLOR color = COLOR_ABSENT;
+				sdlgf::Color color = COLOR_ABSENT;
 				if (row.states[i] == DigitState::Correct) color = COLOR_CORRECT;
 				else if (row.states[i] == DigitState::Misplaced) color = COLOR_MISPLACED;
 

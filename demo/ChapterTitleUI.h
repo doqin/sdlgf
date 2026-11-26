@@ -17,14 +17,14 @@ namespace Demo {
 
 		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
-		D3DCOLOR titleColor;
-		D3DCOLOR subColor;
-		D3DCOLOR shadowColor;
+		sdlgf::Color titleColor;
+		sdlgf::Color subColor;
+		sdlgf::Color shadowColor;
 
 	public:
 		ChapterTitleUI(std::shared_ptr<sdlgf::Font> font);
 
-		void Show(const std::wstring& title, const std::wstring& sub, float duration, D3DCOLOR tColor, D3DCOLOR sColor, D3DCOLOR shColor);
+		void Show(const std::wstring& title, const std::wstring& sub, float duration, sdlgf::Color tColor, sdlgf::Color sColor, sdlgf::Color shColor);
 		void Update(unsigned long long deltaTime);
 
 		void Draw(sdlgf::Camera* uiCam, unsigned long long deltaTime);

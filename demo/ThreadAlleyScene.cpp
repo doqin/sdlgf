@@ -572,7 +572,7 @@ void Demo::ThreadAlleyScene::DrawCheckerBackground(sdlgf::GraphicsDevice* gd, un
 			}
 
 			bool isColor1 = (col + row) % 2 == 0;
-			D3DCOLOR baseColor = isColor1 ? bgBaseColor1 : bgBaseColor2;
+			sdlgf::Color baseColor = isColor1 ? bgBaseColor1 : bgBaseColor2;
 
 			if (blinkFactor > 0.0f) {
 				int a = (baseColor >> 24) & 0xFF;
@@ -580,7 +580,7 @@ void Demo::ThreadAlleyScene::DrawCheckerBackground(sdlgf::GraphicsDevice* gd, un
 				int g = ((baseColor >> 8) & 0xFF) + (int)((((bgBlinkColor >> 8) & 0xFF) - ((baseColor >> 8) & 0xFF)) * blinkFactor);
 				int b = (baseColor & 0xFF) + (int)((((bgBlinkColor & 0xFF) - (baseColor & 0xFF)) * blinkFactor));
 
-				baseColor = D3DCOLOR_ARGB(a, r, g, b);
+				baseColor = COLOR_ARGB(a, r, g, b);
 			}
 
 			gd->DrawRectangle(uiCamera, x, y, SQUARE_SIZE, SQUARE_SIZE, baseColor, true);

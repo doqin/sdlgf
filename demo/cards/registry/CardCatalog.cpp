@@ -36,7 +36,7 @@ namespace Demo::CardCatalog {
 		return RarityForPrice(GetPrice(cardSaveID));
 	}
 
-	D3DCOLOR RarityColor(Rarity rarity) {
+	sdlgf::Color RarityColor(Rarity rarity) {
 		switch (rarity) {
 		case Rarity::Common:    return 0xFFB8B8B8; // grey
 		case Rarity::Uncommon:  return 0xFF5CD65C; // green

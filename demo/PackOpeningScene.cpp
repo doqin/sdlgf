@@ -21,9 +21,9 @@ namespace Demo {
 		constexpr float FADE_MS = 260.f;
 		constexpr int   BURST_COUNT = 48;
 
-		BYTE ChR(D3DCOLOR c) { return (c >> 16) & 0xFF; }
-		BYTE ChG(D3DCOLOR c) { return (c >> 8) & 0xFF; }
-		BYTE ChB(D3DCOLOR c) { return c & 0xFF; }
+		BYTE ChR(sdlgf::Color c) { return (c >> 16) & 0xFF; }
+		BYTE ChG(sdlgf::Color c) { return (c >> 8) & 0xFF; }
+		BYTE ChB(sdlgf::Color c) { return c & 0xFF; }
 	}
 
 	PackOpeningScene::PackOpeningScene(Game* game, int screenWidth, int screenHeight, std::vector<std::string> cardIds)
@@ -166,7 +166,7 @@ namespace Demo {
 		if (FAILED(gd->BeginDraw())) return;
 
 		gd->SetAlphaBlending(true);
-		gd->DrawRectangle(uiCamera, -vw / 2.f, -vh / 2.f, vw, vh, D3DCOLOR_ARGB(210, 0, 0, 0), true);
+		gd->DrawRectangle(uiCamera, -vw / 2.f, -vh / 2.f, vw, vh, COLOR_ARGB(210, 0, 0, 0), true);
 
 		if (state == State::Opening) {
 			packSprite->SetPosition(0.f, 0.f);
@@ -184,23 +184,23 @@ namespace Demo {
 			const float fw = face.valid ? cardFrame->MeasureWidth(face.name, face.inputs, CARD_SCALE) : 0.f;
 			const float fh = face.valid ? CardFrame::Height(CARD_SCALE) : 0.f;
 			const BYTE a = (BYTE)((std::clamp)(cardAlpha, 0.f, 1.f) * 255.f);
-			const D3DCOLOR rc = CardCatalog::RarityColor(rarities[idx]);
+			const sdlgf::Color rc = CardCatalog::RarityColor(rarities[idx]);
 
 			if (fw > 0.f && fh > 0.f) {
 				const float gw = fw + 48.f;
 				const float gh = fh + 48.f;
 				gd->DrawRectangle(uiCamera, -gw / 2.f, -gh / 2.f - 10.f, gw, gh,
-					D3DCOLOR_ARGB((BYTE)(a * 0.45f), ChR(rc), ChG(rc), ChB(rc)), true);
+					COLOR_ARGB((BYTE)(a * 0.45f), ChR(rc), ChG(rc), ChB(rc)), true);
 
 				cardFrame->Draw(uiCamera, deltaTime, -fw / 2.f, -10.f - fh / 2.f, face.cardTemplate, face.name,
-					face.inputs, face.cost, CARD_SCALE, D3DCOLOR_ARGB(a, 255, 255, 255));
+					face.inputs, face.cost, CARD_SCALE, COLOR_ARGB(a, 255, 255, 255));
 			}
 
 			fontSprite->Begin();
 
 			fontSprite->SetScale(1.2f, 1.2f);
 			fontSprite->SetOutline(true, 0xFF000000, 2.f);
-			fontSprite->SetColor(D3DCOLOR_ARGB(a, ChR(rc), ChG(rc), ChB(rc)));
+			fontSprite->SetColor(COLOR_ARGB(a, ChR(rc), ChG(rc), ChB(rc)));
 			fontSprite->SetText(CardCatalog::RarityName(rarities[idx]));
 			const float labelW = fontSprite->GetWidth() * 1.2f;
 			fontSprite->SetPosition(-labelW / 2.f, fh / 2.f + 8.f);

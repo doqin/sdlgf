@@ -20,18 +20,18 @@ struct TexVertex {
 };
 #define D3DFVF_TEXVERTEX (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 
-static D3DXVECTOR2 TransformPoint(const D3DXMATRIX& matrix, float x, float y)
+static sdlgf::Vec2 TransformPoint(const sdlgf::Mat4& matrix, float x, float y)
 {
-	D3DXVECTOR4 v(x, y, 0.0f, 1.0f);
-	D3DXVec4Transform(&v, &v, &matrix);
+	sdlgf::Vec4 v(x, y, 0.0f, 1.0f);
+	v = sdlgf::Transform(v, matrix);
 	if (v.w != 0.0f) {
 		v.x /= v.w;
 		v.y /= v.w;
 	}
-	return D3DXVECTOR2(v.x, v.y);
+	return sdlgf::Vec2(v.x, v.y);
 }
 
-static D3DXVECTOR2 TransformRectanglePoint(
+static sdlgf::Vec2 TransformRectanglePoint(
 	float x,
 	float y,
 	float localX,
@@ -49,7 +49,7 @@ static D3DXVECTOR2 TransformRectanglePoint(
 	float s = std::sin(rotation);
 	float rx = px * c - py * s;
 	float ry = px * s + py * c;
-	return D3DXVECTOR2(x + rx, y + ry);
+	return sdlgf::Vec2(x + rx, y + ry);
 }
 
 sdlgf::GraphicsDevice::GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer) : d3ddev(d3ddev), backbuffer(backbuffer)
@@ -85,14 +85,14 @@ HRESULT sdlgf::GraphicsDevice::BeginDraw()
 	return d3ddev->BeginScene();
 }
 
-HRESULT sdlgf::GraphicsDevice::Clear(D3DXCOLOR color)
+HRESULT sdlgf::GraphicsDevice::Clear(sdlgf::ColorF color)
 {
 	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
 }
 
 HRESULT sdlgf::GraphicsDevice::Clear()
 {
-	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, COLOR_XRGB(0, 0, 0), 1.0f, 0);
 }
 
 void sdlgf::GraphicsDevice::RegisterVolatileResource(IDeviceLostAware* resource)
@@ -170,7 +170,7 @@ void sdlgf::GraphicsDevice::ResetVirtualTransform()
 	virtualOffsetY = 0.0f;
 }
 
-void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness)
+void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
 {
 	DrawLineInternal(
 		x1 * virtualScale + virtualOffsetX,
@@ -182,7 +182,7 @@ void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, D3D
 	);
 }
 
-void sdlgf::GraphicsDevice::DrawLineInternal(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness)
+void sdlgf::GraphicsDevice::DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
 {
 	if (thickness <= 1.0f) {
 		Vertex vertices[] = {
@@ -221,7 +221,7 @@ void sdlgf::GraphicsDevice::DrawLineInternal(float x1, float y1, float x2, float
 	}
 }
 
-void sdlgf::GraphicsDevice::DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness)
+void sdlgf::GraphicsDevice::DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
 {
 	auto matCamera = camera.GetTransformMatrix();
 	auto p1 = TransformPoint(matCamera, x1, y1);
@@ -229,17 +229,17 @@ void sdlgf::GraphicsDevice::DrawLine(const sdlgf::Camera& camera, float x1, floa
 	DrawLineInternal(p1.x, p1.y, p2.x, p2.y, color, thickness);
 }
 
-void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	DrawRectangle(x, y, width, height, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, color, isFilled);
 }
 
-void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	DrawRectangle(camera, x, y, width, height, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, color, isFilled);
 }
 
-void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
 	auto p0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
 	auto p1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
@@ -267,7 +267,7 @@ void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float h
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 }
 
-void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
 	auto matCamera = camera.GetTransformMatrix();
 
@@ -296,17 +296,17 @@ void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, 
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
 }
 
-void sdlgf::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	DrawEllipse(centerX, centerY, width, height, 0.0f, 1.0f, 1.0f, width * 0.5f, height * 0.5f, color, isFilled);
 }
 
-void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float centerX, float centerY, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	DrawEllipse(camera, centerX, centerY, width, height, 0.0f, 1.0f, 1.0f, width * 0.5f, height * 0.5f, color, isFilled);
 }
 
-void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
 	const int SAMPLES = 36;
 	std::vector<Vertex> vertices;
@@ -321,7 +321,7 @@ void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float hei
 		vertices.push_back({ .x = c.x * virtualScale + virtualOffsetX, .y = c.y * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color });
 	}
 	for (int i = 0; i <= SAMPLES; ++i) {
-		float theta = i * (2.0f * D3DX_PI / SAMPLES);
+		float theta = i * (2.0f * sdlgf::Pi / SAMPLES);
 		float lx = cx + std::cos(theta) * rx;
 		float ly = cy + std::sin(theta) * ry;
 		auto p = TransformRectanglePoint(x, y, lx, ly, rotation, scaleX, scaleY, offsetX, offsetY);
@@ -338,7 +338,7 @@ void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float hei
 	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
 }
 
-void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
 	const int SAMPLES = 36;
 	auto matCamera = camera.GetTransformMatrix();
@@ -356,7 +356,7 @@ void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, fl
 		vertices.push_back({ .x = c.x, .y = c.y, .z = 0.0f, .rhw = 1.0f, .color = color });
 	}
 	for (int i = 0; i <= SAMPLES; ++i) {
-		float theta = i * (2.0f * D3DX_PI / SAMPLES);
+		float theta = i * (2.0f * sdlgf::Pi / SAMPLES);
 		float lx = cx + std::cos(theta) * rx;
 		float ly = cy + std::sin(theta) * ry;
 		auto wp = TransformRectanglePoint(x, y, lx, ly, rotation, scaleX, scaleY, offsetX, offsetY);
@@ -375,7 +375,7 @@ void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, fl
 	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
 }
 
-void sdlgf::GraphicsDevice::DrawTriangle(float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawTriangle(float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	std::vector<Vertex> vertices = {
 		{.x = (centerX - width * 0.5f) * virtualScale + virtualOffsetX, .y = topY * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color },
@@ -392,7 +392,7 @@ void sdlgf::GraphicsDevice::DrawTriangle(float centerX, float topY, float width,
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 1 : 3, vertices.data(), sizeof(Vertex));
 }
 
-void sdlgf::GraphicsDevice::DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled)
+void sdlgf::GraphicsDevice::DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	auto matCamera = camera.GetTransformMatrix();
 
@@ -414,7 +414,7 @@ void sdlgf::GraphicsDevice::DrawTriangle(const sdlgf::Camera& camera, float cent
 	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
 	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 1 : 3, vertices.data(), sizeof(Vertex));
 }
-void sdlgf::GraphicsDevice::DrawTexturedPolygon(const std::vector<D3DXVECTOR2>& points, const std::vector<D3DXVECTOR2>& uvs, sdlgf::Texture* texture, D3DCOLOR color)
+void sdlgf::GraphicsDevice::DrawTexturedPolygon(const std::vector<sdlgf::Vec2>& points, const std::vector<sdlgf::Vec2>& uvs, sdlgf::Texture* texture, sdlgf::Color color)
 {
 	if (points.size() < 3 || points.size() != uvs.size() || texture == nullptr) return;
 

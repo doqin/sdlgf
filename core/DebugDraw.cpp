@@ -35,7 +35,7 @@ void sdlgf::DebugDraw::Release() {
 	coordinateCache.clear();
 }
 
-void sdlgf::DebugDraw::DrawAxis(const Camera& camera, int range, int step, D3DCOLOR color) {
+void sdlgf::DebugDraw::DrawAxis(const Camera& camera, int range, int step, sdlgf::Color color) {
 
 		
 	if (!debugSprite) return;
@@ -69,22 +69,22 @@ void sdlgf::DebugDraw::DrawAxis(const Camera& camera, int range, int step, D3DCO
 //	int spacingX,
 //	int spacingY,
 //	int range, int step,
-//	D3DCOLOR color)
+//	sdlgf::Color color)
 //{
 //	if (spacingX <= 0 || spacingY <= 0) return;
 //
 //	auto matCamera = camera.GetTransformMatrix();
-//	D3DXMATRIX matInv;
-//	if (D3DXMatrixInverse(&matInv, nullptr, &matCamera) == nullptr) return;
+//	sdlgf::Mat4 matInv;
+//	if (!sdlgf::Mat4::Inverse(&matInv, matCamera)) return;
 //
 //	auto TransformPoint = [&matInv](float x, float y) {
-//		D3DXVECTOR4 v(x, y, 0.0f, 1.0f);
-//		D3DXVec4Transform(&v, &v, &matInv);
+//		sdlgf::Vec4 v(x, y, 0.0f, 1.0f);
+//		v = sdlgf::Transform(v, matInv);
 //		if (v.w != 0.0f) {
 //			v.x /= v.w;
 //			v.y /= v.w;
 //		}
-//		return D3DXVECTOR2(v.x, v.y);
+//		return sdlgf::Vec2(v.x, v.y);
 //		};
 //
 //	// Convert screen rect to a world-space AABB (works fine even with camera rotation; the AABB just becomes a conservative bound).
@@ -165,7 +165,7 @@ void sdlgf::DebugDraw::DrawAxis(const Camera& camera, int range, int step, D3DCO
 //}
 
 void sdlgf::DebugDraw::DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY,
-	D3DCOLOR lineColor) {
+	sdlgf::Color lineColor) {
 		// Horizontal lines
 		for (int i = offsetY % spacingY - spacingY; i < screenHeight; i += spacingY) {
 			graphicsDevice->DrawLine(offsetX % spacingX - spacingX, i, screenWidth, i, lineColor);
@@ -176,22 +176,22 @@ void sdlgf::DebugDraw::DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int
 		}
 }
 
-void sdlgf::DebugDraw::DrawGrid(GraphicsDevice* graphicsDevice, const Camera& camera, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, D3DCOLOR lineColor)
+void sdlgf::DebugDraw::DrawGrid(GraphicsDevice* graphicsDevice, const Camera& camera, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, sdlgf::Color lineColor)
 {
 		if (spacingX <= 0 || spacingY <= 0) return;
 
 		auto matCamera = camera.GetTransformMatrix();
-		D3DXMATRIX matInv;
-		if (D3DXMatrixInverse(&matInv, nullptr, &matCamera) == nullptr) return;
+		sdlgf::Mat4 matInv;
+		if (!sdlgf::Mat4::Inverse(&matInv, matCamera)) return;
 
 		auto TransformPoint = [&matInv](float x, float y) {
-			D3DXVECTOR4 v(x, y, 0.0f, 1.0f);
-			D3DXVec4Transform(&v, &v, &matInv);
+			sdlgf::Vec4 v(x, y, 0.0f, 1.0f);
+			v = sdlgf::Transform(v, matInv);
 			if (v.w != 0.0f) {
 				v.x /= v.w;
 				v.y /= v.w;
 			}
-			return D3DXVECTOR2(v.x, v.y);
+			return sdlgf::Vec2(v.x, v.y);
 			};
 
 		// Convert screen rect to a world-space AABB (works fine even with camera rotation; the AABB just becomes a conservative bound).

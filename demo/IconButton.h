@@ -39,7 +39,7 @@ namespace Demo
 		float GetSliceCapsWidth() const;
 		void Init(sdlgf::Camera* cam) override;
 		void SetSpriteScale(float scaleX, float scaleY);
-		void SetSpriteColor(D3DCOLOR color);
+		void SetSpriteColor(sdlgf::Color color);
 		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) override;
 		void SetSpriteRotation(float radians);
 		void SetSpriteOrigin(float x, float y);

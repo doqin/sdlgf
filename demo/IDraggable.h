@@ -17,7 +17,7 @@ namespace Demo {
 		std::shared_ptr<Demo::DraggableManager> draggableManager;
 		sdlgf::Camera* camera = nullptr;
 		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
-		D3DXCOLOR color;
+		sdlgf::ColorF color;
 		static std::shared_ptr<sdlgf::Font> debugFont;
 		static std::shared_ptr<sdlgf::FontSprite> debugFontSprite;
 		bool isDragging = false;

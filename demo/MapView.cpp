@@ -7,13 +7,13 @@
 namespace {
 	constexpr int kRevealRadiusTiles = 7;
 
-	constexpr D3DCOLOR kFloorColor = 0xFF5B7A99;
-	constexpr D3DCOLOR kWallColor = 0xFF2A3347;
-	constexpr D3DCOLOR kPanelColor = 0xD0101520;
-	constexpr D3DCOLOR kBorderColor = 0xFFE8EEF5;
-	constexpr D3DCOLOR kDotOutline = 0xFF000000;
+	constexpr sdlgf::Color kFloorColor = 0xFF5B7A99;
+	constexpr sdlgf::Color kWallColor = 0xFF2A3347;
+	constexpr sdlgf::Color kPanelColor = 0xD0101520;
+	constexpr sdlgf::Color kBorderColor = 0xFFE8EEF5;
+	constexpr sdlgf::Color kDotOutline = 0xFF000000;
 
-	D3DCOLOR MarkerColor(Demo::MapView::MarkerKind kind, bool dimmed) {
+	sdlgf::Color MarkerColor(Demo::MapView::MarkerKind kind, bool dimmed) {
 		using K = Demo::MapView::MarkerKind;
 		switch (kind) {
 		case K::Player: return 0xFFFF4040;
@@ -138,7 +138,7 @@ void Demo::MapView::Reveal(float worldX, float worldY)
 }
 
 void Demo::MapView::FillClipped(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float x0, float y0, float x1, float y1,
-	D3DCOLOR color, const ClipRect& clip) const
+	sdlgf::Color color, const ClipRect& clip) const
 {
 	x0 = (std::max)(x0, clip.x0); y0 = (std::max)(y0, clip.y0);
 	x1 = (std::min)(x1, clip.x1); y1 = (std::min)(y1, clip.y1);
@@ -209,7 +209,7 @@ void Demo::MapView::DrawMarkers(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCame
 	}
 }
 
-void Demo::MapView::DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color)
+void Demo::MapView::DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, sdlgf::Color color)
 {
 	fontSprite->Begin();
 	fontSprite->SetColor(color);

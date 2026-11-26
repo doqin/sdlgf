@@ -30,17 +30,17 @@ namespace {
 	constexpr float BUTTON_W = 32.0f * BUTTON_SCALE;
 	constexpr float BUTTON_H = 32.0f * BUTTON_SCALE;
 
-	constexpr D3DCOLOR PANEL_OUTLINE = 0xFF262620;
-	constexpr D3DCOLOR PANEL_FRAME = 0xFFd8d5a8;
-	constexpr D3DCOLOR PANEL_BG = 0xFF7e7ec6;
-	constexpr D3DCOLOR PANEL_BG_ALT = 0xFF8d8dd4;
+	constexpr sdlgf::Color PANEL_OUTLINE = 0xFF262620;
+	constexpr sdlgf::Color PANEL_FRAME = 0xFFd8d5a8;
+	constexpr sdlgf::Color PANEL_BG = 0xFF7e7ec6;
+	constexpr sdlgf::Color PANEL_BG_ALT = 0xFF8d8dd4;
 
-	constexpr D3DCOLOR LABEL_COLOR = 0xFFFFFFFF;
-	constexpr D3DCOLOR LABEL_OUTLINE = 0xFF54317c;
-	constexpr D3DCOLOR CELL_FRAME = 0xFFd8d5a8;
-	constexpr D3DCOLOR CELL_BG = 0xFF141410;
-	constexpr D3DCOLOR DIGIT_COLOR = 0xFFf0eeda;
-	constexpr D3DCOLOR DIGIT_COLOR_LOW = 0xFFff5a3c;
+	constexpr sdlgf::Color LABEL_COLOR = 0xFFFFFFFF;
+	constexpr sdlgf::Color LABEL_OUTLINE = 0xFF54317c;
+	constexpr sdlgf::Color CELL_FRAME = 0xFFd8d5a8;
+	constexpr sdlgf::Color CELL_BG = 0xFF141410;
+	constexpr sdlgf::Color DIGIT_COLOR = 0xFFf0eeda;
+	constexpr sdlgf::Color DIGIT_COLOR_LOW = 0xFFff5a3c;
 
 	// Opacity while the player is moving, and fade rates in opacity per millisecond
 	constexpr float MOVING_OPACITY = 0.15f;
@@ -125,7 +125,7 @@ void Demo::PlayerHUD::Update(unsigned long long deltaTime)
 	btnInventory->Update(deltaTime);
 }
 
-D3DCOLOR Demo::PlayerHUD::ApplyOpacity(D3DCOLOR color) const
+sdlgf::Color Demo::PlayerHUD::ApplyOpacity(sdlgf::Color color) const
 {
 	DWORD alpha = static_cast<DWORD>(((color >> 24) & 0xFF) * opacity);
 	return (color & 0x00FFFFFF) | (alpha << 24);
@@ -164,7 +164,7 @@ void Demo::PlayerHUD::DrawPanel(sdlgf::GraphicsDevice* gd)
 	}
 }
 
-void Demo::PlayerHUD::DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor)
+void Demo::PlayerHUD::DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, sdlgf::Color digitColor)
 {
 	float groupX = contentX + contentW - groupW;
 

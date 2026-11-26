@@ -53,7 +53,7 @@ namespace Demo {
 		static constexpr float LINE_GAP = 4.f;
 		static constexpr float ANCHOR_MARGIN = 20.f;   // gap between the top edge and the first line
 		static constexpr float RESHUFFLE_SPEED = 12.f; // higher = the stack collapses faster
-		static constexpr D3DCOLOR TEXT_COLOR = 0xFFfffc40;
+		static constexpr sdlgf::Color TEXT_COLOR = 0xFFfffc40;
 		static constexpr size_t MAX_VISIBLE_LINES = 5;
 
 		// History log

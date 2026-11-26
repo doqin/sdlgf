@@ -20,7 +20,7 @@ namespace sdlgf {
 			// in Update, so a manual burst still needs Update called every frame.
 			float vx = 0, vy = 0;
 			float age = 0; // ms since spawn
-			D3DCOLOR tint = 0xFFFFFFFF;
+			sdlgf::Color tint = 0xFFFFFFFF;
 		};
 
 		Texture* texture;
@@ -33,11 +33,11 @@ namespace sdlgf {
 		float fadeOutTime = 200.f;
 		float startScale = 1.f;
 		float endScale = 1.f;
-		D3DCOLOR startColor = 0xFFFFFFFF;
-		D3DCOLOR endColor = 0xFFFFFFFF;
+		sdlgf::Color startColor = 0xFFFFFFFF;
+		sdlgf::Color endColor = 0xFFFFFFFF;
 		bool enabled = true;
 
-		D3DCOLOR LerpColor(D3DCOLOR a, D3DCOLOR b, float t) const;
+		sdlgf::Color LerpColor(sdlgf::Color a, sdlgf::Color b, float t) const;
 	public:
 		ParticleSystem(Texture* texture, size_t maxParticles);
 		~ParticleSystem() = default;
@@ -48,15 +48,15 @@ namespace sdlgf {
 		void SetLifeTime(float lifeTimeMs);
 		void SetFadeOutTime(float fadeOutMs);
 		void SetScaleRange(float startScale, float endScale);
-		void SetColorRange(D3DCOLOR startColor, D3DCOLOR endColor);
+		void SetColorRange(sdlgf::Color startColor, sdlgf::Color endColor);
 		void SetEnabled(bool enabled);
 		bool IsEnabled() const;
 		void Clear();
 
 		// Returns true if a particle was spawned this call.
 		bool Update(unsigned long long deltaTime, float x, float y, float rotation = 0.f,
-			float scaleX = 1.f, float scaleY = 1.f, D3DCOLOR tint = 0xFFFFFFFF, bool active = true);
-		void Spawn(float x, float y, float rotation, float scaleX, float scaleY, D3DCOLOR tint,
+			float scaleX = 1.f, float scaleY = 1.f, sdlgf::Color tint = 0xFFFFFFFF, bool active = true);
+		void Spawn(float x, float y, float rotation, float scaleX, float scaleY, sdlgf::Color tint,
 			float vx = 0.f, float vy = 0.f);
 		void Draw(const Camera& camera, unsigned long long deltaTime);
 	};

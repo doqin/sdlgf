@@ -47,7 +47,7 @@ namespace Demo {
 
 		sprite->Begin();
 		sprite->SetPosition(GetWorldX(), GetWorldY() + floatOffset);
-		sprite->SetColor(D3DCOLOR_ARGB(currentAlpha, 255, 255, 255));
+		sprite->SetColor(COLOR_ARGB(currentAlpha, 255, 255, 255));
 		sprite->Draw(*camera, deltaTime);
 		sprite->End();
 	}

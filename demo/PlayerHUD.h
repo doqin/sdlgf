@@ -30,7 +30,7 @@ namespace Demo {
 		bool visible = true;
 		// Fades toward barely-visible while the player is moving, back to full when idle
 		float opacity = 1.0f;
-		D3DCOLOR ApplyOpacity(D3DCOLOR color) const;
+		sdlgf::Color ApplyOpacity(sdlgf::Color color) const;
 
 		// Layout cache, recomputed every frame so the panel can grow with its content
 		std::wstring hpValue;
@@ -41,7 +41,7 @@ namespace Demo {
 		float contentX = 0, contentY = 0, contentW = 0, contentH = 0;
 		void UpdateLayout();
 		void DrawPanel(sdlgf::GraphicsDevice* gd);
-		void DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor);
+		void DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, sdlgf::Color digitColor);
 	public:
 		PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, sdlgf::Font* font);
 

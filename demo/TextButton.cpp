@@ -21,17 +21,17 @@ Demo::TextButton::TextButton(std::shared_ptr<sdlgf::TransformManager> tm,
 	};
 
 	this->bgColors = {
-		D3DXCOLOR(0.2f, 0.2f, 0.2f, 1.0f), // 0: IDLE (dark grey)
-		D3DXCOLOR(0.4f, 0.4f, 0.4f, 1.0f), // 1: HOVER (light grey)
-		D3DXCOLOR(0.1f, 0.8f, 0.1f, 1.0f), // 2: CLICKED (green)
-		D3DXCOLOR(0.2f, 0.2f, 0.2f, 0.5f)  // 3: DISABLED (slightly transparent)
+		sdlgf::ColorF(0.2f, 0.2f, 0.2f, 1.0f), // 0: IDLE (dark grey)
+		sdlgf::ColorF(0.4f, 0.4f, 0.4f, 1.0f), // 1: HOVER (light grey)
+		sdlgf::ColorF(0.1f, 0.8f, 0.1f, 1.0f), // 2: CLICKED (green)
+		sdlgf::ColorF(0.2f, 0.2f, 0.2f, 0.5f)  // 3: DISABLED (slightly transparent)
 	};
 
 	this->hasOutline = false;
 	this->outlineThickness = 0.0f;
 	this->paddingX = 0.0f;
 	this->paddingY = 0.0f;
-	this->outlineColors = { D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,1), D3DXCOLOR(0,0,0,0.5f) };
+	this->outlineColors = { sdlgf::ColorF(0,0,0,1), sdlgf::ColorF(0,0,0,1), sdlgf::ColorF(0,0,0,1), sdlgf::ColorF(0,0,0,0.5f) };
 
 	this->SetOnReleaseLeft(onClick);
 }
@@ -44,7 +44,7 @@ Demo::TextButton* Demo::TextButton::SetText(std::string newText)
 	return this;
 }
 
-Demo::TextButton* Demo::TextButton::SetBackgroundColors(D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled)
+Demo::TextButton* Demo::TextButton::SetBackgroundColors(sdlgf::ColorF idle, sdlgf::ColorF hover, sdlgf::ColorF click, sdlgf::ColorF disabled)
 {
 	bgColors[0] = idle; bgColors[1] = hover; bgColors[2] = click; bgColors[3] = disabled;
 	return this;
@@ -56,7 +56,7 @@ Demo::TextButton* Demo::TextButton::SetTextColors(DWORD idle, DWORD hover, DWORD
 	return this;
 }
 
-Demo::TextButton* Demo::TextButton::SetOutline(float thickness, D3DXCOLOR idle, D3DXCOLOR hover, D3DXCOLOR click, D3DXCOLOR disabled)
+Demo::TextButton* Demo::TextButton::SetOutline(float thickness, sdlgf::ColorF idle, sdlgf::ColorF hover, sdlgf::ColorF click, sdlgf::ColorF disabled)
 {
 	this->hasOutline = true;
 	this->outlineThickness = thickness;

@@ -15,7 +15,7 @@ const float BAD_SECTOR_ARROW_HEAD_WIDTH = 8.f;
 const int BAD_SECTOR_ARC_SEGMENTS = 16;
 
 namespace {
-	void DrawSpiralSpinIndicator(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, float spinDirection, D3DCOLOR color) {
+	void DrawSpiralSpinIndicator(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, float spinDirection, sdlgf::Color color) {
 		if (graphicsDevice == nullptr || camera == nullptr || radius <= 0.f) {
 			return;
 		}
@@ -56,7 +56,7 @@ namespace {
 		graphicsDevice->DrawLine(*camera, tipX, tipY, rightX, rightY, color, 2.5f);
 	}
 
-	void DrawBadSectorArmPreview(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, const std::vector<float>& armAngles, float spinDirection, D3DCOLOR color) {
+	void DrawBadSectorArmPreview(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, const std::vector<float>& armAngles, float spinDirection, sdlgf::Color color) {
 		if (graphicsDevice == nullptr || camera == nullptr || radius <= 0.f) {
 			return;
 		}
@@ -107,9 +107,9 @@ namespace Demo {
 				double sin_value = std::sin(progress * 2.0 * PI);
 				double normalized = (sin_value + 1.0) / 2.0;
 				float targetAlphaMult = minAlpha + normalized * (maxAlpha - minAlpha);
-				//D3DCOLOR targetColor = D3DCOLOR_ARGB(static_cast<int>(200 * targetAlphaMult), 255, 50, 50);
-				D3DCOLOR telegraphColor = D3DCOLOR_ARGB(static_cast<int>(170 * targetAlphaMult), 255, 190, 190);
-				D3DCOLOR armColor = D3DCOLOR_ARGB(static_cast<int>(190 * targetAlphaMult), 255, 230, 110);
+				//sdlgf::Color targetColor = COLOR_ARGB(static_cast<int>(200 * targetAlphaMult), 255, 50, 50);
+				sdlgf::Color telegraphColor = COLOR_ARGB(static_cast<int>(170 * targetAlphaMult), 255, 190, 190);
+				sdlgf::Color armColor = COLOR_ARGB(static_cast<int>(190 * targetAlphaMult), 255, 230, 110);
 
 				graphicsDevice->SetAlphaBlending(true);
 				//graphicsDevice->DrawRectangle(*camera, centerX - 8.f, centerY - 8.f, 16.f, 16.f, targetColor, true);
@@ -206,7 +206,7 @@ namespace Demo {
 						else { angles[0] = PI / 4; angles[1] = 3 * PI / 4; angles[2] = 5 * PI / 4; angles[3] = 7 * PI / 4; }
 
 						for (int i = 0; i < 4; ++i) {
-							D3DXVECTOR2 dir(cos(angles[i]), sin(angles[i]));
+							sdlgf::Vec2 dir(cos(angles[i]), sin(angles[i]));
 							projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, m.x, m.y)
 								.SetTrajectory(dir).SetVelocity(100.f).SetDamage(finalDamage).SetDecayTime(5.f));
 						}
@@ -243,7 +243,7 @@ namespace Demo {
 
 						projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, bx, -150.f)
 							.SetDelay(1.f)
-							.SetTrajectory(D3DXVECTOR2(0.f, -1.f))
+							.SetTrajectory(sdlgf::Vec2(0.f, -1.f))
 							.SetVelocity(420.f)
 							.SetReturnAcceleration(800.f)
 							.SetDamage(finalDamage)
@@ -273,7 +273,7 @@ namespace Demo {
 				if (auto p = this->player.lock()) {
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 					float spawnX = fromLeft ? -ARENA_HALF * 4.f : ARENA_HALF * 4.f;
-					D3DXVECTOR2 dir = fromLeft ? D3DXVECTOR2(1, 0) : D3DXVECTOR2(-1, 0);
+					sdlgf::Vec2 dir = fromLeft ? sdlgf::Vec2(1, 0) : sdlgf::Vec2(-1, 0);
 
 					for (int i = 0; i < BULLETS_PER_WAVE; ++i) {
 						float spawnY = START_Y + STEP_Y * static_cast<float>(i) + *offsetY;

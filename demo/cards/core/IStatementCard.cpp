@@ -167,7 +167,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
 
 		graphicsDevice->SetAlphaBlending(true);
-		graphicsDevice->DrawRectangle(*camera, thisX, thisY, trigger->GetWidth(), trigger->GetHeight(), D3DCOLOR_ARGB(180, 50, 50, 50), true);
+		graphicsDevice->DrawRectangle(*camera, thisX, thisY, trigger->GetWidth(), trigger->GetHeight(), COLOR_ARGB(180, 50, 50, 50), true);
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
@@ -189,7 +189,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		auto thisY = trigger->GetWorldY() - trigger->GetOriginY();
 
 		graphicsDevice->SetAlphaBlending(true);
-		graphicsDevice->DrawRectangle(*camera, thisX, thisY, trigger->GetWidth(), trigger->GetHeight(), D3DCOLOR_ARGB(180, 50, 50, 50), true);
+		graphicsDevice->DrawRectangle(*camera, thisX, thisY, trigger->GetWidth(), trigger->GetHeight(), COLOR_ARGB(180, 50, 50, 50), true);
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {

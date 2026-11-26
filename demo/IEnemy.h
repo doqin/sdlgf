@@ -25,7 +25,7 @@ namespace Demo {
 			float vx = 0.f;
 			float vy = 0.f;
 			unsigned long long elapsed = 0;
-			D3DCOLOR textColor = 0xFFFF4444;
+			sdlgf::Color textColor = 0xFFFF4444;
 		};
 		bool isOnStandby = true;
 		// "This enemy just debuffed you": a flash + ring on the enemy, an orb flying to the player,
@@ -33,7 +33,7 @@ namespace Demo {
 		struct DebuffEffect {
 			RECT iconRect{ 0, 0, 0, 0 };
 			std::wstring name;
-			D3DCOLOR color = 0xFFFFFFFF;
+			sdlgf::Color color = 0xFFFFFFFF;
 			std::weak_ptr<sdlgf::IGameObject> target;
 			float targetX = 0.f;
 			float targetY = 0.f;

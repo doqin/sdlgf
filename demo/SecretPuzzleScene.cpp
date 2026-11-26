@@ -334,7 +334,7 @@ void Demo::SecretPuzzleScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned
 	const float segmentLength = 16.0f;
 	const float amplitude = 12.0f;
 	const float frequency = 0.05f;
-	const D3DCOLOR gridColor = 0xFF9cdb43;
+	const sdlgf::Color gridColor = 0xFF9cdb43;
 	static float waveTime = 0.0f;
 	waveTime += static_cast<float>(deltaTime) * 0.002f;
 	while (waveTime > 6.2831853f) {

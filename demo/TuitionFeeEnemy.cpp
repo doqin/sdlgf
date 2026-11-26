@@ -146,7 +146,7 @@ void Demo::TuitionFeeEnemy::PatternSideWall(float baseDamage, std::vector<std::s
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, 16, 16, finalX, finalY)
-						.SetTrajectory(D3DXVECTOR2(-1.f, 0.f))
+						.SetTrajectory(sdlgf::Vec2(-1.f, 0.f))
 						.SetDelay(0.f)
 						.SetDecayTime(BULLET_DECAY_TIME)
 						.SetVelocity(BULLET_SPEED)
@@ -237,7 +237,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 									lock,
 									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										ARENA_HALF_SIZE + spawnOvershoot, laneY)
-									.SetTrajectory(D3DXVECTOR2(-1.f, 0.f))
+									.SetTrajectory(sdlgf::Vec2(-1.f, 0.f))
 									.SetVelocity(bulletSpeed)
 									.SetDecayTime(decayTime)
 									.SetDamage(finalDamage)
@@ -252,7 +252,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 									lock,
 									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										-ARENA_HALF_SIZE - spawnOvershoot, laneY)
-									.SetTrajectory(D3DXVECTOR2(1.f, 0.f))
+									.SetTrajectory(sdlgf::Vec2(1.f, 0.f))
 									.SetVelocity(bulletSpeed)
 									.SetDecayTime(decayTime)
 									.SetDamage(finalDamage)
@@ -267,7 +267,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 									lock,
 									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										laneX, -ARENA_HALF_SIZE - spawnOvershoot)
-									.SetTrajectory(D3DXVECTOR2(0.f, 1.f))
+									.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 									.SetVelocity(bulletSpeed)
 									.SetDecayTime(decayTime)
 									.SetDamage(finalDamage)
@@ -282,7 +282,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 									lock,
 									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										laneX, ARENA_HALF_SIZE + spawnOvershoot)
-									.SetTrajectory(D3DXVECTOR2(0.f, -1.f))
+									.SetTrajectory(sdlgf::Vec2(0.f, -1.f))
 									.SetVelocity(bulletSpeed)
 									.SetDecayTime(decayTime)
 									.SetDamage(finalDamage)

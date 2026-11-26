@@ -111,7 +111,7 @@ namespace Demo {
             if (IsUnlocked()) {
                 const float pulse = 0.5f + 0.5f * std::sin(indicatorTime / 300.f);
                 const BYTE glow = static_cast<BYTE>(60 + 80 * pulse);
-                gd->DrawRectangle(*uiCamera, cx - 6 * u, cy - 6 * u, 12 * u, 12 * u, D3DCOLOR_ARGB(glow, 102, 224, 122), true);
+                gd->DrawRectangle(*uiCamera, cx - 6 * u, cy - 6 * u, 12 * u, 12 * u, COLOR_ARGB(glow, 102, 224, 122), true);
                 gd->DrawRectangle(*uiCamera, cx - 4 * u, cy - 4 * u, 8 * u, 8 * u, 0xFF000000, true);
                 gd->DrawRectangle(*uiCamera, cx - 3 * u, cy - 3 * u, 6 * u, 6 * u, 0xFF66E07A, true);
             }

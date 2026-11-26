@@ -315,7 +315,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, sdlgf::Gr
 		isDragging = false;
 		});
 	manager->Add(dynamic_pointer_cast<IDraggable>(shared_from_this()));
-	color = D3DXCOLOR(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
+	color = sdlgf::ColorF(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
 	if (debugFont.get() == nullptr) {
 		IDraggable::debugFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 	}
@@ -411,7 +411,7 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 			gd->SetAlphaBlending(true);
 			float alphaPhase = (sin(sdlgf::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 			int alpha = static_cast<int>(alphaPhase * 80.0f);
-			D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+			sdlgf::Color color = COLOR_ARGB(alpha, 255, 255, 255);
 			gd->DrawRectangle(*cam, thisX, thisY, width, height, color, true);
 			gd->SetAlphaBlending(false);
 			markFinished();

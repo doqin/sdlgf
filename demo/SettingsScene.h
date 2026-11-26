@@ -103,7 +103,7 @@ namespace Demo
         void DrawWorld(unsigned long long deltaTime) override;
         void DrawUI(unsigned long long deltaTime) override;
         void UpdateLayout(int width, int height);
-        void DrawString(std::wstring text, float x, float y, D3DCOLOR color, DWORD format = DT_RIGHT);
+        void DrawString(std::wstring text, float x, float y, sdlgf::Color color, DWORD format = DT_RIGHT);
         void ResetListening();
     };
 }

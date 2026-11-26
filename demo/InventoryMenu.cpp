@@ -31,8 +31,8 @@ namespace {
 	constexpr float ORBIT_RADIUS = 90.0f;
 	constexpr float INNER_ORBIT_RADIUS = 35.0f;
 
-	constexpr float ORBIT_START_ANGLE = -D3DX_PI / 2.0f;
-	constexpr D3DCOLOR ORBIT_RING_COLOR = D3DCOLOR_ARGB(90, 100, 100, 120);
+	constexpr float ORBIT_START_ANGLE = -sdlgf::Pi / 2.0f;
+	constexpr sdlgf::Color ORBIT_RING_COLOR = COLOR_ARGB(90, 100, 100, 120);
 
 	bool IsHealOnlyItem(const Demo::ConsumableItem& item)
 	{
@@ -42,12 +42,12 @@ namespace {
 			[](const Demo::CombatModifier& mod) { return mod.type == Demo::ModifierType::HealHP; });
 	}
 
-	constexpr D3DCOLOR ITEM_UNUSABLE_TINT = 0xFF707070;
-	constexpr D3DCOLOR ITEM_HOVER_TINT = D3DCOLOR_ARGB(60, 255, 255, 255);
-	constexpr D3DCOLOR ITEM_PRESS_TINT = D3DCOLOR_ARGB(110, 255, 220, 120);
-	constexpr D3DCOLOR ITEM_OUTLINE_COLOR = 0xFFFFD700;
-	constexpr D3DCOLOR ITEM_STATUS_ERROR = 0xFFFF8080;
-	constexpr D3DCOLOR ITEM_STATUS_OK = 0xFF80FF80;
+	constexpr sdlgf::Color ITEM_UNUSABLE_TINT = 0xFF707070;
+	constexpr sdlgf::Color ITEM_HOVER_TINT = COLOR_ARGB(60, 255, 255, 255);
+	constexpr sdlgf::Color ITEM_PRESS_TINT = COLOR_ARGB(110, 255, 220, 120);
+	constexpr sdlgf::Color ITEM_OUTLINE_COLOR = 0xFFFFD700;
+	constexpr sdlgf::Color ITEM_STATUS_ERROR = 0xFFFF8080;
+	constexpr sdlgf::Color ITEM_STATUS_OK = 0xFF80FF80;
 	constexpr float ITEM_STATUS_SECONDS = 2.0f;
 }
 namespace Demo {
@@ -784,7 +784,7 @@ namespace Demo {
 			passiveSlot->Update(deltaTime);
 
 			for (int i = 0; i < 8; i++) {
-				float angle = ORBIT_START_ANGLE + i * (D3DX_PI / 4.0f);
+				float angle = ORBIT_START_ANGLE + i * (sdlgf::Pi / 4.0f);
 				float x = std::round(centerX + ORBIT_RADIUS * std::cos(angle) - slotSize / 2.0f);
 				float y = std::round(centerY + ORBIT_RADIUS * std::sin(angle) - slotSize / 2.0f);
 
@@ -838,8 +838,8 @@ namespace Demo {
 		float bottomEdge = sh / 2.0f;
 
 		gd->SetAlphaBlending(true);
-		// Use D3DCOLOR_ARGB instead of D3DXCOLOR for the best compatibility with DrawRectangle
-		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, D3DCOLOR_ARGB(165, 0, 0, 0), true);
+		// Use COLOR_ARGB instead of sdlgf::ColorF for the best compatibility with DrawRectangle
+		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, COLOR_ARGB(165, 0, 0, 0), true);
 		gd->SetAlphaBlending(false);
 
 		btnTabItems->Draw(gd, deltaTime);
@@ -1022,8 +1022,8 @@ namespace Demo {
 			fontSprite->End();
 
 			// Panels
-			const D3DCOLOR PANEL_BG = D3DCOLOR_ARGB(230, 15, 15, 20);
-			const D3DCOLOR PANEL_BORDER = D3DCOLOR_ARGB(255, 100, 100, 120);
+			const sdlgf::Color PANEL_BG = COLOR_ARGB(230, 15, 15, 20);
+			const sdlgf::Color PANEL_BORDER = COLOR_ARGB(255, 100, 100, 120);
 			gd->SetAlphaBlending(true);
 			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, gearContainerH, PANEL_BG, true);
 			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, gearContainerH, PANEL_BG, true);
@@ -1209,8 +1209,8 @@ namespace Demo {
 			fontSprite->Draw(*uiCamera, deltaTime);
 			fontSprite->End();
 
-			const D3DCOLOR PANEL_BG = D3DCOLOR_ARGB(230, 15, 15, 20);
-			const D3DCOLOR PANEL_BORDER = D3DCOLOR_ARGB(255, 100, 100, 120);
+			const sdlgf::Color PANEL_BG = COLOR_ARGB(230, 15, 15, 20);
+			const sdlgf::Color PANEL_BORDER = COLOR_ARGB(255, 100, 100, 120);
 
 			gd->SetAlphaBlending(true);
 			gd->DrawRectangle(*uiCamera, leftContainerX, containerY, containerW, containerH, PANEL_BG, true);
@@ -1221,11 +1221,11 @@ namespace Demo {
 			gd->DrawRectangle(*uiCamera, rightContainerX, containerY, containerW, containerH, PANEL_BORDER, false);
 
 			//Quest list
-			D3DXMATRIX matCamera = uiCamera->GetTransformMatrix();
-			D3DXVECTOR4 topLeft(leftContainerX, containerY, 0.0f, 1.0f);
-			D3DXVECTOR4 bottomRight(leftContainerX + containerW, containerY + containerH, 0.0f, 1.0f);
-			D3DXVec4Transform(&topLeft, &topLeft, &matCamera);
-			D3DXVec4Transform(&bottomRight, &bottomRight, &matCamera);
+			sdlgf::Mat4 matCamera = uiCamera->GetTransformMatrix();
+			sdlgf::Vec4 topLeft(leftContainerX, containerY, 0.0f, 1.0f);
+			sdlgf::Vec4 bottomRight(leftContainerX + containerW, containerY + containerH, 0.0f, 1.0f);
+			topLeft = sdlgf::Transform(topLeft, matCamera);
+			bottomRight = sdlgf::Transform(bottomRight, matCamera);
 
 			RECT scissorRect;
 			scissorRect.left = static_cast<LONG>(topLeft.x / topLeft.w);
@@ -1271,8 +1271,8 @@ namespace Demo {
 					if (isTracked || isSelected) {
 						float btnDrawY = containerY + qb.originalY - questScrollY;
 						float fullBtnH = qb.btn->GetHeight() + 11.0f;
-						const D3DCOLOR bg = isTracked ? D3DCOLOR_ARGB(50, 255, 170, 0) : D3DCOLOR_ARGB(28, 255, 255, 255);
-						const D3DCOLOR bar = isTracked ? 0xFFFFAA00 : 0xFF777788;
+						const sdlgf::Color bg = isTracked ? COLOR_ARGB(50, 255, 170, 0) : COLOR_ARGB(28, 255, 255, 255);
+						const sdlgf::Color bar = isTracked ? 0xFFFFAA00 : 0xFF777788;
 
 						gd->SetAlphaBlending(true);
 						gd->DrawRectangle(*uiCamera, leftContainerX + 2.0f, btnDrawY, containerW - 4.0f, fullBtnH, bg, true);
@@ -1437,7 +1437,7 @@ namespace Demo {
 		isItemsDirty = false;
 	}
 
-	void InventoryMenu::ShowItemStatus(const std::wstring& text, D3DCOLOR color)
+	void InventoryMenu::ShowItemStatus(const std::wstring& text, sdlgf::Color color)
 	{
 		itemStatusText = text;
 		itemStatusColor = color;
@@ -1494,7 +1494,7 @@ namespace Demo {
 			auto btn = std::make_shared<TextButton>(transformManager, 0, 0, containerW - 4.0f, buttonH, "", font, [](sdlgf::ITrigger*) {});
 			btn->Init(uiCamera);
 			btn->SetState(Demo::IButton::ButtonState::DISABLED);
-			btn->SetBackgroundColors(D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0));
+			btn->SetBackgroundColors(sdlgf::ColorF(0, 0, 0, 0), sdlgf::ColorF(0, 0, 0, 0), sdlgf::ColorF(0, 0, 0, 0), sdlgf::ColorF(0, 0, 0, 0));
 
 			std::string encoded = "HEADER|" + std::to_string(color) + "|" + text;
 			questButtons.push_back({ btn, currentY, encoded });
@@ -1519,7 +1519,7 @@ namespace Demo {
 			btn->Init(uiCamera);
 			btn->SetPadding(questPadX, 6.0f);
 
-			btn->SetBackgroundColors(D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(1.0f, 1.0f, 1.0f, 0.1f), D3DXCOLOR(1.0f, 0.84f, 0.0f, 0.2f), D3DXCOLOR(0, 0, 0, 0));
+			btn->SetBackgroundColors(sdlgf::ColorF(0, 0, 0, 0), sdlgf::ColorF(1.0f, 1.0f, 1.0f, 0.1f), sdlgf::ColorF(1.0f, 0.84f, 0.0f, 0.2f), sdlgf::ColorF(0, 0, 0, 0));
 
 			questButtons.push_back({ btn, currentY, q.id });
 			currentY += buttonH + paddingY;

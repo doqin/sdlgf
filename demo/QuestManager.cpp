@@ -11,8 +11,8 @@ namespace {
 	constexpr float PANEL_MIN_W = 120.0f;
 	constexpr float PANEL_PADDING_X = 24.0f;
 	constexpr float PANEL_H = 30.0f;
-	constexpr D3DCOLOR PANEL_BG = 0xCC141410;
-	constexpr D3DCOLOR TEXT_COLOR = 0xFFFFD700;
+	constexpr sdlgf::Color PANEL_BG = 0xCC141410;
+	constexpr sdlgf::Color TEXT_COLOR = 0xFFFFD700;
 }
 
 //init quest here
@@ -212,12 +212,12 @@ void Demo::QuestManager::Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera* uiCamera
 	gd->SetAlphaBlending(false);
 
 	//scissor text
-	D3DXMATRIX matCamera = uiCamera->GetTransformMatrix();
-	D3DXVECTOR4 topLeft(textX, panelY, 0.0f, 1.0f);
-	D3DXVECTOR4 bottomRight(textX + currentWidth, panelY + PANEL_H, 0.0f, 1.0f);
+	sdlgf::Mat4 matCamera = uiCamera->GetTransformMatrix();
+	sdlgf::Vec4 topLeft(textX, panelY, 0.0f, 1.0f);
+	sdlgf::Vec4 bottomRight(textX + currentWidth, panelY + PANEL_H, 0.0f, 1.0f);
 
-	D3DXVec4Transform(&topLeft, &topLeft, &matCamera);
-	D3DXVec4Transform(&bottomRight, &bottomRight, &matCamera);
+	topLeft = sdlgf::Transform(topLeft, matCamera);
+	bottomRight = sdlgf::Transform(bottomRight, matCamera);
 
 	RECT scissorRect;
 	scissorRect.left = static_cast<LONG>(topLeft.x / topLeft.w);

@@ -27,10 +27,10 @@ namespace Demo {
     struct PopupStyle {
         RECT bgSrcRect;
         int marginL, marginT, marginR, marginB;
-        D3DCOLOR titleColor;
-        D3DCOLOR msgColor;
+        sdlgf::Color titleColor;
+        sdlgf::Color msgColor;
         bool hasOutline;
-        D3DCOLOR outlineColor;
+        sdlgf::Color outlineColor;
     };
 
     class PopupManager {

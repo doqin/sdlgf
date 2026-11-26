@@ -75,22 +75,22 @@ void sdlgf::Utils::SetMousePos(int x, int y)
 
 std::tuple<float, float> sdlgf::Utils::WindowToWorldCoords(const sdlgf::Camera& camera, float windowX, float windowY)
 {
-	D3DXMATRIX cameraTransform = camera.GetTransformMatrix();
-	D3DXMATRIX invTransform;
-	D3DXMatrixInverse(&invTransform, nullptr, &cameraTransform);
+	sdlgf::Mat4 cameraTransform = camera.GetTransformMatrix();
+	sdlgf::Mat4 invTransform;
+	sdlgf::Mat4::Inverse(&invTransform, cameraTransform);
 
-	D3DXVECTOR3 windowPos(windowX, windowY, 0.0f);
-	D3DXVECTOR3 worldPos;
-	D3DXVec3TransformCoord(&worldPos, &windowPos, &invTransform);
+	sdlgf::Vec3 windowPos(windowX, windowY, 0.0f);
+	sdlgf::Vec3 worldPos;
+	worldPos = sdlgf::TransformCoord(windowPos, invTransform);
 	return std::make_tuple(worldPos.x, worldPos.y);
 }
 
 std::tuple<float, float> sdlgf::Utils::WorldToWindowCoords(const sdlgf::Camera& camera, float worldX, float worldY)
 {
-	D3DXMATRIX cameraTransform = camera.GetTransformMatrix();
-	D3DXVECTOR3 worldPos(worldX, worldY, 0.0f);
-	D3DXVECTOR3 windowPos;
-	D3DXVec3TransformCoord(&windowPos, &worldPos, &cameraTransform);
+	sdlgf::Mat4 cameraTransform = camera.GetTransformMatrix();
+	sdlgf::Vec3 worldPos(worldX, worldY, 0.0f);
+	sdlgf::Vec3 windowPos;
+	windowPos = sdlgf::TransformCoord(worldPos, cameraTransform);
 	return std::make_tuple(windowPos.x, windowPos.y);
 }
 

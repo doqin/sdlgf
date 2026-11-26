@@ -349,7 +349,7 @@ namespace Demo {
 		// One target position per entry in `enemies`, packed into right-anchored columns that
 		// grow leftward. Columns are filled in list order, so a mid-battle spawn takes the next
 		// free slot instead of reshuffling the enemies already placed.
-		std::vector<D3DXVECTOR2> BuildEnemyGridSlots() const;
+		std::vector<sdlgf::Vec2> BuildEnemyGridSlots() const;
 		// Vertical band the enemy grid may occupy, in world coordinates.
 		void GetEnemyGridBand(float& top, float& bottom) const;
 		void RemoveEnemyCardsInRemoveArea();

@@ -22,7 +22,7 @@ namespace Demo
 		float alpha;
 		float textSize = 1.0f;
 		bool isActive = false;
-		D3DCOLOR displayColor = D3DCOLOR_ARGB(255, 255, 0, 0); //red
+		sdlgf::Color displayColor = COLOR_ARGB(255, 255, 0, 0); //red
 	};
 	class DamageTextManager
 	{

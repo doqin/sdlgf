@@ -46,7 +46,7 @@ namespace {
 	// Name colours lifted from the hand-drawn strips this replaced, indexed like CardTemplate: the
 	// upper half of the letters over the card's light band, the lower half over its dark one. The
 	// cost digit was the same off-white, outlined in black, on every card.
-	struct NameColors { D3DCOLOR top; D3DCOLOR bottom; };
+	struct NameColors { sdlgf::Color top; sdlgf::Color bottom; };
 	constexpr NameColors NAME_COLORS[] = {
 		{ 0xFFFFFC40, 0xFFD6F264 }, // Red
 		{ 0xFFFFFFFF, 0xFFA6FCDB }, // Magenta
@@ -66,21 +66,21 @@ namespace {
 	};
 	static_assert(sizeof(NAME_COLORS) / sizeof(NAME_COLORS[0]) == static_cast<size_t>(Demo::CardTemplate::Count),
 		"one name colour per CardTemplate");
-	constexpr D3DCOLOR COST_COLOR = 0xFFE3E6FF;
+	constexpr sdlgf::Color COST_COLOR = 0xFFE3E6FF;
 	// The "(_)" after the name was the same cool grey on every card.
-	constexpr D3DCOLOR INPUT_COLOR = 0xFFB3B9D1;
+	constexpr sdlgf::Color INPUT_COLOR = 0xFFB3B9D1;
 	// A filled slot's "x" has to stand out from that grey: orange, except on the templates whose own
 	// colours are orange or yellow. Cyan reads on orange but washes out against yellow, which wants
 	// something dark - a saturated blue.
-	constexpr D3DCOLOR FILLED_INPUT_COLOR = 0xFFFF9A1F;
-	constexpr D3DCOLOR FILLED_INPUT_COLOR_ON_ORANGE = 0xFF22E6F0;
-	constexpr D3DCOLOR FILLED_INPUT_COLOR_ON_YELLOW = 0xFF1B3FD6;
-	constexpr D3DCOLOR OUTLINE_COLOR = 0xFF060608;
+	constexpr sdlgf::Color FILLED_INPUT_COLOR = 0xFFFF9A1F;
+	constexpr sdlgf::Color FILLED_INPUT_COLOR_ON_ORANGE = 0xFF22E6F0;
+	constexpr sdlgf::Color FILLED_INPUT_COLOR_ON_YELLOW = 0xFF1B3FD6;
+	constexpr sdlgf::Color OUTLINE_COLOR = 0xFF060608;
 
 	// Component-wise multiply, the same way a sprite's colour modulates its texture.
-	D3DCOLOR Modulate(D3DCOLOR a, D3DCOLOR b) {
+	sdlgf::Color Modulate(sdlgf::Color a, sdlgf::Color b) {
 		auto ch = [&](int shift) { return ((a >> shift) & 0xFF) * ((b >> shift) & 0xFF) / 255; };
-		return D3DCOLOR_ARGB(ch(24), ch(16), ch(8), ch(0));
+		return COLOR_ARGB(ch(24), ch(16), ch(8), ch(0));
 	}
 
 	RECT TemplateRect(Demo::CardTemplate t) {
@@ -165,7 +165,7 @@ float Demo::CardFrame::MeasureWidth(const std::wstring& name, const std::wstring
 }
 
 void Demo::CardFrame::DrawSlice(sdlgf::StaticSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-	RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint) {
+	RECT src, float x, float y, float scaleX, float scaleY, sdlgf::Color tint) {
 	sprite.SetSrcRect(src);
 	sprite.SetColor(tint);
 	sprite.SetPosition(x, y);
@@ -174,7 +174,7 @@ void Demo::CardFrame::DrawSlice(sdlgf::StaticSprite& sprite, const sdlgf::Camera
 }
 
 void Demo::CardFrame::DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-	const std::wstring& text, float x, float y, float scale, D3DCOLOR color, bool outlined, D3DCOLOR tint) {
+	const std::wstring& text, float x, float y, float scale, sdlgf::Color color, bool outlined, sdlgf::Color tint) {
 	sprite.SetText(text);
 	sprite.SetColor(color);
 	sprite.SetOutline(outlined, Modulate(OUTLINE_COLOR, tint), scale);
@@ -253,7 +253,7 @@ void Demo::CardFrame::DrawGroup(unsigned long long deltaTime, const Entry* entri
 		const float nameW = TextWidth(e.name) * l.textScale;
 		// The signature is drawn in runs so each "x" can take its own colour. Glyph advances add up, so a
 		// run's start is just the measured width of everything before it.
-		D3DCOLOR filledColor = FILLED_INPUT_COLOR;
+		sdlgf::Color filledColor = FILLED_INPUT_COLOR;
 		if (e.cardTemplate == CardTemplate::Orange) filledColor = FILLED_INPUT_COLOR_ON_ORANGE;
 		else if (e.cardTemplate == CardTemplate::Yellow) filledColor = FILLED_INPUT_COLOR_ON_YELLOW;
 		float runX = e.x + l.leftW + nameW;
@@ -278,7 +278,7 @@ void Demo::CardFrame::DrawGroup(unsigned long long deltaTime, const Entry* entri
 }
 
 void Demo::CardFrame::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y,
-	CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost, float scale, D3DCOLOR tint) {
+	CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost, float scale, sdlgf::Color tint) {
 	// Anything queued before this face was drawn before it, so it has to land first.
 	FlushCollected();
 	const Entry entry{ &camera, x, y, cardTemplate, name, inputs, cost, scale, tint, false, RECT{} };
@@ -302,7 +302,7 @@ std::vector<Demo::CardFrame::Entry> Demo::CardFrame::pending;
 Demo::CardFrame* Demo::CardFrame::pendingOwner = nullptr;
 
 void Demo::CardFrame::Queue(const sdlgf::Camera& camera, float x, float y,
-	CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost, float scale, D3DCOLOR tint, const RECT* scissor) {
+	CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost, float scale, sdlgf::Color tint, const RECT* scissor) {
 	// Faces from another device's frame can't share a batch.
 	if (pendingOwner && pendingOwner != this) FlushCollected();
 	pendingOwner = this;

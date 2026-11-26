@@ -602,7 +602,7 @@ void Demo::BossWorldScene::OnRestoreSaveData(const nlohmann::json& inData) {
 void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
-	D3DCOLOR bgColor = 0xFF05101a;
+	sdlgf::Color bgColor = 0xFF05101a;
 	if (currentIslandID == 2) bgColor = 0xFF051105;
 	else if (currentIslandID == 3) bgColor = 0xFF1c0d02;
 	else if (currentIslandID == 4) bgColor = 0xFF1a0505;
@@ -613,8 +613,8 @@ void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 
 	switch (currentIslandID) {
 	case 2: {
-		const D3DCOLOR waveColor = 0x3300E5FF;
-		const D3DCOLOR nodeColor = 0xAA00E5FF;
+		const sdlgf::Color waveColor = 0x3300E5FF;
+		const sdlgf::Color nodeColor = 0xAA00E5FF;
 		float centerY = screenHeight / 2.0f;
 		float prevX = 0.0f;
 		float prevY1 = centerY;
@@ -631,7 +631,7 @@ void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 			if (x % 60 == 0) {
 				gd->DrawLine(static_cast<float>(x), y1, static_cast<float>(x), y2, 0x1100E5FF);
 				float pulse = (std::sinf(timeAcc * 4.0f + x) + 1.0f) * 0.5f;
-				D3DCOLOR dynamicNodeColor = (static_cast<DWORD>(pulse * 155 + 100) << 24) | 0x0000E5FF;
+				sdlgf::Color dynamicNodeColor = (static_cast<DWORD>(pulse * 155 + 100) << 24) | 0x0000E5FF;
 				gd->DrawLine(static_cast<float>(x) - 3, y1, static_cast<float>(x) + 3, y1, dynamicNodeColor);
 				gd->DrawLine(static_cast<float>(x), y1 - 3, static_cast<float>(x), y1 + 3, dynamicNodeColor);
 				gd->DrawLine(static_cast<float>(x) - 3, y2, static_cast<float>(x) + 3, y2, dynamicNodeColor);
@@ -644,8 +644,8 @@ void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 		break;
 	}
 	case 1: {
-		const D3DCOLOR rainColor = 0xFF00FF41;
-		const D3DCOLOR tailColor = 0x4400FF41;
+		const sdlgf::Color rainColor = 0xFF00FF41;
+		const sdlgf::Color tailColor = 0x4400FF41;
 		for (int x = 0; x < screenWidth; x += 48) {
 			float speed = 80.f + (x % 5) * 40.f;
 			float yOffset = std::fmod(timeAcc * speed + (x * 17.f), static_cast<float>(screenHeight + 100));
@@ -655,9 +655,9 @@ void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 		break;
 	}
 	case 3: {
-		const D3DCOLOR gridColor = 0xFFFF8C00;
-		const D3DCOLOR streakColor = 0xFFFF8C00;
-		const D3DCOLOR brightColor = 0xFFFFD700;
+		const sdlgf::Color gridColor = 0xFFFF8C00;
+		const sdlgf::Color streakColor = 0xFFFF8C00;
+		const sdlgf::Color brightColor = 0xFFFFD700;
 		for (int i = 0; i < screenHeight; i += 40) gd->DrawLine(0, static_cast<float>(i), static_cast<float>(screenWidth), static_cast<float>(i), gridColor);
 		for (int i = 0; i < screenWidth; i += 40) gd->DrawLine(static_cast<float>(i), 0, static_cast<float>(i), static_cast<float>(screenHeight), gridColor);
 		int numStreaks = 40;
@@ -685,8 +685,8 @@ void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 		break;
 	}
 	case 4: {
-		const D3DCOLOR polyColor = 0xFFDC143C;
-		const D3DCOLOR crackColor = 0xFFDC143C;
+		const sdlgf::Color polyColor = 0xFFDC143C;
+		const sdlgf::Color crackColor = 0xFFDC143C;
 		for (int i = 0; i < 15; ++i) {
 			float size = 100.0f + (i % 3) * 50.0f;
 			float bx = std::fmod((i * 123.0f) + timeAcc * 10.0f, static_cast<float>(screenWidth + size)) - size / 2.0f;

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <d3d9.h>
+#include <d3dx9.h> // legacy renderer only: removed with the D3D9 backend
 #include <vector>
 #include "Camera.h"
 #include "IDeviceLostAware.h"
@@ -15,7 +16,7 @@ namespace sdlgf {
 		float virtualScale = 1.0f;
 		float virtualOffsetX = 0.0f;
 		float virtualOffsetY = 0.0f;
-		void DrawLineInternal(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness);
+		void DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness);
 		// Every live ID3DXSprite/ID3DXFont wrapper (sprites, fonts), so Reset() can be preceded
 		// and followed by OnLostDevice/OnResetDevice on all of them - required by the D3DX
 		// helper library or Reset() can fail outright.
@@ -47,7 +48,7 @@ namespace sdlgf {
 		HRESULT SetViewport(DWORD x, DWORD y, DWORD width, DWORD height, float minZ, float maxZ);
 		HRESULT SetViewport(D3DVIEWPORT9 viewport);
 		HRESULT BeginDraw();
-		HRESULT Clear(D3DXCOLOR color);
+		HRESULT Clear(sdlgf::ColorF color);
 		HRESULT Clear();
 		HRESULT EndDraw();
 		HRESULT Present();
@@ -76,29 +77,29 @@ namespace sdlgf {
 		void SetVirtualTransform(float scale, float offsetX, float offsetY);
 		void ResetVirtualTransform();
 
-		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
-		void DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
-		void DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
-		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
-		void DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawEllipse(const sdlgf::Camera& camera, float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
-		void DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
+		void DrawLine(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness = 1.0f);
+		void DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness = 1.0f);
+		void DrawRectangle(float x, float y, float width, float height, sdlgf::Color color, bool isFilled);
+		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, sdlgf::Color color, bool isFilled);
+		void DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled);
+		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled);
+		void DrawEllipse(float centerX, float centerY, float width, float height, sdlgf::Color color, bool isFilled);
+		void DrawEllipse(const sdlgf::Camera& camera, float centerX, float centerY, float width, float height, sdlgf::Color color, bool isFilled);
+		void DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled);
+		void DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled);
 
 		/// <summary>
 		/// Draws an isoceles triangle pointing down, centered horizontally at centerX, spanning from topY to topY + height.
 		/// </summary>
-		void DrawTriangle(float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
-		void DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawTriangle(float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled);
+		void DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled);
 
 		/// <summary>
 		/// Draws a filled, textured convex polygon (as a triangle fan) in screen space.
 		/// </summary>
 		/// <param name="points">Boundary points of the polygon, in order.</param>
 		/// <param name="uvs">Texture coordinates matching each point in points.</param>
-		void DrawTexturedPolygon(const std::vector<D3DXVECTOR2>& points, const std::vector<D3DXVECTOR2>& uvs, sdlgf::Texture* texture, D3DCOLOR color = 0xFFFFFFFF);
+		void DrawTexturedPolygon(const std::vector<sdlgf::Vec2>& points, const std::vector<sdlgf::Vec2>& uvs, sdlgf::Texture* texture, sdlgf::Color color = 0xFFFFFFFF);
 
 	};
 };

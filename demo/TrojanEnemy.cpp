@@ -128,7 +128,7 @@ void Demo::TrojanEnemy::PatternVirusSpread(float projDamage) {
 		float baseAngleOffset = RNG::Range(0.f, 360.f) * (3.14159265f / 180.f);
 		for (int i = 0; i < BULLET_COUNT; i++) {
 			float angle = baseAngleOffset + (2.0f * 3.14159265f / BULLET_COUNT) * i;
-			D3DXVECTOR2 dir{ std::cos(angle), std::sin(angle) };
+			sdlgf::Vec2 dir{ std::cos(angle), std::sin(angle) };
 			float waveAmp = 4.0f;
 			float waveFreq = 0.5f;
 
@@ -177,7 +177,7 @@ void Demo::TrojanEnemy::PatternFanning(float projDamage)
 	for (int wave = 0; wave < WAVE_COUNT; wave++) {
 		for (int i = 0; i < BULLET_COUNT; i++) {
 			float angle = BASE_ANGLE - SPREAD_ANGLE / 2 + ANGLE_INCREMENT * i;
-			D3DXVECTOR2 dir{ std::cos(angle), std::sin(angle) };
+			sdlgf::Vec2 dir{ std::cos(angle), std::sin(angle) };
 			float jitterAngle = RNG::Range(0.f, 360.f) * (3.14159265f / 180.f);
 			float jitterDist = std::sqrt(RNG::Range(0.f, 1.f)) * JITTER_RADIUS;
 			float jitterX = std::cos(jitterAngle) * jitterDist;

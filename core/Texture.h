@@ -18,8 +18,8 @@ namespace sdlgf {
 		~Texture();
 		void OnLostDevice() override;
 		void OnResetDevice() override;
-		void CreatePlainTexture(D3DCOLOR color, UINT width, UINT height);
-		void SetColor(D3DCOLOR color);
+		void CreatePlainTexture(sdlgf::Color color, UINT width, UINT height);
+		void SetColor(sdlgf::Color color);
 		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
 		void LoadTexture(int resourceId, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
 		void CaptureCurrentBackBuffer();

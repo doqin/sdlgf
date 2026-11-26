@@ -12,10 +12,10 @@ namespace Demo {
         std::shared_ptr<sdlgf::FontSprite> fontSprite;
         float textScaleX = 1.0f;
         float textScaleY = 1.0f;
-        D3DCOLOR textColor = 0xFF111111;
-        D3DCOLOR disabledTextColor = 0xFF5A6078;
+        sdlgf::Color textColor = 0xFF111111;
+        sdlgf::Color disabledTextColor = 0xFF5A6078;
         bool hasOutline = false;
-        D3DCOLOR outlineColor = 0xFF000000;
+        sdlgf::Color outlineColor = 0xFF000000;
 
         float baseTextOffsetY = 0.0f;
         //Maps each state to its corresponding text offset
@@ -36,10 +36,10 @@ namespace Demo {
             std::shared_ptr<sdlgf::Texture> uiSheetTex, sdlgf::Font* font, const std::wstring& text, int frames = 3);
 
         void SetText(const std::wstring& text) { this->label = text; }
-        void SetTextColor(D3DCOLOR color) { this->textColor = color; }
-        void SetDisabledTextColor(D3DCOLOR color) { this->disabledTextColor = color; }
+        void SetTextColor(sdlgf::Color color) { this->textColor = color; }
+        void SetDisabledTextColor(sdlgf::Color color) { this->disabledTextColor = color; }
         void SetTextScale(float scaleX, float scaleY) { this->textScaleX = scaleX; this->textScaleY = scaleY; }
-        void SetTextOutline(bool outline, D3DCOLOR color = 0xFF000000) { this->hasOutline = outline; this->outlineColor = color; }
+        void SetTextOutline(bool outline, sdlgf::Color color = 0xFF000000) { this->hasOutline = outline; this->outlineColor = color; }
         void SetBaseTextOffsetY(float offset) { this->baseTextOffsetY = offset; }
         void SetStateOffsetY(ButtonState state, float offsetY) { this->stateOffsetsY[state] = offsetY; }
         void SetDynamicTextGetter(std::function<std::wstring()> getter) {

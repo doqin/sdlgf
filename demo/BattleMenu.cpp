@@ -149,7 +149,7 @@ namespace Demo {
 		float topEdge = -sh / 2.0f;
 
 		gd->SetAlphaBlending(true);
-		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, D3DCOLOR_ARGB(165, 0, 0, 0), true);
+		gd->DrawRectangle(*uiCamera, leftEdge, topEdge, sw, sh, COLOR_ARGB(165, 0, 0, 0), true);
 		gd->SetAlphaBlending(false);
 
 		btnResume->Draw(gd, deltaTime);

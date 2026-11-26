@@ -34,7 +34,7 @@ namespace Demo
 	}
 
 	//Draw functions for scene (to avoid code duplication)
-	void SettingsScene::DrawString(std::wstring text, float x, float y, D3DCOLOR color, DWORD format)
+	void SettingsScene::DrawString(std::wstring text, float x, float y, sdlgf::Color color, DWORD format)
 	{
 		int screenX = (int)(lastScreenWidth / 2.0f + x);
 		int screenY = (int)(lastScreenHeight / 2.0f + y);
@@ -52,7 +52,7 @@ namespace Demo
 
 		game->GetGraphicsDevice()->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF000000, true);
 
-		const D3DCOLOR polyColor = 0xFF9cdb43;
+		const sdlgf::Color polyColor = 0xFF9cdb43;
 
 		static float timeAcc = 0.0f;
 		timeAcc += static_cast<float>(deltaTime) * 0.001f;
@@ -411,7 +411,7 @@ namespace Demo
 			btn->SetAutoResize(true, 10.f);
 
 			btn->SetTextScale(1.0f, 1.0f);
-			btn->SetTextColor(D3DCOLOR_XRGB(0, 0, 0));
+			btn->SetTextColor(COLOR_XRGB(0, 0, 0));
 
 			Demo::TextIconButton* rawBtn = btn.get();
 
@@ -556,7 +556,7 @@ namespace Demo
 		if (SUCCEEDED(gd->BeginDraw())) {
 
 			gd->SetAlphaBlending(true);
-			gd->DrawRectangle(uiCamera, -lastScreenWidth / 2.f, -lastScreenHeight / 2.f, lastScreenWidth, lastScreenHeight, D3DCOLOR_ARGB(200, 0, 0, 0), true);
+			gd->DrawRectangle(uiCamera, -lastScreenWidth / 2.f, -lastScreenHeight / 2.f, lastScreenWidth, lastScreenHeight, COLOR_ARGB(200, 0, 0, 0), true);
 			gd->SetAlphaBlending(false);
 
 			float startY = -lastScreenHeight / 2.f + 64.f;
@@ -584,7 +584,7 @@ namespace Demo
 
 			auto sm = SettingsManager::GetInstance();
 
-			D3DCOLOR resColor = sm->GetFullscreen() ? 0xFF888888 : 0xFFFFFFFF;
+			sdlgf::Color resColor = sm->GetFullscreen() ? 0xFF888888 : 0xFFFFFFFF;
 			DrawString(Tr(L"Resolution"), LABEL_COLUMN_X, resRowY, resColor);
 
 			int resIdx = sm->GetCurrentResolutionIndex();

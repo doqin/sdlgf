@@ -200,7 +200,7 @@ namespace Demo {
 			}
 
 			// Calculate movement direction
-			D3DXVECTOR2 dir{ 0, 0 };
+			sdlgf::Vec2 dir{ 0, 0 };
 
 			if (currentState == State::Chase) {
 				float targetX = px;
@@ -228,8 +228,8 @@ namespace Demo {
 					}
 				}
 
-				D3DXVECTOR2 targetDir(targetX - ex, targetY - ey);
-				D3DXVec2Normalize(&dir, &targetDir);
+				sdlgf::Vec2 targetDir(targetX - ex, targetY - ey);
+				dir = sdlgf::Normalize(targetDir);
 			}
 			else if (currentState == State::Return) {
 				float targetX = startX;
@@ -246,8 +246,8 @@ namespace Demo {
 					}
 				}
 
-				D3DXVECTOR2 targetDir(targetX - ex, targetY - ey);
-				D3DXVec2Normalize(&dir, &targetDir);
+				sdlgf::Vec2 targetDir(targetX - ex, targetY - ey);
+				dir = sdlgf::Normalize(targetDir);
 			}
 
 			if (dir.x != 0 || dir.y != 0) {

@@ -144,7 +144,7 @@ void Demo::KeyboardNavigator::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf:
 				graphicsDevice->SetAlphaBlending(true);
 				float alphaPhase = (std::sin(sdlgf::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 				int alpha = static_cast<int>(alphaPhase * 80.0f);
-				D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
+				sdlgf::Color color = COLOR_ARGB(alpha, 255, 255, 255);
 				graphicsDevice->DrawRectangle(camera, c.x, c.y, c.width, c.height, color, true);
 				graphicsDevice->SetAlphaBlending(false);
 			}

@@ -10,14 +10,14 @@ namespace sdlgf {
 	protected:
 		GraphicsDevice* graphicsDevice = nullptr;
 		ID3DXSprite* p_sprite = nullptr;
-		D3DXVECTOR3 pos = { 0.0f, 0.0f, 0.0f };
-		D3DCOLOR color = 0xFFFFFFFF;
-		D3DXVECTOR2 scale = D3DXVECTOR2(1.0f, 1.0f);
+		sdlgf::Vec3 pos = { 0.0f, 0.0f, 0.0f };
+		sdlgf::Color color = 0xFFFFFFFF;
+		sdlgf::Vec2 scale = sdlgf::Vec2(1.0f, 1.0f);
 		float rotation = 0.0f;
-		D3DXVECTOR2 origin = D3DXVECTOR2(0.0f, 0.0f);
+		sdlgf::Vec2 origin = sdlgf::Vec2(0.0f, 0.0f);
 		bool needUpdate = true;
-		D3DXMATRIX localTransformMatrix;
-		D3DXMATRIX GetTransformMatrix();
+		sdlgf::Mat4 localTransformMatrix;
+		sdlgf::Mat4 GetTransformMatrix();
 	public:
 		ISprite(GraphicsDevice* graphicsDevice);
 		virtual ~ISprite();
@@ -53,16 +53,16 @@ namespace sdlgf {
 		float GetPositionX() const;
 		float GetPositionY() const;
 		float GetPositionZ() const;
-		D3DXVECTOR3 GetPosition() const;
+		sdlgf::Vec3 GetPosition() const;
 		//color (modulates the sprite, including alpha for opacity)
-		void SetColor(D3DCOLOR color);
-		D3DCOLOR GetColor() const;
+		void SetColor(sdlgf::Color color);
+		sdlgf::Color GetColor() const;
 		//scale
 		void SetScale(float s);
 		void SetScale(float sx, float sy); //stretch
 		void SetScaleX(float sx);
 		void SetScaleY(float sy);
-		D3DXVECTOR2 GetScale() const;
+		sdlgf::Vec2 GetScale() const;
 		//rotate
 		void SetRotation(float radians);
 		void Rotate(float radians);

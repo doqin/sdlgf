@@ -2,17 +2,17 @@
 #include "ISprite.h"
 #include "GraphicsDevice.h"
 
-D3DXMATRIX sdlgf::ISprite::GetTransformMatrix()
+sdlgf::Mat4 sdlgf::ISprite::GetTransformMatrix()
 {
 	if (needUpdate) {
-		D3DXMATRIX matOffset;
-		D3DXMATRIX matScale;
-		D3DXMATRIX matRotation;
-		D3DXMATRIX matTranslation;
-		D3DXMatrixScaling(&matScale, scale.x, scale.y, 1.0f);
-		D3DXMatrixRotationZ(&matRotation, rotation);		
-		D3DXMatrixTranslation(&matTranslation, pos.x, pos.y, pos.z);
-		D3DXMatrixTranslation(&matOffset, -origin.x, -origin.y, 0.0f);
+		sdlgf::Mat4 matOffset;
+		sdlgf::Mat4 matScale;
+		sdlgf::Mat4 matRotation;
+		sdlgf::Mat4 matTranslation;
+		matScale = sdlgf::Mat4::Scaling(scale.x, scale.y, 1.0f);
+		matRotation = sdlgf::Mat4::RotationZ(rotation);		
+		matTranslation = sdlgf::Mat4::Translation(pos.x, pos.y, pos.z);
+		matOffset = sdlgf::Mat4::Translation(-origin.x, -origin.y, 0.0f);
 		localTransformMatrix = matOffset * matScale * matRotation * matTranslation;
 		needUpdate = false;
 	}
@@ -20,7 +20,7 @@ D3DXMATRIX sdlgf::ISprite::GetTransformMatrix()
 }
 
 sdlgf::ISprite::ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
-	D3DXMatrixIdentity(&localTransformMatrix);
+	localTransformMatrix = sdlgf::Mat4::Identity();
 	if (graphicsDevice != nullptr) graphicsDevice->RegisterVolatileResource(this);
 }
 
@@ -46,12 +46,12 @@ void sdlgf::ISprite::Translate(
 	needUpdate = true;
 }
 
-void sdlgf::ISprite::SetColor(D3DCOLOR color)
+void sdlgf::ISprite::SetColor(sdlgf::Color color)
 {
 	this->color = color;
 }
 
-D3DCOLOR sdlgf::ISprite::GetColor() const
+sdlgf::Color sdlgf::ISprite::GetColor() const
 {
 	return color;
 }
@@ -104,7 +104,7 @@ float sdlgf::ISprite::GetPositionZ() const
 	return pos.z;
 }
 
-D3DXVECTOR3 sdlgf::ISprite::GetPosition() const
+sdlgf::Vec3 sdlgf::ISprite::GetPosition() const
 {
 	return pos;
 }
@@ -136,7 +136,7 @@ void sdlgf::ISprite::SetScaleY(float sy)
 	needUpdate = true;
 }
 
-D3DXVECTOR2 sdlgf::ISprite::GetScale() const
+sdlgf::Vec2 sdlgf::ISprite::GetScale() const
 {
 	return scale;
 }

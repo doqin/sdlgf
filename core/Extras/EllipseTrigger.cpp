@@ -7,12 +7,8 @@
 namespace {
 	constexpr float floatEpsilon = 0.000001f;
 
-	struct Vec2 {
-		float x;
-		float y;
-	};
+	using sdlgf::Vec2;
 
-	Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
 
 	Vec2 Rotate(const Vec2& v, float radians)
 	{

@@ -75,13 +75,13 @@ namespace Demo {
 		bool IsVisited(int cx, int cy) const;
 		bool WorldToCell(float worldX, float worldY, int& cx, int& cy) const;
 		void FillClipped(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float x0, float y0, float x1, float y1,
-			D3DCOLOR color, const ClipRect& clip) const;
+			sdlgf::Color color, const ClipRect& clip) const;
 		// screenOrigin = screen position of the grid's top-left corner, scale = pixels per tile
 		void DrawCells(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 			float scale, const ClipRect& clip) const;
 		void DrawMarkers(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 			float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers,
 			const TravelUI* travel = nullptr, TravelHits* hits = nullptr) const;
-		void DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color);
+		void DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, sdlgf::Color color);
 	};
 }

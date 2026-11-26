@@ -36,10 +36,10 @@ namespace Demo {
         float postBattleCooldown = 0.f;
 
         // queue to store footprints
-        std::deque<D3DXVECTOR2> chasePath;
-        std::deque<D3DXVECTOR2> returnPath;
-        D3DXVECTOR2 lastPlayerPos{ 0, 0 };
-        D3DXVECTOR2 lastEnemyPos{ 0, 0 };
+        std::deque<sdlgf::Vec2> chasePath;
+        std::deque<sdlgf::Vec2> returnPath;
+        sdlgf::Vec2 lastPlayerPos{ 0, 0 };
+        sdlgf::Vec2 lastEnemyPos{ 0, 0 };
 
         // simulated raycast function for hybrid ai
         bool CheckLineOfSight(float startX, float startY, float targetX, float targetY);

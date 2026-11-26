@@ -12,7 +12,7 @@ namespace Demo {
 		}
 	}
 
-	void ChapterTitleUI::Show(const std::wstring& title, const std::wstring& sub, float duration, D3DCOLOR tColor, D3DCOLOR sColor, D3DCOLOR shColor) {
+	void ChapterTitleUI::Show(const std::wstring& title, const std::wstring& sub, float duration, sdlgf::Color tColor, sdlgf::Color sColor, sdlgf::Color shColor) {
 		mainTitle = title;
 		subTitle = sub;
 		maxTime = duration;
@@ -63,10 +63,10 @@ namespace Demo {
 		int a = static_cast<int>((std::max)(0.f, (std::min)(255.f, alpha * 255.f)));
 		if (a <= 0) return;
 
-		D3DCOLOR alphaBits = static_cast<D3DCOLOR>(a) << 24;
-		D3DCOLOR finalTitleCol = alphaBits | (titleColor & 0x00FFFFFF);
-		D3DCOLOR finalSubCol = alphaBits | (subColor & 0x00FFFFFF);
-		D3DCOLOR finalShadowCol = alphaBits | (shadowColor & 0x00FFFFFF);
+		sdlgf::Color alphaBits = static_cast<sdlgf::Color>(a) << 24;
+		sdlgf::Color finalTitleCol = alphaBits | (titleColor & 0x00FFFFFF);
+		sdlgf::Color finalSubCol = alphaBits | (subColor & 0x00FFFFFF);
+		sdlgf::Color finalShadowCol = alphaBits | (shadowColor & 0x00FFFFFF);
 
 		fontSprite->Begin();
 		float scaleRat = 1.3f;

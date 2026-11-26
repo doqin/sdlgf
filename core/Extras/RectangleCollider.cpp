@@ -12,26 +12,10 @@ namespace {
 	constexpr float floatEpsilon = 0.000001f;
 	constexpr float rotationEpsilon = 0.0001f;
 
-	struct Vec2 {
-		float x;
-		float y;
-	};
+	using sdlgf::Vec2;
 
-	Vec2 operator+(const Vec2& a, const Vec2& b) { return { a.x + b.x, a.y + b.y }; }
-	Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
-	Vec2 operator*(const Vec2& v, float s) { return { v.x * s, v.y * s }; }
 
-	float Dot(const Vec2& a, const Vec2& b)
-	{
-		return a.x * b.x + a.y * b.y;
-	}
-
-	float LengthSq(const Vec2& v)
-	{
-		return v.x * v.x + v.y * v.y;
-	}
-
-	Vec2 Normalize(const Vec2& v)
+	Vec2 NormalizeWithFallback(const Vec2& v)
 	{
 		float lenSq = LengthSq(v);
 		if (lenSq <= floatEpsilon) {
@@ -72,10 +56,10 @@ namespace {
 	)
 	{
 		Vec2 axes[4] = {
-			Normalize(a[1] - a[0]),
-			Normalize(a[3] - a[0]),
-			Normalize(b[1] - b[0]),
-			Normalize(b[3] - b[0])
+			NormalizeWithFallback(a[1] - a[0]),
+			NormalizeWithFallback(a[3] - a[0]),
+			NormalizeWithFallback(b[1] - b[0]),
+			NormalizeWithFallback(b[3] - b[0])
 		};
 
 		float bestOverlap = (std::numeric_limits<float>::infinity)();

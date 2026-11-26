@@ -20,9 +20,9 @@ namespace Demo {
 		float bgOddRowShift = 0;
 		float bgEvenRowShift = 0;
 		int bgAnimPhase = 0;
-		D3DCOLOR bgBlinkColor = D3DCOLOR_XRGB(80, 80, 80);
-		D3DCOLOR bgBaseColor1 = D3DCOLOR_ARGB(0, 20, 20, 20);
-		D3DCOLOR bgBaseColor2 = 0xFF793a80;
+		sdlgf::Color bgBlinkColor = COLOR_XRGB(80, 80, 80);
+		sdlgf::Color bgBaseColor1 = COLOR_ARGB(0, 20, 20, 20);
+		sdlgf::Color bgBaseColor2 = 0xFF793a80;
 
 		void DrawCheckerBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 		void StartTrojanConversation();

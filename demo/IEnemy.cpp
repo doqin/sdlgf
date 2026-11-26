@@ -96,13 +96,13 @@ void Demo::IEnemy::UpdateDeath(unsigned long long deltaTime)
 	if (auto* body = GetBodySprite()) {
 		if (deathTimer < DEATH_FLASH_MS) {
 			// Sprite colour only modulates (can't brighten), so the flash is a hard red tint.
-			body->SetColor(D3DCOLOR_ARGB(255, 255, 70, 70));
+			body->SetColor(COLOR_ARGB(255, 255, 70, 70));
 		}
 		else {
 			const float fadeMs = 450.f;
 			float t = std::clamp((deathTimer - DEATH_FLASH_MS) / fadeMs, 0.f, 1.f);
 			BYTE a = static_cast<BYTE>(255.f * (1.f - t));
-			body->SetColor(D3DCOLOR_ARGB(a, 255, 70, 70));
+			body->SetColor(COLOR_ARGB(a, 255, 70, 70));
 			body->SetScale(deathBaseScale * (1.f - 0.4f * t));
 		}
 	}
@@ -149,7 +149,7 @@ void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* ca
 				*camera,
 				triggerLeft, triggerTop,
 				triggerW, triggerH,
-				0, 1, 1, 0, 0, D3DCOLOR_ARGB(80, 255, 240, 120), true);
+				0, 1, 1, 0, 0, COLOR_ARGB(80, 255, 240, 120), true);
 
 			Demo::DrawAnimatedDashedRectangle(
 				graphicsDevice,
@@ -200,7 +200,7 @@ void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* ca
 			}
 		}
 		else {
-			D3DCOLOR color = D3DCOLOR_ARGB(idleAlpha, 128, 128, 128);
+			sdlgf::Color color = COLOR_ARGB(idleAlpha, 128, 128, 128);
 			graphicsDevice->DrawRectangle(
 				*camera,
 				triggerLeft, triggerTop,
@@ -210,7 +210,7 @@ void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* ca
 			if (fontSprite) {
 				fontSprite->Begin();
 				fontSprite->SetOutline(true, 0xFF000000, 2.f);
-				fontSprite->SetColor(D3DCOLOR_ARGB((std::max)(idleAlpha, 140), 255, 230, 120));
+				fontSprite->SetColor(COLOR_ARGB((std::max)(idleAlpha, 140), 255, 230, 120));
 				std::wstring hintText = Tr(L"Click to get enemy card");
 				fontSprite->SetText(std::move(hintText));
 				float hintWidth = fontSprite->GetWidth();
@@ -310,7 +310,7 @@ void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* ca
 
 			fontSprite->End();
 			graphicsDevice->SetAlphaBlending(true);
-			graphicsDevice->DrawRectangle(*camera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
+			graphicsDevice->DrawRectangle(*camera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, COLOR_ARGB(220, 0, 0, 0), true);
 			fontSprite->Begin();
 
 			fontSprite->SetColor(0xFFFFFFFF);
@@ -342,13 +342,13 @@ namespace {
 	constexpr float DEBUFF_ICON_MS = 1000.f;
 	constexpr size_t DEBUFF_MAX_EFFECTS = 6;
 
-	D3DCOLOR WithAlpha(D3DCOLOR color, float alpha01)
+	sdlgf::Color WithAlpha(sdlgf::Color color, float alpha01)
 	{
 		const int a = static_cast<int>(255.f * std::clamp(alpha01, 0.f, 1.f));
-		return (color & 0x00FFFFFF) | (static_cast<D3DCOLOR>(a) << 24);
+		return (color & 0x00FFFFFF) | (static_cast<sdlgf::Color>(a) << 24);
 	}
 
-	void DrawRing(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float r, D3DCOLOR color, float thickness)
+	void DrawRing(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float r, sdlgf::Color color, float thickness)
 	{
 		constexpr int SEGMENTS = 28;
 		constexpr float TWO_PI = 6.2831853f;
@@ -360,7 +360,7 @@ namespace {
 		}
 	}
 
-	void DrawSquare(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float size, D3DCOLOR color)
+	void DrawSquare(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float size, sdlgf::Color color)
 	{
 		gd->DrawRectangle(camera, cx - size / 2.f, cy - size / 2.f, size, size, color, true);
 	}
@@ -526,7 +526,7 @@ bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
 	if (health < 0) health = 0;
 	CheckHurtLine();
 
-	D3DCOLOR textColor = 0xFFFFFFFF;
+	sdlgf::Color textColor = 0xFFFFFFFF;
 
 	if (type == DamageType::Poison) {
 		textColor = 0xFFba4aed; //purple
@@ -724,8 +724,8 @@ void Demo::IEnemy::DrawSpeech(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, 
 	const float fadeIn = (std::min)(1.f, speechElapsed / SPEECH_FADE_MS);
 	const float fadeOut = (std::min)(1.f, (SPEECH_SHOW_MS - speechElapsed) / SPEECH_FADE_MS);
 	const int alpha = static_cast<int>(255.f * (std::max)(0.f, (std::min)(fadeIn, fadeOut)));
-	const D3DCOLOR fill = D3DCOLOR_ARGB(alpha, 255, 255, 255);
-	const D3DCOLOR ink = D3DCOLOR_ARGB(alpha, 0, 0, 0);
+	const sdlgf::Color fill = COLOR_ARGB(alpha, 255, 255, 255);
+	const sdlgf::Color ink = COLOR_ARGB(alpha, 0, 0, 0);
 
 	speechFontSprite->SetMaxWidth(SPEECH_MAX_TEXT_W);
 	speechFontSprite->SetText(std::wstring(speechQueue.front().text));

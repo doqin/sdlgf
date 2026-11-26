@@ -192,7 +192,7 @@ namespace Demo {
 
 		gd->SetAlphaBlending(true);
 		gd->DrawRectangle(uiCamera, -screenW / 2.f, -screenH / 2.f, screenW, screenH,
-			D3DCOLOR_ARGB(190, 0, 0, 0), true);
+			COLOR_ARGB(190, 0, 0, 0), true);
 
 		// Caption (translated), wrapped to the panel width and centred above the artwork.
 		fontSprite->SetScale(1.f, 1.f);
@@ -244,7 +244,7 @@ namespace Demo {
 		const int hintAlpha = 150 + static_cast<int>(90.0 * (0.5 + 0.5 * std::sin(appearElapsed * 0.006)));
 		fontSprite->SetScale(1.f, 1.f);
 		fontSprite->SetText(Tr(L"Click / Space to continue"));
-		fontSprite->SetColor(D3DCOLOR_ARGB((std::min)(255, hintAlpha), 255, 255, 255));
+		fontSprite->SetColor(COLOR_ARGB((std::min)(255, hintAlpha), 255, 255, 255));
 		fontSprite->SetOutline(true, 0xFF000000, 2.f);
 		fontSprite->SetPosition(-fontSprite->GetWidth() / 2.f, gfxTop + gfxH + 18.f);
 		fontSprite->Begin();

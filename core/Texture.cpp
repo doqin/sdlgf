@@ -68,7 +68,7 @@ void sdlgf::Texture::OnResetDevice()
 	);
 }
 
-void sdlgf::Texture::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
+void sdlgf::Texture::CreatePlainTexture(sdlgf::Color color, UINT width, UINT height)
 {
 	SafeRelease(texture);
 	HRESULT result = graphicsDevice->GetDevice()->CreateTexture(
@@ -109,7 +109,7 @@ void sdlgf::Texture::CreatePlainTexture(D3DCOLOR color, UINT width, UINT height)
 	this->height = height;
 }
 
-void sdlgf::Texture::SetColor(D3DCOLOR color)
+void sdlgf::Texture::SetColor(sdlgf::Color color)
 {
 	if (texture == nullptr) {
 		throw std::runtime_error("Texture is null");

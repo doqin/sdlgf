@@ -18,7 +18,7 @@ namespace {
 		float y2,
 		float x3,
 		float y3,
-		D3DCOLOR color)
+		sdlgf::Color color)
 	{
 		auto d3ddev = graphicsDevice->GetDevice();
 		if (d3ddev == nullptr) {
@@ -49,10 +49,10 @@ void Demo::DrawAnimatedDashedLine(
 	float lastX,
 	float lastY,
 	float lineThickness,
-	D3DCOLOR lineColor,
+	sdlgf::Color lineColor,
 	bool drawOutline,
 	float outlineThickness,
-	D3DCOLOR outlineColor,
+	sdlgf::Color outlineColor,
 	float dashLength,
 	float dashDistance,
 	float animationSpeed,
@@ -106,7 +106,7 @@ void Demo::DrawAnimatedDashedLine(
 	}
 }
 
-void Demo::DrawAnimatedDashedLine(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float firstX, float firstY, float lastX, float lastY, float lineThickness, D3DCOLOR lineColor, bool drawOutline, float outlineThickness, D3DCOLOR outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
+void Demo::DrawAnimatedDashedLine(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float firstX, float firstY, float lastX, float lastY, float lineThickness, sdlgf::Color lineColor, bool drawOutline, float outlineThickness, sdlgf::Color outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	float camFirstX = firstX - camera.GetPosition().x + screenWidth / 2.f;
@@ -138,10 +138,10 @@ void Demo::DrawAnimatedDashedArrow(
 	float lastX,
 	float lastY,
 	float lineThickness,
-	D3DCOLOR lineColor,
+	sdlgf::Color lineColor,
 	bool drawOutline,
 	float outlineThickness,
-	D3DCOLOR outlineColor,
+	sdlgf::Color outlineColor,
 	float dashLength,
 	float dashDistance,
 	float animationSpeed,
@@ -214,7 +214,7 @@ void Demo::DrawAnimatedDashedArrow(
 		lineColor);
 }
 
-void Demo::DrawAnimatedDashedArrow(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float firstX, float firstY, float lastX, float lastY, float lineThickness, D3DCOLOR lineColor, bool drawOutline, float outlineThickness, D3DCOLOR outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick, float headLength, float headWidth)
+void Demo::DrawAnimatedDashedArrow(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float firstX, float firstY, float lastX, float lastY, float lineThickness, sdlgf::Color lineColor, bool drawOutline, float outlineThickness, sdlgf::Color outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick, float headLength, float headWidth)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	float camFirstX = firstX - camera.GetPosition().x + screenWidth / 2.f;
@@ -241,7 +241,7 @@ void Demo::DrawAnimatedDashedArrow(sdlgf::GraphicsDevice* graphicsDevice, sdlgf:
 	);
 }
 
-void Demo::DrawAnimatedDashedRectangle(sdlgf::GraphicsDevice* graphicsDevice, float x, float y, float width, float height, float lineThickness, D3DCOLOR lineColor, bool drawOutline, float outlineThickness, D3DCOLOR outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
+void Demo::DrawAnimatedDashedRectangle(sdlgf::GraphicsDevice* graphicsDevice, float x, float y, float width, float height, float lineThickness, sdlgf::Color lineColor, bool drawOutline, float outlineThickness, sdlgf::Color outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
 {
 	if (graphicsDevice == nullptr || lineThickness <= 0.0f || dashLength <= 0.0f || dashDistance < 0.0f) {
 		return;
@@ -252,7 +252,7 @@ void Demo::DrawAnimatedDashedRectangle(sdlgf::GraphicsDevice* graphicsDevice, fl
 	DrawAnimatedDashedLine(graphicsDevice, x, y + height, x, y, lineThickness, lineColor, drawOutline, outlineThickness, outlineColor, dashLength, dashDistance, animationSpeed, tick);
 }
 
-void Demo::DrawAnimatedDashedRectangle(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float x, float y, float width, float height, float lineThickness, D3DCOLOR lineColor, bool drawOutline, float outlineThickness, D3DCOLOR outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
+void Demo::DrawAnimatedDashedRectangle(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, float x, float y, float width, float height, float lineThickness, sdlgf::Color lineColor, bool drawOutline, float outlineThickness, sdlgf::Color outlineColor, float dashLength, float dashDistance, float animationSpeed, unsigned long long tick)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	float camX = x - camera.GetPosition().x + screenWidth / 2.f;
@@ -284,7 +284,7 @@ void Demo::DrawKeyboardTargetReticle(sdlgf::GraphicsDevice* graphicsDevice, sdlg
 	}
 
 	const float pad = 4.0f + 3.0f * std::sin(static_cast<float>(tick) * 0.004f);
-	const D3DCOLOR reticleColor = 0xFFFFD700;
+	const sdlgf::Color reticleColor = 0xFFFFD700;
 	const int thickness = 4;
 
 	const float rectX = x - pad;

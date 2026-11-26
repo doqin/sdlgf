@@ -74,7 +74,7 @@ void Demo::LabInsideScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned lo
 	const float segmentLength = 16.0f;
 	const float amplitude = 8.0f;
 	const float frequency = 0.08f;
-	const D3DCOLOR gridColor = 0xFF1b1c1b;
+	const sdlgf::Color gridColor = 0xFF1b1c1b;
 	static float waveTime = 0.0f;
 	waveTime += static_cast<float>(deltaTime) * 0.001f;
 	while (waveTime > 6.2831853f) {

@@ -102,7 +102,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 		if (auto lock = this->player.lock()) {
 			bool fromLeft = RNG::Range(0, 1) == 0;
 			float spawnX = fromLeft ? -SINE_SPAWN_X : SINE_SPAWN_X;
-			D3DXVECTOR2 dir(fromLeft ? 1.f : -1.f, 0.f);
+			sdlgf::Vec2 dir(fromLeft ? 1.f : -1.f, 0.f);
 			for (int i = 0; i < SINE_BULLETS; i++) {
 				float startY = (i - SINE_BULLETS / 2.f) * SINE_SPACING;
 				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, startY)

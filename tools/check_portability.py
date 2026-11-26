@@ -125,11 +125,39 @@ def main():
             else:
                 problems.append(f'{rel_path}:{line}: asset not found: "{norm}"')
 
+    problems.extend(check_system_header_shadowing())
+
     unique = sorted(set(problems))
     for p in unique:
         print(p)
     print(f'\n{len(unique)} problem(s) found.')
     return 1 if unique else 0
+
+
+# Headers that ship with compilers and SDKs. A project header whose name matches one of these
+# ignoring case (core/Math.h vs <math.h>) shadows it on case-insensitive filesystems
+# (Windows, default macOS) as soon as its directory is on the include path - which breaks
+# the standard library itself, not just our code.
+SYSTEM_HEADERS = {
+    'assert.h', 'complex.h', 'ctype.h', 'errno.h', 'fenv.h', 'float.h', 'inttypes.h', 'iso646.h',
+    'limits.h', 'locale.h', 'math.h', 'setjmp.h', 'signal.h', 'stdalign.h', 'stdarg.h', 'stdatomic.h',
+    'stdbool.h', 'stddef.h', 'stdint.h', 'stdio.h', 'stdlib.h', 'stdnoreturn.h', 'string.h', 'tgmath.h',
+    'threads.h', 'time.h', 'uchar.h', 'wchar.h', 'wctype.h', 'malloc.h', 'memory.h', 'process.h', 'io.h',
+    'direct.h', 'conio.h', 'search.h', 'share.h', 'tchar.h', 'excpt.h', 'unistd.h', 'fcntl.h', 'dirent.h',
+    'windows.h', 'winsock.h', 'winsock2.h', 'mmsystem.h', 'shellapi.h', 'commctrl.h', 'd3d9.h', 'dinput.h',
+    'xaudio2.h', 'objbase.h', 'basetsd.h', 'wtypes.h', 'rpc.h', 'guiddef.h', 'cderr.h', 'dde.h',
+    'direct.h', 'dos.h', 'ocidl.h', 'oleauto.h', 'pthread.h', 'regex.h', 'semaphore.h', 'syslog.h',
+}
+
+
+def check_system_header_shadowing():
+    found = []
+    for d in INCLUDE_DIRS:
+        base = os.path.join(ROOT, d)
+        for name in listing(base):
+            if name.lower() in SYSTEM_HEADERS and os.path.isfile(os.path.join(base, name)):
+                found.append(f'{d}/{name}: shadows the system header <{name.lower()}> on case-insensitive filesystems; rename it')
+    return found
 
 
 if __name__ == '__main__':

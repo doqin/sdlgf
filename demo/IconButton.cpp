@@ -89,7 +89,7 @@ void Demo::IconButton::SetSpriteScale(float scaleX, float scaleY)
 	if (this->sliceSprite) this->sliceSprite->SetScale(scaleX);
 }
 
-void Demo::IconButton::SetSpriteColor(D3DCOLOR color)
+void Demo::IconButton::SetSpriteColor(sdlgf::Color color)
 {
 	if (this->sprite) this->sprite->SetColor(color);
 	if (this->sliceSprite) this->sliceSprite->SetColor(color);

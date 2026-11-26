@@ -31,7 +31,7 @@ void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 	const auto gridSize = tmxMap.getTileSize(); // returns the size of a grid
 	const auto& tileSets = tmxMap.getTilesets();
 	const auto tintColour = layer.getTintColour();
-	D3DXCOLOR vertexColour(
+	sdlgf::ColorF vertexColour(
 		static_cast<float>(tintColour.r) / 0xFF,
 		static_cast<float>(tintColour.g) / 0xFF,
 		static_cast<float>(tintColour.b) / 0xFF,

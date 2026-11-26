@@ -63,7 +63,7 @@ namespace Demo {
 		// the shop greys out cards the player cannot afford.
 		void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y,
 			CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost,
-			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF);
+			float scale = 2.f, sdlgf::Color tint = 0xFFFFFFFF);
 
 		// Batched drawing. While collecting (DraggableManager::Draw turns it on), Queue() records a face
 		// instead of drawing it; FlushCollected() then draws everything queued with one pass over the
@@ -77,7 +77,7 @@ namespace Demo {
 		static void FlushCollected();
 		void Queue(const sdlgf::Camera& camera, float x, float y,
 			CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost,
-			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF, const RECT* scissor = nullptr);
+			float scale = 2.f, sdlgf::Color tint = 0xFFFFFFFF, const RECT* scissor = nullptr);
 
 	private:
 		struct Entry {
@@ -88,7 +88,7 @@ namespace Demo {
 			std::wstring inputs;
 			size_t cost;
 			float scale;
-			D3DCOLOR tint;
+			sdlgf::Color tint;
 			bool cropped;
 			RECT scissor;
 		};
@@ -118,9 +118,9 @@ namespace Demo {
 
 		// Draw one slice / label inside an already-begun sprite.
 		void DrawSlice(sdlgf::StaticSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-			RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint);
+			RECT src, float x, float y, float scaleX, float scaleY, sdlgf::Color tint);
 		void DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
-			const std::wstring& text, float x, float y, float scale, D3DCOLOR color, bool outlined, D3DCOLOR tint);
+			const std::wstring& text, float x, float y, float scale, sdlgf::Color color, bool outlined, sdlgf::Color tint);
 		// Draws `count` faces that share a camera and scissor state: one sheet pass, then one per font.
 		void DrawGroup(unsigned long long deltaTime, const Entry* entries, size_t count);
 		void FlushPending(std::vector<Entry>& entries);

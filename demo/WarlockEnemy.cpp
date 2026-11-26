@@ -116,7 +116,7 @@ void Demo::WarlockEnemy::PatternDarkVortex(float baseDamage, std::vector<std::sh
 						.SetDelay(0.2f)
 						.SetDecayTime(DECAY_TIME)
 						.SetVelocity(VELOCITY)
-						.SetTrajectory(D3DXVECTOR2(-std::cos(angle), -std::sin(angle)))
+						.SetTrajectory(sdlgf::Vec2(-std::cos(angle), -std::sin(angle)))
 						.SetDamage(finalDamage)
 					);
 				}
@@ -139,7 +139,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			projectiles.Spawn(
 				lock,
 				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, 512, 128)
-				.SetTrajectory(D3DXVECTOR2(-1, 1))
+				.SetTrajectory(sdlgf::Vec2(-1, 1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
 				.SetDecayTime(5.f)
@@ -157,7 +157,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			projectiles.Spawn(
 				lock,
 				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, -512, 128)
-				.SetTrajectory(D3DXVECTOR2(1, 1))
+				.SetTrajectory(sdlgf::Vec2(1, 1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
 				.SetDecayTime(5.f)
@@ -175,7 +175,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			projectiles.Spawn(
 				lock,
 				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, 512, -128)
-				.SetTrajectory(D3DXVECTOR2(-1, -1))
+				.SetTrajectory(sdlgf::Vec2(-1, -1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
 				.SetDecayTime(5.f)
@@ -193,7 +193,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			projectiles.Spawn(
 				lock,
 				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, -512, -128)
-				.SetTrajectory(D3DXVECTOR2(1, -1))
+				.SetTrajectory(sdlgf::Vec2(1, -1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
 				.SetDecayTime(5.f)

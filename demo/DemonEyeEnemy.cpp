@@ -111,7 +111,7 @@ void Demo::DemonEyeEnemy::PatternBloodRain(float baseDamage, std::vector<std::sh
 				projectiles.Spawn(
 					lock,
 					ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
-					.SetTrajectory(D3DXVECTOR2(0, 1))
+					.SetTrajectory(sdlgf::Vec2(0, 1))
 					.SetDelay(0.f)
 					.SetDecayTime(4.f)
 					.SetVelocity(BULLET_SPEED)
@@ -155,7 +155,7 @@ void Demo::DemonEyeEnemy::PatternBloodWall(float baseDamage, std::vector<std::sh
 					projectiles.Spawn(
 						lock,
 						ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
-						.SetTrajectory(D3DXVECTOR2(0, 1))
+						.SetTrajectory(sdlgf::Vec2(0, 1))
 						.SetDelay(0.f)
 						.SetDecayTime(BULLET_DECAY_TIME)
 						.SetVelocity(BULLET_SPEED)
@@ -197,7 +197,7 @@ void Demo::DemonEyeEnemy::PatternBloodCross(float baseDamage, std::vector<std::s
 				projectiles.Spawn(
 					lock,
 					ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
-					.SetTrajectory(D3DXVECTOR2(0.5f, 1.0f))
+					.SetTrajectory(sdlgf::Vec2(0.5f, 1.0f))
 					.SetDelay(0.f)
 					.SetDecayTime(4.f)
 					.SetVelocity(BULLET_SPEED)

@@ -21,6 +21,18 @@ target_include_directories(sdlgf_keys_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
 target_link_libraries(sdlgf_keys_test PRIVATE SDL3::SDL3)
 add_test(NAME keys COMMAND sdlgf_keys_test)
 
+# --- Math types (Vec/Mat/Colour); on Windows also compared against the real D3DX9 -----
+add_executable(sdlgf_math_test math_test.cpp)
+target_include_directories(sdlgf_math_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
+if(WIN32)
+    target_compile_definitions(sdlgf_math_test PRIVATE SDLGF_HAVE_D3DX)
+    target_link_libraries(sdlgf_math_test PRIVATE sdlgf_d3dx9)
+    add_custom_command(TARGET sdlgf_math_test POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different "${SDLGF_D3DX9_RUNTIME_DLL}" "$<TARGET_FILE_DIR:sdlgf_math_test>"
+        VERBATIM)
+endif()
+add_test(NAME math COMMAND sdlgf_math_test)
+
 # --- Application window + InputManager, headless (SDL "dummy" video driver) ---------
 add_executable(sdlgf_input_test input_test.cpp)
 target_link_libraries(sdlgf_input_test PRIVATE sdlgf::core)

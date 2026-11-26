@@ -192,7 +192,7 @@ namespace Demo {
 		bool IsSoldOut(const ShopItem& item) const { return PurchasesLeft(item) == 0; }
 		// "Owned: N" (Buy) or "xN" (Sell), plus "Left: x/y" on a limited row. Drawn on its own line
 		// under the row's name or card face; empty when there is nothing to show.
-		std::wstring GetCountLabel(const ShopItem& item, D3DCOLOR& color) const;
+		std::wstring GetCountLabel(const ShopItem& item, sdlgf::Color& color) const;
 		// Draws the "STATUS EFFECTS" tab for a card row that applies any. It drops down from under the
 		// hovered row (rowY), or opens above it when there is no room before maxY; never above minY.
 		void DrawStatusTab(const ShopItem& item, float rowY, float boxX, float boxW, float minY, float maxY,

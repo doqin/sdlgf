@@ -98,7 +98,7 @@ void Demo::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderMa
 	collider->SetOriginCenter();
 	// Create footprint particle emitter
 	footprintTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	footprintTexture->CreatePlainTexture(D3DCOLOR_ARGB(160, 90, 70, 50), 4, 4);
+	footprintTexture->CreatePlainTexture(COLOR_ARGB(160, 90, 70, 50), 4, 4);
 	footprintEmitter = std::make_unique<sdlgf::ParticleSystem>(footprintTexture.get(), 32);
 	footprintEmitter->SetOrigin(2, 2);
 	sdlgf::ConfigureFootprintEmitter(*footprintEmitter);
@@ -115,7 +115,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	int keyLeft = sm->GetKeybind("MOVE_LEFT");
 	int keyRight = sm->GetKeybind("MOVE_RIGHT");
 	// Movement
-	D3DXVECTOR2 dir{ 0, 0 };
+	sdlgf::Vec2 dir{ 0, 0 };
 	if (inpMan->KeyPress(keyRight)) dir.x += 1;
 	if (inpMan->KeyPress(keyLeft))  dir.x -= 1;
 	if (inpMan->KeyPress(keyDown))  dir.y += 1;
@@ -132,9 +132,9 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	if (dir.x == 1 && dir.y == -1) state = State::UpRight;
 	if (dir.x == -1 && dir.y == 1) state = State::DownLeft;
 	if (dir.x == -1 && dir.y == -1) state = State::UpLeft;
-	D3DXVECTOR2 dirNorm;
-	D3DXVec2Normalize(&dirNorm, &dir);
-	D3DXVECTOR2 moveDir = dirNorm; // unscaled direction, used for footprint placement
+	sdlgf::Vec2 dirNorm;
+	dirNorm = sdlgf::Normalize(dir);
+	sdlgf::Vec2 moveDir = dirNorm; // unscaled direction, used for footprint placement
 	bool isRunning = false;
 	// "Shift to sprint": holding the key speeds up. "Shift to slow": sprint speed is the default and holding the key slows to normal.
 	const bool shiftHeld = inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("SPRINT"));
@@ -210,7 +210,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	}
 	// Footprint particles, spawned at the collider (feet) position, alternating left/right
 	auto [colliderX, colliderY] = collider->GetWorldPosition();
-	D3DXVECTOR2 perp{ -moveDir.y, moveDir.x };
+	sdlgf::Vec2 perp{ -moveDir.y, moveDir.x };
 	float footSign = nextFootLeft ? -1.f : 1.f;
 	float footX = colliderX + perp.x * FOOTPRINT_OFFSET * footSign;
 	float footY = colliderY + perp.y * FOOTPRINT_OFFSET * footSign;
@@ -221,7 +221,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 	if (followCamera) {
 		auto cameraPos = camera->GetPosition();
 		auto [playerPosX, playerPosY] = GetLocalPosition();
-		D3DXVECTOR2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y };
+		sdlgf::Vec2 vec{ playerPosX - cameraPos.x, playerPosY - cameraPos.y };
 		const float EPSILON = 0.0001f;
 		const float CAMERA_EASE_IN_TIME_MS = 220.f;
 		const float CAMERA_EASE_OUT_DISTANCE = 64.f;
@@ -320,7 +320,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 
 	if (showVisuals && !IsDead()) {
 		drawDrone(activeGearAnim, 0.0f, true);
-		drawDrone(passiveGearAnim, D3DX_PI, true);
+		drawDrone(passiveGearAnim, sdlgf::Pi, true);
 	}
 
 	if (!isInvincible || static_cast<int>(timeSinceTurnedInvincible / BLINKING_DURATION) % 2) {
@@ -468,7 +468,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 
 	if (showVisuals && !IsDead()) {
 		drawDrone(activeGearAnim, 0.0f, false);
-		drawDrone(passiveGearAnim, D3DX_PI, false);
+		drawDrone(passiveGearAnim, sdlgf::Pi, false);
 	}
 
 	collider->Draw(graphicsDevice, *camera);
@@ -479,11 +479,11 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 		const float haloD = d + 8.f;
 		graphicsDevice->SetAlphaBlending(true);
 		// soft red halo and a bright ring around the exact hitbox so it reads against the sprite
-		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, D3DCOLOR_ARGB(110, 255, 40, 40), true);
-		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, D3DCOLOR_ARGB(255, 255, 255, 255), false);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, COLOR_ARGB(110, 255, 40, 40), true);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, haloD, haloD, COLOR_ARGB(255, 255, 255, 255), false);
 		// the hitbox itself: solid white core with a red edge
-		graphicsDevice->DrawEllipse(*camera, hx, hy, d, d, D3DCOLOR_ARGB(255, 255, 255, 255), true);
-		graphicsDevice->DrawEllipse(*camera, hx, hy, d + 1.f, d + 1.f, D3DCOLOR_ARGB(255, 255, 0, 0), false);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, d, d, COLOR_ARGB(255, 255, 255, 255), true);
+		graphicsDevice->DrawEllipse(*camera, hx, hy, d + 1.f, d + 1.f, COLOR_ARGB(255, 255, 0, 0), false);
 		graphicsDevice->SetAlphaBlending(false);
 	}
 }

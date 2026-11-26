@@ -744,13 +744,13 @@ void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const
 	bottom = actionBarY - ENEMY_GRID_BOTTOM_PAD;
 }
 
-std::vector<D3DXVECTOR2> Demo::IBattleScene::BuildEnemyGridSlots() const
+std::vector<sdlgf::Vec2> Demo::IBattleScene::BuildEnemyGridSlots() const
 {
-	std::vector<D3DXVECTOR2> slots;
+	std::vector<sdlgf::Vec2> slots;
 	if (enemies.empty()) {
 		return slots;
 	}
-	slots.resize(enemies.size(), D3DXVECTOR2{ 0.f, 0.f });
+	slots.resize(enemies.size(), sdlgf::Vec2{ 0.f, 0.f });
 
 	const auto app = sdlgf::Application::GetInstance();
 	const float screenWidth = static_cast<float>(app->GetScreenWidth());
@@ -853,10 +853,10 @@ std::vector<D3DXVECTOR2> Demo::IBattleScene::BuildEnemyGridSlots() const
 		const float squeeze = (span > available && span > 0.f) ? available / span : 1.f;
 
 		float y = columnTop(column) + (available - span * squeeze) / 2.f;
-		slots[column.front()] = D3DXVECTOR2{ columnX, y };
+		slots[column.front()] = sdlgf::Vec2{ columnX, y };
 		for (size_t k = 1; k < column.size(); ++k) {
 			y += ((bodyHeight(column[k - 1]) + bodyHeight(column[k])) / 2.f + ENEMY_GRID_ROW_GAP) * squeeze;
-			slots[column[k]] = D3DXVECTOR2{ columnX, y };
+			slots[column[k]] = sdlgf::Vec2{ columnX, y };
 		}
 	}
 
@@ -878,9 +878,9 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 	const size_t enemyCount = enemies.size();
 
 	// PlayerAttack is the phase the player reads and clicks through, so it gets the full grid.
-	const std::vector<D3DXVECTOR2> gridSlots = (targetState != State::PlayerStandBy && targetState != State::EnemyAttack)
+	const std::vector<sdlgf::Vec2> gridSlots = (targetState != State::PlayerStandBy && targetState != State::EnemyAttack)
 		? BuildEnemyGridSlots()
-		: std::vector<D3DXVECTOR2>{};
+		: std::vector<sdlgf::Vec2>{};
 
 	// The standby row and the off-screen attack queue keep their single-line arrangement, but
 	// both used to run off the edge once enough enemies were alive. Clamp their pitch to fit.
@@ -1345,8 +1345,8 @@ void Demo::IBattleScene::DrawAttackCountdown(unsigned long long deltaTime)
 	fontSprite->Begin();
 	fontSprite->SetScale(scale);
 	fontSprite->SetBold(true);
-	fontSprite->SetOutline(true, D3DCOLOR_ARGB(alphaByte, 0, 0, 0), 4.f);
-	fontSprite->SetColor(D3DCOLOR_ARGB(alphaByte, 255, 60, 60));
+	fontSprite->SetOutline(true, COLOR_ARGB(alphaByte, 0, 0, 0), 4.f);
+	fontSprite->SetColor(COLOR_ARGB(alphaByte, 255, 60, 60));
 	fontSprite->SetText(std::move(text));
 
 	const float textWidth = fontSprite->GetWidth();
@@ -1385,7 +1385,7 @@ void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
 
 	constexpr int WEDGE_COUNT = 128;
 	constexpr float PI_LOCAL = 3.14159265359f;
-	const D3DCOLOR overlayColor = D3DCOLOR_ARGB(200, 5, 5, 10);
+	const sdlgf::Color overlayColor = COLOR_ARGB(200, 5, 5, 10);
 
 	gd->SetAlphaBlending(true);
 
@@ -1413,7 +1413,7 @@ void Demo::IBattleScene::DrawVisionDebuffOverlay(unsigned long long deltaTime)
 
 		const float t = static_cast<float>(ring + 1) / GRADIENT_RINGS;
 		const int alpha = static_cast<int>(MAX_RING_ALPHA * (t * t));
-		const D3DCOLOR bandColor = D3DCOLOR_ARGB(alpha, 5, 5, 10);
+		const sdlgf::Color bandColor = COLOR_ARGB(alpha, 5, 5, 10);
 
 		const float bandWidth = 2.f * outerR * std::sin(PI_LOCAL / WEDGE_COUNT) * 1.15f;
 		for (int i = 0; i < WEDGE_COUNT; ++i) {
@@ -2396,7 +2396,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		enemyCardRemoveAreaY - outline,
 		enemyCardRemoveAreaWidth + (outline * 2),
 		enemyCardRemoveAreaHeight + (outline * 2),
-		D3DXCOLOR(0.f, 0.f, 0.f, 1.f),
+		sdlgf::ColorF(0.f, 0.f, 0.f, 1.f),
 		true
 	);
 
@@ -2406,17 +2406,17 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 		enemyCardRemoveAreaY,
 		enemyCardRemoveAreaWidth,
 		enemyCardRemoveAreaHeight,
-		D3DXCOLOR(0.7f, 0.1f, 0.1f, 1.0f),
+		sdlgf::ColorF(0.7f, 0.1f, 0.1f, 1.0f),
 		true
 	);
 
 	if (IsDraggingAnyEnemyCard()) {
 		const unsigned long long tick = sdlgf::Platform::GetTicksMs();
-		D3DCOLOR dashColor = 0xFFFFFFFF;
+		sdlgf::Color dashColor = 0xFFFFFFFF;
 		if (IsDraggingEnemyCardOverRemoveArea()) {
 			const float phase = static_cast<float>(tick % 1000) / 1000.f; // one blink per second
-			const float pulse = (std::sin(phase * 2.f * D3DX_PI) + 1.f) * 0.5f;
-			dashColor = D3DCOLOR_ARGB(120 + static_cast<int>(135.f * pulse), 255, 230, 120);
+			const float pulse = (std::sin(phase * 2.f * sdlgf::Pi) + 1.f) * 0.5f;
+			dashColor = COLOR_ARGB(120 + static_cast<int>(135.f * pulse), 255, 230, 120);
 		}
 		const float pad = 4.f;
 
@@ -2832,9 +2832,9 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsD
 	constexpr float CELL_W = 18.f, CELL_H = 24.f, CELL_BORDER = 2.f;
 	constexpr float ROW_H = CELL_H + 2.f * CELL_BORDER;
 	constexpr float GAP = 8.f;
-	constexpr D3DCOLOR PANEL_OUTLINE = 0xFF262620, PANEL_FRAME = 0xFFd8d5a8;
-	constexpr D3DCOLOR PANEL_BG = 0xFF7e7ec6, PANEL_BG_ALT = 0xFF8d8dd4;
-	constexpr D3DCOLOR CELL_BG = 0xFF141410, DIGIT_COLOR = 0xFFf0eeda, DIGIT_COLOR_LOW = 0xFFff5a3c;
+	constexpr sdlgf::Color PANEL_OUTLINE = 0xFF262620, PANEL_FRAME = 0xFFd8d5a8;
+	constexpr sdlgf::Color PANEL_BG = 0xFF7e7ec6, PANEL_BG_ALT = 0xFF8d8dd4;
+	constexpr sdlgf::Color CELL_BG = 0xFF141410, DIGIT_COLOR = 0xFFf0eeda, DIGIT_COLOR_LOW = 0xFFff5a3c;
 
 	const float hp = battlePlayer->GetHealth();
 	const std::wstring hpValue = std::to_wstring(static_cast<int>(hp));
@@ -2946,7 +2946,7 @@ void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float scre
 	auto [worldDrawX, worldDrawY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, targetScreenX, targetScreenY);
 
 	gd->SetAlphaBlending(true);
-	gd->DrawRectangle(this->uiCamera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
+	gd->DrawRectangle(this->uiCamera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, COLOR_ARGB(220, 0, 0, 0), true);
 	gd->SetAlphaBlending(false);
 
 	fontSprite->SetColor(0xFFFFFFFF);
@@ -3979,7 +3979,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 			const float segmentLength = 16.0f;
 			const float amplitude = 12.0f;
 			const float frequency = 0.05f;
-			const D3DCOLOR gridColor = 0xFF9cdb43;
+			const sdlgf::Color gridColor = 0xFF9cdb43;
 			static float waveTime = 0.0f;
 			waveTime += static_cast<float>(deltaTime) * 0.002f;
 			while (waveTime > 6.2831853f) {
@@ -4009,7 +4009,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 			float screenHeight = static_cast<float>(app->GetScreenHeight());
 			const int dimAlphaByte = static_cast<int>(backgroundDimAlpha * 255.f);
 			gd->SetAlphaBlending(true);
-			gd->DrawRectangle(0.f, 0.f, screenWidth, screenHeight, D3DCOLOR_ARGB(dimAlphaByte, 0, 0, 0), true);
+			gd->DrawRectangle(0.f, 0.f, screenWidth, screenHeight, COLOR_ARGB(dimAlphaByte, 0, 0, 0), true);
 			gd->SetAlphaBlending(false);
 		}
 
@@ -4033,7 +4033,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 				float screenW = static_cast<float>(app->GetScreenWidth());
 				float screenH = static_cast<float>(app->GetScreenHeight());
 				gd->SetAlphaBlending(true);
-				gd->DrawRectangle(camera, -screenW / 2, -screenH / 2, screenW, screenH, D3DCOLOR_ARGB(150, 0, 0, 0), true);
+				gd->DrawRectangle(camera, -screenW / 2, -screenH / 2, screenW, screenH, COLOR_ARGB(150, 0, 0, 0), true);
 				gd->SetAlphaBlending(false);
 			}
 			DrawDiscardEnemyCardArea(deltaTime);
@@ -4164,11 +4164,11 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 			//disable
 			if (isFlawlessCompleted) {
-				energyTokenUI->SetColor(D3DCOLOR_ARGB(255, 120, 120, 120));
-				fontSprite->SetColor(D3DCOLOR_ARGB(255, 150, 150, 150));
+				energyTokenUI->SetColor(COLOR_ARGB(255, 120, 120, 120));
+				fontSprite->SetColor(COLOR_ARGB(255, 150, 150, 150));
 			}
 			else {
-				energyTokenUI->SetColor(D3DCOLOR_ARGB(255, 255, 255, 255));
+				energyTokenUI->SetColor(COLOR_ARGB(255, 255, 255, 255));
 				fontSprite->SetColor(0xFFFFFFFF);
 			}
 
@@ -4226,7 +4226,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 				auto [worldX, worldY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, targetScX, targetScY);
 
 				gd->SetAlphaBlending(true);
-				gd->DrawRectangle(this->uiCamera, worldX, worldY, ttW, ttH, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
+				gd->DrawRectangle(this->uiCamera, worldX, worldY, ttW, ttH, 0, 1, 1, 0, 0, COLOR_ARGB(220, 0, 0, 0), true);
 				gd->SetAlphaBlending(false);
 
 				fontSprite->SetColor(0xFFFFFFFF);
@@ -4266,7 +4266,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			const int alpha = static_cast<int>((std::min)(1.0f, defeatFadeAlpha) * 255.f);
 
 			gd->SetAlphaBlending(true);
-			gd->DrawRectangle(uiCamera, -w / 2.f, -h / 2.f, w, h, D3DCOLOR_ARGB(alpha, 0, 0, 0), true);
+			gd->DrawRectangle(uiCamera, -w / 2.f, -h / 2.f, w, h, COLOR_ARGB(alpha, 0, 0, 0), true);
 			gd->SetAlphaBlending(false);
 		}
 		DrawAttackCountdown(deltaTime);

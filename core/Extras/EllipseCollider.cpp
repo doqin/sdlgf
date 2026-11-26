@@ -12,26 +12,10 @@ namespace {
 	constexpr float pi = 3.14159265358979323846f;
 	constexpr int overlapSamples = 48;
 
-	struct Vec2 {
-		float x;
-		float y;
-	};
+	using sdlgf::Vec2;
 
-	Vec2 operator+(const Vec2& a, const Vec2& b) { return { a.x + b.x, a.y + b.y }; }
-	Vec2 operator-(const Vec2& a, const Vec2& b) { return { a.x - b.x, a.y - b.y }; }
-	Vec2 operator*(const Vec2& v, float s) { return { v.x * s, v.y * s }; }
 
-	float Dot(const Vec2& a, const Vec2& b)
-	{
-		return a.x * b.x + a.y * b.y;
-	}
-
-	float LengthSq(const Vec2& v)
-	{
-		return v.x * v.x + v.y * v.y;
-	}
-
-	Vec2 Normalize(const Vec2& v)
+	Vec2 NormalizeWithFallback(const Vec2& v)
 	{
 		float lenSq = LengthSq(v);
 		if (lenSq <= floatEpsilon) {
@@ -198,7 +182,7 @@ std::optional<std::tuple<float, float>> sdlgf::EllipseCollider::IsIntersecting(s
 			if (LengthSq(dir) <= floatEpsilon) {
 				dir = { newX - currentX, newY - currentY };
 			}
-			dir = Normalize(dir);
+			dir = NormalizeWithFallback(dir);
 
 			float selfRadius = (std::max)(width * std::abs(GetWorldScaleX()), height * std::abs(GetWorldScaleY())) * 0.5f;
 			float otherRadius = (std::max)(ellipseCollider->width * std::abs(ellipseCollider->GetWorldScaleX()), ellipseCollider->height * std::abs(ellipseCollider->GetWorldScaleY())) * 0.5f;

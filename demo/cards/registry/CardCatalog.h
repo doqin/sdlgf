@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d9.h>
+#include "MathTypes.h"
 #include <string>
 #include <vector>
 
@@ -25,7 +25,7 @@ namespace Demo::CardCatalog {
 	Rarity RarityForPrice(int price);
 	Rarity GetRarity(const std::string& cardSaveID);
 
-	D3DCOLOR RarityColor(Rarity rarity);
+	sdlgf::Color RarityColor(Rarity rarity);
 	std::wstring RarityName(Rarity rarity);
 
 	// Every card that has a price, sorted, deduplicated.

@@ -5,33 +5,33 @@
 namespace sdlgf {
 
 	namespace {
-		BYTE ChannelA(D3DCOLOR c) { return (BYTE)((c >> 24) & 0xFF); }
-		BYTE ChannelR(D3DCOLOR c) { return (BYTE)((c >> 16) & 0xFF); }
-		BYTE ChannelG(D3DCOLOR c) { return (BYTE)((c >> 8) & 0xFF); }
-		BYTE ChannelB(D3DCOLOR c) { return (BYTE)(c & 0xFF); }
+		BYTE ChannelA(sdlgf::Color c) { return (BYTE)((c >> 24) & 0xFF); }
+		BYTE ChannelR(sdlgf::Color c) { return (BYTE)((c >> 16) & 0xFF); }
+		BYTE ChannelG(sdlgf::Color c) { return (BYTE)((c >> 8) & 0xFF); }
+		BYTE ChannelB(sdlgf::Color c) { return (BYTE)(c & 0xFF); }
 
-		D3DCOLOR ModulateColor(D3DCOLOR a, D3DCOLOR b) {
+		sdlgf::Color ModulateColor(sdlgf::Color a, sdlgf::Color b) {
 			BYTE alpha = (BYTE)(ChannelA(a) * ChannelA(b) / 255);
 			BYTE red = (BYTE)(ChannelR(a) * ChannelR(b) / 255);
 			BYTE green = (BYTE)(ChannelG(a) * ChannelG(b) / 255);
 			BYTE blue = (BYTE)(ChannelB(a) * ChannelB(b) / 255);
-			return D3DCOLOR_ARGB(alpha, red, green, blue);
+			return COLOR_ARGB(alpha, red, green, blue);
 		}
 
-		D3DCOLOR ScaleAlpha(D3DCOLOR c, float factor) {
+		sdlgf::Color ScaleAlpha(sdlgf::Color c, float factor) {
 			factor = std::clamp(factor, 0.f, 1.f);
 			BYTE alpha = (BYTE)(ChannelA(c) * factor);
-			return D3DCOLOR_ARGB(alpha, ChannelR(c), ChannelG(c), ChannelB(c));
+			return COLOR_ARGB(alpha, ChannelR(c), ChannelG(c), ChannelB(c));
 		}
 	}
 
-	D3DCOLOR ParticleSystem::LerpColor(D3DCOLOR a, D3DCOLOR b, float t) const {
+	sdlgf::Color ParticleSystem::LerpColor(sdlgf::Color a, sdlgf::Color b, float t) const {
 		t = std::clamp(t, 0.f, 1.f);
 		BYTE alpha = (BYTE)(ChannelA(a) + (ChannelA(b) - ChannelA(a)) * t);
 		BYTE red = (BYTE)(ChannelR(a) + (ChannelR(b) - ChannelR(a)) * t);
 		BYTE green = (BYTE)(ChannelG(a) + (ChannelG(b) - ChannelG(a)) * t);
 		BYTE blue = (BYTE)(ChannelB(a) + (ChannelB(b) - ChannelB(a)) * t);
-		return D3DCOLOR_ARGB(alpha, red, green, blue);
+		return COLOR_ARGB(alpha, red, green, blue);
 	}
 
 	ParticleSystem::ParticleSystem(Texture* texture, size_t maxParticles) : texture(texture) {
@@ -64,7 +64,7 @@ namespace sdlgf {
 		this->endScale = endScale;
 	}
 
-	void ParticleSystem::SetColorRange(D3DCOLOR startColor, D3DCOLOR endColor) {
+	void ParticleSystem::SetColorRange(sdlgf::Color startColor, sdlgf::Color endColor) {
 		this->startColor = startColor;
 		this->endColor = endColor;
 	}
@@ -84,7 +84,7 @@ namespace sdlgf {
 	}
 
 	bool ParticleSystem::Update(unsigned long long deltaTime, float x, float y, float rotation,
-		float scaleX, float scaleY, D3DCOLOR tint, bool active) {
+		float scaleX, float scaleY, sdlgf::Color tint, bool active) {
 		// Per-tick velocity damping. Tuned for ~60fps ticks; particles carrying no velocity
 		// (the timer-driven emitters) are unaffected.
 		constexpr float kDrag = 0.90f;
@@ -110,7 +110,7 @@ namespace sdlgf {
 		return false;
 	}
 
-	void ParticleSystem::Spawn(float x, float y, float rotation, float scaleX, float scaleY, D3DCOLOR tint,
+	void ParticleSystem::Spawn(float x, float y, float rotation, float scaleX, float scaleY, sdlgf::Color tint,
 		float vx, float vy) {
 		for (auto& particle : pool) {
 			if (particle.isActive) continue;
@@ -135,7 +135,7 @@ namespace sdlgf {
 
 			float t = lifeTime > 0.f ? particle.age / lifeTime : 1.f;
 			float scale = startScale + (endScale - startScale) * std::clamp(t, 0.f, 1.f);
-			D3DCOLOR color = ModulateColor(LerpColor(startColor, endColor, t), particle.tint);
+			sdlgf::Color color = ModulateColor(LerpColor(startColor, endColor, t), particle.tint);
 
 			float lifeRemaining = lifeTime - particle.age;
 			if (fadeOutTime > 0.f && lifeRemaining < fadeOutTime) {
@@ -172,7 +172,7 @@ namespace sdlgf {
 		particleSystem.SetLifeTime(250.f);
 		particleSystem.SetFadeOutTime(250.f);
 		particleSystem.SetScaleRange(1.f, 1.f);
-		particleSystem.SetColorRange(D3DCOLOR_ARGB(120, 200, 220, 255), D3DCOLOR_ARGB(0, 200, 220, 255));
+		particleSystem.SetColorRange(COLOR_ARGB(120, 200, 220, 255), COLOR_ARGB(0, 200, 220, 255));
 	}
 
 	void ConfigureExplosionEmitter(ParticleSystem& particleSystem) {

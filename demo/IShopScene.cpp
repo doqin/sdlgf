@@ -45,15 +45,15 @@ namespace {
 	constexpr float TITLE_SCALE = 1.25f;
 	constexpr float GOLD_SCALE = 1.25f;
 
-	constexpr D3DCOLOR COLOR_GOLD = 0xFFFFD700;
-	constexpr D3DCOLOR COLOR_TEXT = 0xFFFFFFFF;
-	constexpr D3DCOLOR COLOR_TEXT_DIM = 0xFF909090;
-	constexpr D3DCOLOR COLOR_PRICE_BAD = 0xFFFF5555;
-	constexpr D3DCOLOR COLOR_STATUS = 0xFF00FFFF;
-	constexpr D3DCOLOR COLOR_DIVIDER = 0x66FFFFFF;
-	constexpr D3DCOLOR COLOR_BTN_DISABLED = 0xFF707070;
-	constexpr D3DCOLOR COLOR_FACE_DISABLED = 0xFF808080;
-	constexpr D3DCOLOR COLOR_OWNED = 0xFFB4F5C3;
+	constexpr sdlgf::Color COLOR_GOLD = 0xFFFFD700;
+	constexpr sdlgf::Color COLOR_TEXT = 0xFFFFFFFF;
+	constexpr sdlgf::Color COLOR_TEXT_DIM = 0xFF909090;
+	constexpr sdlgf::Color COLOR_PRICE_BAD = 0xFFFF5555;
+	constexpr sdlgf::Color COLOR_STATUS = 0xFF00FFFF;
+	constexpr sdlgf::Color COLOR_DIVIDER = 0x66FFFFFF;
+	constexpr sdlgf::Color COLOR_BTN_DISABLED = 0xFF707070;
+	constexpr sdlgf::Color COLOR_FACE_DISABLED = 0xFF808080;
+	constexpr sdlgf::Color COLOR_OWNED = 0xFFB4F5C3;
 
 	// Status cover geometry, mirrored from IStatementCard's private constants of the same name
 	// so the shop's cover panel matches the one cards draw in battle pixel-for-pixel.
@@ -78,10 +78,10 @@ namespace {
 	constexpr RECT ROW_HOVER_SRC = { 0, 0, 32, 32 };         // basic_blackwhite, tinted
 	constexpr RECT DESC_SRC = { 0, 0, 32, 32 };              // basic_blackwhite, tinted
 
-	constexpr D3DCOLOR TINT_PANEL_FILL = 0xFF232331;
-	constexpr D3DCOLOR TINT_ROW_HOVER = 0xFF4E6FA8;
-	constexpr D3DCOLOR TINT_DESC = 0xFF15151F;
-	constexpr D3DCOLOR TINT_STATUS_TAB = 0xFF1E2A40;
+	constexpr sdlgf::Color TINT_PANEL_FILL = 0xFF232331;
+	constexpr sdlgf::Color TINT_ROW_HOVER = 0xFF4E6FA8;
+	constexpr sdlgf::Color TINT_DESC = 0xFF15151F;
+	constexpr sdlgf::Color TINT_STATUS_TAB = 0xFF1E2A40;
 	// How much of the gold frame stays visible around the panel fill.
 	constexpr float PANEL_FRAME_INSET = 10.0f;
 
@@ -434,7 +434,7 @@ int Demo::IShopScene::PurchasesLeft(const ShopItem& item) const
 	return (std::max)(0, item.purchaseLimit - bought);
 }
 
-std::wstring Demo::IShopScene::GetCountLabel(const ShopItem& item, D3DCOLOR& color) const
+std::wstring Demo::IShopScene::GetCountLabel(const ShopItem& item, sdlgf::Color& color) const
 {
 	std::wstring text;
 	color = COLOR_TEXT_DIM;
@@ -460,13 +460,13 @@ void Demo::IShopScene::DrawStatusTab(const ShopItem& item, float rowY, float box
 {
 	if (item.statusEffects.empty()) return;
 
-	struct TabLine { std::wstring text; D3DCOLOR color; };
+	struct TabLine { std::wstring text; sdlgf::Color color; };
 	std::vector<TabLine> lines;
 	const float innerW = boxW - ROW_INNER_PAD * 2.0f;
 
 	// WrapText measures unscaled widths, so wrap against the width the text gets at COUNT_SCALE.
 	// GetModifierInfo descriptions can hold their own line breaks, so wrap each paragraph.
-	auto addWrapped = [&](const std::wstring& text, D3DCOLOR color) {
+	auto addWrapped = [&](const std::wstring& text, sdlgf::Color color) {
 		size_t start = 0;
 		while (true) {
 			const size_t nl = text.find(L'\n', start);
@@ -561,7 +561,7 @@ void Demo::IShopScene::DrawCardCover(const ShopItem& item, float faceX, float fa
 		return;
 	}
 
-	const D3DCOLOR tint = affordable ? 0xFFFFFFFF : COLOR_FACE_DISABLED;
+	const sdlgf::Color tint = affordable ? 0xFFFFFFFF : COLOR_FACE_DISABLED;
 	const float bodyWidth = static_cast<float>(panelWidth - USES_COVER_CAP_WIDTH);
 	// Backs up over the face's right outline, same as the battle cover does against the card.
 	const float panelX = faceX + faceWidth - USES_COVER_OVERLAP * USES_COVER_SCALE;
@@ -742,7 +742,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 		gd->SetAlphaBlending(true);
 
 		// Dim the world scene underneath.
-		gd->DrawRectangle(uiCamera, leftEdge, topEdge, sw, sh, D3DCOLOR_ARGB(190, 0, 0, 0), true);
+		gd->DrawRectangle(uiCamera, leftEdge, topEdge, sw, sh, COLOR_ARGB(190, 0, 0, 0), true);
 
 		gd->SetAlphaBlending(false);
 
@@ -803,7 +803,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 			const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
 			const float faceX = l.rowX + ROW_INNER_PAD;
 			// With a count line under it, the face moves up so face + count stay centred in the row.
-			D3DCOLOR countColor;
+			sdlgf::Color countColor;
 			const bool hasCount = !GetCountLabel(item, countColor).empty();
 			const float blockH = faceH * CARD_FACE_SCALE + (hasCount ? COUNT_H : 0.0f);
 			const float faceY = rowY + (ROW_H - blockH) / 2.0f;
@@ -860,7 +860,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 				const bool affordable = sellMode || (gold >= item.cost && !IsSoldOut(item));
 				const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
 
-				D3DCOLOR countColor;
+				sdlgf::Color countColor;
 				const std::wstring countText = GetCountLabel(item, countColor);
 				const float textX = l.rowX + ROW_INNER_PAD;
 				float countX = textX;

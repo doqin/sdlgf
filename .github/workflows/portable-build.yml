@@ -57,7 +57,7 @@ jobs:
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-14
 
       - name: Build
-        run: cmake --build build --parallel
+        run: cmake --build build --parallel -- -k 0   # keep going: list every error, not just the first
 
       - name: Test
         run: ctest --test-dir build --output-on-failure

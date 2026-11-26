@@ -38,3 +38,26 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/sdlgf-demo.zip
+
+  # Experiment: has the code ever built off Windows? Not gating yet (continue-on-error): read the
+  # log to see what is left. Everything but the render test must pass; the render test only
+  # reports there (its golden images come from Direct3D 9).
+  linux:
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends             g++-14 cmake ninja-build pkg-config             libasound2-dev libpulse-dev libudev-dev libdbus-1-dev             libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxfixes-dev libxss-dev libxtst-dev             libwayland-dev libxkbcommon-dev libdrm-dev libgbm-dev libegl1-mesa-dev libgl1-mesa-dev
+
+      - name: Configure (CMake)
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-14
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

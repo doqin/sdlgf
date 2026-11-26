@@ -6,12 +6,11 @@ project(sdlgf
     LANGUAGES CXX
 )
 
-# Window, input, rendering, text and audio are SDL3 now, but the code has only ever been built
-# and tested on Windows (MSVC): the crash handler, the Win32 type stand-ins and the CI are
-# Windows-specific. Remove this guard when a Linux/macOS build has been tried.
+# Window, input, rendering, text and audio are SDL3 now, but the code has only ever been
+# verified on Windows (MSVC): the crash handler, the Win32 type stand-ins and the main CI job are
+# Windows-specific. Other platforms are being tried by the (non-gating) "linux" CI job.
 if(NOT WIN32)
-    message(FATAL_ERROR
-        "sdlgf has only been built on Windows so far (see the comment above this check).")
+    message(WARNING "sdlgf has only been verified on Windows so far; expect problems on this platform.")
 endif()
 
 set(CMAKE_CXX_STANDARD 23)

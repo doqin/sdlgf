@@ -6,6 +6,7 @@
 #include "CardShop.h"
 #include "ItemShop.h"
 #include <cmath>
+#include <cstdio>
 #include "MainMenu.h"
 #include "SaveGameState.h"
 #include "TransitionCommand.h"
@@ -96,7 +97,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	{
 		char codeBuf[8];
-		sprintf_s(codeBuf, "%04d", RNG::Range(0, 9999));
+		std::snprintf(codeBuf, sizeof(codeBuf), "%04d", RNG::Range(0, 9999));
 		authPassword = codeBuf;
 	}
 

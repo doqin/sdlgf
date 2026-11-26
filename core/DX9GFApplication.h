@@ -32,6 +32,10 @@ namespace DX9GF {
 		void SetAppIcon(const std::wstring& iconPath);
 		void AttachGame(IGame* game);
 		void Run();
+		/// <summary>
+		/// Asks the main loop to exit after the current frame.
+		/// </summary>
+		void Quit();
 
 		void SetFramerate(int fps);
 		HWND GetHWnd() const;

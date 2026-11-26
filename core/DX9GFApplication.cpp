@@ -175,7 +175,7 @@ void DX9GF::Application::Run()
 
 	MSG msg;
 	int done = 0;
-	unsigned long long start = GetTickCount64();
+	unsigned long long start = DX9GF::Platform::GetTicksMs();
 	while (!done) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
@@ -185,9 +185,9 @@ void DX9GF::Application::Run()
 			DispatchMessage(&msg);
 		}
 		else {
-			if (frameRate == -1 || GetTickCount64() - start >= 1000 / frameRate) {
-				unsigned long long rawDeltaTime = GetTickCount64() - start;
-				start = GetTickCount64();
+			if (frameRate == -1 || DX9GF::Platform::GetTicksMs() - start >= 1000 / frameRate) {
+				unsigned long long rawDeltaTime = DX9GF::Platform::GetTicksMs() - start;
+				start = DX9GF::Platform::GetTicksMs();
 
 				// Clamp the delta fed to Update/Draw so a stall (e.g. a heavy scene load)
 				// doesn't get replayed as one giant time jump - that skips timer-driven
@@ -205,6 +205,11 @@ void DX9GF::Application::Run()
 	// Cleanup any fonts added at runtime
 	DX9GF::Font::RemoveAllFonts();
 	audioManager->Shutdown();
+}
+
+void DX9GF::Application::Quit()
+{
+	PostQuitMessage(0);
 }
 
 void DX9GF::Application::SetAppIcon(const std::wstring& iconPath)

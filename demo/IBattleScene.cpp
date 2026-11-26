@@ -359,7 +359,7 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 		if (popUpMessage) {
 			popUpMessage->ShowMessage(Tr(L"Deck empty - drew ") + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
 		}
-		OutputDebugStringA(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
+		DX9GF::Platform::DebugLog(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
 	}
 }
 
@@ -1989,7 +1989,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 			for (auto& enemy : this->enemies) {
 				if (enemy && enemy->SayPendingAbilityLines()) this->abilityLinesSaid = true;
 			}
-			this->abilitySpeechStartMs = GetTickCount64();
+			this->abilitySpeechStartMs = DX9GF::Platform::GetTicksMs();
 			this->abilitySpeechQuietSinceMs = this->abilitySpeechStartMs;
 			markFinished();
 			}),
@@ -1999,7 +1999,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 					markFinished();
 					return;
 				}
-				const unsigned long long now = GetTickCount64();
+				const unsigned long long now = DX9GF::Platform::GetTicksMs();
 				const bool anySpeaking = std::any_of(this->enemies.begin(), this->enemies.end(),
 					[](const std::shared_ptr<IEnemy>& enemy) { return enemy && !enemy->IsDead() && enemy->IsSpeaking(); });
 				if (anySpeaking) this->abilitySpeechQuietSinceMs = now;
@@ -2411,7 +2411,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 	);
 
 	if (IsDraggingAnyEnemyCard()) {
-		const unsigned long long tick = GetTickCount64();
+		const unsigned long long tick = DX9GF::Platform::GetTicksMs();
 		D3DCOLOR dashColor = 0xFFFFFFFF;
 		if (IsDraggingEnemyCardOverRemoveArea()) {
 			const float phase = static_cast<float>(tick % 1000) / 1000.f; // one blink per second
@@ -3556,7 +3556,7 @@ void Demo::IBattleScene::Init()
 		else {
 			// CardRegistry::Create returns null for an id it does not recognise (renamed/removed card,
 			// typo, stale save). Dropping it silently makes the deck - and every draw - short.
-			OutputDebugStringA(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
+			DX9GF::Platform::DebugLog(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
 		}
 	}
 
@@ -3885,7 +3885,7 @@ void Demo::IBattleScene::DrawKeyboardReticleUI(unsigned long long deltaTime)
 		return;
 	}
 	auto gd = game->GetGraphicsDevice();
-	Demo::DrawKeyboardTargetReticle(gd, uiCamera, button->GetWorldX(), button->GetWorldY(), (float)button->GetWidth(), (float)button->GetHeight(), GetTickCount64());
+	Demo::DrawKeyboardTargetReticle(gd, uiCamera, button->GetWorldX(), button->GetWorldY(), (float)button->GetWidth(), (float)button->GetHeight(), DX9GF::Platform::GetTicksMs());
 }
 
 void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
@@ -3910,13 +3910,13 @@ void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
 			}
 			Demo::DrawAnimatedDashedRectangle(
 				gd, camera, slot.x, slot.y, slot.width, slot.height,
-				3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, GetTickCount64());
+				3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
 		}
 		gd->SetAlphaBlending(false);
 
 		auto& selected = slots[selectedIndex];
 		if (!selected.inUIPass) {
-			Demo::DrawKeyboardTargetReticle(gd, camera, selected.x, selected.y, selected.width, selected.height, GetTickCount64());
+			Demo::DrawKeyboardTargetReticle(gd, camera, selected.x, selected.y, selected.width, selected.height, DX9GF::Platform::GetTicksMs());
 		}
 		return;
 	}
@@ -3950,13 +3950,13 @@ void Demo::IBattleScene::DrawKeyboardPlacementUI(unsigned long long deltaTime)
 		}
 		Demo::DrawAnimatedDashedRectangle(
 			gd, uiCamera, slot.x, slot.y, slot.width, slot.height,
-			3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, GetTickCount64());
+			3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
 	}
 	gd->SetAlphaBlending(false);
 
 	auto& selected = slots[selectedIndex];
 	if (selected.inUIPass) {
-		Demo::DrawKeyboardTargetReticle(gd, uiCamera, selected.x, selected.y, selected.width, selected.height, GetTickCount64());
+		Demo::DrawKeyboardTargetReticle(gd, uiCamera, selected.x, selected.y, selected.width, selected.height, DX9GF::Platform::GetTicksMs());
 	}
 }
 

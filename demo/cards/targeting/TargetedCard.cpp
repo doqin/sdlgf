@@ -157,7 +157,7 @@ namespace Demo {
 			[gd = graphicsDevice, cam = camera, width, height, thisX, thisY](std::function<void(void)> markFinished) {
 				gd->SetAlphaBlending(true);
 				Demo::DrawAnimatedDashedRectangle(gd, *cam, thisX, thisY, width, height,
-					3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, GetTickCount64());
+					3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
 				gd->SetAlphaBlending(false);
 				markFinished();
 			}));

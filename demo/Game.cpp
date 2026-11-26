@@ -6,6 +6,8 @@
 #include "SettingsScene.h"
 #include "DX9GFAudioManager.h"
 #include "resource.h"
+#include <cwchar>
+#include <iterator>
 #include "SettingsManager.h"
 #include "SplashScene.h"
 void Demo::Game::Init()
@@ -194,7 +196,7 @@ void Demo::Game::Update(unsigned long long deltaTime)
 	if (fpsAccumulator >= 1000) {
 		float msPerFrame = (float)fpsAccumulator / fpsFrames;
 		wchar_t buf[256];
-		swprintf_s(buf, L"%s - FPS: %d (%.2f ms/frame)", GAME_TITLE, fpsFrames, msPerFrame);
+		std::swprintf(buf, std::size(buf), L"%ls - FPS: %d (%.2f ms/frame)", GAME_TITLE, fpsFrames, msPerFrame);
 		SetWindowTextW(GetHwnd(), buf);
 
 		fpsAccumulator = 0;

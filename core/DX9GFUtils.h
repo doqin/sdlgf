@@ -26,11 +26,11 @@ namespace DX9GF {
 		static std::tuple<float, float> WorldToWindowCoords(const DX9GF::Camera& camera, float worldX, float worldY);
 
 		/// <summary>
-		/// Converts a UTF-8 encoded string to a UTF-16 (wide) string using MultiByteToWideChar.
+		/// Converts a UTF-8 encoded string to a UTF-16 (wide) string via DX9GF::Platform::Utf8ToWide.
 		/// </summary>
 		static std::wstring Utf8ToWide(const std::string& utf8);
 		/// <summary>
-		/// Converts a UTF-16 (wide) string to a UTF-8 encoded string using WideCharToMultiByte.
+		/// Converts a UTF-16 (wide) string to a UTF-8 encoded string via DX9GF::Platform::WideToUtf8.
 		/// </summary>
 		static std::string WideToUtf8(const std::wstring& wide);
 	};

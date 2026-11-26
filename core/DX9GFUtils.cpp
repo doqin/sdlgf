@@ -96,24 +96,10 @@ std::tuple<float, float> DX9GF::Utils::WorldToWindowCoords(const DX9GF::Camera& 
 
 std::wstring DX9GF::Utils::Utf8ToWide(const std::string& utf8)
 {
-	if (utf8.empty()) return std::wstring();
-
-	int wideLen = MultiByteToWideChar(CP_UTF8, 0, utf8.data(), static_cast<int>(utf8.size()), nullptr, 0);
-	if (wideLen <= 0) return std::wstring();
-
-	std::wstring wide(wideLen, L'\0');
-	MultiByteToWideChar(CP_UTF8, 0, utf8.data(), static_cast<int>(utf8.size()), wide.data(), wideLen);
-	return wide;
+	return DX9GF::Platform::Utf8ToWide(utf8);
 }
 
 std::string DX9GF::Utils::WideToUtf8(const std::wstring& wide)
 {
-	if (wide.empty()) return std::string();
-
-	int utf8Len = WideCharToMultiByte(CP_UTF8, 0, wide.data(), static_cast<int>(wide.size()), nullptr, 0, nullptr, nullptr);
-	if (utf8Len <= 0) return std::string();
-
-	std::string utf8(utf8Len, '\0');
-	WideCharToMultiByte(CP_UTF8, 0, wide.data(), static_cast<int>(wide.size()), utf8.data(), utf8Len, nullptr, nullptr);
-	return utf8;
+	return DX9GF::Platform::WideToUtf8(wide);
 }

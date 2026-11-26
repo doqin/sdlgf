@@ -1,4 +1,5 @@
-# Source list for the core library (mirrors the ClCompile items of core.vcxproj).
+# Source list for the core library (started as the ClCompile items of core.vcxproj;
+# this file is now the source of truth).
 set(SDLGF_CORE_SOURCES
     DX9GFApplication.cpp
     DX9GFCamera.cpp
@@ -33,6 +34,7 @@ set(SDLGF_CORE_SOURCES
     DX9GFGraphicsDevice.cpp
     DX9GFIGame.cpp
     DX9GFInputManager.cpp
+    DX9GFPlatform.cpp
     DX9GFIScene.cpp
     DX9GFISprite.cpp
     DX9GFSceneManager.cpp

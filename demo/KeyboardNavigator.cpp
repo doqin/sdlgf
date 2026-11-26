@@ -139,10 +139,10 @@ void Demo::KeyboardNavigator::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF:
 	}
 	for (auto& c : candidates) {
 		if (c.anchor == target) {
-			Demo::DrawKeyboardTargetReticle(graphicsDevice, camera, c.x, c.y, c.width, c.height, GetTickCount64());
+			Demo::DrawKeyboardTargetReticle(graphicsDevice, camera, c.x, c.y, c.width, c.height, DX9GF::Platform::GetTicksMs());
 			if (dynamic_cast<Demo::ICard*>(c.anchor.get()) != nullptr) {
 				graphicsDevice->SetAlphaBlending(true);
-				float alphaPhase = (std::sin(GetTickCount64() / 150.0f) + 1.0f) / 2.0f;
+				float alphaPhase = (std::sin(DX9GF::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 				int alpha = static_cast<int>(alphaPhase * 80.0f);
 				D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 				graphicsDevice->DrawRectangle(camera, c.x, c.y, c.width, c.height, color, true);

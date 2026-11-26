@@ -1,4 +1,5 @@
 #pragma once
+#include "DX9GFPlatform.h"
 #include "DX9GFApplication.h"
 #include "DX9GFGraphicsDevice.h"
 #include "DX9GFIGame.h"

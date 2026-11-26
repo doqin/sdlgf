@@ -20,7 +20,7 @@ namespace {
 			return;
 		}
 
-		const float tick = static_cast<float>(GetTickCount64()) * 0.001f;
+		const float tick = static_cast<float>(DX9GF::Platform::GetTicksMs()) * 0.001f;
 		const float spinVelocity = 4.f; // radians per second
 		float arcSpan = PI * 1.5f;
 		// Spin animation is based on the current time, so the arc rotates around the center point.

@@ -400,7 +400,7 @@ namespace Demo
 
 		//Quit Button
 		InitMenuButton(quitButton, L"Quit");
-		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
+		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { DX9GF::Application::GetInstance()->Quit(); });
 
 		//active buttons
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, optionsButton, creditsButton, quitButton };

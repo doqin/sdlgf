@@ -57,7 +57,7 @@ namespace Demo {
                 { Tr(L"Save"), [this]() {
                     if (auto smLock = this->saveManager.lock()) {
                         smLock->Save("savegame.json");
-                        OutputDebugStringA("Successfully saved!\n");
+                        DX9GF::Platform::DebugLog("Successfully saved!\n");
                         DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
                     }
                 }},

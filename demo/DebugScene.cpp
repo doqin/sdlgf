@@ -62,7 +62,7 @@ void Demo::DebugScene::Init()
 		myFont.get(), //reuse myFont
 		[](DX9GF::ITrigger* t)
 		{
-			PostQuitMessage(0);
+			DX9GF::Application::GetInstance()->Quit();
 		}
 	);
 	btnTextExit->Init(&uiCamera);
@@ -77,7 +77,7 @@ void Demo::DebugScene::Init()
 
 	auto quitBtn = std::make_shared<Demo::IconButton>(transformManager, 200, 200, 62, 30, uiSheetTex, 3);
 	quitBtn->SetSpriteCoords(385, 449, 62, 30, 2);
-	quitBtn->SetOnReleaseLeft([](DX9GF::ITrigger* t) { PostQuitMessage(0); });
+	quitBtn->SetOnReleaseLeft([](DX9GF::ITrigger* t) { DX9GF::Application::GetInstance()->Quit(); });
 
 	auto continueBtn = std::make_shared<Demo::IconButton>(transformManager, 150, 150, 94, 30, uiSheetTex, 3);
 	continueBtn->SetSpriteCoords(577, 193, 94, 30, 34);
@@ -171,8 +171,8 @@ void Demo::DebugScene::DrawWorld(unsigned long long deltaTime)
 	if (SUCCEEDED(gd->BeginDraw())) {
 		draggableManager->Draw(deltaTime);
 
-		Demo::DrawAnimatedDashedRectangle(gd, camera, 0, 0, 500, 500, 6.f, 0xFFFF00FF, true, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, GetTickCount64());
-		Demo::DrawAnimatedDashedArrow(gd, camera, 0, 0, 200, 200, 3.f, 0xFFFFFFFF, false, 10.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, GetTickCount64(), 10.f, 10.f);
+		Demo::DrawAnimatedDashedRectangle(gd, camera, 0, 0, 500, 500, 6.f, 0xFFFF00FF, true, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
+		Demo::DrawAnimatedDashedArrow(gd, camera, 0, 0, 200, 200, 3.f, 0xFFFFFFFF, false, 10.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs(), 10.f, 10.f);
 
 		gd->EndDraw();
 	}

@@ -25,6 +25,7 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 option(SDLGF_TESTING "Define TESTING (demo boots into DebugScene)" OFF)
+option(SDLGF_BUILD_TESTS "Build the unit tests (run with ctest)" ON)
 option(SDLGF_COPY_ASSETS "Copy demo/assets next to the demo executable after building" ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
@@ -35,3 +36,8 @@ include(Dependencies)
 
 add_subdirectory(core)
 add_subdirectory(demo)
+
+if(SDLGF_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

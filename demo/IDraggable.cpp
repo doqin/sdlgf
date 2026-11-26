@@ -409,7 +409,7 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 		auto cam = this->camera;
 		draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([gd, cam, thisX, thisY, width, height](std::function<void(void)> markFinished) {
 			gd->SetAlphaBlending(true);
-			float alphaPhase = (sin(GetTickCount64() / 150.0f) + 1.0f) / 2.0f;
+			float alphaPhase = (sin(DX9GF::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 			int alpha = static_cast<int>(alphaPhase * 80.0f);
 			D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 			gd->DrawRectangle(*cam, thisX, thisY, width, height, color, true);

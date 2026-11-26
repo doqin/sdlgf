@@ -6,9 +6,6 @@
 #include <string>
 #include <map>
 
-#pragma comment(lib, "xaudio2.lib")
-#pragma comment(lib, "winmm.lib")
-
 namespace DX9GF {
 	struct SoundBuffer
 	{

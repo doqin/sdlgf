@@ -185,7 +185,7 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 					20.f,
 					10.f,
 					40.f,
-					GetTickCount64()
+					DX9GF::Platform::GetTicksMs()
 				);
 				graphicsDevice->SetAlphaBlending(false);
 				markFinished();

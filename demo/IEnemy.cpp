@@ -166,7 +166,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 				20.f,
 				10.f,
 				40.f,
-				GetTickCount64()
+				DX9GF::Platform::GetTicksMs()
 			);
 
 			{

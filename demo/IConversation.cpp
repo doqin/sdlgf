@@ -140,7 +140,7 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamer
 	if (!isTyping) {
 		const float triangleWidth = 16.0f;
 		const float triangleHeight = 10.0f;
-		const float bounce = std::sin(static_cast<float>(GetTickCount64()) * 0.006f) * 3.0f;
+		const float bounce = std::sin(static_cast<float>(DX9GF::Platform::GetTicksMs()) * 0.006f) * 3.0f;
 		const float triangleTopY = boxY + boxHeight - triangleHeight - 10.0f + bounce;
 		gd->DrawTriangle(*uiCamera, boxX + boxWidth / 2.0f, triangleTopY, triangleWidth, triangleHeight, 0xFF000000, true);
 	}

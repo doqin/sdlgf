@@ -11,7 +11,7 @@ target_include_directories(sdlgf_core PUBLIC
 # Shared precompiled header (also used by demo); sources include "pch.h" first.
 target_precompile_headers(sdlgf_core PRIVATE "${CMAKE_SOURCE_DIR}/includes/pch.h")
 
-target_compile_definitions(sdlgf_core PUBLIC UNICODE _UNICODE)
+target_compile_definitions(sdlgf_core PUBLIC UNICODE _UNICODE NOMINMAX)
 
 target_link_libraries(sdlgf_core PUBLIC
     tmxlite

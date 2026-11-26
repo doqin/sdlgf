@@ -403,17 +403,17 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime) {
 			const auto closeKey = SettingsManager::GetInstance()->GetKeybindDisplayName("OPEN_MAP");
 			if (travelMapOpen && travelTab >= 0 && travelTab < static_cast<int>(travelWorlds.size())) {
 				MapView::TravelUI ui;
-				for (auto* world : travelWorlds) {
-					const auto* info = SaveGameState::GetSceneInfo(world->GetSaveID());
+				for (const auto& world : travelWorlds) {
+					const auto* info = SaveGameState::GetSceneInfo(world->sceneId);
 					ui.tabs.push_back(info ? Tr(info->displayName) : std::wstring(L"?"));
 				}
 				ui.selectedTab = travelTab;
 				ui.hoverId = travelHoverId;
 				ui.hoverTab = travelHoverTab;
 				travelHits = {};
-				WorldSceneBase* shown = travelWorlds[travelTab];
-				shown->mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
-										shown->BuildMapMarkers(shown == this), closeKey, &ui, &travelHits);
+				WorldOverview& shown = *travelWorlds[travelTab];
+				shown.mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(),
+									   shown.markers, closeKey, &ui, &travelHits);
 			} else {
 				mapView.DrawFull(gd, uiCamera, game->GetVirtualWidth(), game->GetVirtualHeight(), BuildMapMarkers(), closeKey);
 			}
@@ -494,49 +494,51 @@ void Demo::WorldSceneBase::AddDepthNode(std::vector<DepthNode>& nodes, float y, 
 	nodes.push_back({y, std::move(drawCall)});
 }
 
-void Demo::WorldSceneBase::CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm, float bgmVol) {
-	TransitionToScene(static_cast<int>(game->GetSceneManager()->GetIndex()) + sceneOffset, targetX, targetY, bgm, bgmVol);
+void Demo::WorldSceneBase::CreatePortalTransition(const char* sceneId, float targetX, float targetY, const char* bgm, float bgmVol) {
+	TransitionToScene(sceneId, targetX, targetY, bgm, bgmVol);
 }
 
-void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm, float bgmVol, bool fastTravel) {
+void Demo::WorldSceneBase::TransitionToScene(const std::string& sceneId, float targetX, float targetY, const char* bgm, float bgmVol, bool fastTravel) {
 	if (isTransitioning) return;
 	isTransitioning = true;
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionInCommand);
-	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol, fastTravel](std::function<void(void)> markFinished) {
+	// bgm points at a string literal, so it is safe to keep
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand, sceneId, targetX, targetY, bgm, bgmVol, fastTravel](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
-		auto sceMan = game->GetSceneManager();
-		auto targetScene = sceMan->GetScene(static_cast<size_t>(sceneIndex));
-		auto targetPlayer = MainMenu::gameSaveState->GetPlayerFromScene(targetScene);
-		targetPlayer->SetLocalPosition(targetX, targetY);
-		if (bgm) {
-			sdlgf::AudioManager::GetInstance()->PlayBGM_Fade(bgm, bgmVol, 1.5f);
-		}
-		if (fastTravel) {
-			if (auto* world = dynamic_cast<WorldSceneBase*>(targetScene)) world->OnFastTravelArrive(targetX, targetY);
-		}
-		sceMan->GoToScene(sceneIndex);
+		// The screen is covered. Loads the target world behind the loading screen and unloads this
+		// one a few frames later, so nothing here may rely on this scene surviving much longer.
+		SaveGameState::Arrival arrival;
+		arrival.position = std::make_pair(targetX, targetY);
+		arrival.bgm = bgm;
+		arrival.bgmVolume = bgmVol;
+		arrival.fastTravel = fastTravel;
+		const bool leavingScene = MainMenu::gameSaveState->TravelTo(sceneId, arrival);
+		// Staying in this world (fast travel between its own save points): uncover the screen again
+		if (!leavingScene) drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 		isTransitioning = false;
 		markFinished();
 	}));
-	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 }
 
 void Demo::WorldSceneBase::OpenTravelMap() {
 	if (isTransitioning) return;
+	MainMenu::gameSaveState->EnsureWorldOverviews([this]() { OpenTravelMapNow(); });
+}
+
+void Demo::WorldSceneBase::OpenTravelMapNow() {
 	travelWorlds.clear();
-	auto sceMan = game->GetSceneManager();
-	for (size_t i = 0; i < sceMan->GetSceneCount(); ++i) {
-		auto* world = dynamic_cast<WorldSceneBase*>(sceMan->GetScene(i));
-		if (!world) continue;
-		const bool visited = std::any_of(world->savePoints.begin(), world->savePoints.end(),
-										 [](const std::shared_ptr<SavePoint>& sp) { return sp->IsUnlocked(); });
-		if (world == this || visited) {
-			if (world == this) travelTab = static_cast<int>(travelWorlds.size());
-			travelWorlds.push_back(world);
+	const std::string myId = GetSaveID();
+	for (auto& overview : MainMenu::gameSaveState->CollectWorldOverviews(*this)) {
+		const bool visited = std::any_of(overview->savePoints.begin(), overview->savePoints.end(),
+			[](const WorldOverview::SavePointInfo& sp) { return PlayerGlobalData::GetInstance()->IsSavePointUnlocked(sp.id); });
+		const bool isThis = overview->sceneId == myId;
+		if (isThis || visited) {
+			if (isThis) travelTab = static_cast<int>(travelWorlds.size());
+			travelWorlds.push_back(std::move(overview));
 		}
 	}
 	travelHits = {};
@@ -618,12 +620,9 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime) {
 
 	auto travelToSelected = [&]() {
 		if (travelHoverId.empty()) return;
-		WorldSceneBase* world = travelWorlds[travelTab];
-		for (const auto& sp : world->savePoints) {
-			if (sp->GetId() == travelHoverId && sp->IsUnlocked()) {
-				ConfirmTravel(world, *sp);
-				return;
-			}
+		const WorldOverview& world = *travelWorlds[travelTab];
+		if (const auto* sp = world.FindSavePoint(travelHoverId)) {
+			if (PlayerGlobalData::GetInstance()->IsSavePointUnlocked(sp->id)) ConfirmTravel(world, *sp);
 		}
 	};
 
@@ -641,37 +640,35 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime) {
 	if (hoveredSave) travelToSelected();
 }
 
-std::pair<float, float> Demo::WorldSceneBase::FindSpawnNear(const SavePoint& point) const {
-	const float px = point.GetWorldX(), py = point.GetWorldY();
-	// The player's whole footprint has to be on floor, not just one point
-	auto clear = [&](float x, float y) {
-		constexpr float kPad = 10.f;
-		return mapView.IsWalkable(x, y) && mapView.IsWalkable(x - kPad, y) && mapView.IsWalkable(x + kPad, y) && mapView.IsWalkable(x, y - kPad) && mapView.IsWalkable(x, y + kPad);
-	};
-	// Prefer in front of the point, then sideways, then behind, widening the search each ring
-	for (float r : {32.f, 48.f, 64.f, 96.f}) {
-		const float offsets[][2] = {{0, r}, {r, 0}, {-r, 0}, {r, r}, {-r, r}, {0, -r}, {r, -r}, {-r, -r}};
-		for (const auto& o : offsets) {
-			if (clear(px + o[0], py + o[1])) return {px + o[0], py + o[1]};
-		}
-	}
-	return point.GetSpawnPosition();
+void Demo::WorldSceneBase::RebindUiServices() {
+	PopupManager::GetInstance()->SetUICamera(&this->uiCamera);
+	QuestManager::GetInstance()->Init(game->GetGraphicsDevice(), transformManager, &this->uiCamera, font);
 }
 
-void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint& target) {
-	const std::string sceneId = world->GetSaveID();
+std::shared_ptr<Demo::WorldOverview> Demo::WorldSceneBase::CaptureOverview(bool includePlayer) const {
+	auto overview = std::make_shared<WorldOverview>();
+	overview->sceneId = GetSaveID();
+	overview->mapView = mapView;
+	overview->markers = BuildMapMarkers(includePlayer);
+	for (const auto& sp : savePoints) {
+		const auto spawn = sp->GetSpawnPosition();
+		overview->savePoints.push_back({ sp->GetId(), sp->GetWorldX(), sp->GetWorldY(), spawn.first, spawn.second });
+	}
+	return overview;
+}
+
+void Demo::WorldSceneBase::ConfirmTravel(const WorldOverview& world, const WorldOverview::SavePointInfo& target) {
+	const std::string sceneId = world.sceneId;
 	const auto* info = SaveGameState::GetSceneInfo(sceneId);
 	const std::wstring worldName = info ? Tr(info->displayName) : std::wstring(L"?");
-	const auto spawn = world->FindSpawnNear(target);
-	const bool sameScene = world == this;
+	const auto spawn = world.FindSpawnNear(target);
+	const bool sameScene = sceneId == GetSaveID();
 
 	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
 		{Tr(L"Travel"), [this, sceneId, info, spawn, sameScene]() {
-			 const int sceneIndex = MainMenu::gameSaveState->GetSceneIndex(sceneId);
-			 if (sceneIndex < 0) return;
 			 CloseFullMap();
 			 // Don't restart the music when hopping between save points of the same world
-			 TransitionToScene(sceneIndex, spawn.first, spawn.second,
+			 TransitionToScene(sceneId, spawn.first, spawn.second,
 							   (info && !sameScene) ? info->bgm : nullptr, info ? info->bgmVolume : 0.3f, true);
 		 }},
 		{Tr(L"Cancel"), nullptr}};

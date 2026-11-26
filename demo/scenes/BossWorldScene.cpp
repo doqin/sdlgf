@@ -235,7 +235,7 @@ void Demo::BossWorldScene::OnInit()
 		RegisterPortalLayer(layer);
 	}
 	map->SetAreaUpdateHandler("trigger_alley", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(-1, 1239.f, -920.f, "bgm_arcade", 0.2f);
+		CreatePortalTransition("ThreadAlleyScene", 1239.f, -920.f, "bgm_arcade", 0.2f);
 	});
 
 	map->SetAreaUpdateHandler("trigger_p_1_2", [this](const sdlgf::Map::ObjectArea& area) {

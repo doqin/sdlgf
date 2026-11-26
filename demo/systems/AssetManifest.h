@@ -8,7 +8,7 @@ namespace Demo {
 	/// loading screen can stream those files in before the scenes are built. A missing file or a
 	/// stale entry is harmless: whatever is not preloaded is simply loaded on demand.
 	///
-	/// Regenerate with `demo --record-assets <file>` (see Game::RecordAssetManifest).
+	/// Regenerate with `demo --record-assets <dir>` (see Game::RecordAssetManifests).
 	std::vector<std::wstring> ReadAssetManifest(const std::string& file);
 	bool WriteAssetManifest(const std::string& file, const std::vector<std::wstring>& paths);
 }

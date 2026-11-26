@@ -28,11 +28,11 @@ void Demo::SecretPuzzleScene::OnInit()
 	RegisterPortalLayer("trigger_p_next_world");
 	RegisterPortalLayer("trigger_p_next");
 	map->SetAreaUpdateHandler("trigger_p_back", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(-2, -263.f, -295.f, "bgm_tutorial", 0.5f);
+		CreatePortalTransition("TutorialWorldScene", -263.f, -295.f, "bgm_tutorial", 0.5f);
 	});
 
 	map->SetAreaUpdateHandler("trigger_p_next_world", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(1, -417.f, 144.f, "bgm_arcade", 0.2f);
+		CreatePortalTransition("ThreadAlleyScene", -417.f, 144.f, "bgm_arcade", 0.2f);
 	});
 
 	map->SetAreaUpdateHandler("trigger_p_next", [this](const sdlgf::Map::ObjectArea& area) {

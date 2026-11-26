@@ -2,6 +2,8 @@
 #include "IntroScene.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
+#include "MainMenu.h"
+#include "SaveGameState.h"
 
 void Demo::IntroScene::Init() {
     font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
@@ -35,7 +37,8 @@ void Demo::IntroScene::Update(unsigned long long deltaTime) {
     if (!conversation && !hasTransitioned) {
         hasTransitioned = true;
         sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
-        game->GetSceneManager()->GoToNext();
+        // Builds the first world behind a loading screen; the music started above carries over
+        MainMenu::gameSaveState->TravelTo(SaveGameState::DEFAULT_WORLD, {});
     }
 }
 

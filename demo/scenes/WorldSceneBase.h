@@ -15,6 +15,7 @@
 #include "MapEnemy.h"
 #include "ChapterTitleUI.h"
 #include "MapView.h"
+#include "WorldOverview.h"
 #include "TextIconButton.h"
 
 namespace Demo {
@@ -35,14 +36,19 @@ namespace Demo {
 		bool travelMapOpen = false;
 		int travelTab = 0;
 		float travelInputGraceMs = 0.f;  // ignores clicks right after opening, so the popup click can't leak through
-		std::vector<WorldSceneBase*> travelWorlds;
+		// One overview per tab: this world is live, the others come from SaveGameState's cache because
+		// only one world scene is in memory at a time.
+		std::vector<std::shared_ptr<WorldOverview>> travelWorlds;
 		MapView::TravelHits travelHits;
 		std::string travelHoverId;  // save point highlighted by mouse hover or keyboard selection
 		int travelHoverTab = -1;
+		// Makes sure every visited world has an overview (briefly building the ones that have none yet
+		// behind the loading screen), then opens the map.
 		void OpenTravelMap();
+		void OpenTravelMapNow();
 		void CloseFullMap();
 		void UpdateTravelMap(unsigned long long deltaTime);
-		void ConfirmTravel(WorldSceneBase* world, const SavePoint& target);
+		void ConfirmTravel(const WorldOverview& world, const WorldOverview::SavePointInfo& target);
 
 		Game* game;
 		std::shared_ptr<sdlgf::ColliderManager> colliderManager;
@@ -93,8 +99,10 @@ namespace Demo {
 
 		void AddDepthNode(std::vector<DepthNode>& nodes, float y, std::function<void()> drawCall);
 
-		void CreatePortalTransition(int sceneOffset, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
-		void TransitionToScene(int sceneIndex, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f, bool fastTravel = false);
+		// Fades out, then loads the world `sceneId` (see SaveGameState::TravelTo) and puts the player at
+		// (targetX, targetY) in it. Only one world scene exists at a time: this one is unloaded.
+		void CreatePortalTransition(const char* sceneId, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f);
+		void TransitionToScene(const std::string& sceneId, float targetX, float targetY, const char* bgm = nullptr, float bgmVol = 0.3f, bool fastTravel = false);
 		// Called on the destination scene once a fast travel has placed the player, so scenes with
 		// per-area state (e.g. the boss world's island) can match it to where the player landed.
 		virtual void OnFastTravelArrive(float x, float y) {}
@@ -124,9 +132,17 @@ namespace Demo {
 		void DrawWorld(unsigned long long deltaTime) override;
 		void DrawUI(unsigned long long deltaTime) override;
 		std::shared_ptr<Player> GetPlayer() const { return player; }
+		// Points the shared UI services (popups, quest panel) at this scene again; needed after another
+		// world scene was built briefly (SaveGameState::EnsureWorldOverviews) and took them over.
+		void RebindUiServices();
+		// Puts the player at (x, y) after a portal or fast travel (called by SaveGameState once built).
+		void Arrive(float x, float y, bool fastTravel) {
+			player->SetLocalPosition(x, y);
+			if (fastTravel) OnFastTravelArrive(x, y);
+		}
 		const std::vector<std::shared_ptr<SavePoint>>& GetSavePoints() const { return savePoints; }
-		// A walkable position beside the save point, so fast travel never lands in a wall or off the map
-		std::pair<float, float> FindSpawnNear(const SavePoint& point) const;
+		// Snapshot for the travel map; includePlayer = false for a world the player is not in.
+		std::shared_ptr<WorldOverview> CaptureOverview(bool includePlayer) const;
 		// includePlayer is false when another world's scene draws this one's map (its player isn't "here")
 		std::vector<MapView::Marker> BuildMapMarkers(bool includePlayer = true) const;
 	};

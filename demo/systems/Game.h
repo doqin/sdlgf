@@ -10,9 +10,9 @@ namespace Demo {
 	Game(const UINT screenWidth, const UINT screenHeight) : IGame(screenWidth, screenHeight) {}
 	void Init() override;
 	void Update(unsigned long long deltaTime) override;
-	/// Builds every world scene once while logging the textures they request, and writes that list
-	/// to `file` (the loading screen's manifest). Returns false if the file cannot be written.
-	bool RecordAssetManifest(const std::string& file);
+	/// Builds every world scene once while logging the textures it requests, and writes one manifest
+	/// per world into `dir` (what the loading screen preloads). Returns false if a file cannot be written.
+	bool RecordAssetManifests(const std::string& dir);
 	UINT GetVirtualWidth() const { return SCREEN_WIDTH; }
 	UINT GetVirtualHeight() const { return SCREEN_HEIGHT; }
 

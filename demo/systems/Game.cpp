@@ -203,13 +203,7 @@ void Demo::Game::Update(unsigned long long deltaTime) {
 #endif
 }
 
-bool Demo::Game::RecordAssetManifest(const std::string& file) {
-	auto& assets = GetGraphicsDevice()->GetAssets();
-	assets.StartRecording();
+bool Demo::Game::RecordAssetManifests(const std::string& dir) {
 	auto state = std::make_shared<SaveGameState>(this, std::make_shared<sdlgf::SaveManager>());
-	state->BuildAllScenesNow();
-	const auto paths = assets.StopRecording();
-	sdlgf::Platform::DebugLog("Recorded " + std::to_string(paths.size()) + " textures\n");
-	std::printf("Recorded %zu textures\n", paths.size());
-	return WriteAssetManifest(file, paths);
+	return state->RecordWorldManifests(dir);
 }

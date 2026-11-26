@@ -20,22 +20,3 @@ assets/minion-Sheet.png
 assets/computerbug-Sheet.png
 assets/random-Sheet.png
 assets/spam-Sheet.png
-assets/labinside.png
-assets/First Asset pack.png
-assets/secretpuzzle.png
-assets/XP.jpg
-assets/icon.jpg
-assets/Shop.png
-assets/shrimp-Sheet.png
-assets/notresponding-Sheet.png
-assets/kernel_2.png
-assets/qem-sheet.png
-assets/bubble-Sheet.png
-assets/hkhang-Sheet.png
-assets/terminals.png
-assets/Trojan_outside.png
-assets/sketchyguy-Sheet.png
-assets/crawler-Sheet.png
-assets/ahai-Sheet.png
-assets/boss-Sheet.png
-assets/gate.png

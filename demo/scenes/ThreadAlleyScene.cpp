@@ -30,10 +30,10 @@ void Demo::ThreadAlleyScene::OnInit()
 	RegisterPortalLayer("trigger_p");
 	RegisterPortalLayer("trigger_tutorial");
 	map->SetAreaUpdateHandler("trigger_p", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(1, 330.f, 263.f, "bgm_bossworld", 0.3f);
+		CreatePortalTransition("BossWorldScene", 330.f, 263.f, "bgm_bossworld", 0.3f);
 	});
 	map->SetAreaUpdateHandler("trigger_tutorial", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(-3, 840.f, -1144.f, "bgm_tutorial", 0.5f);
+		CreatePortalTransition("TutorialWorldScene", 840.f, -1144.f, "bgm_tutorial", 0.5f);
 	});
 
 	shopPoints.push_back(std::make_shared<ShopPoint>(transformManager, -606, -548));

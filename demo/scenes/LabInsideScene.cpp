@@ -21,7 +21,7 @@ void Demo::LabInsideScene::OnInit()
 	SetChapterTitle(Tr(L"KAKOS LAB"), Tr(L"< What scared her off? >"));
 	RegisterPortalLayer("trigger_back");
 	map->SetAreaUpdateHandler("trigger_back", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(-1, 544.f, -928.f, "bgm_tutorial", 0.5f);
+		CreatePortalTransition("TutorialWorldScene", 544.f, -928.f, "bgm_tutorial", 0.5f);
 	});
 
 	treasureChests.push_back(std::make_shared<TreasureChestNPC>(

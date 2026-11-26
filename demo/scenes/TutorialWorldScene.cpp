@@ -27,13 +27,13 @@ void Demo::TutorialWorldScene::OnInit()
 	RegisterPortalLayer("trigger_lab");
 	map->SetAreaUpdateHandler("trigger_p", [this](const sdlgf::Map::ObjectArea& area) {
 		if (!spamBossDefeated) return;   // locked until the Spam boss guarding it is beaten
-		CreatePortalTransition(3, -417.f, 144.f, "bgm_arcade", 0.2f);
+		CreatePortalTransition("ThreadAlleyScene", -417.f, 144.f, "bgm_arcade", 0.2f);
 	});
 	map->SetAreaUpdateHandler("trigger_lab", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(1, 64.f, -1.f, "bgm_secret", 0.3f);
+		CreatePortalTransition("LabInsideScene", 64.f, -1.f, "bgm_secret", 0.3f);
 	});
 	map->SetAreaUpdateHandler("trigger_secret", [this](const sdlgf::Map::ObjectArea& area) {
-		CreatePortalTransition(2, -84 * 16, -39 * 16, "bgm_secret", 0.3f);
+		CreatePortalTransition("SecretPuzzleScene", -84 * 16, -39 * 16, "bgm_secret", 0.3f);
 	});
 
 	NPCConfig daudauConfig = { L"assets/daudau-Sheet.png", 32, 32, 5, 12, 24.f, 8.f, 12.f };

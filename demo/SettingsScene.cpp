@@ -17,18 +17,10 @@ namespace Demo
 	std::string GetKeyName(int dikCode)
 	{
 		if (dikCode <= 0 || dikCode > 255) return "None";
-		char name[64];
-
-		LONG lParam = (dikCode & 0x7F) << 16;
-
-		if (dikCode == DIK_UP || dikCode == DIK_DOWN || dikCode == DIK_LEFT || dikCode == DIK_RIGHT ||
-			dikCode == DIK_INSERT || dikCode == DIK_DELETE || dikCode == DIK_HOME || dikCode == DIK_END ||
-			dikCode == DIK_PRIOR || dikCode == DIK_NEXT || dikCode == DIK_DIVIDE || dikCode == DIK_RALT ||
-			dikCode == DIK_RMENU) {
-			lParam |= 0x01000000;
-		}
-
-		if (GetKeyNameTextA(lParam, name, 64)) return std::string(name);
+		// SDL's own name for the key (Win32's GetKeyNameTextA is Windows-only)
+		const int scancode = sdlgf::Keys::ToSDLScancode(dikCode);
+		const char* name = scancode != 0 ? SDL_GetScancodeName(static_cast<SDL_Scancode>(scancode)) : "";
+		if (name != nullptr && name[0] != '\0') return std::string(name);
 		return "Key " + std::to_string(dikCode);
 	}
 

@@ -4,7 +4,7 @@
 Windows hides two classes of bug that break the moment the project is built or
 run elsewhere:
 
-  1. #include "..." that only resolves because the filesystem ignores case, or
+  1. #include "..." or <...> that only resolves because the filesystem ignores case, or
      that uses backslashes.
   2. Asset paths in string literals ("assets/Foo.PNG") that only resolve because
      the filesystem ignores case, or that use backslashes.
@@ -77,7 +77,7 @@ def source_files():
                     yield os.path.join(dirpath, f)
 
 
-INCLUDE_RE = re.compile(r'^\s*#\s*include\s+"([^"]+)"', re.M)
+INCLUDE_RE = re.compile(r'^\s*#\s*include\s+[<"]([^">]+)[">]', re.M)
 ASSET_RE = re.compile(r'"((?:[^"\\\n]|\\.)*?assets(?:\\\\|/)(?:[^"\\\n]|\\.)*?)"')
 
 

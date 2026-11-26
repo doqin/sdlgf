@@ -10,6 +10,7 @@
 #include <SDL3/SDL.h>
 
 #include <cmath>
+#include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>

@@ -1,5 +1,5 @@
 #pragma once
-#include <Extras\ICommand.h>
+#include <Extras/ICommand.h>
 #include <Sprites.h>
 #include <GraphicsDevice.h>
 #include <Camera.h>

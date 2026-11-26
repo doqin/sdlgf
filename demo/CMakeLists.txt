@@ -35,8 +35,12 @@ set_source_files_properties(
 # The game loads "assets/..." relative to the executable.
 if(SDLGF_COPY_ASSETS)
     add_custom_command(TARGET sdlgf_demo POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
-                "${CMAKE_CURRENT_SOURCE_DIR}/assets" "$<TARGET_FILE_DIR:sdlgf_demo>/assets"
+        # CopyAssets.cmake rather than copy_directory_if_different: it leaves the Aseprite
+        # sources behind so they never reach the build tree or the release zip.
+        COMMAND ${CMAKE_COMMAND}
+                "-DSRC=${CMAKE_CURRENT_SOURCE_DIR}/assets"
+                "-DDST=$<TARGET_FILE_DIR:sdlgf_demo>/assets"
+                -P "${CMAKE_SOURCE_DIR}/cmake/CopyAssets.cmake"
         VERBATIM
     )
 endif()

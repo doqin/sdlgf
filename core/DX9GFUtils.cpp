@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "DX9GFUtils.h"
 #include "DX9GFApplication.h"
+#include <SDL3/SDL_mouse.h>
 
 std::vector<RECT> DX9GF::Utils::CreateFrames(UINT sheetWidth, UINT sheetHeight, UINT frameWidth, UINT frameHeight, UINT frameCount, UINT offset)
 {
@@ -65,12 +66,11 @@ bool DX9GF::Utils::IsWithinRectangle(float pointX, float pointY, float rectX, fl
 
 void DX9GF::Utils::SetMousePos(int x, int y)
 {
-	POINT p;
-	p.x = x;
-	p.y = y;
-	if (ClientToScreen(DX9GF::Application::GetInstance()->GetHWnd(), &p)) {
-		SetCursorPos(p.x, p.y);
-	}
+	// x and y are client-area pixels; SDL warps in window coordinates
+	auto app = DX9GF::Application::GetInstance();
+	if (app->GetWindow() == nullptr) return;
+	const float density = app->GetPixelDensity();
+	SDL_WarpMouseInWindow(app->GetWindow(), static_cast<float>(x) / density, static_cast<float>(y) / density);
 }
 
 std::tuple<float, float> DX9GF::Utils::WindowToWorldCoords(const DX9GF::Camera& camera, float windowX, float windowY)

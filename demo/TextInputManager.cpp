@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "TextInputManager.h"
 #include <DX9GFInputManager.h>
-#include <dinput.h>
+#include "DX9GFKeys.h"
 
 Demo::TextInputManager* Demo::TextInputManager::instance = nullptr;
 

@@ -5,7 +5,7 @@
 #include "resource.h"
 #include "DX9GFInputManager.h"
 #include <algorithm>
-#include <dinput.h>
+#include "DX9GFKeys.h"
 #include "DX9GFIScene.h"
 
 namespace Demo

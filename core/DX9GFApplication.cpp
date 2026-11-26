@@ -1,17 +1,20 @@
 #include "pch.h"
 #include "DX9GFApplication.h"
+#include <SDL3/SDL.h>
+#include <algorithm>
+#include <filesystem>
 #include <stdexcept>
 #include "DX9GFFont.h"
 #include "DX9GFInputManager.h"
 #include "DX9GFAudioManager.h"
 DX9GF::Application* DX9GF::Application::instance = nullptr;
 DX9GF::IGame* p_game = nullptr;
-LRESULT(*customWndProc)(HWND, UINT, WPARAM, LPARAM) = nullptr;
+DX9GF::Application::EventHook eventHook = nullptr;
 void(*onDeviceResetHandler)() = nullptr;
 
-void DX9GF::Application::OverrideWindowProc(LRESULT(*_customWndProc)(HWND, UINT, WPARAM, LPARAM))
+void DX9GF::Application::SetEventHook(EventHook hook)
 {
-	customWndProc = _customWndProc;
+	eventHook = hook;
 }
 
 void DX9GF::Application::SetOnDeviceResetHandler(void(*handler)())
@@ -19,106 +22,75 @@ void DX9GF::Application::SetOnDeviceResetHandler(void(*handler)())
 	onDeviceResetHandler = handler;
 }
 
-LRESULT CALLBACK WinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+void DX9GF::Application::HandleEvent(const SDL_Event& event)
 {
-	if (customWndProc != nullptr) {
-		LRESULT result = customWndProc(hwnd, msg, wParam, lParam);
-		if (result != 0) {
-			return result;
-		}
+	if (eventHook != nullptr) {
+		eventHook(event);
 	}
-	switch (msg)
+	DX9GF::InputManager::GetInstance()->OnEvent(event);
+
+	switch (event.type)
 	{
-	case WM_SIZE:
-		if (wParam == SIZE_MINIMIZED) {
-			return 0;
-		}
+	case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED: {
+		const int width = event.window.data1;
+		const int height = event.window.data2;
+		// Minimized windows report no usable size; nothing to resize to
+		if (width <= 0 || height <= 0) break;
+		if (width == lastClientWidth && height == lastClientHeight) break;
+		lastClientWidth = width;
+		lastClientHeight = height;
+
 		if (p_game != nullptr && p_game->GetGraphicsDevice() != nullptr) {
 			if (onDeviceResetHandler != nullptr) {
 				onDeviceResetHandler();
 			}
 		}
 		if (p_game != nullptr) {
-			p_game->OnResize(LOWORD(lParam), HIWORD(lParam));
+			p_game->OnResize(width, height);
 		}
-		if (DX9GF::Application::GetInstance() != nullptr) {
-			DX9GF::Application::GetInstance()->OnResize(LOWORD(lParam), HIWORD(lParam));
-		}
-		return 0;
-	case WM_DESTROY:
-		p_game->Dispose();
-		PostQuitMessage(0);
-		return 0;
+		OnResize(width, height);
+		break;
 	}
-
-	return DefWindowProc(hwnd, msg, wParam, lParam);
+	case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+	case SDL_EVENT_QUIT:
+		if (p_game != nullptr && !gameDisposed) {
+			gameDisposed = true;
+			p_game->Dispose();
+		}
+		quitRequested = true;
+		break;
+	}
 }
 
-void DX9GF::Application::Init(HINSTANCE hInstance, std::wstring appTitle, UINT screenWidth, UINT screenHeight, bool resizable)
+void DX9GF::Application::Init(std::wstring appTitle, UINT screenWidth, UINT screenHeight, bool resizable)
 {
-	this->hInstance = hInstance;
 	this->appTitle = appTitle;
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
 
-	// Load pending icon before registering the window class (so the taskbar gets it)
-	if (!pendingIconPath.empty()) {
-		hIcon = static_cast<HICON>(LoadImageW(
-			hInstance,
-			pendingIconPath.c_str(),
-			IMAGE_ICON,
-			0, 0,
-			LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED
-		));
-	}
-
 	// Ensure the current working directory is the executable directory so relative paths work
-	wchar_t exePath[MAX_PATH]{};
-	DWORD exePathLen = GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-	if (exePathLen > 0 && exePathLen < MAX_PATH) {
-		std::wstring exePathStr(exePath, exePathLen);
-		size_t lastSlash = exePathStr.find_last_of(L"\\/");
-		if (lastSlash != std::wstring::npos) {
-			std::wstring exeDir = exePathStr.substr(0, lastSlash);
-			SetCurrentDirectoryW(exeDir.c_str());
-		}
+	const std::string exeDir = DX9GF::Platform::GetExecutableDirectory();
+	if (!exeDir.empty()) {
+		std::error_code ec;
+		std::filesystem::current_path(std::filesystem::path(std::u8string(exeDir.begin(), exeDir.end())), ec);
 	}
 
-	// Very important =)))
-	AppRegisterClass();
-
-    DWORD windowStyle = WS_VISIBLE | WS_OVERLAPPEDWINDOW;
-	windowStyle &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-
-	RECT windowRect = { 0, 0, static_cast<LONG>(screenWidth), static_cast<LONG>(screenHeight) };
-	AdjustWindowRect(&windowRect, windowStyle, FALSE);
-
-	// T?o m?t c?a s?
-    hwnd = CreateWindow(
-		appTitle.c_str(),
-		appTitle.c_str(),
-       windowStyle,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		windowRect.right - windowRect.left, // chi?u r?ng
-		windowRect.bottom - windowRect.top, // chi?u cao
-		NULL, // c?a s? cha
-		NULL, // menu
-		hInstance, // instance
-		NULL // C�c tham s? c?a s?
-	);
-
-	if (!hwnd) {
-		throw std::runtime_error("Error creating window");
+	if (!SDL_Init(SDL_INIT_VIDEO)) {
+		throw std::runtime_error(std::string("Error initializing SDL: ") + SDL_GetError());
 	}
 
-	// Apply the icon to the created window so the title bar and taskbar show it
-	if (hIcon != nullptr) {
-		SendMessageW(hwnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
-		SendMessageW(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIcon));
+	SDL_WindowFlags flags = 0;
+	if (resizable) flags |= SDL_WINDOW_RESIZABLE;
+	window = SDL_CreateWindow(DX9GF::Platform::WideToUtf8(appTitle).c_str(),
+		static_cast<int>(screenWidth), static_cast<int>(screenHeight), flags);
+	if (window == nullptr) {
+		throw std::runtime_error(std::string("Error creating window: ") + SDL_GetError());
 	}
 
-	DX9GF::InputManager::GetInstance()->Init(GetHWnd(), hInstance);
+	ApplyIcon();
+	GetClientSize(lastClientWidth, lastClientHeight);
+
+	DX9GF::InputManager::GetInstance()->Init();
 }
 
 void DX9GF::Application::SetFramerate(int fps)
@@ -126,10 +98,19 @@ void DX9GF::Application::SetFramerate(int fps)
 	frameRate = fps;
 }
 
+SDL_Window* DX9GF::Application::GetWindow() const
+{
+	return window;
+}
+
+#ifdef _WIN32
 HWND DX9GF::Application::GetHWnd() const
 {
-	return hwnd;
+	if (window == nullptr) return nullptr;
+	return static_cast<HWND>(SDL_GetPointerProperty(
+		SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
 }
+#endif
 
 DX9GF::Application* DX9GF::Application::GetInstance()
 {
@@ -149,6 +130,22 @@ unsigned int DX9GF::Application::GetScreenHeight() const
 	return screenHeight;
 }
 
+void DX9GF::Application::GetClientSize(int& width, int& height) const
+{
+	width = 0;
+	height = 0;
+	if (window != nullptr) {
+		SDL_GetWindowSizeInPixels(window, &width, &height);
+	}
+}
+
+float DX9GF::Application::GetPixelDensity() const
+{
+	if (window == nullptr) return 1.0f;
+	const float density = SDL_GetWindowPixelDensity(window);
+	return density > 0.0f ? density : 1.0f;
+}
+
 void DX9GF::Application::OnResize(UINT width, UINT height)
 {
 	//this->screenWidth = width;
@@ -158,10 +155,14 @@ void DX9GF::Application::OnResize(UINT width, UINT height)
 void DX9GF::Application::AttachGame(IGame* game)
 {
 	p_game = game;
-	if (p_game != nullptr && hwnd != nullptr) {
-		RECT rect;
-		if (GetClientRect(hwnd, &rect)) {
-			p_game->OnResize(rect.right - rect.left, rect.bottom - rect.top);
+	gameDisposed = false;
+	if (p_game != nullptr && window != nullptr) {
+		int width = 0, height = 0;
+		GetClientSize(width, height);
+		if (width > 0 && height > 0) {
+			lastClientWidth = width;
+			lastClientHeight = height;
+			p_game->OnResize(width, height);
 		}
 	}
 }
@@ -173,115 +174,109 @@ void DX9GF::Application::Run()
 	auto audioManager = AudioManager::GetInstance();
 	audioManager->Init();
 
-	MSG msg;
-	int done = 0;
 	unsigned long long start = DX9GF::Platform::GetTicksMs();
-	while (!done) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
-			if (msg.message == WM_QUIT) done = 1;
+	while (!quitRequested) {
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			HandleEvent(event);
+		}
+		if (quitRequested) break;
 
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+		if (frameRate == -1 || DX9GF::Platform::GetTicksMs() - start >= 1000 / frameRate) {
+			unsigned long long rawDeltaTime = DX9GF::Platform::GetTicksMs() - start;
+			start = DX9GF::Platform::GetTicksMs();
+
+			// Clamp the delta fed to Update/Draw so a stall (e.g. a heavy scene load)
+			// doesn't get replayed as one giant time jump - that skips timer-driven
+			// animations (fades, transitions) straight to their end instead of playing
+			// them smoothly
+			const unsigned long long MAX_DELTA_TIME_MS = 100;
+			unsigned long long deltaTime = (rawDeltaTime > MAX_DELTA_TIME_MS) ? MAX_DELTA_TIME_MS : rawDeltaTime;
+
+			p_game->Update(deltaTime);
+			audioManager->Update(deltaTime);
+			p_game->Draw(deltaTime);
 		}
 		else {
-			if (frameRate == -1 || DX9GF::Platform::GetTicksMs() - start >= 1000 / frameRate) {
-				unsigned long long rawDeltaTime = DX9GF::Platform::GetTicksMs() - start;
-				start = DX9GF::Platform::GetTicksMs();
-
-				// Clamp the delta fed to Update/Draw so a stall (e.g. a heavy scene load)
-				// doesn't get replayed as one giant time jump - that skips timer-driven
-				// animations (fades, transitions) straight to their end instead of playing
-				// them smoothly
-				const unsigned long long MAX_DELTA_TIME_MS = 100;
-				unsigned long long deltaTime = (rawDeltaTime > MAX_DELTA_TIME_MS) ? MAX_DELTA_TIME_MS : rawDeltaTime;
-
-				p_game->Update(deltaTime);
-				audioManager->Update(deltaTime);
-				p_game->Draw(deltaTime);
-			}
+			SDL_Delay(1); // frame not due yet: don't spin a core
 		}
 	}
 	// Cleanup any fonts added at runtime
 	DX9GF::Font::RemoveAllFonts();
 	audioManager->Shutdown();
+
+	SDL_DestroyWindow(window);
+	window = nullptr;
+	SDL_Quit();
 }
 
 void DX9GF::Application::Quit()
 {
-	PostQuitMessage(0);
+	quitRequested = true;
 }
 
 void DX9GF::Application::SetAppIcon(const std::wstring& iconPath)
 {
-	pendingIconPath = iconPath;
-
-	// If hInstance is already set, load the icon immediately
-	if (hInstance != nullptr) {
-		hIcon = static_cast<HICON>(LoadImageW(
-			hInstance,
-			pendingIconPath.c_str(),
-			IMAGE_ICON,
-			0, 0,
-			LR_LOADFROMFILE | LR_DEFAULTSIZE | LR_SHARED
-		));
-
-		if (hwnd != nullptr) {
-			SendMessageW(hwnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
-			SendMessageW(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIcon));
-		}
-	}
+	pendingIconPath = DX9GF::Platform::WideToUtf8(iconPath);
+	ApplyIcon(); // no-op until the window exists; Init applies it then
 }
 
-ATOM DX9GF::Application::AppRegisterClass()
+void DX9GF::Application::ApplyIcon()
 {
-	WNDCLASSEX wc;
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = (WNDPROC)WinProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
-	wc.hIcon = hIcon;
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = DX9GF::Application::appTitle.c_str();
-	wc.hIconSm = hIcon;
+	if (window == nullptr || pendingIconPath.empty()) return;
+	SDL_Surface* icon = SDL_LoadSurface(pendingIconPath.c_str());
+	if (icon == nullptr) {
+		DX9GF::Platform::DebugLog("Could not load window icon '" + pendingIconPath + "': " + SDL_GetError() + "\n");
+		return;
+	}
+	SDL_SetWindowIcon(window, icon);
+	SDL_DestroySurface(icon);
+}
 
-	return RegisterClassEx(&wc);
+void DX9GF::Application::SetTitle(const std::wstring& title)
+{
+	appTitle = title;
+	if (window != nullptr) {
+		SDL_SetWindowTitle(window, DX9GF::Platform::WideToUtf8(title).c_str());
+	}
 }
 
 void DX9GF::Application::SetFullscreen(bool fullscreen)
 {
 	if (this->isFullscreen == fullscreen) return;
 	this->isFullscreen = fullscreen;
+	if (window == nullptr) return;
 
-	DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+	// With no explicit fullscreen mode set this is borderless fullscreen at desktop
+	// resolution; leaving it restores the previous size and position.
+	SDL_SetWindowFullscreen(window, fullscreen);
+}
 
-	if (fullscreen) {
-		// Save the previous window dimensions before maximizing
-		GetWindowPlacement(hwnd, &wpPrev);
-		MONITORINFO mi = { sizeof(mi) };
-		if (GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-			// Strip away the window borders
-			SetWindowLong(hwnd, GWL_STYLE, style & ~WS_OVERLAPPEDWINDOW);
-			// Force the window size to match the actual screen dimensions
-			SetWindowPos(hwnd, HWND_TOP,
-				mi.rcMonitor.left, mi.rcMonitor.top,
-				mi.rcMonitor.right - mi.rcMonitor.left,
-				mi.rcMonitor.bottom - mi.rcMonitor.top,
-				SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-		}
-	}
-	else {
-		// Restore the window borders but strictly disable resizing
-		DWORD windowedStyle = (style | WS_OVERLAPPEDWINDOW) & ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-		SetWindowLong(hwnd, GWL_STYLE, windowedStyle);
+void DX9GF::Application::SetWindowedSize(UINT width, UINT height)
+{
+	if (window == nullptr) return;
 
-		// Revert to the original size
-		SetWindowPlacement(hwnd, &wpPrev);
-		SetWindowPos(hwnd, NULL, 0, 0, 0, 0,
-			SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-	}
+	SetFullscreen(false);
+	// Leaving fullscreen is asynchronous on some platforms; wait so the size and position
+	// below are applied to the restored window instead of being overwritten by it.
+	SDL_SyncWindow(window);
+
+	SDL_SetWindowSize(window, static_cast<int>(width), static_cast<int>(height));
+	SDL_SyncWindow(window);
+
+	int top = 0, left = 0, bottom = 0, right = 0;
+	SDL_GetWindowBordersSize(window, &top, &left, &bottom, &right);
+	const int outerWidth = static_cast<int>(width) + left + right;
+	const int outerHeight = static_cast<int>(height) + top + bottom;
+
+	SDL_Rect work{};
+	if (!SDL_GetDisplayUsableBounds(SDL_GetDisplayForWindow(window), &work)) return;
+
+	const int posX = work.x + (work.w - outerWidth) / 2;
+	const int idealPosY = work.y + (work.h - outerHeight) / 3;
+	const int safePosY = work.y + 10;
+	const int posY = (std::max)(idealPosY, safePosY);
+
+	// SDL positions the client area; the position above is for the outer frame.
+	SDL_SetWindowPosition(window, posX + left, posY + top);
 }

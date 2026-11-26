@@ -1,7 +1,15 @@
 #include "DX9GFPlatform.h"
 #include <chrono>
+#include <SDL3/SDL_messagebox.h>
 #include <cstdio>
 #include <type_traits>
+
+#if defined(__APPLE__)
+#	include <mach-o/dyld.h>
+#elif !defined(_WIN32)
+#	include <limits.h>
+#	include <unistd.h>
+#endif
 
 unsigned long long DX9GF::Platform::GetTicksMs()
 {
@@ -23,9 +31,50 @@ void DX9GF::Platform::DebugLog(const std::string& message)
 void DX9GF::Platform::ShowErrorMessage(const std::string& title, const std::string& message)
 {
 	std::fprintf(stderr, "[%s] %s\n", title.c_str(), message.c_str());
+	// Safe to call before SDL_Init, which matters for startup failures.
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title.c_str(), message.c_str(), nullptr);
+}
+
+std::string DX9GF::Platform::GetExecutablePath()
+{
 #if defined(_WIN32)
-	MessageBoxA(nullptr, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+	std::wstring buffer(MAX_PATH, L'\0');
+	for (;;) {
+		const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+		if (length == 0) return {};
+		if (length < buffer.size()) {
+			buffer.resize(length);
+			return WideToUtf8(buffer);
+		}
+		buffer.resize(buffer.size() * 2); // path was truncated
+	}
+#elif defined(__APPLE__)
+	uint32_t size = 0;
+	_NSGetExecutablePath(nullptr, &size);
+	std::string buffer(size, '\0');
+	if (_NSGetExecutablePath(buffer.data(), &size) != 0) return {};
+	buffer.resize(std::char_traits<char>::length(buffer.c_str()));
+	return buffer;
+#else
+	std::string buffer(PATH_MAX, '\0');
+	for (;;) {
+		const ssize_t length = readlink("/proc/self/exe", buffer.data(), buffer.size());
+		if (length < 0) return {};
+		if (static_cast<size_t>(length) < buffer.size()) {
+			buffer.resize(static_cast<size_t>(length));
+			return buffer;
+		}
+		buffer.resize(buffer.size() * 2);
+	}
 #endif
+}
+
+std::string DX9GF::Platform::GetExecutableDirectory()
+{
+	const std::string path = GetExecutablePath();
+	const size_t slash = path.find_last_of("/\\");
+	if (slash == std::string::npos) return {};
+	return path.substr(0, slash);
 }
 
 namespace {

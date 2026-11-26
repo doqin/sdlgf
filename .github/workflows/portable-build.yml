@@ -21,6 +21,9 @@ jobs:
       - name: Build demo (Release x64)
         run: cmake --build build --config Release --parallel
 
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
       - name: Package portable folder
         shell: pwsh
         run: ./scripts/package-portable.ps1

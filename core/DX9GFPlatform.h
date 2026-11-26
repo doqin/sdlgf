@@ -90,6 +90,16 @@ namespace DX9GF::Platform {
 	void ShowErrorMessage(const std::string& title, const std::string& message);
 
 	/// <summary>
+	/// Absolute path of the running executable, UTF-8. Empty if it cannot be determined.
+	/// </summary>
+	std::string GetExecutablePath();
+
+	/// <summary>
+	/// Directory containing the running executable, UTF-8, without a trailing separator.
+	/// </summary>
+	std::string GetExecutableDirectory();
+
+	/// <summary>
 	/// Converts UTF-8 to the platform's wide string (UTF-16 on Windows, UTF-32 elsewhere).
 	/// Invalid sequences become U+FFFD. Valid input converts identically to
 	/// MultiByteToWideChar; for malformed input (esp. overlong / out-of-range sequences)

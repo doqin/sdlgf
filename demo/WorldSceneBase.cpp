@@ -14,7 +14,7 @@
 #include "MapView.h"
 #include "RNG.h"
 #include "backends/imgui_impl_dx9.h"
-#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_sdl3.h"
 
 namespace {
 	void ShowQuestResult(Demo::PopUpMessage* popup, const Demo::QuestEventResult& r) {

@@ -22,7 +22,7 @@ endif()
 target_precompile_headers(sdlgf_demo PRIVATE "${CMAKE_SOURCE_DIR}/includes/pch.h")
 set_source_files_properties(
     backends/imgui_impl_dx9.cpp
-    backends/imgui_impl_win32.cpp
+    backends/imgui_impl_sdl3.cpp
     imgui.cpp
     imgui_demo.cpp
     imgui_draw.cpp

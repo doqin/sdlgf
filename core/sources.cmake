@@ -35,6 +35,8 @@ set(SDLGF_CORE_SOURCES
     DX9GFIGame.cpp
     DX9GFInputManager.cpp
     DX9GFPlatform.cpp
+    DX9GFKeys.cpp
+    DX9GFCrashHandler.cpp
     DX9GFIScene.cpp
     DX9GFISprite.cpp
     DX9GFSceneManager.cpp

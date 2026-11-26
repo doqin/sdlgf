@@ -7,7 +7,7 @@
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
-#include <dinput.h>
+#include "DX9GFKeys.h"
 namespace Demo
 {
 	//Extra helpers, use to get keyname and string

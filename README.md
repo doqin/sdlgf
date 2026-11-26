@@ -11,7 +11,11 @@ cmake --build build --config Release
 build/bin/Release/demo.exe
 ```
 
-Tuỳ chọn: `-DSDLGF_TESTING=ON` (vào thẳng `DebugScene`), `-DSDLGF_COPY_ASSETS=OFF`.
+Tuỳ chọn: `-DSDLGF_TESTING=ON` (vào thẳng `DebugScene`), `-DSDLGF_COPY_ASSETS=OFF`, `-DSDLGF_BUILD_TESTS=OFF`.
+
+Chạy test: `ctest --test-dir build -C Release --output-on-failure`
+
+Cửa sổ, vòng lặp và input đã chạy trên SDL3 (không còn Win32/DirectInput). Phần đồ hoạ (Direct3D 9) và âm thanh (XAudio2) vẫn đang được port ở các bước sau.
 
 Các file `.vcxproj`/`.slnx` cũ sẽ bị xoá ở bước dọn dẹp cuối của quá trình port.
 

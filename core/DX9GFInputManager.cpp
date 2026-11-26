@@ -1,11 +1,57 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "DX9GFInputManager.h"
-#include <stdexcept>
-#include <DxErr.h>
+#include <SDL3/SDL.h>
+#include <algorithm>
+#include <cmath>
+#include <cstring>
 #include "DX9GFApplication.h"
 #include "DX9GF.h"
 
 DX9GF::InputManager* DX9GF::InputManager::instance = nullptr;
+
+namespace {
+	// DirectInput reported "down" as the high bit of a byte; the rest of the class still
+	// tests for it that way.
+	constexpr BYTE kDown = 0x80;
+
+	// SDL button number -> DX9GF mouse button slot (Left/Right/Middle/X1), or -1.
+	int ButtonSlot(Uint8 sdlButton)
+	{
+		switch (sdlButton) {
+		case SDL_BUTTON_LEFT: return 0;
+		case SDL_BUTTON_RIGHT: return 1;
+		case SDL_BUTTON_MIDDLE: return 2;
+		case SDL_BUTTON_X1: return 3;
+		default: return -1;
+		}
+	}
+
+	// Mouse position in client pixels, letterbox region of the virtual screen within it.
+	struct Letterbox {
+		float currentWidth, currentHeight;
+		float scale, offsetX, offsetY, finalW, finalH;
+	};
+
+	Letterbox ComputeLetterbox(DX9GF::Application* app)
+	{
+		int clientW = 0, clientH = 0;
+		app->GetClientSize(clientW, clientH);
+		Letterbox box{};
+		box.currentWidth = static_cast<float>(clientW);
+		box.currentHeight = static_cast<float>(clientH);
+
+		const float virtualWidth = static_cast<float>(app->GetScreenWidth());
+		const float virtualHeight = static_cast<float>(app->GetScreenHeight());
+		const float scaleX = box.currentWidth / virtualWidth;
+		const float scaleY = box.currentHeight / virtualHeight;
+		box.scale = (std::min)(scaleX, scaleY);
+		box.finalW = virtualWidth * box.scale;
+		box.finalH = virtualHeight * box.scale;
+		box.offsetX = (box.currentWidth - box.finalW) / 2.0f;
+		box.offsetY = (box.currentHeight - box.finalH) / 2.0f;
+		return box;
+	}
+}
 
 bool DX9GF::InputManager::CheckKeysBuffer(int DIKey) const
 {
@@ -19,7 +65,7 @@ bool DX9GF::InputManager::CheckMouseBuffer(MouseButton button)
 
 void DX9GF::InputManager::UpdateMouseBuffer(int buttonIndex)
 {
-    if (firstMouseCheck && (diMouseState.rgbButtons[buttonIndex] != mouseBuffer[buttonIndex])) {
+    if (firstMouseCheck && (mouseButtons[buttonIndex] != mouseBuffer[buttonIndex])) {
         lastMouseBufferPressed = lastMouseButtonPressed;
         lastMouseButtonPressed = buttonIndex;
         mouseDelta = 0;
@@ -35,42 +81,50 @@ DX9GF::InputManager* DX9GF::InputManager::GetInstance()
     return instance;
 }
 
-void DX9GF::InputManager::Init(HWND hWnd, HINSTANCE hInstance)
+void DX9GF::InputManager::Init()
 {
-    HRESULT result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dinput, NULL);
-    if (result != DI_OK) {
-        auto error = DXGetErrorDescription(result);
-        std::string what = std::string(error, error + wcslen(error));
-        throw std::runtime_error(what);
-    }
-    result = dinput->CreateDevice(GUID_SysKeyboard, &diKeyboard, NULL);
-    if (result != DI_OK) {
-        auto error = DXGetErrorDescription(result);
-        std::string what = std::string(error, error + wcslen(error));
-        throw std::runtime_error(what);
-    }
-    diKeyboard->SetDataFormat(&c_dfDIKeyboard);
-    diKeyboard->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
-    result = diKeyboard->Acquire();
-    if (result != DI_OK) {
-        auto error = DXGetErrorDescription(result);
-        std::string what = std::string(error, error + wcslen(error));
-        throw std::runtime_error(what);
-    }
+    // Start from where the cursor actually is rather than the corner
+    SDL_GetMouseState(&liveMouseX, &liveMouseY);
+}
 
-    result = dinput->CreateDevice(GUID_SysMouse, &diMouse, NULL);
-    if (result != DI_OK) {
-        auto error = DXGetErrorDescription(result);
-        std::string what = std::string(error, error + wcslen(error));
-        throw std::runtime_error(what);
+void DX9GF::InputManager::OnEvent(const SDL_Event& event)
+{
+    switch (event.type) {
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP: {
+        // Auto-repeat re-sends KEY_DOWN for a key that is already down; state is unchanged
+        if (event.key.repeat) break;
+        const int dik = DX9GF::Keys::FromSDLScancode(static_cast<int>(event.key.scancode));
+        if (dik > 0) {
+            liveKeys[dik] = (event.type == SDL_EVENT_KEY_DOWN) ? kDown : 0;
+        }
+        break;
     }
-    diMouse->SetDataFormat(&c_dfDIMouse);
-    diMouse->SetCooperativeLevel(hWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
-    result = diMouse->Acquire();
-    if (result != DI_OK) {
-        auto error = DXGetErrorDescription(result);
-        std::string what = std::string(error, error + wcslen(error));
-        throw std::runtime_error(what);
+    case SDL_EVENT_MOUSE_BUTTON_DOWN:
+    case SDL_EVENT_MOUSE_BUTTON_UP: {
+        const int slot = ButtonSlot(event.button.button);
+        if (slot >= 0) {
+            liveButtons[slot] = (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN) ? kDown : 0;
+        }
+        liveMouseX = event.button.x;
+        liveMouseY = event.button.y;
+        break;
+    }
+    case SDL_EVENT_MOUSE_MOTION:
+        liveMouseX = event.motion.x;
+        liveMouseY = event.motion.y;
+        break;
+    case SDL_EVENT_MOUSE_WHEEL: {
+        // Positive y is away from the user unless the OS reports natural (flipped) scrolling
+        const float flip = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -1.0f : 1.0f;
+        wheelNotches += event.wheel.y * flip;
+        break;
+    }
+    case SDL_EVENT_WINDOW_FOCUS_LOST:
+        // Keys/buttons released while another window had focus would otherwise stay stuck
+        std::memset(liveKeys, 0, sizeof(liveKeys));
+        std::memset(liveButtons, 0, sizeof(liveButtons));
+        break;
     }
 }
 
@@ -98,9 +152,8 @@ void DX9GF::InputManager::ReadKeyboard(unsigned long long deltaTime)
     for (int i = 0; i < 256; i++) {
         keysBuffer[i] = keys[i];
     }
-    HRESULT result = diKeyboard->GetDeviceState(sizeof(keys), (LPVOID)&keys);
-    while (result != DI_OK && (result == DIERR_INPUTLOST || result == DIERR_NOTACQUIRED)) {
-        result = diKeyboard->Acquire();
+    for (int i = 0; i < 256; i++) {
+        keys[i] = static_cast<char>(liveKeys[i]);
     }
     firstKeyCheck = true;
 }
@@ -149,32 +202,19 @@ void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
         lastMouseBufferPressed = -1;
     }
     for (int i = 0; i < 4; i++) {
-        mouseBuffer[i] = diMouseState.rgbButtons[i];
+        mouseBuffer[i] = mouseButtons[i];
     }
 
     auto app = DX9GF::Application::GetInstance();
-    HWND hwnd = app->GetHWnd();
+    const float density = app->GetPixelDensity();
 
     POINT rawMousePos;
-    GetCursorPos(&rawMousePos);
-    ScreenToClient(hwnd, &rawMousePos);
+    rawMousePos.x = static_cast<LONG>(liveMouseX * density);
+    rawMousePos.y = static_cast<LONG>(liveMouseY * density);
 
-    RECT clientRect;
-    GetClientRect(hwnd, &clientRect);
-    float currentWidth = static_cast<float>(clientRect.right - clientRect.left);
-    float currentHeight = static_cast<float>(clientRect.bottom - clientRect.top);
-
-    float virtualWidth = static_cast<float>(app->GetScreenWidth());
-    float virtualHeight = static_cast<float>(app->GetScreenHeight());
-
-    float scaleX = currentWidth / virtualWidth;
-    float scaleY = currentHeight / virtualHeight;
-    float scale = (std::min)(scaleX, scaleY);
-
-    float finalW = virtualWidth * scale;
-    float finalH = virtualHeight * scale;
-    float offsetX = (currentWidth - finalW) / 2.0f;
-    float offsetY = (currentHeight - finalH) / 2.0f;
+    const Letterbox box = ComputeLetterbox(app);
+    const float offsetX = box.offsetX, offsetY = box.offsetY;
+    const float finalW = box.finalW, finalH = box.finalH;
 
     //Mouse Clamp
     if (rawMousePos.x < offsetX) rawMousePos.x = static_cast<LONG>(offsetX);
@@ -195,10 +235,12 @@ void DX9GF::InputManager::ReadMouse(unsigned long long deltaTime)
         lastMousePos = mousePos;
     }
 
-    HRESULT result = diMouse->GetDeviceState(sizeof(diMouseState), (LPVOID)&diMouseState);
-    while (result != DI_OK && (result == DIERR_INPUTLOST || result == DIERR_NOTACQUIRED)) {
-        result = diMouse->Acquire();
+    for (int i = 0; i < 4; i++) {
+        mouseButtons[i] = liveButtons[i];
     }
+    // One wheel notch is 120 units (WHEEL_DELTA), as DirectInput reported it
+    mouseScroll = static_cast<long>(std::lround(wheelNotches * 120.0f));
+    wheelNotches = 0.0f;
     firstMouseCheck = true;
 }
 
@@ -222,7 +264,7 @@ void DX9GF::InputManager::DrawCursor(DX9GF::Camera* uiCamera, unsigned long long
     activeSprite->Draw(*uiCamera, deltaTime);
     activeSprite->End();
 
-    if (GetAsyncKeyState(VK_LBUTTON) & 0x8000)
+    if (liveButtons[0] & 0x80)
     {
         this->currentCursorType = CursorType::GRAB;
     }
@@ -235,7 +277,7 @@ void DX9GF::InputManager::DrawCursor(DX9GF::Camera* uiCamera, unsigned long long
 bool DX9GF::InputManager::MousePress(MouseButton button)
 {
     if (consumedMouseButtons[button]) return false;
-    if (diMouseState.rgbButtons[button] & 0x80) {
+    if (mouseButtons[button] & 0x80) {
         UpdateMouseBuffer(button);
         return true;
     }
@@ -286,25 +328,24 @@ POINT DX9GF::InputManager::GetAbsoluteMousePos() const
 
 long DX9GF::InputManager::GetMouseScroll() const
 {
-    return diMouseState.lZ;
+    return mouseScroll;
 }
 //
 void DX9GF::InputManager::EnableCustomCursor(bool enable)
 {
-    //if the state is the same, do nothing to prevent the counter from jamming
+    //if the state is the same, do nothing
     if (this->isCustomCursorActive == enable) return;
 
     this->isCustomCursorActive = enable;
 
-    if (enable) 
+    // The game draws its own cursor sprite, so hide the system one (and restore it when disabled)
+    if (enable)
     {
-        //hide win default cursor when the counter is positive
-        while (ShowCursor(FALSE) >= 0);
+        SDL_HideCursor();
     }
-    else 
+    else
     {
-        //show win default cursor when the counter is negative
-        while (ShowCursor(TRUE) < 0);
+        SDL_ShowCursor();
     }
 }
 void DX9GF::InputManager::AddCursor(CursorType type, DX9GF::GraphicsDevice* gd, const std::wstring& path, float scale, float hX, float hY)
@@ -331,20 +372,7 @@ void DX9GF::InputManager::SwitchCursor(CursorType type)
 
 void DX9GF::InputManager::Dispose()
 {
-    if (diKeyboard != nullptr) {
-        diKeyboard->Unacquire();
-        diKeyboard->Release();
-        diKeyboard = nullptr;
-    }
-    if (diMouse != nullptr) {
-        diKeyboard->Unacquire();
-        diMouse->Release();
-        diMouse = nullptr;
-    }
-    if (dinput != nullptr) {
-        dinput->Release();
-        dinput = nullptr;
-    }
+    // Nothing to release: input state is plain data and SDL owns the devices.
 }
 
 std::tuple<float, float> DX9GF::InputManager::GetVirtualAbsoluteMousePos(const DX9GF::Camera* camera) const
@@ -360,21 +388,14 @@ std::tuple<float, float> DX9GF::InputManager::GetVirtualAbsoluteMousePos(const D
     auto [camW, camH] = camera->GetScreenResolution();
 
     if (camW == virtualW && camH == virtualH) {
-        HWND hwnd = app->GetHWnd();
-        RECT clientRect;
-        GetClientRect(hwnd, &clientRect);
-        float currentWidth = static_cast<float>(clientRect.right - clientRect.left);
-        float currentHeight = static_cast<float>(clientRect.bottom - clientRect.top);
+        const Letterbox box = ComputeLetterbox(app);
+        float currentWidth = box.currentWidth;
+        float currentHeight = box.currentHeight;
 
         if (currentWidth > 0.0f && currentHeight > 0.0f) {
-            float scaleX = currentWidth / virtualW;
-            float scaleY = currentHeight / virtualH;
-            float scale = (std::min)(scaleX, scaleY);
-
-            float finalW = virtualW * scale;
-            float finalH = virtualH * scale;
-            float offsetX = (currentWidth - finalW) / 2.0f;
-            float offsetY = (currentHeight - finalH) / 2.0f;
+            float scale = box.scale;
+            float offsetX = box.offsetX;
+            float offsetY = box.offsetY;
 
             mouseX = (mouseX - offsetX) / scale;
             mouseY = (mouseY - offsetY) / scale;
@@ -396,19 +417,11 @@ std::tuple<float, float> DX9GF::InputManager::GetVirtualRelativeMousePos(const D
     auto [camW, camH] = camera->GetScreenResolution();
 
     if (camW == virtualW && camH == virtualH) {
-        HWND hwnd = app->GetHWnd();
-        RECT clientRect;
-        GetClientRect(hwnd, &clientRect);
-        float currentWidth = static_cast<float>(clientRect.right - clientRect.left);
-        float currentHeight = static_cast<float>(clientRect.bottom - clientRect.top);
+        const Letterbox box = ComputeLetterbox(app);
 
-        if (currentWidth > 0.0f && currentHeight > 0.0f) {
-            float scaleX = currentWidth / virtualW;
-            float scaleY = currentHeight / virtualH;
-            float scale = (std::min)(scaleX, scaleY);
-
-            dX /= scale;
-            dY /= scale;
+        if (box.currentWidth > 0.0f && box.currentHeight > 0.0f) {
+            dX /= box.scale;
+            dY /= box.scale;
         }
     }
     return { dX, dY };

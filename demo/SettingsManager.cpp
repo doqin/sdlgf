@@ -143,7 +143,7 @@ namespace Demo
 	{
 		this->isFullscreen = fs;
 		auto app = DX9GF::Application::GetInstance();
-		if (app && app->GetHWnd()) {
+		if (app && app->GetWindow()) {
 			app->SetFullscreen(fs);
 		}
 	}
@@ -156,7 +156,7 @@ namespace Demo
 
 	void SettingsManager::ApplyResolution() {
 		auto app = DX9GF::Application::GetInstance();
-		if (!app || !app->GetHWnd()) return;
+		if (!app || !app->GetWindow()) return;
 
 		if (isFullscreen) {
 			app->SetFullscreen(true);
@@ -167,30 +167,8 @@ namespace Demo
 			app->SetFullscreen(false);
 			this->SetFullscreen(false);
 
-			HWND hwnd = app->GetHWnd();
-			DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-
-			RECT windowRect = { 0, 0, static_cast<LONG>(res.width), static_cast<LONG>(res.height) };
-			AdjustWindowRect(&windowRect, style, FALSE);
-
-			int windowWidth = windowRect.right - windowRect.left;
-			int windowHeight = windowRect.bottom - windowRect.top;
-
-			MONITORINFO mi = { sizeof(mi) };
-			GetMonitorInfo(MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY), &mi);
-
-			int workWidth = mi.rcWork.right - mi.rcWork.left;
-			int workHeight = mi.rcWork.bottom - mi.rcWork.top;
-
-			int posX = mi.rcWork.left + (workWidth - windowWidth) / 2;
-			int idealPosY = mi.rcWork.top + (workHeight - windowHeight) / 3;
-			int safePosY = mi.rcWork.top + 10;
-			int posY = (std::max)(idealPosY, safePosY);
-
-			SetWindowPos(hwnd, HWND_TOP, posX, posY,
-				windowWidth,
-				windowHeight,
-				SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+			// Sizes the client area and centers the window on its display
+			app->SetWindowedSize(res.width, res.height);
 		}
 	}
 

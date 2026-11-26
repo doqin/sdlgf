@@ -1,16 +1,19 @@
-﻿#pragma once
-#include "dinput.h"
+#pragma once
+#include "DX9GFPlatform.h"
+#include "DX9GFKeys.h"
 //
 #include "DX9GFSprites.h"
 #include "DX9GFCamera.h"
+#include <map>
 #include <memory>
+#include <string>
+#include <tuple>
 //
 #define KEYBOARD_BUFFER_SIZE 1024
 #define KEYBOARD_LAST_PRESS_TIME 125
 #define MOUSE_LAST_PRESS_TIME 125
 
-
-
+union SDL_Event;
 
 namespace DX9GF {
 	class InputManager final {
@@ -33,11 +36,18 @@ namespace DX9GF {
 	private:
 		static InputManager* instance;
 
-		LPDIRECTINPUT8 dinput = nullptr;
-		LPDIRECTINPUTDEVICE8 diKeyboard = nullptr;
-		LPDIRECTINPUTDEVICE8 diMouse = nullptr;
-		DIMOUSESTATE diMouseState;
-		BYTE mouseBuffer[4];
+		// Live state, kept current by OnEvent() as SDL events arrive. ReadKeyboard() and
+		// ReadMouse() snapshot it once per frame, which is what gives KeyDown/KeyUp/
+		// MouseDown/MouseUp their "changed since last frame" meaning.
+		BYTE liveKeys[256] = {};
+		BYTE liveButtons[4] = {};
+		float liveMouseX = 0.0f; // window coordinates, as reported by SDL
+		float liveMouseY = 0.0f;
+		float wheelNotches = 0.0f; // accumulated since the last ReadMouse (positive = away from user)
+
+		BYTE mouseButtons[4] = {}; // button state as of the last ReadMouse
+		long mouseScroll = 0;      // wheel movement during the last ReadMouse, 120 per notch
+		BYTE mouseBuffer[4] = {};
 		POINT mousePos = {0, 0};
 		POINT lastMousePos = {0, 0};
 		POINT relativeMousePos = {0, 0};
@@ -54,8 +64,8 @@ namespace DX9GF {
 		InputManager() {}
 		~InputManager() {}
 
-		char keys[256];
-		char keysBuffer[256];
+		char keys[256] = {};
+		char keysBuffer[256] = {};
 		bool consumedKeys[256] = { false };
 		bool consumedMouseButtons[4] = { false };
 		int lastKeyPressed = -1;
@@ -72,7 +82,15 @@ namespace DX9GF {
 		void UpdateMouseBuffer(int buttonIndex);
 	public:
 		static InputManager* GetInstance();
-		void Init(HWND, HINSTANCE);
+		/// <summary>
+		/// Call once after the application window exists.
+		/// </summary>
+		void Init();
+		/// <summary>
+		/// Feeds one SDL event (key, mouse button/motion/wheel, focus) into the live state.
+		/// Called by Application for every event; tests can call it with synthetic events.
+		/// </summary>
+		void OnEvent(const SDL_Event& event);
 		void ConsumeKey(int DIKey);
 		void ConsumeMouseButton(MouseButton button);
 		void ReadKeyboard(unsigned long long deltaTime);

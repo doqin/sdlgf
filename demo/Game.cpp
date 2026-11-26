@@ -197,7 +197,7 @@ void Demo::Game::Update(unsigned long long deltaTime)
 		float msPerFrame = (float)fpsAccumulator / fpsFrames;
 		wchar_t buf[256];
 		std::swprintf(buf, std::size(buf), L"%ls - FPS: %d (%.2f ms/frame)", GAME_TITLE, fpsFrames, msPerFrame);
-		SetWindowTextW(GetHwnd(), buf);
+		DX9GF::Application::GetInstance()->SetTitle(buf);
 
 		fpsAccumulator = 0;
 		fpsFrames = 0;

@@ -120,6 +120,10 @@ namespace Demo {
 		const float KEYBOARD_BLOCK_CARD_SPEED = 300.f; // px/sec
 		// Externals
 		Game* game;
+		// Declared before the players on purpose: members are destroyed in reverse order, and
+		// ~Player removes its collider from the ColliderManager it was Init()ed with (this one,
+		// for battlePlayer). Destroyed first, the manager would be freed under it.
+		sdlgf::ColliderManager colliderManager;
 		std::shared_ptr<Player> player;
 		std::shared_ptr<Player> battlePlayer;
 
@@ -129,7 +133,6 @@ namespace Demo {
 		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer;
 		std::shared_ptr<DraggableManager> draggableManager;
 		std::shared_ptr<sdlgf::TransformManager> transformManager;
-		sdlgf::ColliderManager colliderManager;
 		// Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
 		std::shared_ptr<InitBlockCard> initBlockCard;

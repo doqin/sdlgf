@@ -338,9 +338,8 @@ void Demo::BossWorldScene::OnInit()
 	audio->Load("hack_fail", "assets/audio/access_denied.ogg");
 	audio->Load("hack_success", "assets/audio/access_granted.ogg");
 
-	gateTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	gateTexture->LoadTexture(L"assets/gate.png");
-	gateSprite = std::make_shared<sdlgf::StaticSprite>(gateTexture.get());
+	gateTexture = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/gate.png");
+	gateSprite = std::make_shared<sdlgf::StaticSprite>(gateTexture);
 	gateSprite->SetPosition(46 * 16, -15 * 16);
 
 	player->SetBaseSurface("default");
@@ -441,7 +440,7 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 		rustyChest->Update(deltaTime);
 		if (!currentConversation && rustyChest->CanInteract() && sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			auto [sw, sh] = camera.GetScreenResolution();
-			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 
 			auto dialogBuilder = std::make_shared<NPC>(transformManager, 0, 0, NPCConfig{});
 
@@ -502,7 +501,7 @@ std::string Demo::BossWorldScene::GetSaveID() const {
 void Demo::BossWorldScene::StartKeyeproConversation()
 {
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 	for (auto& line : keyeproNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}

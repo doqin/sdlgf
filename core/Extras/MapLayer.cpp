@@ -51,7 +51,7 @@ void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 		const float uNorm = static_cast<float>(tileSetTileSize.x) / textureSizeX;
 		const float vNorm = static_cast<float>(tileSetTileSize.y) / textureSizeY;
 		Subset subset;
-		subset.texture = textures[i].get();
+		subset.texture = textures[i];
 		std::vector<TileVertex> subsetVertices;
 
 		for (const auto& chunk : chunks) {
@@ -185,6 +185,6 @@ void sdlgf::MapLayer::Draw(const Camera& camera, const ViewBounds& viewBounds)
 				}
 			}
 		}
-		graphicsDevice->DrawTexturedTriangles(subset.texture, visibleVertices.data(), static_cast<int>(visibleVertices.size()));
+		graphicsDevice->DrawTexturedTriangles(subset.texture.get(), visibleVertices.data(), static_cast<int>(visibleVertices.size()));
 	}
 }

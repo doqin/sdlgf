@@ -112,7 +112,7 @@ void Demo::ThreadAlleyScene::OnInit()
 			trojanNPC->GetQuestMarker()->SetConditionMet(true);
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
-		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 		currentConversation->AddLine({ .name = Tr(L"Terminal"), .content = Tr(L"ACCESS GRANTED.\nYou obtained the Authentication Token.") });
 	});
 
@@ -379,7 +379,7 @@ void Demo::ThreadAlleyScene::StartTrojanConversation()
 	}
 
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 	for (auto& line : trojanNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}
@@ -462,7 +462,7 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 
 	if (!npcData->HasMet()) {
 		auto [sw, sh] = camera.GetScreenResolution();
-		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 		for (auto& line : sketchyGuy->GetDialogueLines()) {
 			currentConversation->AddLine(line);
 		}

@@ -5,7 +5,7 @@
 
 namespace Demo {
     TextIconButton::TextIconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-        std::shared_ptr<sdlgf::Texture> uiSheetTex, sdlgf::Font* font, const std::wstring& text, int frames)
+        std::shared_ptr<sdlgf::Texture> uiSheetTex, std::shared_ptr<sdlgf::Font> font, const std::wstring& text, int frames)
         : IconButton(tm, displayX, displayY, imgW, imgH, uiSheetTex, frames), label(text)
     {
         if (font) {

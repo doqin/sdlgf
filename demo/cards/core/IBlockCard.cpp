@@ -109,11 +109,10 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 {
 	IContainer::Draw(deltaTime);
 	if (!blockTexture) {
-		blockTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		blockTexture->LoadTexture(L"assets/ui.png");
-		blockSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture.get());
+		blockTexture = graphicsDevice->GetAssets().GetTexture(L"assets/ui.png");
+		blockSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture);
 		blockSprite->SetSrcRect(GetBlockFaceRect());
-		pointerSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture.get());
+		pointerSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture);
 		pointerSprite->SetSrcRect({ .left = 128, .top = 0, .right = 144, .bottom = 16 });
 		pointerSprite->SetScale(2.f, 2.f);
 		pointerSprite->SetOrigin(8.f, 8.f);
@@ -124,8 +123,8 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 	blockSprite->Draw(*camera, deltaTime);
 	blockSprite->End();
 	if (!nameFont) {
-		nameFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-		nameFontSprite = std::make_shared<sdlgf::FontSprite>(nameFont.get());
+		nameFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+		nameFontSprite = std::make_shared<sdlgf::FontSprite>(nameFont);
 		nameFontSprite->SetColor(0xFF000000);
 	}
 	if (auto currentCard = GetCurrentExecutingCard()) {

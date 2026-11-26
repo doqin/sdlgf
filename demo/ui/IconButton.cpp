@@ -8,7 +8,7 @@ Demo::IconButton::IconButton(std::shared_ptr<sdlgf::TransformManager> tm, float 
 	: IButton(tm, displayX, displayY, imgW, imgH, frames), texture(uiSheetTex)
 {
 	if (uiSheetTex) {
-		this->sprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+		this->sprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	}
 	this->buttonRects.resize(frames);
 }
@@ -58,7 +58,7 @@ void Demo::IconButton::RebuildSliceSprite()
 	//top/bottom margins stay at 0, so the nine slice degenerates into the three horizontal segments we want
 	RECT src = this->buttonRects.empty() ? RECT{} : this->buttonRects[0];
 	this->sliceSprite = std::make_shared<sdlgf::NineSliceSprite>(
-		this->texture.get(), src, this->sliceLeftMargin, 0, this->sliceRightMargin, 0);
+		this->texture, src, this->sliceLeftMargin, 0, this->sliceRightMargin, 0);
 
 	//the caps keep the sprite's own zoom, only the centre segment gets stretched
 	this->sliceSprite->SetScale(this->spriteScaleX);

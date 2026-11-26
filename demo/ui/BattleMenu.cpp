@@ -26,7 +26,7 @@ namespace Demo {
 	{
 	}
 
-	void BattleMenu::Init(sdlgf::Font* f)
+	void BattleMenu::Init(std::shared_ptr<sdlgf::Font> f)
 	{
 		font = f;
 		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
@@ -36,8 +36,7 @@ namespace Demo {
 		const BottomRowX x = ComputeRowX();
 		float resumeX = x.resume, optionsX = x.options, guideX = x.guide, leaveX = x.leave;
 
-		uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiTex->LoadTexture(L"assets/ui.png");
+		uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
 		btnResume = std::make_shared<IconButton>(transformManager, resumeX, 0, 48.0f * 2, 32.0f * 2, uiTex);
 		btnResume->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));

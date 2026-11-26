@@ -13,7 +13,7 @@ namespace Demo {
         this->game = game;
         this->worldCamera = camera;
         player = p;
-        fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+        fontSprite = std::make_shared<sdlgf::FontSprite>(font);
         this->drawBuffer = drawBuffer;
         this->gd = gd;
         this->config = shopConfig;
@@ -21,10 +21,9 @@ namespace Demo {
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/Shop-Sheet.png");
+        spritesheet = gd->GetAssets().GetTexture(L"assets/Shop-Sheet.png");
 
-        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 80, 80, 8), 8);
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 80, 80, 8), 8);
         sprite->SetOrigin(40.f, 40.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }

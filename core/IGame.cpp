@@ -103,7 +103,7 @@ void sdlgf::IGame::Init()
 	// Add letterboxing: initialize the virtual screen
 	renderTargetTex = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	renderTargetTex->CreateRenderTarget(SCREEN_WIDTH, SCREEN_HEIGHT);
-	renderTargetSprite = std::make_shared<sdlgf::StaticSprite>(renderTargetTex.get());
+	renderTargetSprite = std::make_shared<sdlgf::StaticSprite>(renderTargetTex);
 }
 
 void sdlgf::IGame::OnResize(UINT width, UINT height)

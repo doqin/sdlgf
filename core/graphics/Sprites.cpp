@@ -19,7 +19,7 @@ namespace {
 	}
 }
 
-sdlgf::StaticSprite::StaticSprite(Texture* texture) : ISprite(texture->GetGraphicsDevice()), texture(texture)
+sdlgf::StaticSprite::StaticSprite(std::shared_ptr<Texture> texture) : ISprite(texture->GetGraphicsDevice()), texture(std::move(texture))
 {
 }
 
@@ -36,7 +36,7 @@ void sdlgf::StaticSprite::Draw(const Camera& camera, unsigned long long deltaTim
 	auto matWorld = GetTransformMatrix();
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
-	DrawTextureRegion(graphicsDevice, texture, hasSrc ? &src : nullptr, matFinal, color);
+	DrawTextureRegion(graphicsDevice, texture.get(), hasSrc ? &src : nullptr, matFinal, color);
 }
 
 void sdlgf::StaticSprite::End()
@@ -50,14 +50,14 @@ void sdlgf::StaticSprite::SetSrcRect(RECT srcRect)
 }
 
 sdlgf::AnimatedSprite::AnimatedSprite(
-	Texture* spritesheet, 
+	std::shared_ptr<Texture> spritesheet, 
 	std::vector<RECT> frames, 
 	UINT frameRate, 
 	bool isLooped
 ) : ISprite(spritesheet->GetGraphicsDevice()), 
 	frames(frames), 
 	frameRate(frameRate), 
-	texture(spritesheet), 
+	texture(std::move(spritesheet)), 
 	isLooped(isLooped) 
 {
 }
@@ -107,14 +107,14 @@ void sdlgf::AnimatedSprite::Draw(const Camera& camera, unsigned long long deltaT
 	auto matWorld = GetTransformMatrix();
 	auto matCamera = camera.GetTransformMatrix();
 	auto matFinal = matWorld * matCamera;
-	DrawTextureRegion(graphicsDevice, texture, p_src, matFinal, color);
+	DrawTextureRegion(graphicsDevice, texture.get(), p_src, matFinal, color);
 }
 
 void sdlgf::AnimatedSprite::End()
 {
 }
 
-sdlgf::FontSprite::FontSprite(Font* font) : ISprite(font->GetGraphicsDevice()), font(font)
+sdlgf::FontSprite::FontSprite(std::shared_ptr<Font> font) : ISprite(font->GetGraphicsDevice()), font(std::move(font))
 {
 }
 
@@ -214,8 +214,8 @@ void sdlgf::FontSprite::End()
 {
 }
 
-sdlgf::NineSliceSprite::NineSliceSprite(Texture* texture, RECT srcRect, int left, int top, int right, int bottom)
-	: ISprite(texture->GetGraphicsDevice()), texture(texture), srcRect(srcRect),
+sdlgf::NineSliceSprite::NineSliceSprite(std::shared_ptr<Texture> texture, RECT srcRect, int left, int top, int right, int bottom)
+	: ISprite(texture->GetGraphicsDevice()), texture(std::move(texture)), srcRect(srcRect),
 	leftMargin(left), topMargin(top), rightMargin(right), bottomMargin(bottom)
 {
 	targetWidth = static_cast<float>(srcRect.right - srcRect.left);
@@ -283,7 +283,7 @@ void sdlgf::NineSliceSprite::Draw(const Camera& camera, unsigned long long delta
 			const float sr = static_cast<float>(static_cast<LONG>(srcX[col + 1]));
 			const float sb = static_cast<float>(static_cast<LONG>(srcY[row + 1]));
 
-			graphicsDevice->DrawTexturedQuad(texture, matFinal, dstX[col], dstY[row], dW, dH,
+			graphicsDevice->DrawTexturedQuad(texture.get(), matFinal, dstX[col], dstY[row], dW, dH,
 				sl / texW, st / texH, sr / texW, sb / texH, color);
 		}
 	}

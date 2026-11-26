@@ -4,8 +4,8 @@
 #include "LocalizationManager.h"
 
 void Demo::OutroScene::Init() {
-    font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-    fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+    font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+    fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
     float sw = game->GetVirtualWidth();
     float sh = game->GetVirtualHeight();

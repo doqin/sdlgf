@@ -5,14 +5,12 @@
 #include "RNG.h"
 
 void Demo::WarlockEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/crawler-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/crawler-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f, 2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/shardprojectile.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/shardprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -111,7 +109,7 @@ void Demo::WarlockEnemy::PatternDarkVortex(float baseDamage, std::vector<std::sh
 
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 16, 8, 16, 16, radius * std::cos(angle), radius * std::sin(angle))
+						ProjectileDesc(projTexture, 16, 8, 16, 16, radius * std::cos(angle), radius * std::sin(angle))
 						.SetDelay(0.2f)
 						.SetDecayTime(DECAY_TIME)
 						.SetVelocity(VELOCITY)
@@ -137,7 +135,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			auto [px, py] = lock->GetWorldPosition();
 			projectiles.Spawn(
 				lock,
-				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, 512, 128)
+				ProjectileDesc(projTexture, 16, 8, 16, 16, 512, 128)
 				.SetTrajectory(sdlgf::Vec2(-1, 1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
@@ -155,7 +153,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			auto [px, py] = lock->GetWorldPosition();
 			projectiles.Spawn(
 				lock,
-				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, -512, 128)
+				ProjectileDesc(projTexture, 16, 8, 16, 16, -512, 128)
 				.SetTrajectory(sdlgf::Vec2(1, 1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
@@ -173,7 +171,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			auto [px, py] = lock->GetWorldPosition();
 			projectiles.Spawn(
 				lock,
-				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, 512, -128)
+				ProjectileDesc(projTexture, 16, 8, 16, 16, 512, -128)
 				.SetTrajectory(sdlgf::Vec2(-1, -1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)
@@ -191,7 +189,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 			auto [px, py] = lock->GetWorldPosition();
 			projectiles.Spawn(
 				lock,
-				ProjectileDesc(projTexture.get(), 16, 8, 16, 16, -512, -128)
+				ProjectileDesc(projTexture, 16, 8, 16, 16, -512, -128)
 				.SetTrajectory(sdlgf::Vec2(1, -1))
 				.SetHoming(TURN_SPEED)
 				.SetDelay(0.f)

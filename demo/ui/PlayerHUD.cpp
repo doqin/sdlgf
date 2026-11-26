@@ -47,7 +47,7 @@ namespace {
 	constexpr float FADE_IN_SPEED = 0.004f;
 }
 
-Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, sdlgf::Font* font)
+Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, std::shared_ptr<sdlgf::Font> font)
 	: game(game), player(player), transformManager(transformManager), uiCamera(uiCamera), font(font)
 {
 	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
@@ -55,14 +55,12 @@ Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shar
 
 void Demo::PlayerHUD::Init()
 {
-	playerTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	playerTex->LoadTexture(L"assets/uiter-Sheet.png");
-	playerIcon = std::make_shared<sdlgf::StaticSprite>(playerTex.get());
+	playerTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/uiter-Sheet.png");
+	playerIcon = std::make_shared<sdlgf::StaticSprite>(playerTex);
 	playerIcon->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
 	playerIcon->SetScale(ICON_SCALE);
 
-	uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiTex->LoadTexture(L"assets/ui.png");
+	uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
 	btnInventory = std::make_shared<IconButton>(transformManager, 0.0f, 0.0f, static_cast<int>(BUTTON_W), static_cast<int>(BUTTON_H), uiTex);
 	btnInventory->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(288, 64, 32, 32, 3));

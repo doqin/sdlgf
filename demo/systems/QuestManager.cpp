@@ -105,11 +105,10 @@ void Demo::QuestManager::Init(sdlgf::GraphicsDevice* gd, std::shared_ptr<sdlgf::
 {
 	if (!fontSprite || this->font.get() != font.get()) {
 		this->font = font;
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	}
 	if (!uiTex) {
-		uiTex = std::make_shared<sdlgf::Texture>(gd);
-		uiTex->LoadTexture(L"assets/ui.png");
+		uiTex = gd->GetAssets().GetTexture(L"assets/ui.png");
 	}
 	if (!uiTransformManager) {
 		uiTransformManager = std::make_shared<sdlgf::TransformManager>();

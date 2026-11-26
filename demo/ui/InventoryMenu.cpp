@@ -52,7 +52,7 @@ namespace {
 }
 namespace Demo {
 
-	InventoryMenu::InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, sdlgf::Font* f)
+	InventoryMenu::InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, std::shared_ptr<sdlgf::Font> f)
 		: game(g), player(p), transformManager(tm), draggableManager(dm), uiCamera(cam), font(f)
 	{
 		fontSprite = std::make_shared<sdlgf::FontSprite>(f);
@@ -84,11 +84,9 @@ namespace Demo {
 		float guideX = optionsX + buttonW + bottomGap;
 		float leaveX = guideX + buttonW + bottomGap;
 
-		itemSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		itemSheetTex->LoadTexture(L"assets/items.png");
+		itemSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/items.png");
 
-		uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiTex->LoadTexture(L"assets/ui.png");
+		uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
 		btnTabItems = std::make_shared<IconButton>(transformManager, startTabX, tabY, 48.0f * 2, 32.0f * 2, uiTex);
 		btnTabItems->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 144, 48, 32, 3));
@@ -175,16 +173,13 @@ namespace Demo {
 		inventoryContainer->SetMaxHeight(sh * 0.5f);
 		inventoryContainer->SetCulling(true);
 
-		uiPlayerTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiPlayerTex->LoadTexture(L"assets/uiter-Sheet.png");
-		uiPlayerSprite = std::make_shared<sdlgf::StaticSprite>(uiPlayerTex.get());
+		uiPlayerTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/uiter-Sheet.png");
+		uiPlayerSprite = std::make_shared<sdlgf::StaticSprite>(uiPlayerTex);
 		uiPlayerSprite->SetSrcRect({ 7, 7, 25, 32 });
 
-		flameTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		flameTex->LoadTexture(L"assets/flame-slot-Sheet.png");
+		flameTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/flame-slot-Sheet.png");
 
-		gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
+		gearTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 
 		activeSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
 		activeSlot->GetButton()->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
@@ -758,7 +753,7 @@ namespace Demo {
 				if (currentID != -1 && gearTex) {
 					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
 					if (bp && !bp->frames.empty()) {
-						animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex.get(), bp->frames);
+						animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex, bp->frames);
 						animPtr->SetFrameRate(12);
 						return;
 					}

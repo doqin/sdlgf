@@ -7,7 +7,7 @@ namespace Demo {
 		player = p;
 		this->gd = gd;
 		this->worldCamera = camera;
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 		this->drawBuffer = drawBuffer;
 		MapCharacterVoices(characterVoices);
 		if (questMarker) questMarker->Init(gd);

@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include "ISprite.h"
@@ -11,10 +12,10 @@ namespace sdlgf {
 	private:
 		RECT src{};
 		bool hasSrc = false;
-		Texture* texture;
+		std::shared_ptr<Texture> texture;
 		UINT width = 0, height = 0;
 	public:
-		StaticSprite(Texture* texture);
+		StaticSprite(std::shared_ptr<Texture> texture);
 		~StaticSprite();
 
 		
@@ -27,14 +28,14 @@ namespace sdlgf {
 	class AnimatedSprite : public ISprite {
 	private:
 		std::vector<RECT> frames;
-		Texture* texture;
+		std::shared_ptr<Texture> texture;
 
 		UINT frame_index = 0;
 		unsigned int frameRate = 24;
 		unsigned long long delta = 0;
 		bool isLooped;
 	public:
-		AnimatedSprite(Texture* spritesheet, std::vector<RECT> frames, UINT frameRate = 24, bool isLooped = true);
+		AnimatedSprite(std::shared_ptr<Texture> spritesheet, std::vector<RECT> frames, UINT frameRate = 24, bool isLooped = true);
 		~AnimatedSprite();
 		void SetFrame(unsigned int frameIndex);
 		void SetFrameRate(unsigned int frameRate);
@@ -47,7 +48,7 @@ namespace sdlgf {
 
 	class FontSprite : public ISprite {
 	private:
-		Font* font = nullptr;
+		std::shared_ptr<Font> font;
 		std::wstring text;
 		bool isBold = false;
 		bool isOutline = false;
@@ -55,7 +56,7 @@ namespace sdlgf {
 		float outlineThickness = 1.0f;
 		float maxWidth = 0.f;
 	public:
-		FontSprite(Font* font);
+		FontSprite(std::shared_ptr<Font> font);
 		~FontSprite();
 		void SetText(std::wstring&& text);
 		void SetText(const std::wstring& text);
@@ -74,13 +75,13 @@ namespace sdlgf {
 
 	class NineSliceSprite : public ISprite {
 	private:
-		Texture* texture;
+		std::shared_ptr<Texture> texture;
 		RECT srcRect;
 		int leftMargin, topMargin, rightMargin, bottomMargin;
 		float targetWidth, targetHeight;
 		float scale = 1.0f;
 	public:
-		NineSliceSprite(Texture* texture, RECT srcRect, int left, int top, int right, int bottom);
+		NineSliceSprite(std::shared_ptr<Texture> texture, RECT srcRect, int left, int top, int right, int bottom);
 		~NineSliceSprite();
 
 		void SetTargetSize(float width, float height);

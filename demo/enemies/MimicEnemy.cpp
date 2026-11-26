@@ -5,14 +5,12 @@
 #include "RNG.h"
 
 void Demo::MimicEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/notresponding-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/notresponding-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f, 2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/xprojectile.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/xprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -89,7 +87,7 @@ void Demo::MimicEnemy::PatternCoinCyclone(float baseDamage, std::vector<std::sha
 				float angle = i * (3.14159f * 2.f / 12.f);
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), 8, 8, 16, 16, 256.f, 0)
+					ProjectileDesc(projTexture, 8, 8, 16, 16, 256.f, 0)
 					.SetSpiralParams(angle, RADICAL_SPEED, ANGULAR_SPEED)
 					.SetDelay(i * 0.05f)
 					.SetDecayTime(6.f)
@@ -121,7 +119,7 @@ void Demo::MimicEnemy::PatternJunkVomit(float baseDamage, std::vector<std::share
 				auto [px, py] = lock->GetWorldPosition();
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), 8, 8, 16, 16, 512.f, 0.f)
+					ProjectileDesc(projTexture, 8, 8, 16, 16, 512.f, 0.f)
 					.SetTargetPosition(px, py + randY)
 
 					.SetInitialVelocity(450.f)

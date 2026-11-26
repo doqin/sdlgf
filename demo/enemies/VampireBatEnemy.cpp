@@ -5,14 +5,12 @@
 #include "RNG.h"
 
 void Demo::VampireBatEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/shrimp-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/shrimp-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/spearprojectile.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/spearprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -108,7 +106,7 @@ void Demo::VampireBatEnemy::PatternEcholocation(float baseDamage, std::vector<st
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 16, 8, 16, 16, x, y)
+						ProjectileDesc(projTexture, 16, 8, 16, 16, x, y)
 						.SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
 						.SetDelay(0.7f)
 						.SetDecayTime(4)
@@ -153,14 +151,14 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 				auto [projTexWidth, projTexHeight] = projTexture->GetSize();
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), 16, 8, 16, 16, spawnX, spawnY)
+					ProjectileDesc(projTexture, 16, 8, 16, 16, spawnX, spawnY)
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(400.f)
 					.SetReturnAcceleration(180.f)
 					.SetDelay(i * 0.05f)
 					.SetDecayTime(DECAY_TIME)
 					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
+					.SetGhostSprite(projTexture, RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
 				);
 			}
 		}
@@ -191,14 +189,14 @@ void Demo::VampireBatEnemy::PatternSwoopBite(float baseDamage) {
 				auto [projTexWidth, projTexHeight] = projTexture->GetSize();
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), 16, 8, 16, 16, spawnX, spawnY)
+					ProjectileDesc(projTexture, 16, 8, 16, 16, spawnX, spawnY)
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(400.f)
 					.SetReturnAcceleration(180.f)
 					.SetDelay(i * 0.05f)
 					.SetDecayTime(DECAY_TIME)
 					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
+					.SetGhostSprite(projTexture, RECT{ 0, 0, (LONG)projTexWidth, (LONG)projTexHeight }, 16, 8)
 				);
 			}
 		}

@@ -26,13 +26,12 @@ namespace Demo {
 		static std::map<std::wstring, std::shared_ptr<sdlgf::Texture>> enemyTextureCache;
 
 		if (enemyTextureCache.find(encounterData.mapTexturePath) == enemyTextureCache.end()) {
-			auto newTex = std::make_shared<sdlgf::Texture>(gd);
-			newTex->LoadTexture(encounterData.mapTexturePath.c_str());
+			auto newTex = gd->GetAssets().GetTexture(encounterData.mapTexturePath.c_str());
 			enemyTextureCache[encounterData.mapTexturePath] = newTex;
 		}
 		this->texture = enemyTextureCache[encounterData.mapTexturePath];
 
-		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(),
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture,
 			sdlgf::Utils::CreateRectsHorizontal(0, 0, encounterData.spriteWidth, encounterData.spriteHeight, encounterData.frameCount), encounterData.frameCount);
 
 		sprite->SetOrigin(encounterData.spriteWidth / 2.f, encounterData.spriteHeight / 2.f);
@@ -56,10 +55,9 @@ namespace Demo {
 
 		collider->SetOrigin(0.f, 0.f);
 
-		particleTex = std::make_shared<sdlgf::Texture>(gd);
-		particleTex->LoadTexture(L"assets/ui.png");
+		particleTex = gd->GetAssets().GetTexture(L"assets/ui.png");
 
-		wealthyAura = std::make_unique<sdlgf::ParticleSystem>(particleTex.get(), 16);
+		wealthyAura = std::make_unique<sdlgf::ParticleSystem>(particleTex, 16);
 		wealthyAura->SetSrcRect({ 261, 277, 267, 283});
 		wealthyAura->SetOrigin(6.f, 6.f);
 		wealthyAura->SetEmissionInterval(100.f);
@@ -350,8 +348,8 @@ namespace Demo {
 		if (!game || !game->GetGraphicsDevice()) return;
 		if (!hpFont) {
 			// A smaller font renders crisper than scaling the main one down.
-			hpFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
-			hpFontSprite = std::make_shared<sdlgf::FontSprite>(hpFont.get());
+			hpFont = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kSmallFontSize);
+			hpFontSprite = std::make_shared<sdlgf::FontSprite>(hpFont);
 		}
 
 		// Only a lone enemy has a number worth showing; a group stays hidden on purpose.

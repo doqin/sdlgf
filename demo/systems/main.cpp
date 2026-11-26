@@ -6,6 +6,7 @@
 #include "sdlgf.h"
 #include "CrashHandler.h"
 #include "Game.h"
+#include "PendingAutoContinue.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
@@ -28,6 +29,16 @@ int main(int argc, char** argv)
 		// Create your game that interfaces with IGame
 		Demo::Game game(app->GetScreenWidth(), app->GetScreenHeight());
 		game.Init();
+		// Developer tool: `demo --record-assets <file>` regenerates the loading screen's manifest
+		for (int i = 1; i < argc; ++i) {
+			// `--auto-continue`: behave as if Continue was pressed on the main menu (smoke tests)
+			if (std::string(argv[i]) == "--auto-continue") Demo::PendingAutoContinue::GetInstance()->Request();
+		}
+		for (int i = 1; i + 1 < argc; ++i) {
+			if (std::string(argv[i]) == "--record-assets") {
+				return game.RecordAssetManifest(argv[i + 1]) ? 0 : 1;
+			}
+		}
 		// Attach your game to the application
 		app->AttachGame(&game);
 		// Run the application

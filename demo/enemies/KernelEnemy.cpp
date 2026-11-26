@@ -75,17 +75,14 @@ namespace {
 namespace Demo {
 
 	void KernelEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-		texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		texture->LoadTexture(L"assets/kernel.png");
-		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
+		texture = graphicsDevice->GetAssets().GetTexture(L"assets/kernel.png");
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
 		sprite->SetOrigin(32, 32);
 		sprite->SetScale(2.f);
 
-		mineTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		mineTexture->LoadTexture(L"assets/mine.png");
+		mineTexture = graphicsDevice->GetAssets().GetTexture(L"assets/mine.png");
 
-		bulletTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		bulletTexture->LoadTexture(L"assets/kernelprojectile.png");
+		bulletTexture = graphicsDevice->GetAssets().GetTexture(L"assets/kernelprojectile.png");
 		SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 		InitCardSpawnTrigger(camera, 128.f, 128.f);
 	}
@@ -187,7 +184,7 @@ namespace Demo {
 			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, mines](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					for (auto& m : mines) {
-						projectiles.Spawn(p, ProjectileDesc(mineTexture.get(), 8, 8, 0, 0, m.x, m.y).SetVelocity(0.f).SetDecayTime(1.5f));
+						projectiles.Spawn(p, ProjectileDesc(mineTexture, 8, 8, 0, 0, m.x, m.y).SetVelocity(0.f).SetDecayTime(1.5f));
 					}
 				}
 				markFinished();
@@ -206,7 +203,7 @@ namespace Demo {
 
 						for (int i = 0; i < 4; ++i) {
 							sdlgf::Vec2 dir(cos(angles[i]), sin(angles[i]));
-							projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, m.x, m.y)
+							projectiles.Spawn(p, ProjectileDesc(bulletTexture, 8, 8, 16, 16, m.x, m.y)
 								.SetTrajectory(dir).SetVelocity(100.f).SetDamage(finalDamage).SetDecayTime(5.f));
 						}
 					}
@@ -240,7 +237,7 @@ namespace Demo {
 						float jitter = RNG::Range(-baseSpacing * 0.4f, baseSpacing * 0.4f);
 						float bx = startX + (i * baseSpacing) + jitter;
 
-						projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, bx, -150.f)
+						projectiles.Spawn(p, ProjectileDesc(bulletTexture, 8, 8, 16, 16, bx, -150.f)
 							.SetDelay(1.f)
 							.SetTrajectory(sdlgf::Vec2(0.f, -1.f))
 							.SetVelocity(420.f)
@@ -279,7 +276,7 @@ namespace Demo {
 						float zigzagAmplitude = 100.f;
 						float zigzagFrequency = 0.3f;
 
-						projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, spawnX, spawnY)
+						projectiles.Spawn(p, ProjectileDesc(bulletTexture, 8, 8, 16, 16, spawnX, spawnY)
 							.SetTrajectory(dir)
 							.SetVelocity(120.f)
 							.SetWave(zigzagAmplitude, zigzagFrequency, true)
@@ -363,7 +360,7 @@ namespace Demo {
 					auto [px, py] = p->GetWorldPosition();
 					auto [centerX, centerY] = this->GetSafeCellCenter(px, py);
 
-					projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, centerX, centerY)
+					projectiles.Spawn(p, ProjectileDesc(bulletTexture, 8, 8, 16, 16, centerX, centerY)
 						.SetVelocity(0.f)
 						.SetDamage(finalDamage)
 						.SetDecayTime(HOLD_TIME));
@@ -377,7 +374,7 @@ namespace Demo {
 							float radialSpeed = i * 12.f;
 							float angularSpeed = (PI * 0.7f - (i * 0.03f)) * this->badSectorSpinDirection;
 
-							projectiles.Spawn(p, ProjectileDesc(bulletTexture.get(), 8, 8, 16, 16, centerX, centerY)
+							projectiles.Spawn(p, ProjectileDesc(bulletTexture, 8, 8, 16, 16, centerX, centerY)
 								.SetSpiralParams(startAngle, radialSpeed, angularSpeed)
 								.SetDamage(finalDamage)
 								.SetDecayTime(HOLD_TIME));

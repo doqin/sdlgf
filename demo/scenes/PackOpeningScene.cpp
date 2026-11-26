@@ -36,23 +36,22 @@ namespace Demo {
 		auto gd = game->GetGraphicsDevice();
 		transformManager = std::make_shared<sdlgf::TransformManager>();
 
-		packTex = std::make_shared<sdlgf::Texture>(gd);
-		packTex->LoadTexture(L"assets/packopening-Sheet.png");
+		packTex = gd->GetAssets().GetTexture(L"assets/packopening-Sheet.png");
 		// 992x64 sheet -> 31 frames, 32x64 each. Non-looping: it plays once and we watch for the end.
 		packSprite = std::make_shared<sdlgf::AnimatedSprite>(
-			packTex.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 64, 31), 18, false);
+			packTex, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 64, 31), 18, false);
 		packSprite->SetOrigin(16.f, 32.f);
 		packSprite->SetPosition(0.f, 0.f);
 		packSprite->SetScale(PACK_SCALE, PACK_SCALE);
 
 		cardFrame = CardFrame::Get(gd);
 
-		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName, Demo::kLargeFontSize);
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		font = gd->GetAssets().GetFont(Demo::kMainFontName, Demo::kLargeFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
 		particleTex = std::make_shared<sdlgf::Texture>(gd);
 		particleTex->CreatePlainTexture(0xFFFFFFFF, 4, 4);
-		explosionEmitter = std::make_unique<sdlgf::ParticleSystem>(particleTex.get(), 80);
+		explosionEmitter = std::make_unique<sdlgf::ParticleSystem>(particleTex, 80);
 		explosionEmitter->SetOrigin(2.f, 2.f);
 		sdlgf::ConfigureExplosionEmitter(*explosionEmitter);
 

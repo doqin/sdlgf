@@ -30,9 +30,8 @@ namespace Demo {
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<sdlgf::Texture>(gd);
-		spritesheet->LoadTexture(L"assets/Trojan_outside.png");
-		sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 6, true);
+		spritesheet = gd->GetAssets().GetTexture(L"assets/Trojan_outside.png");
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 6, true);
 		sprite->SetOrigin(32.f, 48.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());
 

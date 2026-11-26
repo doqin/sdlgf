@@ -15,7 +15,7 @@ namespace Demo {
         this->player = p;
         this->worldCamera = worldCamera;
         this->saveManager = sm;
-        this->fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+        this->fontSprite = std::make_shared<sdlgf::FontSprite>(font);
         this->drawBuffer = drawBuffer;
         this->gd = gd;
 
@@ -23,9 +23,8 @@ namespace Demo {
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/savepoint-Sheet.png");
-        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 10), 12, true);
+        spritesheet = gd->GetAssets().GetTexture(L"assets/savepoint-Sheet.png");
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 10), 12, true);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }

@@ -56,20 +56,19 @@ void Demo::IStatementCard::DrawStatusCover(unsigned long long deltaTime)
 	}
 
 	if (!usesTexture) {
-		usesTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		usesTexture->LoadTexture(L"assets/ui.png");
+		usesTexture = graphicsDevice->GetAssets().GetTexture(L"assets/ui.png");
 		// The panel body is a single uniform column (sheet columns 224-252 are identical), so
 		// one slice stretched to any width reproduces it. Sampling from the middle keeps
 		// filtering from bleeding in the transparent pixels beside the panel.
-		usesCoverBody = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
+		usesCoverBody = std::make_shared<sdlgf::StaticSprite>(usesTexture);
 		usesCoverBody->SetSrcRect({ .left = 236, .top = 272, .right = 237, .bottom = 288 });
-		usesCoverCap = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
+		usesCoverCap = std::make_shared<sdlgf::StaticSprite>(usesTexture);
 		usesCoverCap->SetSrcRect({ .left = 253, .top = 272, .right = 256, .bottom = 288 });
-		usesPipFull = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
+		usesPipFull = std::make_shared<sdlgf::StaticSprite>(usesTexture);
 		usesPipFull->SetSrcRect({ .left = 277, .top = 277, .right = 283, .bottom = 283 });
-		usesPipSpent = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
+		usesPipSpent = std::make_shared<sdlgf::StaticSprite>(usesTexture);
 		usesPipSpent->SetSrcRect({ .left = 261, .top = 277, .right = 267, .bottom = 283 });
-		nonPersistentBadge = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
+		nonPersistentBadge = std::make_shared<sdlgf::StaticSprite>(usesTexture);
 		nonPersistentBadge->SetSrcRect({ .left = 259, .top = 290, .right = 269, .bottom = 302 });
 	}
 
@@ -171,8 +170,8 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
+			descFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont);
 		}
 
 		descFontSprite->Begin();
@@ -193,8 +192,8 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
+			descFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont);
 		}
 
 		descFontSprite->Begin();
@@ -209,11 +208,11 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 
 	if (trigger && trigger->IsHovering(deltaTime)) {
 		if (!descFont) {
-			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
+			descFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont);
 		}
 		if (!statusFontSprite) {
-			statusFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
+			statusFontSprite = std::make_shared<sdlgf::FontSprite>(descFont);
 		}
 		// The lock overlay shares this sprite and leaves its own colour and outline behind, so
 		// re-apply the tooltip's styling every frame instead of only on first creation.

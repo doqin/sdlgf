@@ -23,7 +23,7 @@ namespace Demo {
 	// and swallows battle input while one is on screen (a click / Space / Enter advances).
 	class BattleTutorial {
 	public:
-		BattleTutorial(sdlgf::GraphicsDevice* gd, sdlgf::Font* font);
+		BattleTutorial(sdlgf::GraphicsDevice* gd, std::shared_ptr<sdlgf::Font> font);
 
 		// Re-evaluates the triggers and queues any newly-due panel. No-op once every panel
 		// has been shown.
@@ -75,7 +75,7 @@ namespace Demo {
 		sdlgf::GraphicsDevice* device = nullptr;
 		std::shared_ptr<sdlgf::Texture> uiTex;
 		std::shared_ptr<sdlgf::TransformManager> uiTransformManager;
-		sdlgf::Font* uiFont = nullptr;
+		std::shared_ptr<sdlgf::Font> uiFont = nullptr;
 		std::shared_ptr<TextIconButton> skipBtn;
 		bool skipRequested = false;
 

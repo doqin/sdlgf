@@ -25,8 +25,8 @@ void Demo::PopUpMessage::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Came
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
-	font = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+	font = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	fontSprite->SetColor(0xFF000000);
 	// Measured once on a sample carrying both an ascender and a descender: every slot in the
 	// stack has to be the same height whatever glyphs happen to land in it.

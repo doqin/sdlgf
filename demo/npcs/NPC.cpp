@@ -13,9 +13,8 @@ namespace Demo {
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<sdlgf::Texture>(gd);
-		spritesheet->LoadTexture(config.texturePath.c_str());
-		sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, config.frameW, config.frameH, config.frameCount), config.animSpeed, true);
+		spritesheet = gd->GetAssets().GetTexture(config.texturePath.c_str());
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, config.frameW, config.frameH, config.frameCount), config.animSpeed, true);
 		sprite->SetOrigin(config.frameW / 2.0f, config.frameH / 2.0f);
 		sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
 	}

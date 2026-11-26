@@ -3,23 +3,22 @@
 
 namespace Demo {
     void QuestMarker::Init(sdlgf::GraphicsDevice* gd) {
-        uiTex = std::make_shared<sdlgf::Texture>(gd);
-        uiTex->LoadTexture(L"assets/ui.png");
+        uiTex = gd->GetAssets().GetTexture(L"assets/ui.png");
 
         std::vector<RECT> r1 = { {240, 128, 258, 144} };
-        sprExclGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r1, 1, false);
+        sprExclGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex, r1, 1, false);
         sprExclGray->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r2 = { {240, 144, 258, 160} };
-        sprExclGold = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r2, 1, false);
+        sprExclGold = std::make_shared<sdlgf::AnimatedSprite>(uiTex, r2, 1, false);
         sprExclGold->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r3 = { {258, 128, 276, 144} };
-        sprQuesGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r3, 1, false);
+        sprQuesGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex, r3, 1, false);
         sprQuesGray->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r4 = { {258, 144, 276, 160} };
-        sprQuesCyan = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r4, 1, false);
+        sprQuesCyan = std::make_shared<sdlgf::AnimatedSprite>(uiTex, r4, 1, false);
         sprQuesCyan->SetOrigin(0.f, 0.f);
     }
 

@@ -19,18 +19,16 @@ namespace Demo {
             transformManager, 32.f, 8.f, this->GetWorldX(), this->GetWorldY() + 12.f);
         collider->SetOriginCenter();
         cm->Add(collider);
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/chestclosed.png");
+        spritesheet = gd->GetAssets().GetTexture(L"assets/chestclosed.png");
         sprite = std::make_shared<sdlgf::AnimatedSprite>(
-            spritesheet.get(),
+            spritesheet,
             sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1),
             12, true);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
-		openedTexture = std::make_shared<sdlgf::Texture>(gd);
-		openedTexture->LoadTexture(L"assets/chestopened.png");
+		openedTexture = gd->GetAssets().GetTexture(L"assets/chestopened.png");
 		openedSprite = std::make_shared<sdlgf::AnimatedSprite>(
-			openedTexture.get(),
+			openedTexture,
 			sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1),
 			12, true);
 		openedSprite->SetOrigin(16.f, 16.f);

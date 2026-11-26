@@ -85,11 +85,13 @@ void sdlgf::Texture::SetColor(sdlgf::Color color)
 	}
 }
 
-void sdlgf::Texture::LoadTexture(const std::wstring& filePath)
+void sdlgf::SurfaceDeleter::operator()(SDL_Surface* surface) const
 {
-	if (graphicsDevice == nullptr) {
-		throw std::runtime_error("Graphics device is null");
-	}
+	SDL_DestroySurface(surface);
+}
+
+sdlgf::SurfacePtr sdlgf::Texture::DecodeFile(const std::wstring& filePath)
+{
 	const std::string path = sdlgf::Platform::WideToUtf8(filePath);
 	SDL_Surface* loaded = IMG_Load(path.c_str());
 	if (loaded == nullptr) {
@@ -102,13 +104,28 @@ void sdlgf::Texture::LoadTexture(const std::wstring& filePath)
 	if (converted == nullptr) {
 		throw std::runtime_error("Could not convert texture \"" + path + "\": " + SDL_GetError());
 	}
-	SDL_Texture* created = SDL_CreateTextureFromSurface(graphicsDevice->GetRenderer(), converted);
-	const UINT w = static_cast<UINT>(converted->w), h = static_cast<UINT>(converted->h);
-	SDL_DestroySurface(converted);
-	if (created == nullptr) {
-		throw std::runtime_error("Could not create texture \"" + path + "\": " + SDL_GetError());
+	return SurfacePtr(converted);
+}
+
+void sdlgf::Texture::LoadFromSurface(SDL_Surface* converted, const std::string& name)
+{
+	if (graphicsDevice == nullptr) {
+		throw std::runtime_error("Graphics device is null");
 	}
-	Adopt(created, w, h);
+	SDL_Texture* created = SDL_CreateTextureFromSurface(graphicsDevice->GetRenderer(), converted);
+	if (created == nullptr) {
+		throw std::runtime_error("Could not create texture \"" + name + "\": " + SDL_GetError());
+	}
+	Adopt(created, static_cast<UINT>(converted->w), static_cast<UINT>(converted->h));
+}
+
+void sdlgf::Texture::LoadTexture(const std::wstring& filePath)
+{
+	if (graphicsDevice == nullptr) {
+		throw std::runtime_error("Graphics device is null");
+	}
+	SurfacePtr decoded = DecodeFile(filePath);
+	LoadFromSurface(decoded.get(), sdlgf::Platform::WideToUtf8(filePath));
 }
 
 void sdlgf::Texture::CaptureCurrentBackBuffer()

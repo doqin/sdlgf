@@ -164,7 +164,7 @@ namespace Demo
 		float bgImageH = (float)bgTex->GetHeight();
 		if (!bgSprite)
 		{
-			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex.get());
+			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex);
 			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
 		}
 		bgSprite->SetScale(std::max(screenW / bgImageW, screenH / bgImageH));
@@ -236,21 +236,18 @@ namespace Demo
 		lastScreenHeight = camH;
 
 		//Load assets
-		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 		fontSprite->SetColor(0xFF000000);
 
-		placeholderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		placeholderTex->LoadTexture(L"assets/ui-pack.png");
-		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiSheetTex->LoadTexture(L"assets/ui.png");
-		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		bgTex->LoadTexture(L"assets/test-background.png");
+		placeholderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui-pack.png");
+		uiSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
+		bgTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/test-background.png");
 
 		//LOCAL FUNCTION to init track and trackfill
 		auto InitTrack = [&](std::shared_ptr<sdlgf::NineSliceSprite>& track, std::shared_ptr<sdlgf::NineSliceSprite>& fill, RECT trackR, RECT fillR) {
-			track = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex.get(), trackR, 4, 2, 4, 2);
-			fill = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex.get(), fillR, 4, 2, 4, 2);
+			track = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex, trackR, 4, 2, 4, 2);
+			fill = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex, fillR, 4, 2, 4, 2);
 			};
 
 		InitTrack(trackMaster, trackMasterFill, { 113, 483, 160, 490 }, { 65, 483, 112, 490 });
@@ -394,7 +391,7 @@ namespace Demo
 			const size_t rowIndex = keybindRows.size();
 			keybindRows.push_back({ action, label, nullptr, false });
 			auto& btn = keybindRows.back().button;
-			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, font.get(), L"", 3);
+			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, font, L"", 3);
 			btn->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
 			btn->SetSpriteScale(2.f, 2.f);
 

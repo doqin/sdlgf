@@ -38,7 +38,7 @@ namespace Demo {
 		static constexpr float kMiniSize = 128.f;
 		static constexpr float kMiniMargin = 16.f;
 
-		void Init(sdlgf::Font* font);
+		void Init(std::shared_ptr<sdlgf::Font> font);
 		// Bakes the grid from the loaded map. Layers named "background*" are ignored, so
 		// decorative sky/water doesn't count as explorable ground.
 		void Build(const sdlgf::Map& map);

@@ -23,7 +23,7 @@ namespace sdlgf {
 				float x, y, width, height;
 			};
 			std::vector<ChunkRange> chunks;
-			Texture* texture = nullptr;
+			std::shared_ptr<Texture> texture;
 			// Two triangles (6 vertices) per tile, in world coordinates; chunks index into this.
 			std::vector<TileVertex> vertices;
 		};

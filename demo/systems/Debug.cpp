@@ -130,11 +130,11 @@ void Demo::Pointable::DrawPosition(unsigned long long deltaTime,
 	if (!isDrawing)
 		return;
 	if (!font) {
-		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName,
+		font = gd->GetAssets().GetFont(Demo::kMainFontName,
 											 Demo::kMainFontSize);
 	}
 	if (!fontSprite) {
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	}
 	auto [worldX, worldY] = GetPoint();
 	fontSprite->SetPosition(worldX, worldY);

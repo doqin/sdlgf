@@ -228,18 +228,18 @@ namespace {
 		const UINT height = static_cast<UINT>(step * rows.size()) + 16;
 		auto canvas = BeginCanvas(gd, std::string("text_") + fc.tag, width, height, 0xFF303030);
 
-		sdlgf::Font font(gd, fc.family, fc.size);
+		auto font = std::make_shared<sdlgf::Font>(gd, fc.family, fc.size);
 		// GDI drew characters the font lacks with a substitute system font; there is nothing to
 		// compare those rows against (they would need that font), so they are skipped.
 		Bands ignore;
 		float y = 8.0f;
 		for (const auto& row : rows) {
 			const std::u32string codePoints = sdlgf::Platform::WideToUtf32(row.text);
-			if (!std::all_of(codePoints.begin(), codePoints.end(), [&](char32_t c) { return c < 0x20 || font.GetFace().HasGlyph(c); })) {
+			if (!std::all_of(codePoints.begin(), codePoints.end(), [&](char32_t c) { return c < 0x20 || font->GetFace().HasGlyph(c); })) {
 				const int top = std::max(0, static_cast<int>(y) - fc.size / 2);
 				ignore.emplace_back(top, top + static_cast<int>(step));
 			}
-			sdlgf::FontSprite sprite(&font);
+			sdlgf::FontSprite sprite(font);
 			sprite.SetText(std::wstring(row.text));
 			sprite.SetColor(row.color);
 			sprite.SetBold(row.bold);
@@ -264,7 +264,7 @@ namespace {
 	{
 		const auto& probes = golden::Probes();
 
-		sdlgf::Font font(gd, L"135OpenPixel v2.3", 13);
+		auto font = std::make_shared<sdlgf::Font>(gd, L"135OpenPixel v2.3", 13);
 		const float step = 13.0f * 6.0f;
 		const UINT width = 400;
 		const UINT height = static_cast<UINT>(step * probes.size()) + 16;
@@ -272,7 +272,7 @@ namespace {
 		sdlgf::Camera cam = IdentityCamera(width, height);
 		float y = 8.0f;
 		for (const auto& p : probes) {
-			sdlgf::FontSprite sprite(&font);
+			sdlgf::FontSprite sprite(font);
 			sprite.SetText(std::wstring(p.text));
 			if (p.maxWidth > 0.0f) sprite.SetMaxWidth(p.maxWidth);
 			// guide rectangle showing the wrap width
@@ -311,7 +311,7 @@ namespace {
 			{ 328,  8,    3,    1,   0.0f,  0xFFFFFFFF, false },  // stretched
 		};
 		for (const auto& it : items) {
-			sdlgf::StaticSprite s(token.get());
+			sdlgf::StaticSprite s(token);
 			s.SetSrcRect(tokenRect);
 			s.SetPosition(it.x, it.y);
 			s.SetScale(it.sx, it.sy);
@@ -323,13 +323,13 @@ namespace {
 
 		// Whole texture, no source rect
 		{
-			sdlgf::StaticSprite s(sheet.get());
+			sdlgf::StaticSprite s(sheet);
 			s.SetPosition(8, 70);
 			s.Begin(); s.Draw(cam, 0); s.End();
 		}
 		// Rotation about a centred origin
 		{
-			sdlgf::StaticSprite s(sheet.get());
+			sdlgf::StaticSprite s(sheet);
 			s.SetPosition(120, 90);
 			s.SetOrigin(32, 16);
 			s.SetRotation(0.7f);
@@ -339,7 +339,7 @@ namespace {
 		{
 			auto frames = sdlgf::Utils::CreateFrames(64, 32, 16, 16, 8);
 			for (unsigned i : { 0u, 3u, 5u }) {
-				sdlgf::AnimatedSprite s(sheet.get(), frames, 12, true);
+				sdlgf::AnimatedSprite s(sheet, frames, 12, true);
 				s.SetFrame(i);
 				s.SetPosition(180.0f + i * 40.0f, 70);
 				s.SetScale(2.0f, 2.0f);
@@ -352,7 +352,7 @@ namespace {
 			{ 8, 140, 48, 48, 1 }, { 70, 140, 100, 40, 1 }, { 190, 140, 120, 80, 2 }, { 340, 140, 90, 60, 1.5f },
 		};
 		for (const auto& n : nines) {
-			sdlgf::NineSliceSprite s(borders.get(), RECT{ 0, 0, 48, 48 }, 16, 16, 16, 16);
+			sdlgf::NineSliceSprite s(borders, RECT{ 0, 0, 48, 48 }, 16, 16, 16, 16);
 			s.SetTargetSize(n.tw, n.th);
 			s.SetScale(n.scale);
 			s.SetPosition(n.x, n.y);
@@ -363,7 +363,7 @@ namespace {
 			sdlgf::Camera zoomed = IdentityCamera(w, h);
 			zoomed.SetZoom(2.0f);
 			zoomed.SetPosition(w / 2.0f + 30.5f, h / 2.0f + 70.25f);
-			sdlgf::StaticSprite s(token.get());
+			sdlgf::StaticSprite s(token);
 			s.SetSrcRect(tokenRect);
 			s.SetPosition(w / 2.0f + 10.0f, h / 2.0f + 90.0f);
 			s.Begin(); s.Draw(zoomed, 0); s.End();

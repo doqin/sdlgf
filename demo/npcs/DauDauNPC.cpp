@@ -13,9 +13,8 @@ namespace Demo {
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/daudau-Sheet.png");
-        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12, true);
+        spritesheet = gd->GetAssets().GetTexture(L"assets/daudau-Sheet.png");
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12, true);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
     }

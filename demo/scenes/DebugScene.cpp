@@ -48,18 +48,17 @@ void Demo::DebugScene::Init()
 	containers.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 
 	//just load resource (texture, font) 1 time and reuse it all over again
-	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiSheetTex->LoadTexture(L"assets/ui-pack.png");
+	uiSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui-pack.png");
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
-	myFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24);
-	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont.get());
+	myFont = game->GetGraphicsDevice()->GetAssets().GetFont(L"Arcade Among 2 R46PV", 24);
+	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont);
 
 	//create 1 text button and 2 icon buttons
 	auto btnTextExit = std::make_shared<Demo::TextButton>(
 		transformManager,
 		0, 0, 150, 50, //x,y,w,h
 		"EXIT GAME", //display text
-		myFont.get(), //reuse myFont
+		myFont, //reuse myFont
 		[](sdlgf::ITrigger* t)
 		{
 			sdlgf::Application::GetInstance()->Quit();

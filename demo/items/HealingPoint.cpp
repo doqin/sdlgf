@@ -11,17 +11,16 @@ namespace Demo {
     void HealingPoint::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer) {
         player = p;
         this->worldCamera = camera;
-        fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+        fontSprite = std::make_shared<sdlgf::FontSprite>(font);
         this->drawBuffer = drawBuffer;
         this->gd = gd;
         collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 8.f, GetWorldX(), GetWorldY() + 12.f);
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/healingpoint-Sheet.png");
+        spritesheet = gd->GetAssets().GetTexture(L"assets/healingpoint-Sheet.png");
 
-        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12);
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }

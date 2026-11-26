@@ -63,7 +63,7 @@ namespace Demo {
     void PopupManager::Init(Game* game, std::shared_ptr<sdlgf::Texture> borderTex, std::shared_ptr<sdlgf::Texture> uiTex, std::shared_ptr<sdlgf::Font> popupFont) {
         this->game = game;
         this->font = popupFont;
-        this->fontSprite = std::make_shared<sdlgf::FontSprite>(this->font.get());
+        this->fontSprite = std::make_shared<sdlgf::FontSprite>(this->font);
         this->internalTm = std::make_shared<sdlgf::TransformManager>();
 
         this->borderSheetTex = borderTex;
@@ -176,7 +176,7 @@ namespace Demo {
         this->popupHeight = paddingTop + titleBlock + std::max(msgH, sideIconSize) + paddingMid + btnH + paddingBot;
 
         this->backgroundSprite = std::make_shared<sdlgf::NineSliceSprite>(
-            borderSheetTex.get(), style.bgSrcRect,
+            borderSheetTex, style.bgSrcRect,
             style.marginL, style.marginT, style.marginR, style.marginB
         );
         this->backgroundSprite->SetTargetSize(popupWidth, popupHeight);
@@ -185,7 +185,7 @@ namespace Demo {
         for (size_t i = 0; i < buttons.size(); ++i) {
             const auto& btnData = buttons[i];
 
-            auto textBtn = std::make_shared<TextIconButton>(internalTm, 0, 0, (int)btnWidths[i], (int)btnH, uiSheetTex, this->font.get(), btnData.first, 3);
+            auto textBtn = std::make_shared<TextIconButton>(internalTm, 0, 0, (int)btnWidths[i], (int)btnH, uiSheetTex, this->font, btnData.first, 3);
             textBtn->SetSpriteRects(btnRectsMed);
             textBtn->SetSpriteScale(scale, scale);
             // Slice the frame so a widened button stretches its centre instead of smearing its caps.
@@ -218,7 +218,7 @@ namespace Demo {
         if (!isActive || !iconTex || iconFrames.empty()) return;
 
         this->iconTexture = iconTex;
-        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex, iconFrames);
         this->iconSprite->SetFrameRate(12);
         this->iconSize = iconSize;
         float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
@@ -242,7 +242,7 @@ namespace Demo {
         if (!isActive || sideIconSize <= 0.0f) return;
 
         this->iconTexture = iconTex;
-        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex, iconFrames);
         this->iconSprite->SetFrameRate(12);
         this->iconSize = sideIconSize;
         float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);

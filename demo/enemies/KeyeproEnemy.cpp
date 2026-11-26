@@ -7,17 +7,14 @@
 #include <algorithm>
 
 void Demo::KeyeproEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/boss-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 128, 128, 29), 6);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/boss-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 128, 128, 29), 6);
 	sprite->SetOrigin(64, 64);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/bossprojectile-Sheet.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/bossprojectile-Sheet.png");
 	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
-	shardTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	shardTexture->LoadTexture(L"assets/bossshard-Sheet.png");
+	shardTexture = graphicsDevice->GetAssets().GetTexture(L"assets/bossshard-Sheet.png");
 	shardFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 6);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -201,7 +198,7 @@ void Demo::KeyeproEnemy::PatternTargetedSniping(float baseDamage) {
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, x, y)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, x, y)
 					.SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
 					.SetVelocity(200.f)
 					.SetDelay(0.f)
@@ -229,14 +226,14 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 				float startY = (i - BULLETS / 2.f) * SPACING + *yOffset;
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, 320, startY)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, 320, startY)
 					.SetTrajectory(sdlgf::Vec2(-1, 0))
 					.SetWave(50.f, 4.f)
 					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
 					.SetVelocity(VELOCITY)
 					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), projFrames.front(), 16, 16)
+					.SetGhostSprite(projTexture, projFrames.front(), 16, 16)
 					.SetStatusEffect(ModifierType::Freeze, 0.05f, 1)
 				);
 			}
@@ -253,14 +250,14 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 				float startY = (i - BULLETS / 2.f) * SPACING + *yOffset;
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, -320, startY)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, -320, startY)
 					.SetTrajectory(sdlgf::Vec2(1, 0))
 					.SetWave(50.f, 4.f)
 					.SetDelay(i * 0.1f * patternPace)
 					.SetDecayTime(4.f)
 					.SetVelocity(VELOCITY)
 					.SetDamage(finalDamage)
-					.SetGhostSprite(projTexture.get(), projFrames.front(), 16, 16)
+					.SetGhostSprite(projTexture, projFrames.front(), 16, 16)
 				);
 			}
 		}
@@ -299,7 +296,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(INITIAL_VELOCITY)
 					.SetReturnAcceleration(180.f)
@@ -331,7 +328,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
 					.SetTargetPosition(targetX, targetY)
 					.SetInitialVelocity(INITIAL_VELOCITY)
 					.SetReturnAcceleration(180.f)
@@ -395,17 +392,17 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
+						ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, spawnX, spawnY)
 						.SetSplitOnArrival(burstX, burstY, SHARDS, SHARD_VELOCITY)
 						.SetSplitRandomAngle()
 						.SetSplitDecayTime(SHARD_DECAY)
 						.SetSplitDamage(shardDamage)
-						.SetShardTexture(shardTexture.get(), shardFrames, 12, 8, 8, 4, 4)
+						.SetShardTexture(shardTexture, shardFrames, 12, 8, 8, 4, 4)
 						.SetVelocity(SHELL_VELOCITY)
 						.SetDelay(i * SHELL_STAGGER * patternPace)
 						.SetDecayTime(4.f)
 						.SetDamage(shellDamage)
-						.SetGhostSprite(projTexture.get(), projFrames.front(), 16, 16)
+						.SetGhostSprite(projTexture, projFrames.front(), 16, 16)
 						.SetStatusEffect(ModifierType::Burn, 1.f, 1)
 					);
 				}
@@ -440,7 +437,7 @@ void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
 					float spawnY = py - dir.y * SPAWN_DISTANCE + jitterY;
-					auto desc = ProjectileDesc(projTexture.get(), projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
+					auto desc = ProjectileDesc(projTexture, projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
 						.SetTrajectory(dir)
 						.SetVelocity(100.f)
 						.SetDecayTime(8.f)

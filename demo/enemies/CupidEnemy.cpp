@@ -7,17 +7,14 @@ const float PI = 3.14159265359f;
 
 void Demo::CupidEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/bubble-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/bubble-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	heartTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	heartTexture->LoadTexture(L"assets/bubbleprojectile.png");
+	heartTexture = graphicsDevice->GetAssets().GetTexture(L"assets/bubbleprojectile.png");
 
-	arrowTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	arrowTexture->LoadTexture(L"assets/bubbleprojectile.png");
+	arrowTexture = graphicsDevice->GetAssets().GetTexture(L"assets/bubbleprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	SetCardDropPool({ "ChainDetonationCard", "CruelStrikeCard", "ForesightCard" }, 1, 3);
@@ -119,7 +116,7 @@ void Demo::CupidEnemy::PatternHeartWave(float projDamage)
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(heartTexture.get(), 8, 8, 16, 16, START_X, START_Y)
+					ProjectileDesc(heartTexture, 8, 8, 16, 16, START_X, START_Y)
 					.SetTrajectory(dir)
 					.SetDelay(0.f)
 					.SetDecayTime(DECAY_TIME)
@@ -156,7 +153,7 @@ void Demo::CupidEnemy::PatternHomingArrow(float projDamage)
 
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(arrowTexture.get(), 8, 8, 16, 16, finalX, finalY)
+						ProjectileDesc(arrowTexture, 8, 8, 16, 16, finalX, finalY)
 						.SetTrajectory(sdlgf::Vec2(0, 1))
 						.SetHoming(TURN_SPEED)
 						.SetDelay(0.f)
@@ -204,7 +201,7 @@ void Demo::CupidEnemy::PatternHeartNova(float projDamage)
 
 						projectiles.Spawn(
 							lock,
-							ProjectileDesc(heartTexture.get(), 8, 8, 16, 16, originX, originY)
+							ProjectileDesc(heartTexture, 8, 8, 16, 16, originX, originY)
 							.SetTrajectory(dir)
 							.SetDelay(1.f)
 							.SetDecayTime(DECAY_TIME + 1.f)

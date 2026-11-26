@@ -81,20 +81,17 @@ namespace Demo {
 		constexpr float SKIP_MARGIN = 24.f;
 	}
 
-	BattleTutorial::BattleTutorial(sdlgf::GraphicsDevice* gd, sdlgf::Font* font)
+	BattleTutorial::BattleTutorial(sdlgf::GraphicsDevice* gd, std::shared_ptr<sdlgf::Font> font)
 		: device(gd), uiFont(font)
 	{
-		sheet = std::make_shared<sdlgf::Texture>(gd);
-		sheet->LoadTexture(L"assets/tutorial-notext.png");
-		sprite = std::make_shared<sdlgf::StaticSprite>(sheet.get());
+		sheet = gd->GetAssets().GetTexture(L"assets/tutorial-notext.png");
+		sprite = std::make_shared<sdlgf::StaticSprite>(sheet);
 		sprite->SetScale(PANEL_SCALE, PANEL_SCALE);
 
-		dodgeTex = std::make_shared<sdlgf::Texture>(gd);
-		dodgeTex->LoadTexture(L"assets/tutorial-dodge.png");
-		dodgeSprite = std::make_shared<sdlgf::StaticSprite>(dodgeTex.get());
+		dodgeTex = gd->GetAssets().GetTexture(L"assets/tutorial-dodge.png");
+		dodgeSprite = std::make_shared<sdlgf::StaticSprite>(dodgeTex);
 
-		uiTex = std::make_shared<sdlgf::Texture>(gd);
-		uiTex->LoadTexture(L"assets/ui.png");
+		uiTex = gd->GetAssets().GetTexture(L"assets/ui.png");
 	}
 
 	void BattleTutorial::TryQueue(Step s, bool condition)

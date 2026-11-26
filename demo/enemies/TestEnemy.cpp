@@ -5,13 +5,11 @@
 
 void Demo::TestEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/placeholder.png");
-	sprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder.png");
+	sprite = std::make_shared<sdlgf::StaticSprite>(texture);
 	sprite->SetOrigin(32, 32);
 
-	roundProjectileTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	roundProjectileTexture->LoadTexture(L"assets/placeholder-round-projectile.png");
+	roundProjectileTexture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder-round-projectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 64.f, 64.f);
@@ -81,7 +79,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<st
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(roundProjectileTexture.get(), 8, 8, 16, 16, x, y)
+					ProjectileDesc(roundProjectileTexture, 8, 8, 16, 16, x, y)
 					.SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
 					.SetDelay(.2f)
 					.SetDecayTime(4.f)

@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include "Texture.h"
+#include "AssetManager.h"
 
 namespace {
 	// The game was written against Direct3D 9, whose pixel CENTRES lie on integer coordinates;
@@ -85,6 +86,7 @@ sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererNa
 	if (!SDL_SetRenderDrawBlendMode(renderer, alphaBlendMode)) {
 		alphaBlendMode = SDL_BLENDMODE_BLEND;
 	}
+	assets = std::make_unique<AssetManager>(this);
 	sdlgf::Platform::DebugLog(std::string("Renderer: ") + SDL_GetRendererName(renderer) + "\n");
 }
 

@@ -5,14 +5,12 @@
 #include "PopUpMessage.h"
 
 void Demo::TrojanEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/trojan.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 96, 96, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/trojan.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 96, 96, 12), 12);
 	sprite->SetOrigin(52, 52);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/arrow_1.png"); //TODO: Change the projectile asset to a proper one
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/arrow_1.png"); //TODO: Change the projectile asset to a proper one
 	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -97,7 +95,7 @@ void Demo::TrojanEnemy::PatternTrojanBolt(float projDamage) {
 			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, x, y](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
-					auto desc = ProjectileDesc(projTexture.get(), projFrames, 12, 8, 8, 16, 16, x, y)
+					auto desc = ProjectileDesc(projTexture, projFrames, 12, 8, 8, 16, 16, x, y)
 						.SetTargetPosition(px, py)
 						.SetVelocity(400.f)
 						//.SetHoming(3.f)
@@ -143,7 +141,7 @@ void Demo::TrojanEnemy::PatternVirusSpread(float projDamage) {
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
 					float spawnY = py - dir.y * SPAWN_DISTANCE + jitterY;
 
-					auto desc = ProjectileDesc(projTexture.get(), projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
+					auto desc = ProjectileDesc(projTexture, projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
 						.SetTrajectory(dir)
 						.SetVelocity(100.f)
 						.SetWave(waveAmp, waveFreq)
@@ -186,7 +184,7 @@ void Demo::TrojanEnemy::PatternFanning(float projDamage)
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
 					float spawnY = py - dir.y * SPAWN_DISTANCE + jitterY;
-					auto desc = ProjectileDesc(projTexture.get(), projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
+					auto desc = ProjectileDesc(projTexture, projFrames, 12, 8, 8, 16, 16, spawnX, spawnY)
 						.SetTrajectory(dir)
 						.SetVelocity(100.f)
 						.SetDecayTime(8.f)

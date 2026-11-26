@@ -146,15 +146,14 @@ std::shared_ptr<Demo::StatusRenderer> Demo::StatusRenderer::Get(sdlgf::GraphicsD
 }
 
 Demo::StatusRenderer::StatusRenderer(sdlgf::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/ui.png");
-	iconSprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/ui.png");
+	iconSprite = std::make_shared<sdlgf::StaticSprite>(texture);
 	iconSprite->SetScale(2.f, 2.f);
 
-	bigFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-	bigSprite = std::make_shared<sdlgf::FontSprite>(bigFont.get());
-	smallFont = std::make_shared<sdlgf::Font>(graphicsDevice, TURNS_FONT_NAME, TURNS_FONT_SIZE);
-	smallSprite = std::make_shared<sdlgf::FontSprite>(smallFont.get());
+	bigFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+	bigSprite = std::make_shared<sdlgf::FontSprite>(bigFont);
+	smallFont = graphicsDevice->GetAssets().GetFont(TURNS_FONT_NAME, TURNS_FONT_SIZE);
+	smallSprite = std::make_shared<sdlgf::FontSprite>(smallFont);
 }
 
 float Demo::StatusRenderer::DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,

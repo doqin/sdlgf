@@ -7,6 +7,8 @@
 #include "ShopPurchaseGlobalData.h"
 #include "BossDeathGlobalData.h"
 #include "IntroScene.h"
+#include "AssetManifest.h"
+#include "LocalizationManager.h"
 #include "TutorialWorldScene.h"
 #include "LabInsideScene.h"
 #include "SecretPuzzleScene.h"
@@ -20,20 +22,41 @@ namespace Demo {
 		: game(game), saveManager(std::move(saveManager)) {
 	}
 
-	void SaveGameState::BuildScenes() {
+	std::vector<LoadStep> SaveGameState::BuildSceneSteps() {
+		// Each scene is constructed (and Init()ed) by SceneManager::PushScene; one per step so the
+		// loading screen repaints in between. `self` keeps this state alive until the last step ran.
+		auto self = shared_from_this();
+		auto addScene = [self](const char* saveId, std::wstring label, std::function<sdlgf::IScene*()> make) {
+			return LoadStep{ std::move(label), [self, saveId, make]() {
+				auto sceneManager = self->game->GetSceneManager();
+				sceneManager->PushScene(make());
+				if (saveId != nullptr) self->sceneMap[saveId] = sceneManager->GetSceneCount() - 1;
+			} };
+		};
 		auto app = sdlgf::Application::GetInstance();
-		auto sceneManager = game->GetSceneManager();
-		sceneManager->PushScene(new IntroScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneManager->PushScene(new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneMap["TutorialWorldScene"] = sceneManager->GetSceneCount() - 1;
-		sceneManager->PushScene(new LabInsideScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneMap["LabInsideScene"] = sceneManager->GetSceneCount() - 1;
-		sceneManager->PushScene(new SecretPuzzleScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneMap["SecretPuzzleScene"] = sceneManager->GetSceneCount() - 1;
-		sceneManager->PushScene(new ThreadAlleyScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneMap["ThreadAlleyScene"] = sceneManager->GetSceneCount() - 1;
-		sceneManager->PushScene(new BossWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
-		sceneMap["BossWorldScene"] = sceneManager->GetSceneCount() - 1;
+		const int w = app->GetScreenWidth(), h = app->GetScreenHeight();
+		Game* g = game;
+		auto sm = saveManager;
+		return {
+			addScene(nullptr, Tr(L"Preparing intro"), [=]() -> sdlgf::IScene* { return new IntroScene(g, w, h); }),
+			addScene("TutorialWorldScene", Tr(L"Building Cloud Canopy"), [=]() -> sdlgf::IScene* { return new TutorialWorldScene(g, sm, w, h); }),
+			addScene("LabInsideScene", Tr(L"Building the lab"), [=]() -> sdlgf::IScene* { return new LabInsideScene(g, sm, w, h); }),
+			addScene("SecretPuzzleScene", Tr(L"Building The Root"), [=]() -> sdlgf::IScene* { return new SecretPuzzleScene(g, sm, w, h); }),
+			addScene("ThreadAlleyScene", Tr(L"Building Thread Alley"), [=]() -> sdlgf::IScene* { return new ThreadAlleyScene(g, sm, w, h); }),
+			addScene("BossWorldScene", Tr(L"Building The Overflow"), [=]() -> sdlgf::IScene* { return new BossWorldScene(g, sm, w, h); }),
+		};
+	}
+
+	void SaveGameState::RunLoading(std::vector<LoadStep> steps) {
+		auto assets = ReadAssetManifest(WORLD_MANIFEST);
+		auto app = sdlgf::Application::GetInstance();
+		game->GetSceneManager()->BeginLoading(std::make_unique<LoadingScene>(
+			game, app->GetScreenWidth(), app->GetScreenHeight(), std::move(assets), std::move(steps), nullptr));
+	}
+
+	void SaveGameState::BuildAllScenesNow() {
+		ClearScenes();
+		for (auto& step : BuildSceneSteps()) step.run();
 	}
 
 	void SaveGameState::ClearScenes()
@@ -142,11 +165,15 @@ namespace Demo {
 		saveManager->Register(SketchyGuyGlobalData::GetInstance());
 		saveManager->Register(ShopPurchaseGlobalData::GetInstance());
 		saveManager->Register(BossDeathGlobalData::GetInstance());
-		saveState->ClearScenes();
-		saveState->BuildScenes();
-		QuestManager::GetInstance()->Reset();
-		sdlgf::AudioManager::GetInstance()->StopAll();
-		game->GetSceneManager()->GoToScene(1);
+		std::vector<LoadStep> steps;
+		steps.push_back({ Tr(L"Clearing the stage"), [saveState]() { saveState->ClearScenes(); } });
+		for (auto& step : saveState->BuildSceneSteps()) steps.push_back(std::move(step));
+		steps.push_back({ Tr(L"Starting"), [saveState, game]() {
+			QuestManager::GetInstance()->Reset();
+			sdlgf::AudioManager::GetInstance()->StopAll();
+			game->GetSceneManager()->GoToScene(1);
+		} });
+		saveState->RunLoading(std::move(steps));
 		return saveState;
 	}
 
@@ -156,21 +183,28 @@ namespace Demo {
 	}
 
 	void SaveGameState::ReloadFromDisk() {
-		// Park on the main menu first. ClearScenes pops everything above index 0, and the
-		// current index may point at a scene that is about to be destroyed.
-		game->GetSceneManager()->GoToScene(0);
-		saveManager->Clear();
-		saveManager->Register(this);
-		saveManager->Register(PlayerGlobalData::GetInstance());
-		saveManager->Register(SketchyGuyGlobalData::GetInstance());
-		ShopPurchaseGlobalData::GetInstance()->Reset();
-		saveManager->Register(ShopPurchaseGlobalData::GetInstance());
-		saveManager->Register(BossDeathGlobalData::GetInstance());
-		ClearScenes();
-		BuildScenes();
-		QuestManager::GetInstance()->Reset();
-		// RestoreSaveData moves the scene manager to the saved "current_scene".
-		saveManager->Load(SAVE_FILE);
+		auto self = shared_from_this();
+		std::vector<LoadStep> steps;
+		steps.push_back({ Tr(L"Clearing the stage"), [self]() {
+			// Park on the main menu first. ClearScenes pops everything above index 0, and the
+			// current index may point at a scene that is about to be destroyed.
+			self->game->GetSceneManager()->GoToScene(0);
+			self->saveManager->Clear();
+			self->saveManager->Register(self.get());
+			self->saveManager->Register(PlayerGlobalData::GetInstance());
+			self->saveManager->Register(SketchyGuyGlobalData::GetInstance());
+			ShopPurchaseGlobalData::GetInstance()->Reset();
+			self->saveManager->Register(ShopPurchaseGlobalData::GetInstance());
+			self->saveManager->Register(BossDeathGlobalData::GetInstance());
+			self->ClearScenes();
+		} });
+		for (auto& step : BuildSceneSteps()) steps.push_back(std::move(step));
+		steps.push_back({ Tr(L"Restoring your save"), [self]() {
+			QuestManager::GetInstance()->Reset();
+			// RestoreSaveData moves the scene manager to the saved "current_scene".
+			self->saveManager->Load(SAVE_FILE);
+		} });
+		RunLoading(std::move(steps));
 	}
 
 	void SaveGameState::ReloadLastSave() {

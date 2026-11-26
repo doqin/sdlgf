@@ -33,7 +33,7 @@ namespace Demo {
         void ApplyAutoResize();
     public:
         TextIconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-            std::shared_ptr<sdlgf::Texture> uiSheetTex, sdlgf::Font* font, const std::wstring& text, int frames = 3);
+            std::shared_ptr<sdlgf::Texture> uiSheetTex, std::shared_ptr<sdlgf::Font> font, const std::wstring& text, int frames = 3);
 
         void SetText(const std::wstring& text) { this->label = text; }
         void SetTextColor(sdlgf::Color color) { this->textColor = color; }

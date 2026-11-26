@@ -271,7 +271,7 @@ void Demo::TutorialWorldScene::OnDrawUI(unsigned long long deltaTime)
 void Demo::TutorialWorldScene::StartSpamConversation()
 {
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 	for (auto& line : spamNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}

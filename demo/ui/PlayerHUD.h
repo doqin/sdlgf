@@ -18,7 +18,7 @@ namespace Demo {
 		std::shared_ptr<Player> player;
 		std::shared_ptr<sdlgf::TransformManager> transformManager;
 		sdlgf::Camera* uiCamera;
-		sdlgf::Font* font;
+		std::shared_ptr<sdlgf::Font> font;
 
 		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 		std::shared_ptr<sdlgf::Texture> playerTex;
@@ -43,7 +43,7 @@ namespace Demo {
 		void DrawPanel(sdlgf::GraphicsDevice* gd);
 		void DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, sdlgf::Color digitColor);
 	public:
-		PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, sdlgf::Font* font);
+		PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, std::shared_ptr<sdlgf::Font> font);
 
 		void Init();
 		void Update(unsigned long long deltaTime);

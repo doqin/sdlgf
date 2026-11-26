@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "DebugDraw.h"
 #include "Utils.h"
+#include "AssetManager.h"
 #include <algorithm>
 #include <cmath>
 
-sdlgf::Font* sdlgf::DebugDraw::debugFont = nullptr;
-sdlgf::FontSprite* sdlgf::DebugDraw::debugSprite = nullptr;
+std::shared_ptr<sdlgf::Font> sdlgf::DebugDraw::debugFont;
+std::shared_ptr<sdlgf::FontSprite> sdlgf::DebugDraw::debugSprite;
 std::map<int, std::wstring> sdlgf::DebugDraw::coordinateCache;
 
 bool sdlgf::DebugDraw::drawGrid = false;
@@ -14,9 +15,9 @@ bool sdlgf::DebugDraw::drawAxis = false;
 void sdlgf::DebugDraw::Init(GraphicsDevice* graphicsDevice, const std::wstring& fontName, int fontSize) {
 	if (debugFont) return;
 
-	debugFont = new Font(graphicsDevice, fontName, fontSize);
+	debugFont = graphicsDevice->GetAssets().GetFont(fontName, fontSize);
 
-	debugSprite = new FontSprite(debugFont);
+	debugSprite = std::make_shared<FontSprite>(debugFont);
 
 	for (int i = -2048; i <= 2048; i += 16) {
 		coordinateCache[i] = std::to_wstring(i);
@@ -24,14 +25,8 @@ void sdlgf::DebugDraw::Init(GraphicsDevice* graphicsDevice, const std::wstring& 
 }
 
 void sdlgf::DebugDraw::Release() {
-	if (debugSprite) {
-		delete debugSprite;
-		debugSprite = nullptr;
-	}
-	if (debugFont) {
-		delete debugFont;
-		debugFont = nullptr;
-	}
+	debugSprite.reset();
+	debugFont.reset();
 	coordinateCache.clear();
 }
 

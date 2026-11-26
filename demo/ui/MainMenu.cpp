@@ -55,7 +55,7 @@ namespace Demo
 
 		if (!bgSprite)
 		{
-			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex.get());
+			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex);
 			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
 		}
 
@@ -260,24 +260,21 @@ namespace Demo
 		lastScreenHeight = camH;
 
 		//load textures
-		buttonSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		buttonSheetTex->LoadTexture(L"assets/ui.png");
+		buttonSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
-		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		bgTex->LoadTexture(L"assets/test-background.png");
+		bgTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/test-background.png");
 
-		titleTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		titleTex->LoadTexture(L"assets/test-title.png");
+		titleTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/test-title.png");
 
 
 		// Sprites
-		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 		fontSprite->SetColor(0xFF000000);
 
 		//LOCAL FUNCTION to init a menu text-icon button: blank slice-able frame + auto-sizing translated label
 		auto InitMenuButton = [&](std::shared_ptr<Demo::TextIconButton>& btn, const std::wstring& english) {
-			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font.get(), L"", 4);
+			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font, L"", 4);
 			auto rects = sdlgf::Utils::CreateRectsVertical(0, 0, 16, 16, 3);
 			rects.push_back({ 288, 48, 304, 64 }); // disabled frame
 			btn->SetSpriteRects(rects);
@@ -295,11 +292,9 @@ namespace Demo
 		InitMenuButton(continueButton, L"Continue");
 		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
 
-		auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		borderTex->LoadTexture(L"assets/popup-borders.png");
+		auto borderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/popup-borders.png");
 
-		auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiTex->LoadTexture(L"assets/ui.png");
+		auto uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
 		PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 

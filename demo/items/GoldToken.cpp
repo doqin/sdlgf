@@ -8,8 +8,7 @@ namespace Demo {
 	GoldToken::GoldToken(std::weak_ptr<sdlgf::TransformManager> tm, sdlgf::GraphicsDevice* gd, float x, float y, int value)
 		: IToken(tm, x, y), goldValue(value)
 	{
-		texture = std::make_shared<sdlgf::Texture>(gd);
-		texture->LoadTexture(L"assets/gold-token.png");
+		texture = gd->GetAssets().GetTexture(L"assets/gold-token.png");
 
 		std::vector<RECT> frames = {
 			{7, 7, 26, 26},
@@ -22,7 +21,7 @@ namespace Demo {
 			{239, 7, 258, 26}
 		};
 
-		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), frames, 12, true);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, frames, 12, true);
 		sprite->SetOrigin(9.5f, 9.5f);
 
 		collider = std::make_shared<sdlgf::RectangleCollider>(tm, 19.f, 19.f, x, y);

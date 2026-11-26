@@ -8,7 +8,7 @@ namespace Demo {
 		titleColor(0xFFFFFFFF), subColor(0xFFFFFFFF), shadowColor(0xFF000000)
 	{
 		if (font) {
-			fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+			fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 		}
 	}
 

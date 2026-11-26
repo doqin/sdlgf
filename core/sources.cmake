@@ -31,6 +31,8 @@ set(SDLGF_CORE_SOURCES
     IGame.cpp
     audio/AudioManager.cpp
     audio/AudioMixer.cpp
+    graphics/AssetLoader.cpp
+    graphics/AssetManager.cpp
     graphics/Camera.cpp
     graphics/Font.cpp
     graphics/GraphicsDevice.cpp

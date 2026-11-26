@@ -25,7 +25,10 @@ if(NOT MSVC)
     target_compile_definitions(sdlgf_core PUBLIC $<$<CONFIG:Debug>:_DEBUG>)
 endif()
 
+find_package(Threads REQUIRED)
+
 target_link_libraries(sdlgf_core PUBLIC
+    Threads::Threads
     tmxlite
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf

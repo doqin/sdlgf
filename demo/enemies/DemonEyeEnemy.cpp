@@ -6,14 +6,12 @@
 
 void Demo::DemonEyeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/computerbug-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/computerbug-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	tearProjectileTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	tearProjectileTexture->LoadTexture(L"assets/bugprojectile-Sheet.png");
+	tearProjectileTexture = graphicsDevice->GetAssets().GetTexture(L"assets/bugprojectile-Sheet.png");
 	tearProjectileFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -109,7 +107,7 @@ void Demo::DemonEyeEnemy::PatternBloodRain(float baseDamage, std::vector<std::sh
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
+					ProjectileDesc(tearProjectileTexture, tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
 					.SetTrajectory(sdlgf::Vec2(0, 1))
 					.SetDelay(0.f)
 					.SetDecayTime(4.f)
@@ -153,7 +151,7 @@ void Demo::DemonEyeEnemy::PatternBloodWall(float baseDamage, std::vector<std::sh
 
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
+						ProjectileDesc(tearProjectileTexture, tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
 						.SetTrajectory(sdlgf::Vec2(0, 1))
 						.SetDelay(0.f)
 						.SetDecayTime(BULLET_DECAY_TIME)
@@ -195,7 +193,7 @@ void Demo::DemonEyeEnemy::PatternBloodCross(float baseDamage, std::vector<std::s
 
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(tearProjectileTexture.get(), tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
+					ProjectileDesc(tearProjectileTexture, tearProjectileFrames, 12, 8, 8, 16, 16, finalX, finalY)
 					.SetTrajectory(sdlgf::Vec2(0.5f, 1.0f))
 					.SetDelay(0.f)
 					.SetDecayTime(4.f)

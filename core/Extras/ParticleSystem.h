@@ -23,7 +23,7 @@ namespace sdlgf {
 			sdlgf::Color tint = 0xFFFFFFFF;
 		};
 
-		Texture* texture;
+		std::shared_ptr<Texture> texture;
 		std::unique_ptr<StaticSprite> sprite; // reused across all particles
 		std::vector<Particle> pool;
 
@@ -39,7 +39,7 @@ namespace sdlgf {
 
 		sdlgf::Color LerpColor(sdlgf::Color a, sdlgf::Color b, float t) const;
 	public:
-		ParticleSystem(Texture* texture, size_t maxParticles);
+		ParticleSystem(std::shared_ptr<Texture> texture, size_t maxParticles);
 		~ParticleSystem() = default;
 
 		void SetSrcRect(RECT rect);

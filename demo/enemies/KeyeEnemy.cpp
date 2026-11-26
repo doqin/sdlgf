@@ -5,14 +5,12 @@
 #include "PopUpMessage.h"
 
 void Demo::KeyeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/minion-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/minion-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/minionprojectile-Sheet.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/minionprojectile-Sheet.png");
 	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -81,7 +79,7 @@ void Demo::KeyeEnemy::PatternRoundCircle(float projDamage) {
 			if (auto lock = this->player.lock()) {
 				projectiles.Spawn(
 					lock,
-					ProjectileDesc(projTexture.get(), projFrames, 12, 16, 16, 16, 16, randX, -220.f)
+					ProjectileDesc(projTexture, projFrames, 12, 16, 16, 16, 16, randX, -220.f)
 					.SetTargetPosition(lock->GetCollider().lock()->GetWorldX(), lock->GetCollider().lock()->GetWorldY())
 					.SetVelocity(220.f)
 					.SetDecayTime(4.f)

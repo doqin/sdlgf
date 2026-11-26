@@ -43,8 +43,7 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	player = std::make_shared<Player>(transformManager, playerX, playerY);
 	camera.SetPosition(playerX, playerY);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
-	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
+	gearTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
 	player->InitGearAnim(gearTex);
 	drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
 	commandBuffer = std::make_shared<sdlgf::CommandBuffer>();
@@ -56,25 +55,23 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	std::string sMapFile = sdlgf::Utils::WideToUtf8(wMapFile);
 	map->Create(transformManager, colliderManager, sMapFile);
 
-	font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+	font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
 	chapterTitleUI = std::make_shared<ChapterTitleUI>(font);
 
-	mapView.Init(font.get());
+	mapView.Init(font);
 	mapView.Build(*map);
 	mapView.Reveal(playerX, playerY);
 
-	auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	borderTex->LoadTexture(L"assets/popup-borders.png");
-	auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiTex->LoadTexture(L"assets/ui.png");
+	auto borderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/popup-borders.png");
+	auto uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 	QuestManager::GetInstance()->SetVirtualResolution(game->GetVirtualWidth(), game->GetVirtualHeight());
 	QuestManager::GetInstance()->Init(game->GetGraphicsDevice(), transformManager, &this->uiCamera, font);
 
 	draggableManager = std::make_shared<Demo::DraggableManager>();
-	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &this->uiCamera, font.get());
+	inventoryMenu = std::make_shared<InventoryMenu>(game, player, transformManager, draggableManager, &this->uiCamera, font);
 	inventoryMenu->Init();
-	playerHUD = std::make_shared<PlayerHUD>(game, player, transformManager, &this->uiCamera, font.get());
+	playerHUD = std::make_shared<PlayerHUD>(game, player, transformManager, &this->uiCamera, font);
 	playerHUD->SetOnInventoryOpen([this]() {
 		if (inventoryMenu && !inventoryMenu->IsOpen()) inventoryMenu->Toggle();
 	});
@@ -122,7 +119,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime) {
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
 		currentConversation = std::make_shared<IConversation>(
-			std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+			std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 		currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 	};
 
@@ -226,7 +223,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime) {
 			activeNPC->SetOnDialogueEnd(onEndCallback);
 
 			auto [sw, sh] = camera.GetScreenResolution();
-			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 			for (auto& line : npc->GetDialogueLines()) {
 				currentConversation->AddLine(line);
 			}
@@ -287,7 +284,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime) {
 				}
 				auto [sw, sh] = camera.GetScreenResolution();
 				currentConversation = std::make_shared<IConversation>(
-					std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+					std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 				currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 			}
 		}
@@ -467,7 +464,7 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 	}
 	auto [sw, sh] = camera.GetScreenResolution();
 	currentConversation = std::make_shared<IConversation>(
-		std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
+		std::make_shared<sdlgf::FontSprite>(font), sw, sh);
 	currentConversation->AddLine({.name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20")});
 }
 

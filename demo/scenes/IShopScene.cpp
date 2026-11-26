@@ -164,23 +164,18 @@ Demo::IShopScene::IShopScene(Game* game, Player* player, int sw, int sh, std::st
 void Demo::IShopScene::Init()
 {
 	transformManager = std::make_shared<sdlgf::TransformManager>();
-	myFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kLargeFontSize);
-	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont.get());
+	myFont = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kLargeFontSize);
+	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont);
 
-	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiSheetTex->LoadTexture(L"assets/ui.png");
+	uiSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
-	borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	borderTex->LoadTexture(L"assets/popup-borders.png");
+	borderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/popup-borders.png");
 
-	itemsTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	itemsTex->LoadTexture(L"assets/items.png");
+	itemsTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/items.png");
 
-	buyTabTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	buyTabTex->LoadTexture(L"assets/buytab.png");
+	buyTabTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/buytab.png");
 
-	sellTabTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	sellTabTex->LoadTexture(L"assets/selltab.png");
+	sellTabTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/selltab.png");
 
 	LoadItems();
 
@@ -196,52 +191,52 @@ void Demo::IShopScene::BuildUI()
 	const ShopLayout l = ComputeLayout(sw, sh);
 
 	// --- Panel and row chrome ---------------------------------------------------
-	panelFrameSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), PANEL_FRAME_SRC, 6, 6, 6, 6);
+	panelFrameSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, PANEL_FRAME_SRC, 6, 6, 6, 6);
 	panelFrameSprite->SetScale(PANEL_BORDER_SCALE);
 	panelFrameSprite->SetTargetSize(l.panelW, l.panelH);
 	panelFrameSprite->SetPosition(l.panelX, l.panelY);
 
-	panelSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), PANEL_FILL_SRC, 2, 2, 2, 2);
+	panelSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, PANEL_FILL_SRC, 2, 2, 2, 2);
 	panelSprite->SetScale(PANEL_BORDER_SCALE);
 	panelSprite->SetColor(TINT_PANEL_FILL);
 	panelSprite->SetTargetSize(l.panelW - PANEL_FRAME_INSET * 2.0f, l.panelH - PANEL_FRAME_INSET * 2.0f);
 	panelSprite->SetPosition(l.panelX + PANEL_FRAME_INSET, l.panelY + PANEL_FRAME_INSET);
 
-	rowSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), ROW_SRC, 2, 2, 2, 2);
+	rowSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, ROW_SRC, 2, 2, 2, 2);
 	rowSprite->SetScale(CARD_BORDER_SCALE);
 	rowSprite->SetTargetSize(l.rowW, ROW_H);
 
-	rowHoverSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), ROW_HOVER_SRC, 2, 2, 2, 2);
+	rowHoverSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, ROW_HOVER_SRC, 2, 2, 2, 2);
 	rowHoverSprite->SetScale(CARD_BORDER_SCALE);
 	rowHoverSprite->SetColor(TINT_ROW_HOVER);
 	rowHoverSprite->SetTargetSize(l.rowW, ROW_H);
 
-	descSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
+	descSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, DESC_SRC, 2, 2, 2, 2);
 	descSprite->SetScale(CARD_BORDER_SCALE);
 	descSprite->SetColor(TINT_DESC);
 	descSprite->SetTargetSize(l.rowW, DESC_BOX_H);
 
-	statusTabSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
+	statusTabSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex, DESC_SRC, 2, 2, 2, 2);
 	statusTabSprite->SetScale(CARD_BORDER_SCALE);
 	statusTabSprite->SetColor(TINT_STATUS_TAB);
 
-	itemIconSprite = std::make_shared<sdlgf::StaticSprite>(itemsTex.get());
+	itemIconSprite = std::make_shared<sdlgf::StaticSprite>(itemsTex);
 	itemIconSprite->SetScale(ICON_SCALE, ICON_SCALE);
 
 	// Card faces are drawn at 2x like in battle, so they stay pixel-exact rather than resampled.
 	cardFrame = CardFrame::Get(game->GetGraphicsDevice());
 
 	// Same sheet rects as IStatementCard::DrawStatusCover.
-	coverBodySprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	coverBodySprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	coverBodySprite->SetSrcRect({ .left = 236, .top = 272, .right = 237, .bottom = 288 });
-	coverCapSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	coverCapSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	coverCapSprite->SetSrcRect({ .left = 253, .top = 272, .right = 256, .bottom = 288 });
-	coverPipSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	coverPipSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	coverPipSprite->SetSrcRect({ .left = 277, .top = 277, .right = 283, .bottom = 283 });
-	coverBadgeSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	coverBadgeSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	coverBadgeSprite->SetSrcRect({ .left = 259, .top = 290, .right = 269, .bottom = 302 });
 
-	goldIconSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	goldIconSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	goldIconSprite->SetSrcRect({ 0, 240, 32, 272 });
 	goldIconSprite->SetScale(1.0f, 1.0f);
 
@@ -279,7 +274,7 @@ void Demo::IShopScene::BuildUI()
 	// --- Page arrows ------------------------------------------------------------
 	auto makePageButton = [&](const std::wstring& label, const std::function<void(sdlgf::ITrigger*)>& action) {
 		auto btn = std::make_shared<Demo::TextIconButton>(
-			transformManager, 0.0f, 0.0f, 32, 32, uiSheetTex, myFont.get(), label, 4);
+			transformManager, 0.0f, 0.0f, 32, 32, uiSheetTex, myFont, label, 4);
 		btn->SetSpriteRects({ { 0, 0, 16, 16 }, { 0, 16, 16, 32 }, { 0, 32, 16, 48 }, { 288, 48, 304, 64 } });
 		btn->SetSpriteScale(2.0f, 2.0f);
 		btn->SetTextColor(0xFF111111);

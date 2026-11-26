@@ -1,12 +1,18 @@
 #pragma once
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <tuple>
 #include "GraphicsDevice.h"
 
 struct SDL_Texture;
+struct SDL_Surface;
 
 namespace sdlgf {
+	struct SurfaceDeleter { void operator()(SDL_Surface* surface) const; };
+	/// A CPU-side image (pixels in RAM, no GPU involved), always 0xAARRGGBB.
+	using SurfacePtr = std::unique_ptr<SDL_Surface, SurfaceDeleter>;
+
 	/// An image in video memory: loaded from a PNG/BMP/JPG file, filled with a colour, built from
 	/// pixels, or a render target the GraphicsDevice can draw into. Filtering is always
 	/// nearest-neighbour (the game is pixel art).
@@ -36,6 +42,12 @@ namespace sdlgf {
 		/// Application sets to the executable's directory). Throws std::runtime_error naming
 		/// the file if it cannot be loaded.
 		void LoadTexture(const std::wstring& filePath);
+		/// Reads and decodes an image file into RAM without touching the GPU, so it is safe to
+		/// call from a worker thread (see AssetLoader). Throws std::runtime_error naming the file.
+		static SurfacePtr DecodeFile(const std::wstring& filePath);
+		/// Uploads a decoded image (from DecodeFile) to the GPU. Main thread only.
+		/// `name` is only used in error messages.
+		void LoadFromSurface(SDL_Surface* argbSurface, const std::string& name);
 		/// Creates the texture from `width` x `height` pixels of 0xAARRGGBB, row-major.
 		void CreateFromPixels(const std::uint32_t* argbPixels, UINT width, UINT height);
 		/// Copies what the window currently shows into this texture.

@@ -9,6 +9,8 @@
 #include <iterator>
 #include "SettingsManager.h"
 #include "SplashScene.h"
+#include "SaveGameState.h"
+#include "AssetManifest.h"
 void Demo::Game::Init() {
 	srand(static_cast<unsigned int>(time(NULL)));
 	IGame::Init();
@@ -185,7 +187,6 @@ void Demo::Game::Init() {
 
 void Demo::Game::Update(unsigned long long deltaTime) {
 	IGame::Update(deltaTime);
-
 #ifdef _DEBUG
 	fpsAccumulator += deltaTime;
 	fpsFrames++;
@@ -200,4 +201,15 @@ void Demo::Game::Update(unsigned long long deltaTime) {
 		fpsFrames = 0;
 	}
 #endif
+}
+
+bool Demo::Game::RecordAssetManifest(const std::string& file) {
+	auto& assets = GetGraphicsDevice()->GetAssets();
+	assets.StartRecording();
+	auto state = std::make_shared<SaveGameState>(this, std::make_shared<sdlgf::SaveManager>());
+	state->BuildAllScenesNow();
+	const auto paths = assets.StopRecording();
+	sdlgf::Platform::DebugLog("Recorded " + std::to_string(paths.size()) + " textures\n");
+	std::printf("Recorded %zu textures\n", paths.size());
+	return WriteAssetManifest(file, paths);
 }

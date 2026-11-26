@@ -64,7 +64,7 @@ void Demo::IEnemy::BeginDeath()
 	if (graphicsDevice) {
 		deathParticleTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		deathParticleTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
-		deathParticles = std::make_unique<sdlgf::ParticleSystem>(deathParticleTexture.get(), 60);
+		deathParticles = std::make_unique<sdlgf::ParticleSystem>(deathParticleTexture, 60);
 		deathParticles->SetOrigin(2.f, 2.f);
 		sdlgf::ConfigureExplosionEmitter(*deathParticles);
 	}
@@ -116,13 +116,12 @@ void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* ca
 	this->graphicsDevice = graphicsDevice;
 
 	if (!font) {
-		font = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		font = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	}
 	if (!uiTexture) {
-		uiTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		uiTexture->LoadTexture(L"assets/ui.png");
-		uiSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
+		uiTexture = graphicsDevice->GetAssets().GetTexture(L"assets/ui.png");
+		uiSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture);
 		uiSprite->SetScale(2.0f);
 	}
 	if (!statusRenderer) {
@@ -496,10 +495,9 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 		});
 
 	if (!hitImpactTexture && graphicsDevice) {
-		hitImpactTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		hitImpactTexture->LoadTexture(L"assets/hitimpact-Sheet.png");
+		hitImpactTexture = graphicsDevice->GetAssets().GetTexture(L"assets/hitimpact-Sheet.png");
 	}
-	hitImpactSprites.push_back(std::make_shared<sdlgf::AnimatedSprite>(hitImpactTexture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
+	hitImpactSprites.push_back(std::make_shared<sdlgf::AnimatedSprite>(hitImpactTexture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
 
 	hitImpactSprites.back()->SetPosition(GetWorldX() + RNG::Range(-16.f, 16.f), GetWorldY() + RNG::Range(-16.f, 16.f));
 	hitImpactSprites.back()->SetScale(RNG::Range(2.f, 3.f));
@@ -716,7 +714,7 @@ void Demo::IEnemy::UpdateSpeech(unsigned long long deltaTime)
 void Demo::IEnemy::DrawSpeech(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (speechQueue.empty() || speechQueue.front().delayMs > 0.f || isDying || IsDead() || !gd || !camera || !font) return;
-	if (!speechFontSprite) speechFontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+	if (!speechFontSprite) speechFontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
 	constexpr float PAD = 10.f, BORDER = 2.f, TAIL_LEN = 16.f, TAIL_HALF = 8.f;
 

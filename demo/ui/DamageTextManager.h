@@ -32,7 +32,7 @@ namespace Demo
 		std::array<DamageText, MAX_TEXTS> pool;
 
 		//i want to prevent leaking memory by using unique_ptr, just switch to shared_ptr if u want to
-		std::unique_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::Font> font;
 		std::unique_ptr<sdlgf::FontSprite> fontSprite;
 
 		DamageTextManager() {}

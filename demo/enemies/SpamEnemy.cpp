@@ -12,14 +12,12 @@ namespace {
 
 void Demo::SpamEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/spam-Sheet.png");
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/spam-Sheet.png");
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/spamprojectile.png");
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/spamprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	SetCardDropPool({ "HeavyStrikeCard", "LethalHarvestCard", "ArmorPiercerCard" }, 1, 3);
@@ -103,7 +101,7 @@ void Demo::SpamEnemy::PatternInboxFlood(float projDamage)
 				if (auto lock = this->player.lock()) {
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, x, SPAWN_Y)
+						ProjectileDesc(projTexture, 8, 8, 11, 11, x, SPAWN_Y)
 						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetVelocity(BULLET_SPEED)
 						.SetDecayTime(4.f)
@@ -139,7 +137,7 @@ void Demo::SpamEnemy::PatternChainLetter(float projDamage)
 					sdlgf::Vec2 dir(std::cos(dirAngle), std::sin(dirAngle));
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, 0.f, 0.f)
+						ProjectileDesc(projTexture, 8, 8, 11, 11, 0.f, 0.f)
 						.SetDelay(1.f)
 						.SetTrajectory(dir)
 						.SetVelocity(BULLET_SPEED)
@@ -179,7 +177,7 @@ void Demo::SpamEnemy::PatternMassMailer(float projDamage)
 					sdlgf::Vec2 dir(std::cos(ang), std::sin(ang));
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, spawnX, spawnY)
+						ProjectileDesc(projTexture, 8, 8, 11, 11, spawnX, spawnY)
 						.SetTrajectory(dir)
 						.SetVelocity(BULLET_SPEED)
 						.SetDecayTime(5.f)
@@ -215,7 +213,7 @@ void Demo::SpamEnemy::PatternPopupAds(float projDamage)
 					float spawnY = py + std::sin(ang) * RING_RADIUS;
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, spawnX, spawnY)
+						ProjectileDesc(projTexture, 8, 8, 11, 11, spawnX, spawnY)
 						.SetTrajectory(sdlgf::Vec2(-std::cos(ang), -std::sin(ang)))
 						.SetHoming(TURN_SPEED)
 						.SetDelay(TELEGRAPH)
@@ -271,7 +269,7 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 				if (auto lock = this->player.lock()) {
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 11, 11, RNG::Range(-120.f, 120.f), -260.f)
+						ProjectileDesc(projTexture, 8, 8, 11, 11, RNG::Range(-120.f, 120.f), -260.f)
 						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetVelocity(150.f)
 						.SetDecayTime(4.f)

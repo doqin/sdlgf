@@ -328,7 +328,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetSplitGenerations(int generations)
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(std::shared_ptr<sdlgf::Texture> texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight)
 {
 	this->shardTexture = texture;
 	this->shardFrames = std::move(frames);
@@ -340,7 +340,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* text
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(std::shared_ptr<sdlgf::Texture> texture, float originX, float originY, float colliderWidth, float colliderHeight)
 {
 	this->shardTexture = texture;
 	this->shardOriginX = originX;
@@ -350,7 +350,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* text
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetGhostSprite(sdlgf::Texture* texture, RECT srcRect, float originX, float originY)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetGhostSprite(std::shared_ptr<sdlgf::Texture> texture, RECT srcRect, float originX, float originY)
 {
 	this->ghostTexture = texture;
 	this->ghostSrcRect = srcRect;
@@ -590,7 +590,7 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 			trailTexture = std::make_shared<sdlgf::Texture>(desc.texture->GetGraphicsDevice());
 			trailTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
 		}
-		emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture.get(), 32);
+		emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture, 32);
 		emitter->SetOrigin(2, 2);
 		sdlgf::ConfigureTrailEmitter(*emitter);
 	}
@@ -796,13 +796,13 @@ void Demo::ProjectileSystem::EmitBurst(const PendingBurst& burst)
 		// Children travel straight, so they get the same white trail Spawn gives
 		// any straight projectile that was not handed a ghost sprite.
 		std::unique_ptr<sdlgf::ParticleSystem> emitter;
-		sdlgf::Texture* parentTexture = batches[burst.batchIndex].texture;
+		std::shared_ptr<sdlgf::Texture> parentTexture = batches[burst.batchIndex].texture;
 		if (parentTexture != nullptr) {
 			if (!trailTexture) {
 				trailTexture = std::make_shared<sdlgf::Texture>(parentTexture->GetGraphicsDevice());
 				trailTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
 			}
-			emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture.get(), 32);
+			emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture, 32);
 			emitter->SetOrigin(2, 2);
 			sdlgf::ConfigureTrailEmitter(*emitter);
 		}

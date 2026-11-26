@@ -11,7 +11,7 @@ namespace Demo {
     void HackTerminal::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::function<void(int)> hackCallback) {
         player = p;
         this->worldCamera = camera;
-        fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+        fontSprite = std::make_shared<sdlgf::FontSprite>(font);
         this->gd = gd;
         this->onHackAttempt = hackCallback;
 
@@ -19,10 +19,9 @@ namespace Demo {
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
-        spritesheet->LoadTexture(L"assets/terminals.png");
+        spritesheet = gd->GetAssets().GetTexture(L"assets/terminals.png");
 
-        sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+        sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet);
         if (terminalName == "M1") {
             sprite->SetSrcRect({ .left = 0, .top = 0, .right = 16, .bottom = 32 });
         }

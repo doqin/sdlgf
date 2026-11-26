@@ -4,8 +4,8 @@
 #include "LocalizationManager.h"
 
 void Demo::IntroScene::Init() {
-    font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-    fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+    font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+    fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
     auto [sw, sh] = camera.GetScreenResolution();
     conversation = std::make_shared<IConversation>(fontSprite, sw, sh);

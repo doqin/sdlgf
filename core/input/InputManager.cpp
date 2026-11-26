@@ -355,10 +355,9 @@ void sdlgf::InputManager::EnableCustomCursor(bool enable)
 }
 void sdlgf::InputManager::AddCursor(CursorType type, sdlgf::GraphicsDevice* gd, const std::wstring& path, float scale, float hX, float hY)
 {
-    auto tex = std::make_shared<sdlgf::Texture>(gd);
-    tex->LoadTexture(path);
+    auto tex = gd->GetAssets().GetTexture(path);
     if (tex->IsLoaded()) {
-        auto sprite = std::make_shared<sdlgf::StaticSprite>(tex.get());
+        auto sprite = std::make_shared<sdlgf::StaticSprite>(tex);
         sprite->SetScale(scale, scale);
         this->cursorTextures[type] = tex;
         this->cursorSprites[type] = sprite;

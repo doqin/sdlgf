@@ -9,10 +9,9 @@ namespace Demo {
 	EnergyToken::EnergyToken(std::weak_ptr<sdlgf::TransformManager> tm, sdlgf::GraphicsDevice* gd, float x, float y)
 		: IToken(tm, x, y)
 	{
-		texture = std::make_shared<sdlgf::Texture>(gd);
-		texture->LoadTexture(L"assets/ui.png"); //TODO: Temporary reuse energy icon, change it if u have any idea about how energy fragments look like
+		texture = gd->GetAssets().GetTexture(L"assets/ui.png"); //TODO: Temporary reuse energy icon, change it if u have any idea about how energy fragments look like
 
-		sprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
+		sprite = std::make_shared<sdlgf::StaticSprite>(texture);
 		sprite->SetSrcRect({ 96, 0, 112, 16 });
 		sprite->SetScale(1.5f, 1.5f);
 		sprite->SetOrigin(8.f, 8.f);

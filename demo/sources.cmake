@@ -73,6 +73,7 @@ set(SDLGF_DEMO_SOURCES
     scenes/DebugScene.cpp
     scenes/IBattleScene.cpp
     scenes/IShopScene.cpp
+    scenes/LoadingScene.cpp
     scenes/IntroScene.cpp
     scenes/ItemShop.cpp
     scenes/LabInsideScene.cpp
@@ -87,6 +88,7 @@ set(SDLGF_DEMO_SOURCES
     scenes/TutorialWorldScene.cpp
     scenes/World1Scene.cpp
     scenes/WorldSceneBase.cpp
+    systems/AssetManifest.cpp
     systems/AuthTerminal.cpp
     systems/Debug.cpp
     systems/DrawUtils.cpp

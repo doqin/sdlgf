@@ -13,16 +13,13 @@ namespace Demo {
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<sdlgf::Texture>(gd);
+        spritesheet = gd->GetAssets().GetTexture(L"assets/chestclosed.png");
 
-        spritesheet->LoadTexture(L"assets/chestclosed.png");
-
-        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1), 12, true);
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1), 12, true);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(this->GetWorldX(), this->GetWorldY());
-		openedTexture = std::make_shared<sdlgf::Texture>(gd);
-		openedTexture->LoadTexture(L"assets/chestopened.png");
-		openedSprite = std::make_shared<sdlgf::AnimatedSprite>(openedTexture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1), 12, true);
+		openedTexture = gd->GetAssets().GetTexture(L"assets/chestopened.png");
+		openedSprite = std::make_shared<sdlgf::AnimatedSprite>(openedTexture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 1), 12, true);
 		openedSprite->SetOrigin(16.f, 16.f);
 		openedSprite->SetPosition(this->GetWorldX(), this->GetWorldY());
     }

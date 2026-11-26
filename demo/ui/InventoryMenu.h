@@ -37,7 +37,7 @@ namespace Demo {
 		std::shared_ptr<DraggableManager> draggableManager;
 		sdlgf::Camera* uiCamera;
 
-		sdlgf::Font* font;
+		std::shared_ptr<sdlgf::Font> font;
 		bool isOpen = false;
 		Tab currentTab = Tab::ITEMS;
 
@@ -138,7 +138,7 @@ namespace Demo {
 		std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
 
 	public:
-		InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, sdlgf::Font* font);
+		InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, std::shared_ptr<sdlgf::Font> font);
 
 		void Init();
 		void Update(unsigned long long deltaTime);

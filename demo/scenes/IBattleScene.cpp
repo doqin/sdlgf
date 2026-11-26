@@ -1141,7 +1141,7 @@ void Demo::IBattleScene::LayoutAttackRowButtons() {
 
 	// Sized to the (translated) label so the text always fits inside the red box.
 	{
-		sdlgf::FontSprite measure(font.get());
+		sdlgf::FontSprite measure(font);
 		measure.SetScale(1.f, 1.f);
 		measure.SetText(Tr(L"Discard Enemy Card Here"));
 		enemyCardRemoveAreaWidth = (std::max)(250.f, static_cast<float>(measure.GetWidth()) + 32.f);
@@ -2104,8 +2104,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime) {
 					// beside the hint, so the long text doesn't push the popup off a small window.
 					const BossPortrait portrait = GetBossPortrait(bossId);
 					if (!hint.empty() && portrait.sheet) {
-						auto portraitTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-						portraitTex->LoadTexture(portrait.sheet);
+						auto portraitTex = game->GetGraphicsDevice()->GetAssets().GetTexture(portrait.sheet);
 						PopupManager::GetInstance()->ShowWithSideIcon("stepped_red", L"DEFEATED",
 																	  hint + L"\n\n" + question, popupBtns, portraitTex,
 																	  sdlgf::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
@@ -2945,7 +2944,7 @@ void Demo::IBattleScene::Init() {
 	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
 	transformManager = std::make_shared<sdlgf::TransformManager>();
-	font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+	font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
 	drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
@@ -2954,34 +2953,29 @@ void Demo::IBattleScene::Init() {
 	battlePlayer->SetVelocity(125);
 
 	// Initialize texture sheet
-	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiSheetTex->LoadTexture(L"assets/ui.png");
+	uiSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 
-	tempTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	tempTex->LoadTexture(L"assets/All-borders.png");
+	tempTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/All-borders.png");
 
-	itemsTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	itemsTex->LoadTexture(L"assets/items.png");
+	itemsTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/items.png");
 
-	energyTokenTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	energyTokenTex->LoadTexture(L"assets/energy-token.png");
+	energyTokenTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/energy-token.png");
 
-	energyTokenUI = std::make_shared<sdlgf::StaticSprite>(energyTokenTex.get());
+	energyTokenUI = std::make_shared<sdlgf::StaticSprite>(energyTokenTex);
 	energyTokenUI->SetScale(1.5f, 1.5f);
 
-	goldTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	goldTex->LoadTexture(L"assets/gold-token.png");
+	goldTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/gold-token.png");
 
-	goldTokenUI = std::make_shared<sdlgf::StaticSprite>(goldTex.get());
+	goldTokenUI = std::make_shared<sdlgf::StaticSprite>(goldTex);
 	goldTokenUI->SetSrcRect({7, 7, 26, 26});
 	goldTokenUI->SetScale(1.5f, 1.5f);
 
-	attackBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	attackBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	attackBuffIcon->SetSrcRect({.left = 112, .top = 240, .right = 128, .bottom = 256});
-	defenseBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	defenseBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	defenseBuffIcon->SetSrcRect({.left = 96, .top = 240, .right = 112, .bottom = 256});
 	// Src rect is set per entry in DrawActiveItems - one sprite serves every item in the row.
-	activeItemIcon = std::make_shared<sdlgf::StaticSprite>(itemsTex.get());
+	activeItemIcon = std::make_shared<sdlgf::StaticSprite>(itemsTex);
 	// Create buttons
 	const auto buttonWidth = 96;
 	const auto buttonHeight = 32;
@@ -3209,8 +3203,7 @@ void Demo::IBattleScene::Init() {
 	});
 	runInitButton->SetSpriteScale(2.f, 2.f);
 
-	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
+	gearTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/12x12-gold-token.png"); // TODO: Change gears asset
 
 	gearButton = std::make_shared<IconButton>(transformManager, 0, 0, 16.f * 2.f, 16.f * 2.f, uiSheetTex);
 	gearButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(272, 400, 16, 16, 4));
@@ -3251,7 +3244,7 @@ void Demo::IBattleScene::Init() {
 		this->ClosePileView();
 	});
 
-	btnPilePrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L"<", 3);
+	btnPilePrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font, L"<", 3);
 	btnPilePrevPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPilePrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPilePrevPage->SetTextColor(0xFF111111);
@@ -3262,7 +3255,7 @@ void Demo::IBattleScene::Init() {
 		}
 	});
 
-	btnPileNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L">", 3);
+	btnPileNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font, L">", 3);
 	btnPileNextPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPileNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnPileNextPage->SetTextColor(0xFF111111);
@@ -3294,7 +3287,7 @@ void Demo::IBattleScene::Init() {
 										  .bottom = 96}});
 	closeItemMenuButton->SetSpriteScale(2.f, 2.f);
 
-	btnPrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L"<", 3);
+	btnPrevPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font, L"<", 3);
 	btnPrevPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnPrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPrevPage->SetTextColor(0xFF111111);
@@ -3305,7 +3298,7 @@ void Demo::IBattleScene::Init() {
 		}
 	});
 
-	btnNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font.get(), L">", 3);
+	btnNextPage = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 30.0f, 30.0f, uiSheetTex, font, L">", 3);
 	btnNextPage->SetSpriteRects({{0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48}});
 	btnNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnNextPage->SetTextColor(0xFF111111);
@@ -3339,15 +3332,15 @@ void Demo::IBattleScene::Init() {
 	LayoutAttackRowButtons();
 
 	// Init sprite
-	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	fontSprite->SetColor(0xFFFFFFFF);
-	energyIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	energyIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	energyIcon->SetSrcRect({.left = 96,
 							.top = 0,
 							.right = 112,
 							.bottom = 16});
 	energyIcon->SetScale(2.f);
-	hourglassIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
+	hourglassIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex);
 	hourglassIcon->SetSrcRect({.left = 112,
 							   .top = 0,
 							   .right = 128,
@@ -3355,7 +3348,7 @@ void Demo::IBattleScene::Init() {
 	hourglassIcon->SetScale(2.f);
 
 	itemMenuBackground = std::make_shared<sdlgf::NineSliceSprite>(
-		tempTex.get(),
+		tempTex,
 		RECT{0, 0, 45, 45},
 		8, 8, 8, 8);
 
@@ -3426,14 +3419,12 @@ void Demo::IBattleScene::Init() {
 	// popUpMessage->ToggleHistory();
 
 	// Init popup
-	auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	borderTex->LoadTexture(L"assets/popup-borders.png");
-	auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	uiTex->LoadTexture(L"assets/ui.png");
+	auto borderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/popup-borders.png");
+	auto uiTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"assets/ui.png");
 	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 
 	battleMenu = std::make_shared<BattleMenu>(game, transformManager, &uiCamera);
-	battleMenu->Init(font.get());
+	battleMenu->Init(font);
 
 	// Init BGM
 	auto audio = sdlgf::AudioManager::GetInstance();
@@ -3469,7 +3460,7 @@ void Demo::IBattleScene::Init() {
 	// First-battle walkthrough: only the very first monster battle (MapBattleScene sets
 	// tutorialEnabled) and only once per save. Marked seen right away so it never replays.
 	if (tutorialEnabled && !PlayerGlobalData::GetInstance()->HasSeenBattleTutorial()) {
-		battleTutorial = std::make_shared<BattleTutorial>(game->GetGraphicsDevice(), font.get());
+		battleTutorial = std::make_shared<BattleTutorial>(game->GetGraphicsDevice(), font);
 		PlayerGlobalData::GetInstance()->SetSeenBattleTutorial(true);
 	}
 
@@ -3498,7 +3489,8 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime) {
 	if (pendingDefeatReloadSave) {
 		pendingDefeatReloadSave = false;
 		if (MainMenu::gameSaveState && SaveGameState::HasSaveFile()) {
-			// This deletes the current scene (this). Nothing may touch a member after the call.
+			// Starts the loading screen; this scene is destroyed a few frames later, but nothing
+			// should touch it after the call anyway.
 			MainMenu::gameSaveState->ReloadLastSave();
 			return;
 		}

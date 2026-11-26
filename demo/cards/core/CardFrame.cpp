@@ -124,16 +124,15 @@ std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(sdlgf::GraphicsDevice* gra
 }
 
 Demo::CardFrame::CardFrame(sdlgf::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/cardtemplates.png");
-	sheet = std::make_shared<sdlgf::StaticSprite>(texture.get());
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/cardtemplates.png");
+	sheet = std::make_shared<sdlgf::StaticSprite>(texture);
 
-	font = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_NAME, CARD_FONT_SIZE);
-	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
-	topFont = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_TOP_NAME, CARD_FONT_SIZE);
-	topSprite = std::make_shared<sdlgf::FontSprite>(topFont.get());
-	bottomFont = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_BOTTOM_NAME, CARD_FONT_SIZE);
-	bottomSprite = std::make_shared<sdlgf::FontSprite>(bottomFont.get());
+	font = graphicsDevice->GetAssets().GetFont(CARD_FONT_NAME, CARD_FONT_SIZE);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
+	topFont = graphicsDevice->GetAssets().GetFont(CARD_FONT_TOP_NAME, CARD_FONT_SIZE);
+	topSprite = std::make_shared<sdlgf::FontSprite>(topFont);
+	bottomFont = graphicsDevice->GetAssets().GetFont(CARD_FONT_BOTTOM_NAME, CARD_FONT_SIZE);
+	bottomSprite = std::make_shared<sdlgf::FontSprite>(bottomFont);
 	fontSprite->SetText(std::wstring(L"0"));
 	digitWidth = static_cast<float>(fontSprite->GetWidth());
 }

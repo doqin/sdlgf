@@ -20,11 +20,10 @@ namespace Demo {
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<sdlgf::Texture>(gd);
-		spritesheet->LoadTexture(L"assets/sketchyguy-Sheet.png");
+		spritesheet = gd->GetAssets().GetTexture(L"assets/sketchyguy-Sheet.png");
 		// 64x32 sheet -> two 32x32 idle frames.
 		sprite = std::make_shared<sdlgf::AnimatedSprite>(
-			spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 2), 4, true);
+			spritesheet, sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 2), 4, true);
 		sprite->SetOrigin(16.f, 24.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());
 

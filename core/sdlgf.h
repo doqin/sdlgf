@@ -12,4 +12,6 @@
 #include "DebugDraw.h"
 #include "Font.h"
 #include "Texture.h"
+#include "AssetManager.h"
+#include "AssetLoader.h"
 #include "AudioManager.h"

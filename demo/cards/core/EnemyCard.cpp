@@ -13,21 +13,19 @@ void Demo::EnemyCard::Draw(unsigned long long deltaTime)
 {
 	IExpressionCard::Draw(deltaTime);
 	if (!uiTexture) {
-		uiTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		uiTexture->LoadTexture(L"assets/ui.png");
-		untargetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
+		uiTexture = graphicsDevice->GetAssets().GetTexture(L"assets/ui.png");
+		untargetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture);
 		untargetedSprite->SetSrcRect({ .left = 80, .top = 272, .right = 128, .bottom = 288 });
 		untargetedSprite->SetScale(2.f, 2.f);
-		targetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
+		targetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture);
 		targetedSprite->SetSrcRect({ .left = 80, .top = 288, .right = 128, .bottom = 304 });
 		targetedSprite->SetScale(2.f, 2.f);
-		targetSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
+		targetSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture);
 		targetSprite->SetSrcRect({ .left = 128, .top = 16, .right = 144, .bottom = 48 });
 		targetSprite->SetScale(2.f, 2.f);
 		targetSprite->SetOrigin(8.f, 16.f);
-		arrowTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-		arrowTexture->LoadTexture(L"assets/arrow.png");
-		arrowSprite = std::make_shared<sdlgf::StaticSprite>(arrowTexture.get());
+		arrowTexture = graphicsDevice->GetAssets().GetTexture(L"assets/arrow.png");
+		arrowSprite = std::make_shared<sdlgf::StaticSprite>(arrowTexture);
 		arrowSprite->SetScale(2.f);
 		auto [w, h] = arrowTexture->GetSize();
 		arrowSprite->SetOrigin(w / 2.0f, h / 2.0f);

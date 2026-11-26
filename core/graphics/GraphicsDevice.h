@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <vector>
 #include "Camera.h"
 #include "Platform.h"
@@ -9,6 +10,7 @@ struct SDL_Vertex;
 
 namespace sdlgf {
 	class Texture;
+	class AssetManager;
 
 	/// 2D renderer on top of SDL_Renderer.
 	///
@@ -26,6 +28,7 @@ namespace sdlgf {
 		Texture* renderTarget = nullptr; // null = the window
 		unsigned int alphaBlendMode = 0; // an SDL_BlendMode
 		std::vector<Texture*> textures;  // every live Texture made for this device
+		std::unique_ptr<AssetManager> assets;
 		std::vector<SDL_Vertex> scratchVertices;
 		bool alphaBlending = false;
 		bool scissorEnabled = false;
@@ -51,6 +54,8 @@ namespace sdlgf {
 
 		SDL_Renderer* GetRenderer() const { return renderer; }
 		SDL_Window* GetWindow() const { return window; }
+		/// The shared pool of textures and fonts for this device (see AssetManager).
+		AssetManager& GetAssets() { return *assets; }
 
 		/// The blend mode every sprite and (when SetAlphaBlending(true)) primitive uses:
 		/// result = src * srcAlpha + dst * (1 - srcAlpha), applied to colour AND alpha, exactly as

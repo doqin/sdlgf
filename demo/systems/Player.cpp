@@ -38,33 +38,32 @@ void Demo::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderMa
 	this->colliderManager = colliderManager;
 	this->camera = camera;
 	// Create texture
-	spritesheet = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	spritesheet->LoadTexture(L"assets/uiter-Sheet.png");
+	spritesheet = graphicsDevice->GetAssets().GetTexture(L"assets/uiter-Sheet.png");
 	// Create sprites
-	idleDown = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleDown = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleDown->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
-	idleUp = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleUp = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleUp->SetSrcRect({ .left = 0, .top = 32, .right = 32, .bottom = 64 });
-	idleRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleRight = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleRight->SetSrcRect({ .left = 0, .top = 64, .right = 32, .bottom = 96 });
-	idleLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleLeft->SetSrcRect({ .left = 0, .top = 96, .right = 32, .bottom = 128 });
-	idleDownRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleDownRight = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleDownRight->SetSrcRect({ .left = 0, .top = 128, .right = 32, .bottom = 160 });
-	idleUpRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleUpRight = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleUpRight->SetSrcRect({ .left = 0, .top = 160, .right = 32, .bottom = 192 });
-	idleDownLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleDownLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleDownLeft->SetSrcRect({ .left = 0, .top = 192, .right = 32, .bottom = 224 });
-	idleUpLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+	idleUpLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 	idleUpLeft->SetSrcRect({ .left = 0, .top = 224, .right = 32, .bottom = 256 });
-	walkingDown = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
-	walkingUp = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
-	walkingRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
-	walkingLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 12));
-	walkingDownRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 16));
-	walkingUpRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 20));
-	walkingDownLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 24));
-	walkingUpLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 28));
+	walkingDown = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
+	walkingUp = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
+	walkingRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
+	walkingLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 12));
+	walkingDownRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 16));
+	walkingUpRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 20));
+	walkingDownLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 24));
+	walkingUpLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet, sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 28));
 	// Align sprites
 	idleDown->SetOrigin(16, 16);
 	idleUp->SetOrigin(16, 16);
@@ -98,7 +97,7 @@ void Demo::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderMa
 	// Create footprint particle emitter
 	footprintTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	footprintTexture->CreatePlainTexture(COLOR_ARGB(160, 90, 70, 50), 4, 4);
-	footprintEmitter = std::make_unique<sdlgf::ParticleSystem>(footprintTexture.get(), 32);
+	footprintEmitter = std::make_unique<sdlgf::ParticleSystem>(footprintTexture, 32);
 	footprintEmitter->SetOrigin(2, 2);
 	sdlgf::ConfigureFootprintEmitter(*footprintEmitter);
 	footprintsEnabled = !isBattling;
@@ -268,7 +267,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 			if (currentID != -1 && gearTex) {
 				auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
 				if (bp && !bp->frames.empty()) {
-					animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex.get(), bp->frames);
+					animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex, bp->frames);
 					animPtr->SetFrameRate(12);
 					return;
 				}

@@ -7,14 +7,12 @@ namespace Demo {
     void SplashScene::Init() {
         auto gd = game->GetGraphicsDevice();
 
-        logo1Tex = std::make_shared<sdlgf::Texture>(gd);
-        logo1Tex->LoadTexture(L"assets/school_logo.png");
+        logo1Tex = gd->GetAssets().GetTexture(L"assets/school_logo.png");
 
-        logo2Tex = std::make_shared<sdlgf::Texture>(gd);
-        logo2Tex->LoadTexture(L"assets/department_logo.png");
+        logo2Tex = gd->GetAssets().GetTexture(L"assets/department_logo.png");
 
-        logo1Sprite = std::make_shared<sdlgf::StaticSprite>(logo1Tex.get());
-        logo2Sprite = std::make_shared<sdlgf::StaticSprite>(logo2Tex.get());
+        logo1Sprite = std::make_shared<sdlgf::StaticSprite>(logo1Tex);
+        logo2Sprite = std::make_shared<sdlgf::StaticSprite>(logo2Tex);
 
         //logo's location
         logo1Sprite->SetOrigin(logo1Tex->GetWidth() / 2.0f, logo1Tex->GetHeight() / 2.0f);

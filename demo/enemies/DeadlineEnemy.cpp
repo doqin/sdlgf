@@ -6,14 +6,12 @@
 #include <algorithm>
 
 void Demo::DeadlineEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/Deadline.png"); // TODO: change when real asset is available
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 82, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/Deadline.png"); // TODO: change when real asset is available
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 82, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -91,7 +89,7 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 				for (int i = 1; i <= HAND_BULLETS; ++i) {
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(projTexture.get(), 8, 8, 12, 12, pivotX, pivotY)
+						ProjectileDesc(projTexture, 8, 8, 12, 12, pivotX, pivotY)
 						.SetSpiralParams(startAng, SWEEP_RADIAL_SPEED * (i / (float)HAND_BULLETS), spinDir)
 						.SetVelocity(100.f)
 						.SetDecayTime(HAND_DECAY_TIME)
@@ -107,7 +105,7 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
-					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 14, 14, px, -260.f)
+					auto desc = ProjectileDesc(projTexture, 8, 8, 14, 14, px, -260.f)
 						.SetTargetPosition(px, py)
 						.SetVelocity(380.f)
 						.SetDecayTime(3.0f)
@@ -181,7 +179,7 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 					if (i % range.tickInterval != 0) continue;
 
 					float spawnX = RNG::Range(range.minX, range.maxX);
-					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, -220.f)
+					auto desc = ProjectileDesc(projTexture, 8, 8, 12, 12, spawnX, -220.f)
 						.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 						.SetWave(45.f, 5.0f)
 						.SetVelocity(280.f)

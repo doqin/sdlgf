@@ -20,16 +20,15 @@ namespace Demo {
 		this->gd = gd;
 		this->worldCamera = camera;
 		this->player = p;
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
 		collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<sdlgf::Texture>(gd);
-		spritesheet->LoadTexture(L"assets/terminals.png");
+		spritesheet = gd->GetAssets().GetTexture(L"assets/terminals.png");
 
-		sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
+		sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet);
 		sprite->SetSrcRect(isSolved ? SRC_OK : SRC_GREEN);
 		sprite->SetOrigin(8.f, 16.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());

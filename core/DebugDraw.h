@@ -12,8 +12,8 @@ namespace sdlgf {
 		DebugDraw() {}
 		~DebugDraw() {}
 
-		static Font* debugFont;
-		static FontSprite* debugSprite;
+		static std::shared_ptr<Font> debugFont;
+		static std::shared_ptr<FontSprite> debugSprite;
 		static std::map<int, std::wstring> coordinateCache;
 	public:
 

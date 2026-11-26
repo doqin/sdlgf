@@ -317,10 +317,10 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, sdlgf::Gr
 	manager->Add(dynamic_pointer_cast<IDraggable>(shared_from_this()));
 	color = sdlgf::ColorF(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
 	if (debugFont.get() == nullptr) {
-		IDraggable::debugFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+		IDraggable::debugFont = graphicsDevice->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
 	}
 	if (debugFontSprite.get() == nullptr) {
-		IDraggable::debugFontSprite = std::make_shared<sdlgf::FontSprite>(debugFont.get());
+		IDraggable::debugFontSprite = std::make_shared<sdlgf::FontSprite>(debugFont);
 		debugFontSprite->SetColor(0xFF000000);
 	}
 }

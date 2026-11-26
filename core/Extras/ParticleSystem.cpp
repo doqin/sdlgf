@@ -34,8 +34,8 @@ namespace sdlgf {
 		return COLOR_ARGB(alpha, red, green, blue);
 	}
 
-	ParticleSystem::ParticleSystem(Texture* texture, size_t maxParticles) : texture(texture) {
-		sprite = std::make_unique<StaticSprite>(texture);
+	ParticleSystem::ParticleSystem(std::shared_ptr<Texture> texture, size_t maxParticles) : texture(std::move(texture)) {
+		sprite = std::make_unique<StaticSprite>(this->texture);
 		pool.resize(maxParticles);
 	}
 

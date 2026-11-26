@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Map.h"
 #include "../util/Utils.h"
+#include "../graphics/AssetManager.h"
 #include <cstring>
 #include <filesystem>
 #include <algorithm>
@@ -33,8 +34,7 @@ void sdlgf::Map::Create(std::weak_ptr<TransformManager> transformManager, std::w
 			// Skip or throw? It's better to throw or log, let's throw.
 			throw std::invalid_argument("Could not find texture file: " + imgPathStr);
 		}
-		textures.emplace_back(std::make_shared<Texture>(graphicsDevice));
-		textures.back()->LoadTexture(sdlgf::Platform::Utf8ToWide(imgPathStr));
+		textures.emplace_back(graphicsDevice->GetAssets().GetTexture(sdlgf::Platform::Utf8ToWide(imgPathStr)));
 	}
 	// load the layers
 	const auto& mapLayers = map.getLayers();

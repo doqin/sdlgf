@@ -30,13 +30,13 @@ namespace Demo {
 		std::shared_ptr<IconButton> btnGuide;
 		std::shared_ptr<BattleTutorial> tutorial; // built lazily on the first Guide click
 		std::shared_ptr<sdlgf::FontSprite> fontSprite;
-		sdlgf::Font* font = nullptr;
+		std::shared_ptr<sdlgf::Font> font = nullptr;
 
 
 	public:
 		BattleMenu(Game* g, std::shared_ptr<sdlgf::TransformManager> tm, sdlgf::Camera* cam);
 
-		void Init(sdlgf::Font* font);
+		void Init(std::shared_ptr<sdlgf::Font> font);
 		void Update(unsigned long long deltaTime);
 		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 		void DrawKeyboardReticle(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);

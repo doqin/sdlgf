@@ -134,18 +134,16 @@ namespace Demo
 		lastScreenHeight = game->GetVirtualHeight();
 
 		// Load Assets
-		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		font = game->GetGraphicsDevice()->GetAssets().GetFont(Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 		fontSprite->SetColor(0xFFFFFFFF);
 
 		//bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		//bgTex->LoadTexture(L"assets/test-background.png");
 
-		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		uiSheetTex->LoadTexture(L"./assets/ui.png");
+		uiSheetTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"./assets/ui.png");
 
-		placeholderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		placeholderTex->LoadTexture(L"./assets/ui-pack.png");
+		placeholderTex = game->GetGraphicsDevice()->GetAssets().GetTexture(L"./assets/ui-pack.png");
 
 		backButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, uiSheetTex, 3);
 		backButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(96, 48, 48, 16, 3));

@@ -31,7 +31,7 @@ namespace Demo {
 	{
 		this->uiCamera = uiCam;
 		this->game = game;
-		this->fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+		this->fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 	}
 
 	void PasswordMenu::Open(const std::wstring& password)

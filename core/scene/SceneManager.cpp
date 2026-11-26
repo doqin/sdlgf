@@ -11,6 +11,7 @@ sdlgf::SceneManager::~SceneManager()
 
 sdlgf::IScene* sdlgf::SceneManager::GetCurrentScene()
 {
+	if (loadingScene) return loadingScene.get();
 	return scenes[index];
 }
 
@@ -53,8 +54,23 @@ void sdlgf::SceneManager::RemoveScene(size_t index)
 	scenes.erase(scenes.begin() + index);
 }
 
+void sdlgf::SceneManager::BeginLoading(std::unique_ptr<IScene> scene)
+{
+	loadingScene = std::move(scene);
+	endLoadingRequested = false;
+	loadingScene->Init();
+}
+
 void sdlgf::SceneManager::Update(unsigned long long deltaTime)
 {
+	if (loadingScene) {
+		loadingScene->Update(deltaTime);
+		if (endLoadingRequested) {
+			loadingScene.reset();
+			endLoadingRequested = false;
+		}
+		return;
+	}
 	if (scenes.empty()) {
 		throw std::runtime_error("No scene to update!");
 	}
@@ -63,6 +79,7 @@ void sdlgf::SceneManager::Update(unsigned long long deltaTime)
 
 void sdlgf::SceneManager::DrawWorld(unsigned long long deltaTime)
 {
+	if (loadingScene) { loadingScene->DrawWorld(deltaTime); return; }
 	if (scenes.empty()) throw std::runtime_error("No scene to draw!");
 	int startIndex = index;
 	while (startIndex > 0 && scenes[startIndex]->IsOverlay()) startIndex--;
@@ -71,6 +88,7 @@ void sdlgf::SceneManager::DrawWorld(unsigned long long deltaTime)
 
 void sdlgf::SceneManager::DrawUI(unsigned long long deltaTime)
 {
+	if (loadingScene) { loadingScene->DrawUI(deltaTime); return; }
 	if (scenes.empty()) throw std::runtime_error("No scene to draw!");
 	int startIndex = index;
 	while (startIndex > 0 && scenes[startIndex]->IsOverlay()) startIndex--;
@@ -82,6 +100,7 @@ void sdlgf::SceneManager::OnResize(int width, int height)
 	for (auto& scene : scenes) {
 		scene->GetUICamera().SetScreenResolution(width, height);
 	}
+	if (loadingScene) loadingScene->GetUICamera().SetScreenResolution(width, height);
 }
 
 void sdlgf::SceneManager::OnDeviceReset()
@@ -111,6 +130,7 @@ void sdlgf::SceneManager::GoToScene(size_t index)
 
 void sdlgf::SceneManager::Dispose()
 {
+	loadingScene.reset();
 	while (!scenes.empty()) {
 		PopScene();
 	}

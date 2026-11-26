@@ -43,7 +43,7 @@ namespace {
 	}
 }
 
-void Demo::MapView::Init(sdlgf::Font* font)
+void Demo::MapView::Init(std::shared_ptr<sdlgf::Font> font)
 {
 	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 }

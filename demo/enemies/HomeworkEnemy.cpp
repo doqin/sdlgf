@@ -5,17 +5,14 @@
 #include "PopUpMessage.h"
 
 void Demo::HomeworkEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/placeholder.png"); // TODO: change when real asset is available
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder.png"); // TODO: change when real asset is available
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	projTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
+	projTexture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
-	groupProjTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	groupProjTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
+	groupProjTexture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
@@ -75,7 +72,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 			if (auto lock = this->player.lock()) {
 				auto [px, py] = lock->GetWorldPosition();
 
-				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, 320.f, 0.f)
+				auto desc = ProjectileDesc(projTexture, 8, 8, 12, 12, 320.f, 0.f)
 					.SetTargetPosition(px, py + randY)
 					.SetInitialVelocity(JUNK_INITIAL_VELOCITY)
 					.SetReturnAcceleration(JUNK_RETURN_ACCEL)
@@ -104,7 +101,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 			sdlgf::Vec2 dir(fromLeft ? 1.f : -1.f, 0.f);
 			for (int i = 0; i < SINE_BULLETS; i++) {
 				float startY = (i - SINE_BULLETS / 2.f) * SINE_SPACING;
-				auto desc = ProjectileDesc(projTexture.get(), 8, 8, 12, 12, spawnX, startY)
+				auto desc = ProjectileDesc(projTexture, 8, 8, 12, 12, spawnX, startY)
 					.SetTrajectory(dir)
 					.SetWave(SINE_AMPLITUDE, 3.5f)
 					.SetDelay(i * 0.08f)
@@ -150,13 +147,13 @@ void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
 
 	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, spawnX, spawnY, CLUSTER_VELOCITY, HOLD_TIME, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
-			auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 16, 16, spawnX, spawnY)
+			auto desc = ProjectileDesc(groupProjTexture, 8, 8, 16, 16, spawnX, spawnY)
 				.SetVelocity(CLUSTER_VELOCITY)
 				.SetSplitOnArrival(0.f, 0.f, BURST_COUNT, BURST_VELOCITY)
 				.SetSplitRandomAngle(true)
 				.SetSplitHoldTime(HOLD_TIME)
 				.SetSplitDecayTime(RING_DECAY_TIME)
-				.SetShardTexture(groupProjTexture.get(), 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
+				.SetShardTexture(groupProjTexture, 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
 				.SetDamage(projDamage);
 			projectiles.Spawn(lock, desc);
 		}
@@ -171,12 +168,12 @@ void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
 		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(PULSE_GAP));
 		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, PULSE_DECAY, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
-				auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 0, 0, 0.f, 0.f)
+				auto desc = ProjectileDesc(groupProjTexture, 8, 8, 0, 0, 0.f, 0.f)
 					.SetSplitOnDecay(BURST_COUNT, BURST_VELOCITY)
 					.SetSplitRandomAngle(true)
 					.SetSplitDecayTime(RING_DECAY_TIME)
 					.SetDecayTime(PULSE_DECAY)
-					.SetShardTexture(groupProjTexture.get(), 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
+					.SetShardTexture(groupProjTexture, 8, 8, RING_BULLET_SIZE, RING_BULLET_SIZE)
 					.SetDamage(projDamage);
 				projectiles.Spawn(lock, desc);
 			}

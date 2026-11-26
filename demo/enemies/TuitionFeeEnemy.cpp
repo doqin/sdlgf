@@ -8,14 +8,12 @@
 
 void Demo::TuitionFeeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(L"assets/tuition.png"); //TODO: change to the real asset path
-	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 83, 64, 12), 12);
+	texture = graphicsDevice->GetAssets().GetTexture(L"assets/tuition.png"); //TODO: change to the real asset path
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture, sdlgf::Utils::CreateRectsHorizontal(0, 0, 83, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	bulletTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	bulletTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); //TODO: change to the real asset path
+	bulletTexture = graphicsDevice->GetAssets().GetTexture(L"assets/placeholder-round-projectile.png"); //TODO: change to the real asset path
 	bulletFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -145,7 +143,7 @@ void Demo::TuitionFeeEnemy::PatternSideWall(float baseDamage, std::vector<std::s
 
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, 16, 16, finalX, finalY)
+						ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, 16, 16, finalX, finalY)
 						.SetTrajectory(sdlgf::Vec2(-1.f, 0.f))
 						.SetDelay(0.f)
 						.SetDecayTime(BULLET_DECAY_TIME)
@@ -185,7 +183,7 @@ void Demo::TuitionFeeEnemy::PatternDualSpiral(float baseDamage, std::vector<std:
 					float angle = i * (3.14159f * 2.f / BULLETS_PER_RING);
 					projectiles.Spawn(
 						lock,
-						ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, 16, 16, sp.x, sp.y)
+						ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, 16, 16, sp.x, sp.y)
 						.SetSpiralParams(angle, RADIAL_SPEED, ANGULAR_SPEED * sp.spinDir)
 						.SetDelay(i * 0.07f)     
 						.SetDecayTime(4.5f)  
@@ -235,7 +233,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 								const float laneY = py + i * LANE_SPACING;
 								projectiles.Spawn(
 									lock,
-									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
+									ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										ARENA_HALF_SIZE + spawnOvershoot, laneY)
 									.SetTrajectory(sdlgf::Vec2(-1.f, 0.f))
 									.SetVelocity(bulletSpeed)
@@ -250,7 +248,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 								const float laneY = py + i * LANE_SPACING;
 								projectiles.Spawn(
 									lock,
-									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
+									ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										-ARENA_HALF_SIZE - spawnOvershoot, laneY)
 									.SetTrajectory(sdlgf::Vec2(1.f, 0.f))
 									.SetVelocity(bulletSpeed)
@@ -265,7 +263,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 								const float laneX = px + i * LANE_SPACING;
 								projectiles.Spawn(
 									lock,
-									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
+									ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										laneX, -ARENA_HALF_SIZE - spawnOvershoot)
 									.SetTrajectory(sdlgf::Vec2(0.f, 1.f))
 									.SetVelocity(bulletSpeed)
@@ -280,7 +278,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 								const float laneX = px + i * LANE_SPACING;
 								projectiles.Spawn(
 									lock,
-									ProjectileDesc(bulletTexture.get(), bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
+									ProjectileDesc(bulletTexture, bulletFrames, 12, 8, 8, bulletWidth, bulletHeight,
 										laneX, ARENA_HALF_SIZE + spawnOvershoot)
 									.SetTrajectory(sdlgf::Vec2(0.f, -1.f))
 									.SetVelocity(bulletSpeed)

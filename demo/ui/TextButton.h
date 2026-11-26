@@ -29,7 +29,7 @@ namespace Demo
 	public:
 		TextButton(std::shared_ptr<sdlgf::TransformManager> tm,
 			float x, float y, float w, float h,
-			std::string txtContent, sdlgf::Font* f,
+			std::string txtContent, std::shared_ptr<sdlgf::Font> f,
 			std::function<void(sdlgf::ITrigger*)> onClick);
 
 		//setters

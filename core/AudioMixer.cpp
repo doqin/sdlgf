@@ -33,9 +33,18 @@ namespace {
 		if (!initialised) {
 			return fail(std::string("cannot initialise SDL_mixer: ") + SDL_GetError());
 		}
-		MIX_AudioDecoder* decoder = MIX_CreateAudioDecoder(utf8Path.c_str(), 0);
-		if (!decoder) {
+		// Open the file ourselves and keep ownership of the stream: when SDL_mixer rejects a file
+		// (not Ogg, corrupt) MIX_CreateAudioDecoder(path) leaves the handle open, which on Windows
+		// then blocks deleting or replacing the file for the rest of the process.
+		SDL_IOStream* io = SDL_IOFromFile(utf8Path.c_str(), "rb");
+		if (!io) {
 			return fail(std::string("cannot read audio: ") + SDL_GetError());
+		}
+		MIX_AudioDecoder* decoder = MIX_CreateAudioDecoder_IO(io, false, 0);
+		if (!decoder) {
+			const std::string reason = SDL_GetError();
+			SDL_CloseIO(io);
+			return fail("cannot read audio: " + reason);
 		}
 
 		const SDL_AudioSpec target{ SDL_AUDIO_S16, 2, sdlgf::kMixRate };
@@ -49,6 +58,7 @@ namespace {
 			sound->samples.insert(sound->samples.end(), chunk.begin(), chunk.begin() + bytes / sizeof(std::int16_t));
 		}
 		MIX_DestroyAudioDecoder(decoder);
+		SDL_CloseIO(io);
 
 		if (!failure.empty()) return fail(failure);
 		if (sound->samples.empty()) return fail("audio file contains no samples");

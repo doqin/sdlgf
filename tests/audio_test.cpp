@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <system_error>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -211,6 +212,10 @@ static void TestOgg()
 		error.clear();
 		CHECK(LoadSoundFile(notOgg, &error) == nullptr);
 		CHECK(!error.empty());
+		// a rejected file must not stay open (SDL_mixer leaks the handle when it is given a path);
+		// Windows refuses to delete a file that is still open, other systems cannot tell
+		std::error_code removeError;
+		CHECK(std::filesystem::remove(notOgg, removeError) && !removeError);
 	}
 	// a decoded OGG plays through the mixer like any other sound
 	{
@@ -448,7 +453,8 @@ int main()
 		return 1;
 	}
 
-	std::filesystem::remove_all(g_dir);
+	std::error_code cleanupError; // a leftover temp folder must not fail the run
+	std::filesystem::remove_all(g_dir, cleanupError);
 	if (g_failures == 0) std::puts("audio_test: all tests passed");
 	else std::fprintf(stderr, "audio_test: %d check(s) failed\n", g_failures);
 	return g_failures == 0 ? 0 : 1;

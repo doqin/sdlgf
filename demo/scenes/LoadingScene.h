@@ -34,11 +34,11 @@ namespace Demo {
 		std::shared_ptr<sdlgf::FontSprite> text;
 		size_t nextStep = 0;
 		bool drawnSinceLastWork = false;
-		float shownProgress = 0.0f;
 		float elapsedSeconds = 0.0f;
-		std::wstring statusLabel;
-
-		float TargetProgress() const;
+		std::wstring statusLabel;   // what is being done now
+		std::wstring shownLabel;    // what the fade-in currently applies to
+		float labelFade = 0.0f;     // 0..1 opacity of the step text
+		float throbberFade = 0.0f;  // 0..1 opacity of the throbber
 	public:
 		LoadingScene(Game* game, int screenW, int screenH, std::vector<std::wstring> assets,
 			std::vector<LoadStep> steps, std::function<void()> onDone);

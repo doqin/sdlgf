@@ -3,11 +3,20 @@
 #include "MainFont.h"
 #include "LocalizationManager.h"
 #include <algorithm>
+#include <cmath>
 
 namespace Demo {
 	namespace {
 		constexpr unsigned long long kUploadBudgetMs = 4;
-		constexpr float kAssetsShare = 0.6f; // the rest of the bar is the steps
+		constexpr float kLabelFadeMs = 300.0f;
+		// Same colour as TransitionCommand's pillars, so the screen stays seamless around loading
+		constexpr sdlgf::Color kBackground = 0xFF000000;
+		constexpr float kMargin = 28.0f;       // throbber centre's distance from the screen corner
+		constexpr float kThrobberRadius = 8.0f;
+		constexpr float kThrobberDot = 4.0f;
+		constexpr int kThrobberDots = 8;
+		constexpr float kThrobberSpeed = 10.0f; // steps per second
+		constexpr float kLabelGap = 18.0f;     // between the text and the throbber
 	}
 
 	LoadingScene::LoadingScene(Game* game, int screenW, int screenH, std::vector<std::wstring> assets,
@@ -21,21 +30,20 @@ namespace Demo {
 		text = std::make_shared<sdlgf::FontSprite>(font);
 		loader = std::make_unique<sdlgf::AssetLoader>(gd->GetAssets());
 		loader->Request(assets);
-	}
-
-	float LoadingScene::TargetProgress() const {
-		const float stepsDone = steps.empty() ? 1.0f : static_cast<float>(nextStep) / static_cast<float>(steps.size());
-		if (assets.empty()) return stepsDone;
-		return kAssetsShare * loader->GetProgress() + (1.0f - kAssetsShare) * stepsDone;
+		statusLabel = Tr(L"Loading");
 	}
 
 	void LoadingScene::Update(unsigned long long deltaTime) {
 		elapsedSeconds += static_cast<float>(deltaTime) / 1000.0f;
 		camera.Update();
 
-		// Ease the bar toward the real progress so a big step does not make it teleport
-		const float target = TargetProgress();
-		shownProgress += (target - shownProgress) * (std::min)(1.0f, static_cast<float>(deltaTime) / 120.0f);
+		// Fade the step text in again whenever it changes
+		if (statusLabel != shownLabel) {
+			shownLabel = statusLabel;
+			labelFade = 0.0f;
+		}
+		labelFade = (std::min)(1.0f, labelFade + static_cast<float>(deltaTime) / kLabelFadeMs);
+		throbberFade = (std::min)(1.0f, throbberFade + static_cast<float>(deltaTime) / kLabelFadeMs);
 
 		if (!drawnSinceLastWork) return; // show the current state before doing more work
 		drawnSinceLastWork = false;
@@ -57,7 +65,6 @@ namespace Demo {
 		sdlgf::Platform::DebugLog("Loading finished in " + std::to_string(static_cast<int>(elapsedSeconds * 1000.0f)) + " ms ("
 			+ std::to_string(loader->GetCompleted()) + " textures preloaded, " + std::to_string(steps.size()) + " steps)\n");
 		loader.reset();
-		shownProgress = 1.0f;
 		if (onDone) onDone();
 		game->GetSceneManager()->EndLoading();
 	}
@@ -68,27 +75,28 @@ namespace Demo {
 
 		const float w = static_cast<float>(game->GetVirtualWidth());
 		const float h = static_cast<float>(game->GetVirtualHeight());
-		gd->DrawRectangle(camera, -w / 2.0f, -h / 2.0f, w, h, 0xFF0B0F14, true);
-
-		// Progress bar
-		const float barW = w * 0.5f, barH = 10.0f;
-		const float barX = -barW / 2.0f, barY = h * 0.18f;
-		gd->DrawRectangle(camera, barX - 2.0f, barY - 2.0f, barW + 4.0f, barH + 4.0f, 0xFF3A4654, false);
-		const float fill = std::clamp(shownProgress, 0.0f, 1.0f) * barW;
-		if (fill > 0.0f) gd->DrawRectangle(camera, barX, barY, fill, barH, 0xFF00FF41, true);
-
-		// "Loading..." with animated dots, centered above the bar
+		gd->DrawRectangle(camera, -w / 2.0f, -h / 2.0f, w, h, kBackground, true);
 		gd->SetAlphaBlending(true);
-		const int dots = static_cast<int>(elapsedSeconds * 3.0f) % 4;
-		text->SetText(Tr(L"Loading") + std::wstring(dots, L'.'));
-		text->SetColor(0xFFFFFFFF);
-		text->SetPosition(-static_cast<float>(text->GetWidth()) / 2.0f, barY - 40.0f);
-		text->Begin(); text->Draw(camera, deltaTime); text->End();
 
+		// White throbber in the bottom-right corner: a ring of squares with a fading trail
+		const float cx = w / 2.0f - kMargin, cy = h / 2.0f - kMargin;
+		const int head = static_cast<int>(elapsedSeconds * kThrobberSpeed) % kThrobberDots;
+		for (int i = 0; i < kThrobberDots; ++i) {
+			const float angle = 6.2831853f * static_cast<float>(i) / kThrobberDots - 1.5707963f;
+			const int behind = (head - i + kThrobberDots) % kThrobberDots; // 0 = the leading square
+			const float brightness = 1.0f - static_cast<float>(behind) / kThrobberDots;
+			const int alpha = static_cast<int>(255.0f * brightness * throbberFade);
+			const float x = std::round(cx + std::cos(angle) * kThrobberRadius - kThrobberDot / 2.0f);
+			const float y = std::round(cy + std::sin(angle) * kThrobberRadius - kThrobberDot / 2.0f);
+			gd->DrawRectangle(camera, x, y, kThrobberDot, kThrobberDot, COLOR_ARGB(alpha, 255, 255, 255), true);
+		}
+
+		// Step text to the left of the throbber, vertically centred on it
 		if (!statusLabel.empty()) {
 			text->SetText(statusLabel);
-			text->SetColor(0xFF8A97A6);
-			text->SetPosition(-static_cast<float>(text->GetWidth()) / 2.0f, barY + barH + 12.0f);
+			text->SetColor(COLOR_ARGB(static_cast<int>(255.0f * labelFade), 255, 255, 255));
+			const float tw = static_cast<float>(text->GetWidth()), th = static_cast<float>(text->GetHeight());
+			text->SetPosition(std::round(cx - kThrobberRadius - kThrobberDot - kLabelGap - tw), std::round(cy - th / 2.0f));
 			text->Begin(); text->Draw(camera, deltaTime); text->End();
 		}
 		gd->SetAlphaBlending(false);

@@ -6,13 +6,6 @@ project(sdlgf
     LANGUAGES CXX
 )
 
-# Window, input, rendering, text and audio are SDL3 now, but the code has only ever been
-# verified on Windows (MSVC): the crash handler, the Win32 type stand-ins and the main CI job are
-# Windows-specific. Other platforms are being tried by the (non-gating) "linux" CI job.
-if(NOT WIN32)
-    message(WARNING "sdlgf has only been verified on Windows so far; expect problems on this platform.")
-endif()
-
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

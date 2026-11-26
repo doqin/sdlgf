@@ -39,12 +39,10 @@ jobs:
         with:
           files: dist/sdlgf-demo.zip
 
-  # Experiment: has the code ever built off Windows? Not gating yet (continue-on-error): read the
-  # log to see what is left. Everything but the render test must pass; the render test only
-  # reports there (its golden images come from Direct3D 9).
+  # Builds and tests on Linux. The render test only reports there (its golden images come from
+  # Direct3D 9 and are compared strictly on the direct3d11 driver only); every other test gates.
   linux:
     runs-on: ubuntu-24.04
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

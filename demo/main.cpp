@@ -35,6 +35,10 @@ int main(int argc, char** argv)
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+		// The game draws its own cursor sprite (InputManager::DrawCursor) and hides the
+		// system cursor. Without this flag the SDL3 backend calls SDL_ShowCursor() on every
+		// ImGui frame, which makes the OS cursor reappear on top of the custom one.
+		io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 		ImGui::StyleColorsDark();
 		ImGui_ImplSDL3_InitForSDLRenderer(app->GetWindow(), game.GetGraphicsDevice()->GetRenderer());
 		ImGui_ImplSDLRenderer3_Init(game.GetGraphicsDevice()->GetRenderer());

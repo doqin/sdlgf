@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cmath>
 #include "TextIconButton.h"
-#include "Game.h"]
+#include "Game.h"
 namespace Demo {
     // Horizontal breathing room between a popup button's label and its edge. Must match the
     // padding handed to TextIconButton::SetAutoResize so Show()'s width estimate agrees with the

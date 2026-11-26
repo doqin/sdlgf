@@ -2,6 +2,7 @@
 #include "MapView.h"
 #include "LocalizationManager.h"
 #include <algorithm>
+#include <climits>
 #include <cmath>
 
 namespace {

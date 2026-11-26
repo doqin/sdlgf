@@ -248,6 +248,11 @@ void sdlgf::InputManager::DrawCursor(sdlgf::Camera* uiCamera, unsigned long long
 {
     if (!isCustomCursorActive || !uiCamera || !cursorSprites.count(currentCursorType)) return;
 
+    // Re-assert the hidden state every frame: message boxes, Alt+Tab/focus changes and other
+    // SDL users can flip cursor visibility back on. SDL_HideCursor() is a no-op when already
+    // hidden, so this is cheap.
+    if (SDL_CursorVisible()) SDL_HideCursor();
+
     auto activeSprite = cursorSprites[currentCursorType];
     float hX = hotspotsX[currentCursorType];
     float hY = hotspotsY[currentCursorType];

@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include <vector>
 #include <string>
 #include <cstdint>
@@ -38,19 +38,19 @@ namespace Demo {
 		static constexpr float kMiniSize = 128.f;
 		static constexpr float kMiniMargin = 16.f;
 
-		void Init(DX9GF::Font* font);
+		void Init(sdlgf::Font* font);
 		// Bakes the grid from the loaded map. Layers named "background*" are ignored, so
 		// decorative sky/water doesn't count as explorable ground.
-		void Build(const DX9GF::Map& map);
+		void Build(const sdlgf::Map& map);
 		bool IsBuilt() const { return built; }
 		// True if the world position sits on a floor tile (not wall, collision rectangle, or outside the map)
 		bool IsWalkable(float worldX, float worldY) const;
 
 		void Reveal(float worldX, float worldY);
 
-		void DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
+		void DrawMini(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, int virtualWidth, int virtualHeight,
 			float playerX, float playerY, const std::vector<Marker>& markers);
-		void DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
+		void DrawFull(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, int virtualWidth, int virtualHeight,
 			const std::vector<Marker>& markers, const std::wstring& closeKeyName,
 			const TravelUI* travel = nullptr, TravelHits* hits = nullptr);
 
@@ -70,18 +70,18 @@ namespace Demo {
 		// Bounding box (grid cells, inclusive) of everything revealed so far
 		int visMinX = 0, visMinY = 0, visMaxX = -1, visMaxY = -1;
 
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
 		bool IsVisited(int cx, int cy) const;
 		bool WorldToCell(float worldX, float worldY, int& cx, int& cy) const;
-		void FillClipped(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float x0, float y0, float x1, float y1,
+		void FillClipped(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float x0, float y0, float x1, float y1,
 			D3DCOLOR color, const ClipRect& clip) const;
 		// screenOrigin = screen position of the grid's top-left corner, scale = pixels per tile
-		void DrawCells(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
+		void DrawCells(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 			float scale, const ClipRect& clip) const;
-		void DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
+		void DrawMarkers(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 			float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers,
 			const TravelUI* travel = nullptr, TravelHits* hits = nullptr) const;
-		void DrawText(DX9GF::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color);
+		void DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color);
 	};
 }

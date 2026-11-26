@@ -5,10 +5,10 @@
 // KeyPress/KeyDown/KeyUp, mouse, wheel and letterbox behaviour the game depends on.
 #include <SDL3/SDL.h>
 
-#include "DX9GFApplication.h"
-#include "DX9GFCamera.h"
-#include "DX9GFInputManager.h"
-#include "DX9GFKeys.h"
+#include "Application.h"
+#include "Camera.h"
+#include "InputManager.h"
+#include "Keys.h"
 
 #include <cstdio>
 
@@ -16,7 +16,7 @@ static int g_failures = 0;
 #define CHECK(cond) \
 	do { if (!(cond)) { std::fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); ++g_failures; } } while (0)
 
-using DX9GF::InputManager;
+using sdlgf::InputManager;
 
 static SDL_Event Key(SDL_Scancode sc, bool down, bool repeat = false)
 {
@@ -234,14 +234,14 @@ static void TestMousePosition(InputManager* in)
 	CHECK(in->GetAbsoluteMouseX() == 960);
 	CHECK(in->GetAbsoluteMouseY() == 0);
 
-	DX9GF::Camera camera(960, 720);
+	sdlgf::Camera camera(960, 720);
 	Feed(in, Motion(480.0f, 360.0f));
 	in->ReadMouse(16);
 	auto [vx, vy] = in->GetVirtualAbsoluteMousePos(&camera);
 	CHECK(vx == 480.0f && vy == 360.0f);
 }
 
-static void TestLetterbox(DX9GF::Application* app, InputManager* in)
+static void TestLetterbox(sdlgf::Application* app, InputManager* in)
 {
 	// Make the window twice as wide as the virtual screen: 480 px bars on each side
 	SDL_SetWindowSize(app->GetWindow(), 1920, 720);
@@ -258,7 +258,7 @@ static void TestLetterbox(DX9GF::Application* app, InputManager* in)
 	in->ReadMouse(16);
 	CHECK(in->GetAbsoluteMouseX() == 1000);   // inside the 480..1440 content region
 
-	DX9GF::Camera camera(960, 720);
+	sdlgf::Camera camera(960, 720);
 	auto [vx, vy] = in->GetVirtualAbsoluteMousePos(&camera);
 	CHECK(vx == 520.0f);                      // (1000 - 480) / scale 1
 	CHECK(vy == 100.0f);
@@ -286,7 +286,7 @@ int main()
 	// Must happen before SDL_Init (done by Application::Init)
 	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "dummy");
 
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	try {
 		app->Init(L"input test", 960, 720, false);
 	}

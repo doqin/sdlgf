@@ -1,32 +1,32 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "ExampleGame.h"
 #include "Player.h"
 #include "Rectangle.h"
 
-class MainScene : public DX9GF::IScene, public DX9GF::ISaveable
+class MainScene : public sdlgf::IScene, public sdlgf::ISaveable
 {
 private:
 	ExampleGame* game;
-	DX9GF::InputManager* inputManager = nullptr;
-	DX9GF::CommandBuffer commandBuffer;
-	std::shared_ptr<DX9GF::Font> fontArial;
-	std::shared_ptr<DX9GF::FontSprite> fontSpriteArial;
+	sdlgf::InputManager* inputManager = nullptr;
+	sdlgf::CommandBuffer commandBuffer;
+	std::shared_ptr<sdlgf::Font> fontArial;
+	std::shared_ptr<sdlgf::FontSprite> fontSpriteArial;
 
-	std::shared_ptr<DX9GF::Font> fontdetemination;
-	std::shared_ptr<DX9GF::FontSprite> fontSpritedetemination;
+	std::shared_ptr<sdlgf::Font> fontdetemination;
+	std::shared_ptr<sdlgf::FontSprite> fontSpritedetemination;
 
 	std::vector<std::shared_ptr<GO::Player>> players;
 	std::shared_ptr<GO::Rectangle> rect;
-	std::shared_ptr<DX9GF::TransformManager> transformManager;
-	std::shared_ptr<DX9GF::ColliderManager> colliderManager;
-	std::shared_ptr<DX9GF::Texture> whiteTexture;
-	std::shared_ptr<DX9GF::Texture> dawgTexture;
-	std::shared_ptr<DX9GF::StaticSprite> colorRec;
-	std::shared_ptr<DX9GF::StaticSprite> textureRec;
-	std::shared_ptr<DX9GF::Map> map;
-	DX9GF::AudioManager* audioManager;
+	std::shared_ptr<sdlgf::TransformManager> transformManager;
+	std::shared_ptr<sdlgf::ColliderManager> colliderManager;
+	std::shared_ptr<sdlgf::Texture> whiteTexture;
+	std::shared_ptr<sdlgf::Texture> dawgTexture;
+	std::shared_ptr<sdlgf::StaticSprite> colorRec;
+	std::shared_ptr<sdlgf::StaticSprite> textureRec;
+	std::shared_ptr<sdlgf::Map> map;
+	sdlgf::AudioManager* audioManager;
 	float triggerX = 170.0f;
 	float triggerY = 170.0f;
 	float triggerRadius = 20.0f;

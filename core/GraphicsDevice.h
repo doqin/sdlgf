@@ -1,0 +1,104 @@
+﻿#pragma once
+#include <d3d9.h>
+#include <vector>
+#include "Camera.h"
+#include "IDeviceLostAware.h"
+namespace sdlgf {
+	class Texture;
+
+	class GraphicsDevice final {
+	private:
+		IDirect3DDevice9* d3ddev = NULL; // Đại diện cho card đồ họa máy tính
+		IDirect3DSurface9* backbuffer = NULL;
+		D3DVIEWPORT9 viewport;
+		// Virtual-to-backbuffer transform applied to the camera-less (instant) draw calls
+		float virtualScale = 1.0f;
+		float virtualOffsetX = 0.0f;
+		float virtualOffsetY = 0.0f;
+		void DrawLineInternal(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness);
+		// Every live ID3DXSprite/ID3DXFont wrapper (sprites, fonts), so Reset() can be preceded
+		// and followed by OnLostDevice/OnResetDevice on all of them - required by the D3DX
+		// helper library or Reset() can fail outright.
+		std::vector<IDeviceLostAware*> volatileResources;
+	public:
+		GraphicsDevice() {};
+		GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer);
+		~GraphicsDevice();
+
+		/// <summary>
+		/// Gets a reference to the Direct3D device pointer.
+		/// </summary>
+		/// <returns>A reference to the Direct3D device pointer.</returns>
+		IDirect3DDevice9*& GetDevice();
+		/// <summary>
+		/// Retrieves a reference to the back buffer surface.
+		/// </summary>
+		/// <returns>A reference to a pointer to the Direct3D surface representing the back buffer.</returns>
+		IDirect3DSurface9*& GetBackBuffer();
+		/// <summary>
+		/// Sets the viewport parameters for rendering.
+		/// </summary>
+		/// <param name="x">The x-coordinate of the upper-left corner of the viewport.</param>
+		/// <param name="y">The y-coordinate of the upper-left corner of the viewport.</param>
+		/// <param name="width">The width of the viewport in pixels.</param>
+		/// <param name="height">The height of the viewport in pixels.</param>
+		/// <param name="minZ">The minimum depth value of the viewport range (typically 0.0).</param>
+		/// <param name="maxZ">The maximum depth value of the viewport range (typically 1.0).</param>
+		HRESULT SetViewport(DWORD x, DWORD y, DWORD width, DWORD height, float minZ, float maxZ);
+		HRESULT SetViewport(D3DVIEWPORT9 viewport);
+		HRESULT BeginDraw();
+		HRESULT Clear(D3DXCOLOR color);
+		HRESULT Clear();
+		HRESULT EndDraw();
+		HRESULT Present();
+		HRESULT IsValid();
+
+		HRESULT SetRenderTarget(Texture* renderTarget);
+		HRESULT RestoreRenderTarget();
+
+		// Sprites and fonts register themselves on construction and unregister on destruction.
+		void RegisterVolatileResource(IDeviceLostAware* resource);
+		void UnregisterVolatileResource(IDeviceLostAware* resource);
+		// Call before IDirect3DDevice9::Reset and after a successful Reset, respectively.
+		void NotifyLostDevice();
+		void NotifyResetDevice();
+
+		void SetAlphaBlending(bool enabled);
+		void SetScissorTest(bool enabled);
+		void SetScissorRect(const RECT& rect);
+
+		/// <summary>
+		/// Sets the transform mapping virtual screen coordinates to actual backbuffer
+		/// pixels for the camera-less (instant) draw calls. Set by IGame each frame so
+		/// instant drawing scales properly when the backbuffer resolution differs from
+		/// the virtual resolution; identity while rendering into the virtual render target.
+		/// </summary>
+		void SetVirtualTransform(float scale, float offsetX, float offsetY);
+		void ResetVirtualTransform();
+
+		void DrawLine(float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
+		void DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, D3DCOLOR color, float thickness = 1.0f);
+		void DrawRectangle(float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
+		void DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
+		void DrawEllipse(float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawEllipse(const sdlgf::Camera& camera, float centerX, float centerY, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
+		void DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, D3DCOLOR color, bool isFilled);
+
+		/// <summary>
+		/// Draws an isoceles triangle pointing down, centered horizontally at centerX, spanning from topY to topY + height.
+		/// </summary>
+		void DrawTriangle(float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
+		void DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, D3DCOLOR color, bool isFilled);
+
+		/// <summary>
+		/// Draws a filled, textured convex polygon (as a triangle fan) in screen space.
+		/// </summary>
+		/// <param name="points">Boundary points of the polygon, in order.</param>
+		/// <param name="uvs">Texture coordinates matching each point in points.</param>
+		void DrawTexturedPolygon(const std::vector<D3DXVECTOR2>& points, const std::vector<D3DXVECTOR2>& uvs, sdlgf::Texture* texture, D3DCOLOR color = 0xFFFFFFFF);
+
+	};
+};

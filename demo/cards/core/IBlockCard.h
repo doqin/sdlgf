@@ -30,19 +30,19 @@ namespace Demo {
 		size_t DropIndexAt(float dropY, const std::shared_ptr<IStatementCard>& dropped, float* slotTopY = nullptr);
 	protected:
 		std::vector<std::weak_ptr<IStatementCard>> statementCards;
-		std::shared_ptr<DX9GF::Font> nameFont;
-		std::shared_ptr<DX9GF::FontSprite> nameFontSprite;
-		std::shared_ptr<DX9GF::Texture> blockTexture;
-		std::shared_ptr<DX9GF::StaticSprite> blockSprite;
-		std::shared_ptr<DX9GF::StaticSprite> pointerSprite;
+		std::shared_ptr<sdlgf::Font> nameFont;
+		std::shared_ptr<sdlgf::FontSprite> nameFontSprite;
+		std::shared_ptr<sdlgf::Texture> blockTexture;
+		std::shared_ptr<sdlgf::StaticSprite> blockSprite;
+		std::shared_ptr<sdlgf::StaticSprite> pointerSprite;
 		// The block's own header art. The only thing that differs between block kinds - the
 		// header, execution pointer and drop highlight below are all shared.
 		virtual RECT GetBlockFaceRect() const = 0;
 	public:
-		inline IBlockCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
+		inline IBlockCard(std::weak_ptr<sdlgf::TransformManager> transformManager)
 			: IGameObject(transformManager), ICard(transformManager), IContainer(transformManager) {}
 		inline IBlockCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			float x = 0,
@@ -54,8 +54,8 @@ namespace Demo {
 			ICard(transformManager, x, y, rotation, scaleX, scaleY),
 			IContainer(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
 		inline IBlockCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::IGameObject> parent,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			float x = 0,
@@ -89,7 +89,7 @@ namespace Demo {
 		std::tuple<float, float> GetStatementSlotWorldPosition(size_t index, std::shared_ptr<IStatementCard> excluding = nullptr);
 		// Ordered list (execution order) of statement cards currently queued in this block.
 		const std::vector<std::weak_ptr<IStatementCard>>& GetStatementCards() const { return statementCards; }
-		bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) override;
+		bool TryReclaim(std::weak_ptr<sdlgf::IGameObject> oldParent) override;
 		bool CanBeStoredInContainer() const override { return false; }
 	};
 }

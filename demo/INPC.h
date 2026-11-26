@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "DX9GF.h"      
-#include "DX9GFExtras.h"  
+#include "sdlgf.h"      
+#include "Extras.h"  
 #include "Player.h"
 #include "DialogueLine.h"
 #include "Debug.h"
@@ -9,20 +9,20 @@
 #include <functional>
 
 namespace Demo {
-    class INPC : public DX9GF::IGameObject, virtual public Pointable {
+    class INPC : public sdlgf::IGameObject, virtual public Pointable {
     protected:
         bool isConversationOpen = false;
         int currentLineIndex = 0;
-        DX9GF::GraphicsDevice* gd = nullptr;
-        DX9GF::Camera* worldCamera;
-        std::weak_ptr<DX9GF::TransformManager> transformManager;
+        sdlgf::GraphicsDevice* gd = nullptr;
+        sdlgf::Camera* worldCamera;
+        std::weak_ptr<sdlgf::TransformManager> transformManager;
         std::weak_ptr<Player> player;
 
-        std::shared_ptr<DX9GF::AnimatedSprite> sprite;
-        std::shared_ptr<DX9GF::Texture> spritesheet;
-        std::shared_ptr<DX9GF::RectangleCollider> collider;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
-        std::weak_ptr<DX9GF::CommandBuffer> drawBuffer;
+        std::shared_ptr<sdlgf::AnimatedSprite> sprite;
+        std::shared_ptr<sdlgf::Texture> spritesheet;
+        std::shared_ptr<sdlgf::RectangleCollider> collider;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
+        std::weak_ptr<sdlgf::CommandBuffer> drawBuffer;
 
         std::unordered_map<std::wstring, std::string> characterVoices = { { L"Player", "bleep8" } }; // Maps character names to voice clip identifiers
         std::vector<DialogueLine> dialogueLines;
@@ -37,21 +37,21 @@ namespace Demo {
         float markerOffsetY = 26.0f;
 
     public:
-        INPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y) : DX9GF::IGameObject(tm, x, y), transformManager(tm) {}
+        INPC(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y) : sdlgf::IGameObject(tm, x, y), transformManager(tm) {}
         virtual ~INPC() = default;
 
 		std::pair<float, float> GetPoint() const override {
 			return { GetWorldX(), GetWorldY() };
 		}
-        virtual void Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer);
+        virtual void Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer);
         virtual void AddLine(std::wstring name, std::wstring content);
         void ClearLines() {
             dialogueLines.clear();
             currentLineIndex = 0;
         }
         virtual void Update(unsigned long long deltaTime);
-        virtual void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime);
-        virtual void DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime);
+        virtual void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime);
+        virtual void DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime);
         virtual std::vector<DialogueLine> GetDialogueLines() { return dialogueLines; }
         virtual bool CanInteract() const = 0;
 

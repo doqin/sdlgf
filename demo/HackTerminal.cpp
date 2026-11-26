@@ -4,25 +4,25 @@
 #include <cmath>
 
 namespace Demo {
-    HackTerminal::HackTerminal(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y, int cID, std::string name)
+    HackTerminal::HackTerminal(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y, int cID, std::string name)
         : IGameObject(tm, x, y), transformManager(tm), colorID(cID), terminalName(name) {
     }
 
-    void HackTerminal::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::function<void(int)> hackCallback) {
+    void HackTerminal::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::function<void(int)> hackCallback) {
         player = p;
         this->worldCamera = camera;
-        fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+        fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
         this->gd = gd;
         this->onHackAttempt = hackCallback;
 
-        collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
+        collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<DX9GF::Texture>(gd);
+        spritesheet = std::make_shared<sdlgf::Texture>(gd);
         spritesheet->LoadTexture(L"assets/terminals.png");
 
-        sprite = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+        sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
         if (terminalName == "M1") {
             sprite->SetSrcRect({ .left = 0, .top = 0, .right = 16, .bottom = 32 });
         }
@@ -59,7 +59,7 @@ namespace Demo {
         float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
         isPlayerNear = (distance <= INTERACTION_DISTANCE);
 
-        auto inpMan = DX9GF::InputManager::GetInstance();
+        auto inpMan = sdlgf::InputManager::GetInstance();
 
         if (isPlayerNear && inpMan->KeyDown(SettingsManager::GetInstance()->GetKeybind("INTERACT")) && !isHacked) {
             if (onHackAttempt) {
@@ -68,14 +68,14 @@ namespace Demo {
         }
     }
 
-    void HackTerminal::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
+    void HackTerminal::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime) {
         if (!isVisible) return;
         sprite->Begin();
         sprite->Draw(camera, deltaTime);
         sprite->End();
     }
 
-    void HackTerminal::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime) {
+    void HackTerminal::DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime) {
         if (!isVisible || !uiCamera || !fontSprite || !worldCamera) return;
 
         auto [worldX, worldY] = GetWorldPosition();
@@ -87,7 +87,7 @@ namespace Demo {
         if (!statusMessage.empty()) {
             float scale = 0.8f * zoom;
             fontSprite->Begin();
-            fontSprite->SetText(DX9GF::Utils::Utf8ToWide(statusMessage));
+            fontSprite->SetText(sdlgf::Utils::Utf8ToWide(statusMessage));
             fontSprite->SetScale(scale);
             fontSprite->SetColor(0xFF55FF55);
 

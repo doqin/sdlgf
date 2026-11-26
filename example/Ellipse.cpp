@@ -6,16 +6,16 @@ void GO::Ellipse::Update(unsigned long long deltaTime)
 	trigger->Update(deltaTime);
 }
 
-std::weak_ptr<DX9GF::EllipseCollider> GO::Ellipse::GetCollider()
+std::weak_ptr<sdlgf::EllipseCollider> GO::Ellipse::GetCollider()
 {
 	return collider;
 }
 
-void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager)
+void GO::Ellipse::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, std::shared_ptr<sdlgf::ColliderManager> colliderManager)
 {
     this->graphicsDevice = graphicsDevice;
     this->camera = camera;
-    collider = std::make_shared<DX9GF::EllipseCollider>(
+    collider = std::make_shared<sdlgf::EllipseCollider>(
         transformManager,
         shared_from_this(),
         width,
@@ -25,7 +25,7 @@ void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* cam
     );
     collider->SetOriginCenter();
     colliderManager->Add(collider);
-    trigger = std::make_shared<DX9GF::EllipseTrigger>(
+    trigger = std::make_shared<sdlgf::EllipseTrigger>(
         transformManager,
         shared_from_this(),
         width,
@@ -35,15 +35,15 @@ void GO::Ellipse::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* cam
     );
     trigger->SetOriginCenter();
     trigger->Init(camera);
-    trigger->SetOnHeldRight([](DX9GF::ITrigger* thisObject) {
+    trigger->SetOnHeldRight([](sdlgf::ITrigger* thisObject) {
         auto parent = dynamic_pointer_cast<Ellipse>(thisObject->GetParent().value().lock());
-        auto input = DX9GF::InputManager::GetInstance();
+        auto input = sdlgf::InputManager::GetInstance();
         auto deltaX = input->GetRelativeMouseX();
         parent->SetLocalRotation(parent->GetLocalRotation() + deltaX * 0.1f);
         });
-    trigger->SetOnHeldLeft([colliderManager](DX9GF::ITrigger* thisObject) {
+    trigger->SetOnHeldLeft([colliderManager](sdlgf::ITrigger* thisObject) {
         auto parent = dynamic_pointer_cast<Ellipse>(thisObject->GetParent().value().lock());
-        auto input = DX9GF::InputManager::GetInstance();
+        auto input = sdlgf::InputManager::GetInstance();
         auto deltaX = input->GetRelativeMouseX();
         auto deltaY = input->GetRelativeMouseY();
         auto localX = parent->GetLocalX();

@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
-#include "DX9GFIScene.h"
+#include "sdlgf.h"
+#include "Extras.h"
+#include "IScene.h"
 #include "Game.h"
 #include "TextButton.h"
 #include "IconButton.h"
@@ -12,20 +12,20 @@
 namespace Demo
 {
    class SaveGameState;
-	class MainMenu : public DX9GF::IScene
+	class MainMenu : public sdlgf::IScene
 	{
 	private:
 		Game* game;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		std::shared_ptr<DX9GF::SaveManager> saveManager;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<DX9GF::StaticSprite> bgSprite;
-		std::shared_ptr<DX9GF::Texture> bgTex;
-		std::shared_ptr<DX9GF::Texture> titleTex;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::SaveManager> saveManager;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::StaticSprite> bgSprite;
+		std::shared_ptr<sdlgf::Texture> bgTex;
+		std::shared_ptr<sdlgf::Texture> titleTex;
 
 		//button component
-		std::shared_ptr<DX9GF::Texture> buttonSheetTex;
+		std::shared_ptr<sdlgf::Texture> buttonSheetTex;
 		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
 
 		//temporarily comment, only uncomment when needed. Ex: That button changes affect another component in the scene.
@@ -35,8 +35,8 @@ namespace Demo
 		std::shared_ptr<TextIconButton> optionsButton;
 		std::shared_ptr<TextIconButton> creditsButton;
 		std::shared_ptr<TextIconButton> quitButton;
-		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
-		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
+		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer;
+		std::shared_ptr<sdlgf::CommandBuffer> commandBuffer;
 
 		//use to scale or relocate the sprite/object
 		int lastScreenWidth;
@@ -51,7 +51,7 @@ namespace Demo
 
 		//map preview pentagons: one cropped snapshot of each featured map's world
 		static const int MAP_PREVIEW_COUNT = 4;
-		std::shared_ptr<DX9GF::Texture> mapPreviews[MAP_PREVIEW_COUNT];
+		std::shared_ptr<sdlgf::Texture> mapPreviews[MAP_PREVIEW_COUNT];
 		void RenderMapPreviews();
 
 	public:

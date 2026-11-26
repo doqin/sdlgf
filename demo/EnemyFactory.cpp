@@ -18,8 +18,8 @@
 
 namespace {
 	template <typename T>
-	std::shared_ptr<Demo::IEnemy> MakeEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int hp,
-		DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam) {
+	std::shared_ptr<Demo::IEnemy> MakeEnemy(std::weak_ptr<sdlgf::TransformManager> tm, int hp,
+		sdlgf::GraphicsDevice* gd, sdlgf::Camera* cam) {
 		auto enemy = std::make_shared<T>(tm, hp);
 		enemy->Init(gd, cam);
 		return enemy;
@@ -77,8 +77,8 @@ namespace Demo {
 		return hps;
 	}
 
-	std::shared_ptr<IEnemy> EnemyFactory::Create(const std::string& type, std::weak_ptr<DX9GF::TransformManager> tm,
-		DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam, int maxHp) {
+	std::shared_ptr<IEnemy> EnemyFactory::Create(const std::string& type, std::weak_ptr<sdlgf::TransformManager> tm,
+		sdlgf::GraphicsDevice* gd, sdlgf::Camera* cam, int maxHp) {
 		int lo = 0, hi = 0;
 		if (!TryGetHpRange(type, lo, hi)) return nullptr;
 
@@ -104,8 +104,8 @@ namespace Demo {
 		float x, float y, const std::string& id,
 		const std::vector<std::string>& types, bool isRandomPool, bool useGlobalPool,
 		const std::string& bgmName,
-		std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDrawFunc,
-		std::shared_ptr<DX9GF::TransformManager> tm, Game* game, DX9GF::ColliderManager* colMan, std::shared_ptr<Player> player)
+		std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDrawFunc,
+		std::shared_ptr<sdlgf::TransformManager> tm, Game* game, sdlgf::ColliderManager* colMan, std::shared_ptr<Player> player)
 	{
 		BattleEncounter enc;
 		enc.mapEnemyID = id;

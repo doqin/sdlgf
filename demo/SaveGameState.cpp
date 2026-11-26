@@ -16,12 +16,12 @@
 #include <fstream>
 
 namespace Demo {
-	SaveGameState::SaveGameState(Game* game, std::shared_ptr<DX9GF::SaveManager> saveManager)
+	SaveGameState::SaveGameState(Game* game, std::shared_ptr<sdlgf::SaveManager> saveManager)
 		: game(game), saveManager(std::move(saveManager)) {
 	}
 
 	void SaveGameState::BuildScenes() {
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		auto sceneManager = game->GetSceneManager();
 		sceneManager->PushScene(new IntroScene(game, app->GetScreenWidth(), app->GetScreenHeight()));
 		sceneManager->PushScene(new TutorialWorldScene(game, saveManager, app->GetScreenWidth(), app->GetScreenHeight()));
@@ -59,7 +59,7 @@ namespace Demo {
 		return it != infos.end() ? &it->second : nullptr;
 	}
 
-	std::shared_ptr<Player> SaveGameState::GetPlayerFromScene(DX9GF::IScene* scene) const {
+	std::shared_ptr<Player> SaveGameState::GetPlayerFromScene(sdlgf::IScene* scene) const {
 		if (auto tutorialScene = dynamic_cast<Demo::TutorialWorldScene*>(scene)) {
 			return tutorialScene->GetPlayer();
 		}
@@ -84,7 +84,7 @@ namespace Demo {
 
 	void SaveGameState::GenerateSaveData(nlohmann::json& outData) {
 		auto sceneManager = game->GetSceneManager();
-		auto currentScene = dynamic_cast<DX9GF::ISaveable*>(sceneManager->GetCurrentScene());
+		auto currentScene = dynamic_cast<sdlgf::ISaveable*>(sceneManager->GetCurrentScene());
 		if (currentScene) {
 			outData["current_scene"] = currentScene->GetSaveID();
 		}
@@ -93,7 +93,7 @@ namespace Demo {
 
 		for (size_t i = 0; i < sceneManager->GetSceneCount(); i++) {
 			nlohmann::json data;
-			auto scene = dynamic_cast<DX9GF::ISaveable*>(sceneManager->GetScene(i));
+			auto scene = dynamic_cast<sdlgf::ISaveable*>(sceneManager->GetScene(i));
 			if (scene) {
 				scene->GenerateSaveData(data);
 				outData["scene_data"][scene->GetSaveID()] = data;
@@ -110,7 +110,7 @@ namespace Demo {
 				sceneManager->GoToScene(sceneIt->second);
 
 				if (const SceneInfo* info = GetSceneInfo(sceneId)) {
-					DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(info->bgm, info->bgmVolume, info->bgmFadeSeconds);
+					sdlgf::AudioManager::GetInstance()->PlayBGM_Fade(info->bgm, info->bgmVolume, info->bgmFadeSeconds);
 				}
 			}
 		}
@@ -121,7 +121,7 @@ namespace Demo {
 			for (auto& [key, value] : inData["scene_data"].items()) {
 				auto sceneIt = sceneMap.find(key);
 				if (sceneIt != sceneMap.end()) {
-					auto scene = dynamic_cast<DX9GF::ISaveable*>(sceneManager->GetScene(sceneIt->second));
+					auto scene = dynamic_cast<sdlgf::ISaveable*>(sceneManager->GetScene(sceneIt->second));
 					if (scene) {
 						scene->RestoreSaveData(value);
 					}
@@ -130,7 +130,7 @@ namespace Demo {
 		}
 	}
 
-	std::shared_ptr<SaveGameState> SaveGameState::StartNewGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager) {
+	std::shared_ptr<SaveGameState> SaveGameState::StartNewGame(Game* game, const std::shared_ptr<sdlgf::SaveManager>& saveManager) {
 		saveManager->Clear();
 		PlayerGlobalData::GetInstance()->Reset();
 		SketchyGuyGlobalData::GetInstance()->Reset();
@@ -145,7 +145,7 @@ namespace Demo {
 		saveState->ClearScenes();
 		saveState->BuildScenes();
 		QuestManager::GetInstance()->Reset();
-		DX9GF::AudioManager::GetInstance()->StopAll();
+		sdlgf::AudioManager::GetInstance()->StopAll();
 		game->GetSceneManager()->GoToScene(1);
 		return saveState;
 	}
@@ -177,7 +177,7 @@ namespace Demo {
 		ReloadFromDisk();
 	}
 
-	std::shared_ptr<SaveGameState> SaveGameState::LoadSavedGame(Game* game, const std::shared_ptr<DX9GF::SaveManager>& saveManager) {
+	std::shared_ptr<SaveGameState> SaveGameState::LoadSavedGame(Game* game, const std::shared_ptr<sdlgf::SaveManager>& saveManager) {
 		auto saveState = std::make_shared<SaveGameState>(game, saveManager);
 		saveState->ReloadFromDisk();
 		return saveState;

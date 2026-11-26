@@ -142,10 +142,10 @@ void Demo::IBattleScene::StartBattle()
 	if (auto speaker = PickSpeaker(false)) speaker->SayIntro(1000.f);
 	energy = (std::max)(0, energy - static_cast<int>(battlePlayer->GetModifierValue(ModifierType::EnergyDrain)));
 	if (!customBGMName.empty()) {
-		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
+		sdlgf::AudioManager::GetInstance()->PlayBGM_Fade(customBGMName, 0.3f, 1.5f);
 	}
 	else {
-		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("battle_bgm", 0.3f, 1.5f);
+		sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("battle_bgm", 0.3f, 1.5f);
 	}
 
 	if (battleEventType == EventType::Gold) {
@@ -252,7 +252,7 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 	finalGold += pendingGoldTokenReward;
 	player->AddGold(finalGold);
 	popUpMessage->QueueMessage(&commandBuffer, Tr(L"You earned ") + std::to_wstring(finalGold) + L" gold!", 1.5f);
-	DX9GF::AudioManager::GetInstance()->Play("coin_gather", false, 0.8f);
+	sdlgf::AudioManager::GetInstance()->Play("coin_gather", false, 0.8f);
 
 	if (!battleCardDrops.empty()) {
 		std::vector<std::pair<std::string, int>> grouped;
@@ -280,9 +280,9 @@ void Demo::IBattleScene::OnAllEnemiesDefeated()
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	const float victoryHoldSeconds = battleCardDrops.empty() ? 2.5f : 1.5f + CARD_DROP_MESSAGE_SECONDS;
-	drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(victoryHoldSeconds));
+	drawBuffer->PushCommand(std::make_shared<sdlgf::DelayCommand>(victoryHoldSeconds));
 	drawBuffer->PushCommand(transitionInCommand);
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
@@ -304,7 +304,7 @@ void Demo::IBattleScene::DrawCardsNow(int amount)
 
 void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 {
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
 	auto x = -static_cast<float>(screenWidth) / 2.f + 20.f;
@@ -337,29 +337,29 @@ void Demo::IBattleScene::DrawCards(size_t count, bool midTurn)
 			draggable->SetHidden(true);
 		}
 		y += 30;
-		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-			std::make_shared<DX9GF::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
-			std::make_shared<DX9GF::CustomCommand>([](std::function<void(void)> markFinished) {
-				DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.3f);
+		std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+			std::make_shared<sdlgf::SetPositionCommand>(card, -static_cast<float>(screenWidth), y),
+			std::make_shared<sdlgf::CustomCommand>([](std::function<void(void)> markFinished) {
+				sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.3f);
 				markFinished();
 			}),
-			std::make_shared<DX9GF::DelayCommand>(midTurn ? 0.f : i * .2f),
-			std::make_shared<DX9GF::GoToCommand>(card, x, y, 0.5f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
-			std::make_shared<DX9GF::DelayCommand>(midTurn ? 0.f : 0.75f),
-			std::make_shared<DX9GF::GoToCommand>(card, x, screenHeight, 0.75f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
-			std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+			std::make_shared<sdlgf::DelayCommand>(midTurn ? 0.f : i * .2f),
+			std::make_shared<sdlgf::GoToCommand>(card, x, y, 0.5f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}),
+			std::make_shared<sdlgf::DelayCommand>(midTurn ? 0.f : 0.75f),
+			std::make_shared<sdlgf::GoToCommand>(card, x, screenHeight, 0.75f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}),
+			std::make_shared<sdlgf::CustomCommand>([this, card](std::function<void(void)> markFinished) {
 				this->LandDrawnCard(card);
 				markFinished();
 			})
 		};
-		cardAnimCommands.push_back(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+		cardAnimCommands.push_back(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	}
 
 	if (drawn < count) {
 		if (popUpMessage) {
 			popUpMessage->ShowMessage(Tr(L"Deck empty - drew ") + std::to_wstring(drawn) + L" of " + std::to_wstring(count));
 		}
-		DX9GF::Platform::DebugLog(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
+		sdlgf::Platform::DebugLog(("DrawCards: requested " + std::to_string(count) + ", drew " + std::to_string(drawn) + " (draw + discard pool exhausted)\n").c_str());
 	}
 }
 
@@ -377,7 +377,7 @@ void Demo::IBattleScene::ShuffleDiscardIntoDrawPile()
 		drawPile.push_back(card);
 	}
 	discardPile.clear();
-	DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.6f);
+	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.6f);
 }
 
 void Demo::IBattleScene::MovePlayedPileToDiscardPileIfNeeded()
@@ -462,7 +462,7 @@ void Demo::IBattleScene::ReturnCardToHand(const std::shared_ptr<IStatementCard>&
 	if (!card) {
 		return;
 	}
-	commandBuffer.StackCommand(std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+	commandBuffer.StackCommand(std::make_shared<sdlgf::CustomCommand>([this, card](std::function<void(void)> markFinished) {
 		// A drop is offered to every droppable in turn, so a block that rejected this card may be
 		// followed by one that accepts it - and the player may have grabbed it again. Only rescue
 		// the card if it is still loose, or this would yank it out of wherever it ended up.
@@ -605,7 +605,7 @@ void Demo::IBattleScene::OpenPileView(PileKind kind)
 	currentPilePage = 0;
 	state = State::PlayerViewPile;
 	RefreshPileView();
-	DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
+	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
 }
 
 void Demo::IBattleScene::ClosePileView()
@@ -735,7 +735,7 @@ void Demo::IBattleScene::BeginNextTurn()
 
 void Demo::IBattleScene::GetEnemyGridBand(float& top, float& bottom) const
 {
-	const auto app = DX9GF::Application::GetInstance();
+	const auto app = sdlgf::Application::GetInstance();
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
 	// Same baseline PlayerAttackUpdate uses for the action bar and the discard strip, so the
 	// grid and the bar cannot drift apart.
@@ -752,7 +752,7 @@ std::vector<D3DXVECTOR2> Demo::IBattleScene::BuildEnemyGridSlots() const
 	}
 	slots.resize(enemies.size(), D3DXVECTOR2{ 0.f, 0.f });
 
-	const auto app = DX9GF::Application::GetInstance();
+	const auto app = sdlgf::Application::GetInstance();
 	const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float screenHeight = static_cast<float>(app->GetScreenHeight());
 
@@ -869,7 +869,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 		return;
 	}
 
-	const auto app = DX9GF::Application::GetInstance();
+	const auto app = sdlgf::Application::GetInstance();
 	const float screenWidth = static_cast<float>(app->GetScreenWidth());
 	const float centerLineY = -120.f;
 	const float horizontalSpacing = 180.f;
@@ -916,7 +916,7 @@ void Demo::IBattleScene::QueueEnemyLayoutTransition(State targetState)
 			targetY = gridSlots[i].y;
 		}
 
-		auto command = std::make_shared<DX9GF::GoToCommand>(enemies[i], targetX, targetY, 0.4f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{});
+		auto command = std::make_shared<sdlgf::GoToCommand>(enemies[i], targetX, targetY, 0.4f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{});
 		commandBuffer.StackCommand(command);
 	}
 }
@@ -941,7 +941,7 @@ void Demo::IBattleScene::CreateEnemyCard(std::shared_ptr<IEnemy> enemy)
 	auto card = std::make_shared<EnemyCard>(transformManager, enemy, spawnX, spawnY);
 	card->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 	enemyCards.push_back(card);
-	DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.2f);
+	sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.2f);
 }
 
 void Demo::IBattleScene::RemoveEnemyCardsInRemoveArea()
@@ -1045,12 +1045,12 @@ void Demo::IBattleScene::RefreshItemMenu()
 
 		btn->SetSpriteRects({ blueprint->GetItemRect() });
 
-		btn->SetOnReleaseLeft([this, slot, blueprint](DX9GF::ITrigger* thisObj) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, slot, blueprint](std::function<void(void)> markFinished) {
+		btn->SetOnReleaseLeft([this, slot, blueprint](sdlgf::ITrigger* thisObj) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, slot, blueprint](std::function<void(void)> markFinished) {
 				if (player->GetInventoryItems().IsItemLocked(slot.itemID)) {
 					int turnsLeft = player->GetInventoryItems().GetItemLockedTurns(slot.itemID);
 					popUpMessage->ShowMessage(Tr(L"This item is banned for ") + std::to_wstring(turnsLeft) + L" more turn(s)!");
-					DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+					sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 				}
 				else if (player->GetInventoryItems().ConsumeItem(slot.itemID)) {
 					for (auto& mod : blueprint->GetModifiers()) {
@@ -1150,7 +1150,7 @@ void Demo::IBattleScene::TickActiveItems()
 
 void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 {
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	// Set position so that it's updated if screen is resized
 	const float buttonY = app->GetScreenHeight() / 2.f - 50 - attackButton->GetHeight();
 	const float spacing = 20.f;
@@ -1177,7 +1177,7 @@ void Demo::IBattleScene::PlayerStandByUpdate(unsigned long long deltaTime)
 
 void Demo::IBattleScene::LayoutAttackRowButtons()
 {
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
 	const float buttonY = screenHeight / 2.f - 20 - attackButton->GetHeight();
@@ -1187,7 +1187,7 @@ void Demo::IBattleScene::LayoutAttackRowButtons()
 
 	// Sized to the (translated) label so the text always fits inside the red box.
 	{
-		DX9GF::FontSprite measure(font.get());
+		sdlgf::FontSprite measure(font.get());
 		measure.SetScale(1.f, 1.f);
 		measure.SetText(Tr(L"Discard Enemy Card Here"));
 		enemyCardRemoveAreaWidth = (std::max)(250.f, static_cast<float>(measure.GetWidth()) + 32.f);
@@ -1220,7 +1220,7 @@ void Demo::IBattleScene::PlayerAttackUpdate(unsigned long long deltaTime)
 		currentEnergyPieces = 0;
 		isFlawlessChallengeActive = false;
 	}
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	float screenWidth = static_cast<float>(app->GetScreenWidth());
 	float screenHeight = static_cast<float>(app->GetScreenHeight());
 	handContainer->SetLocalPosition(-screenWidth / 2.f + 20.f, -screenHeight / 2.f + 20.f);
@@ -1634,7 +1634,7 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 								this->pickedUpCard.reset();
 								this->state = State::PlayerAttack;
 								this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained!"), 1.5f);
-								DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+								sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 							}
 				});
 		}
@@ -1649,7 +1649,7 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IBattleScene::CollectKeybo
 
 void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime)
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = SettingsManager::GetInstance();
 
 	const int keyUp = sm->GetKeybind("MOVE_UP");
@@ -1716,7 +1716,7 @@ void Demo::IBattleScene::UpdateKeyboardNavigation(unsigned long long deltaTime)
 		}
 	}
 	if (draggedBlock) {
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		const float halfScreenWidth = app->GetScreenWidth() / 2.f;
 		const float halfScreenHeight = app->GetScreenHeight() / 2.f;
 
@@ -1835,15 +1835,15 @@ void Demo::IBattleScene::PlaceStatementCardAt(std::shared_ptr<IStatementCard> ca
 
 	auto [slotX, slotY] = block->GetStatementSlotWorldPosition(index, card);
 
-	std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-		std::make_shared<DX9GF::GoToCommand>(card, slotX, slotY, 0.3f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
-		std::make_shared<DX9GF::CustomCommand>([card, index, block](std::function<void(void)> markFinished) {
+	std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+		std::make_shared<sdlgf::GoToCommand>(card, slotX, slotY, 0.3f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}),
+		std::make_shared<sdlgf::CustomCommand>([card, index, block](std::function<void(void)> markFinished) {
 			block->InsertStatementCardAt(card, index);
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
 			})
 	};
-	commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
 void Demo::IBattleScene::PlaceStatementCardInHand(std::shared_ptr<IStatementCard> card)
@@ -1860,15 +1860,15 @@ void Demo::IBattleScene::PlaceStatementCardInHand(std::shared_ptr<IStatementCard
 	const float handX = handContainer->GetWorldX();
 	const float handY = handContainer->GetWorldY() + (float)handContainer->GetHeight();
 
-	std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-		std::make_shared<DX9GF::GoToCommand>(card, handX, handY, 0.3f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
-		std::make_shared<DX9GF::CustomCommand>([this, card](std::function<void(void)> markFinished) {
+	std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+		std::make_shared<sdlgf::GoToCommand>(card, handX, handY, 0.3f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}),
+		std::make_shared<sdlgf::CustomCommand>([this, card](std::function<void(void)> markFinished) {
 			handContainer->StoreCard(card);
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
 			})
 	};
-	commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
 void Demo::IBattleScene::PlaceEnemyCardOn(std::shared_ptr<EnemyCard> card, std::shared_ptr<IStatementCard> destination)
@@ -1884,15 +1884,15 @@ void Demo::IBattleScene::PlaceEnemyCardOn(std::shared_ptr<EnemyCard> card, std::
 
 	auto [slotX, slotY] = destination->GetEnemyCardSlotWorldPosition();
 
-	std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-		std::make_shared<DX9GF::GoToCommand>(card, slotX, slotY, 0.3f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}),
-		std::make_shared<DX9GF::CustomCommand>([destination, card](std::function<void(void)> markFinished) {
+	std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+		std::make_shared<sdlgf::GoToCommand>(card, slotX, slotY, 0.3f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}),
+		std::make_shared<sdlgf::CustomCommand>([destination, card](std::function<void(void)> markFinished) {
 			destination->AttachEnemyCard(card);
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 			markFinished();
 			})
 	};
-	commandBuffer.StackCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+	commandBuffer.StackCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 }
 
 void Demo::IBattleScene::DiscardEnemyCard(std::shared_ptr<EnemyCard> card)
@@ -1914,19 +1914,19 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 	isTransitioning = true;
 	// Use shared_ptr to share state between multiple commands in the MultiCommand
 	auto attackingEnemies = std::make_shared<std::vector<std::shared_ptr<IEnemy>>>();
-	std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
+	std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
 
 		//trigger effects: poison
-		std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+		std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 			for (auto& enemy : this->enemies) {
 				enemy->TriggerEffects(TickPhase::EndOfTurn);
 			}
 			markFinished();
 		}),
 
-		std::make_shared<DX9GF::DelayCommand>(0.6f),
+		std::make_shared<sdlgf::DelayCommand>(0.6f),
 
-		std::make_shared<DX9GF::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
+		std::make_shared<sdlgf::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
 			// Wait for dead enemies to finish animations before collecting them
 			for (auto& enemy : this->enemies) {
 				if (enemy->IsDead() && !enemy->IsDoneAttacking()) {
@@ -1981,25 +1981,25 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 			}
 			markFinished();
 			}),
-		std::make_shared<DX9GF::DelayCommand>(0.5f),
+		std::make_shared<sdlgf::DelayCommand>(0.5f),
 			// Enemies say the ability lines they cast at the start of the turn while they are still on
 			// screen - the next command slides them off to the attack queue.
-		std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+		std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 			this->abilityLinesSaid = false;
 			for (auto& enemy : this->enemies) {
 				if (enemy && enemy->SayPendingAbilityLines()) this->abilityLinesSaid = true;
 			}
-			this->abilitySpeechStartMs = DX9GF::Platform::GetTicksMs();
+			this->abilitySpeechStartMs = sdlgf::Platform::GetTicksMs();
 			this->abilitySpeechQuietSinceMs = this->abilitySpeechStartMs;
 			markFinished();
 			}),
 			// ...and the turn waits until every enemy has finished talking, plus a short beat.
-			std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+			std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 				if (!this->abilityLinesSaid) {
 					markFinished();
 					return;
 				}
-				const unsigned long long now = DX9GF::Platform::GetTicksMs();
+				const unsigned long long now = sdlgf::Platform::GetTicksMs();
 				const bool anySpeaking = std::any_of(this->enemies.begin(), this->enemies.end(),
 					[](const std::shared_ptr<IEnemy>& enemy) { return enemy && !enemy->IsDead() && enemy->IsSpeaking(); });
 				if (anySpeaking) this->abilitySpeechQuietSinceMs = now;
@@ -2008,7 +2008,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 					markFinished();
 				}
 				}),
-		std::make_shared<DX9GF::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
+		std::make_shared<sdlgf::CustomCommand>([this, deltaTime, attackingEnemies](std::function<void(void)> markFinished) {
 			// Wait for enemies that died from statuses to finish animations
 			for (auto& enemy : this->enemies) {
 				if (!enemy->IsDoneAttacking()) {
@@ -2033,9 +2033,9 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 				//even if the enemy is stunned, poison effect on player still hits
 				this->battlePlayer->TriggerEffects(TickPhase::EndOfTurn);
 
-				std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-					std::make_shared<DX9GF::DelayCommand>(0.8f),
-					std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished2) {
+				std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+					std::make_shared<sdlgf::DelayCommand>(0.8f),
+					std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished2) {
 						if (this->battlePlayer->IsDead())
 						{
 							this->isDefeatSequence = true;
@@ -2055,7 +2055,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 					markFinished2();
 					})
 				};
-				this->commandBuffer.PushCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+				this->commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 				markFinished();
 				return;
 			}
@@ -2075,7 +2075,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 
 					if (this->currentTurn == 1) {
 						this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"FLAWLESS CHALLENGE!"), 2.0f);
-						DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.8f);
+						sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.8f);
 					}
 				}
 				else {
@@ -2106,7 +2106,7 @@ void Demo::IBattleScene::QueueToEnemyAttack(unsigned long long deltaTime)
 			markFinished();
 		})
 	};
-	commandBuffer.PushCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	return;
 }
 
@@ -2200,11 +2200,11 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 					// beside the hint, so the long text doesn't push the popup off a small window.
 					const BossPortrait portrait = GetBossPortrait(bossId);
 					if (!hint.empty() && portrait.sheet) {
-						auto portraitTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+						auto portraitTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 						portraitTex->LoadTexture(portrait.sheet);
 						PopupManager::GetInstance()->ShowWithSideIcon("stepped_red", L"DEFEATED",
 							hint + L"\n\n" + question, popupBtns, portraitTex,
-							DX9GF::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
+							sdlgf::Utils::CreateRectsHorizontal(0, 0, portrait.frameSize, portrait.frameSize, portrait.frameCount),
 							(std::min)(128.0f, static_cast<float>(game->GetVirtualHeight()) * 0.18f));
 					}
 					else {
@@ -2232,7 +2232,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				float rY = Demo::RNG::Range(-halfSize, halfSize);
 				SpawnRandomToken(rX, rY);
 				tokensSpawnedThisTurn++;
-				DX9GF::AudioManager::GetInstance()->PlayRandom("token_spawn", 0.6f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("token_spawn", 0.6f);
 			}
 		}
 
@@ -2332,7 +2332,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				activeTokens.push_back(token);
 
 				transitionDelay = 1.5f;
-				DX9GF::AudioManager::GetInstance()->PlayRandom("token_spawn", 0.6f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("token_spawn", 0.6f);
 			}
 
 			isFlawlessChallengeActive = false;
@@ -2348,9 +2348,9 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 		// poison hits at the end of enemy's turn
 		battlePlayer->TriggerEffects(TickPhase::EndOfTurn);
 
-		std::vector<std::shared_ptr<DX9GF::ICommand>> commands = {
-			std::make_shared<DX9GF::DelayCommand>(transitionDelay),
-			std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+		std::vector<std::shared_ptr<sdlgf::ICommand>> commands = {
+			std::make_shared<sdlgf::DelayCommand>(transitionDelay),
+			std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 				if (!battlePlayer->IsDead()) {
 					BeginNextTurn();
 					state = State::PlayerStandBy;
@@ -2363,7 +2363,7 @@ bool Demo::IBattleScene::EnemyAttackUpdate(unsigned long long deltaTime)
 				markFinished();
 			})
 		};
-		commandBuffer.PushCommand(std::make_shared<DX9GF::MultiCommand>(std::move(commands)));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::MultiCommand>(std::move(commands)));
 	}
 	return false;
 }
@@ -2411,7 +2411,7 @@ void Demo::IBattleScene::DrawDiscardEnemyCardArea(unsigned long long deltaTime)
 	);
 
 	if (IsDraggingAnyEnemyCard()) {
-		const unsigned long long tick = DX9GF::Platform::GetTicksMs();
+		const unsigned long long tick = sdlgf::Platform::GetTicksMs();
 		D3DCOLOR dashColor = 0xFFFFFFFF;
 		if (IsDraggingEnemyCardOverRemoveArea()) {
 			const float phase = static_cast<float>(tick % 1000) / 1000.f; // one blink per second
@@ -2490,7 +2490,7 @@ void Demo::IBattleScene::PlayerAttackDraw(unsigned long long deltaTime)
 			float btnWorldX = gearButton->GetWorldX() + (gearButton->GetWidth() / 2.0f) - 20.f;
 			float btnWorldY = gearButton->GetWorldY() - 20.f;
 
-			auto [screenX, screenY] = DX9GF::Utils::WorldToWindowCoords(this->uiCamera, btnWorldX, btnWorldY);
+			auto [screenX, screenY] = sdlgf::Utils::WorldToWindowCoords(this->uiCamera, btnWorldX, btnWorldY);
 
 			DrawTooltip(tooltipText, screenX, screenY, game->GetGraphicsDevice());
 		}
@@ -2821,7 +2821,7 @@ void Demo::IBattleScene::DrawProjectedDamage(unsigned long long deltaTime)
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd, const float extraH, const float minContentW)
+void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsDevice* gd, const float extraH, const float minContentW)
 {
 	// Same look as the overworld PlayerHUD panel, trimmed to an HP row. The panel keeps the old
 	// bar's bottom edge (y + 20) so the layout around it does not move. extraH / minContentW
@@ -2910,8 +2910,8 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsD
 	fontSprite->End();
 	gd->SetAlphaBlending(false);
 
-	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
-	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
+	auto [screenX, screenY] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+	auto [mouseX, mouseY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
 
 	bool isTooltipActive = false;
 	std::wstring activeTooltipText = L"";
@@ -2930,7 +2930,7 @@ void Demo::IBattleScene::DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsD
 	}
 }
 
-void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, DX9GF::GraphicsDevice* gd)
+void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, sdlgf::GraphicsDevice* gd)
 {
 	fontSprite->SetText(std::move(activeTooltipText));
 	float tooltipWidth = fontSprite->GetWidth() + 8.f;
@@ -2943,7 +2943,7 @@ void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float scre
 	if (targetScreenX + tooltipWidth > screenW) targetScreenX = screenW - tooltipWidth;
 	if (targetScreenY < 0) targetScreenY = screenY + 32.f;
 
-	auto [worldDrawX, worldDrawY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, targetScreenX, targetScreenY);
+	auto [worldDrawX, worldDrawY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, targetScreenX, targetScreenY);
 
 	gd->SetAlphaBlending(true);
 	gd->DrawRectangle(this->uiCamera, worldDrawX, worldDrawY, tooltipWidth, tooltipHeight, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
@@ -2957,7 +2957,7 @@ void Demo::IBattleScene::DrawTooltip(std::wstring& activeTooltipText, float scre
 	fontSprite->End();
 }
 
-void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::GraphicsDevice* gd)
+void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, sdlgf::GraphicsDevice* gd)
 {
 	auto modifiers = battlePlayer->GetModifiers();
 	auto modY = y - 48.f;
@@ -2965,8 +2965,8 @@ void Demo::IBattleScene::DrawModifierIcons(const float x, const float y, DX9GF::
 	bool isTooltipActive = false;
 	std::wstring activeTooltipText = L"";
 
-	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
-	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
+	auto [screenX, screenY] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+	auto [mouseX, mouseY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
 
 	auto statusRenderer = StatusRenderer::Get(gd);
 	for (const auto& mod : modifiers) {
@@ -3005,8 +3005,8 @@ std::wstring Demo::IBattleScene::DrawActiveItems(const float barRightX, const fl
 	auto [camW, camH] = this->uiCamera.GetScreenResolution();
 	const float rowRight = camW / 2.f - 8.f;
 
-	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
-	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
+	auto [screenX, screenY] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+	auto [mouseX, mouseY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, screenX, screenY);
 
 	std::wstring tooltip;
 	float drawX = barRightX + 16.f;
@@ -3062,9 +3062,9 @@ void Demo::IBattleScene::Init()
 {
 	// Init components
 	draggableManager = std::make_shared<DraggableManager>();
-	transformManager = std::make_shared<DX9GF::TransformManager>();
-	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
+	transformManager = std::make_shared<sdlgf::TransformManager>();
+	font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+	drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
 	// Setup player
 	battlePlayer = std::make_shared<Player>(transformManager);
 	battlePlayer->Init(game->GetGraphicsDevice(), &colliderManager, &camera, true);
@@ -3072,40 +3072,40 @@ void Demo::IBattleScene::Init()
 	battlePlayer->SetVelocity(125);
 
 	// Initialize texture sheet
-	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiSheetTex->LoadTexture(L"assets/ui.png");
 
-	tempTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	tempTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	tempTex->LoadTexture(L"assets/All-borders.png");
 
-	itemsTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	itemsTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	itemsTex->LoadTexture(L"assets/items.png");
 
-	energyTokenTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	energyTokenTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	energyTokenTex->LoadTexture(L"assets/energy-token.png");
 
-	energyTokenUI = std::make_shared<DX9GF::StaticSprite>(energyTokenTex.get());
+	energyTokenUI = std::make_shared<sdlgf::StaticSprite>(energyTokenTex.get());
 	energyTokenUI->SetScale(1.5f, 1.5f);
 
-	goldTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	goldTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	goldTex->LoadTexture(L"assets/gold-token.png");
 
-	goldTokenUI = std::make_shared<DX9GF::StaticSprite>(goldTex.get());
+	goldTokenUI = std::make_shared<sdlgf::StaticSprite>(goldTex.get());
 	goldTokenUI->SetSrcRect({ 7, 7, 26, 26 });
 	goldTokenUI->SetScale(1.5f, 1.5f);
 
-	attackBuffIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	attackBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	attackBuffIcon->SetSrcRect({ .left = 112, .top = 240, .right = 128, .bottom = 256 });
-	defenseBuffIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	defenseBuffIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	defenseBuffIcon->SetSrcRect({ .left = 96, .top = 240, .right = 112, .bottom = 256 });
 	// Src rect is set per entry in DrawActiveItems - one sprite serves every item in the row.
-	activeItemIcon = std::make_shared<DX9GF::StaticSprite>(itemsTex.get());
+	activeItemIcon = std::make_shared<sdlgf::StaticSprite>(itemsTex.get());
 	// Create buttons
 	const auto buttonWidth = 96;
 	const auto buttonHeight = 32;
 	attackButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	attackButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+	attackButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerAttack;
 			for (auto& enemy : enemies) {
 				enemy->SetState(false);
@@ -3165,8 +3165,8 @@ void Demo::IBattleScene::Init()
 			.bottom = 144
 		}
 		});
-	itemsButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+	itemsButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->RefreshItemMenu();
 			this->state = State::PlayerOpenItems;
 			//turn off volume or play sfx volume when open a menu here
@@ -3175,23 +3175,23 @@ void Demo::IBattleScene::Init()
 		});
 	itemsButton->SetSpriteScale(2.f, 2.f);
 	fleeButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	fleeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	fleeButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		popUpMessage->QueueMessage(&commandBuffer, Tr(L"You tried to flee..."));
 		isFleeing = true;
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 			if (RNG::Range(0, 1) == 0) {
 				popUpMessage->QueueMessage(&commandBuffer, Tr(L"You successfully fled!"));
 				auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
-				drawBuffer->PushCommand(std::make_shared<DX9GF::DelayCommand>(1.5f));
+				drawBuffer->PushCommand(std::make_shared<sdlgf::DelayCommand>(1.5f));
 				drawBuffer->PushCommand(transitionInCommand);
-				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished2) {
+				commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished2) {
 					if (!transitionInCommand->IsFinished()) {
 						return;
 					}
 					auto sceMan = game->GetSceneManager();
 
 					auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
-					auto audio = DX9GF::AudioManager::GetInstance();
+					auto audio = sdlgf::AudioManager::GetInstance();
 
 					if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
 					else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
@@ -3205,9 +3205,9 @@ void Demo::IBattleScene::Init()
 			}
 			else {
 				popUpMessage->QueueMessage(&commandBuffer, Tr(L"You failed to flee!"));
-				commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished) {
+				commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished) {
 					this->QueueToEnemyAttack(0);
-					commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished2) {
+					commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished2) {
 						isFleeing = false;
 						markFinished2();
 						}));
@@ -3239,9 +3239,9 @@ void Demo::IBattleScene::Init()
 		});
 	fleeButton->SetSpriteScale(2.f, 2.f);
 	backButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	backButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	backButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		commandBuffer.Clear();
-		commandBuffer.StackCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+		commandBuffer.StackCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
 			for (auto& enemy : enemies) {
 				enemy->SetState(true);
@@ -3291,7 +3291,7 @@ void Demo::IBattleScene::Init()
 			.bottom = 144
 		}
 		});
-	executeButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	executeButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		// commandBuffer.Clear() below would also wipe a queued victory/flee return-to-previous-
 		// scene command if the battle is already ending - refuse instead of stranding the player.
 		if (isBattleEnding || isFleeing) {
@@ -3301,11 +3301,11 @@ void Demo::IBattleScene::Init()
 		// program runs.
 		if (!queuedToDraw.empty()) {
 			popUpMessage->ShowMessage(Tr(L"Still drawing"));
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 		}
 		else if (usedEnergy > energy) {
 			popUpMessage->ShowMessage(Tr(L"Not enough energy"));
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 		}
 		else if (mainBlockCard && !mainBlockCard->IsExecuting()) {
 			// Anything still queued in init runs first, so its targets have to be complete too -
@@ -3316,7 +3316,7 @@ void Demo::IBattleScene::Init()
 				// Repeats fold into the line already on screen, so pressing this a dozen times
 				// reads as one message counting up rather than a dozen queued pop-ups.
 				popUpMessage->ShowMessage(Tr(L"Some cards are missing a target!"));
-				DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+				sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 				return;
 			}
 			commandBuffer.Clear();
@@ -3341,7 +3341,7 @@ void Demo::IBattleScene::Init()
 		{.left = 48, .top = 64, .right = 96, .bottom = 80 },
 		{.left = 48, .top = 80, .right = 96, .bottom = 96 }
 		});
-	runInitButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	runInitButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (!initBlockCard || initBlockCard->GetStatementCards().empty()) {
 			return;
 		}
@@ -3349,12 +3349,12 @@ void Demo::IBattleScene::Init()
 		// program runs.
 		if (!queuedToDraw.empty()) {
 			popUpMessage->ShowMessage(Tr(L"Still drawing"));
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		if (usedEnergy > energy) {
 			popUpMessage->ShowMessage(Tr(L"Not enough energy"));
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		if (initBlockCard->IsExecuting() || (mainBlockCard && mainBlockCard->IsExecuting())) {
@@ -3362,7 +3362,7 @@ void Demo::IBattleScene::Init()
 		}
 		if (!initBlockCard->HasAllRequiredTargets()) {
 			popUpMessage->ShowMessage(Tr(L"Some cards are missing a target!"));
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		isExecutingInit = true;
@@ -3370,36 +3370,36 @@ void Demo::IBattleScene::Init()
 		});
 	runInitButton->SetSpriteScale(2.f, 2.f);
 
-	gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 
 	gearButton = std::make_shared<IconButton>(transformManager, 0, 0, 16.f * 2.f, 16.f * 2.f, uiSheetTex);
-	gearButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(272, 400, 16, 16, 4));
+	gearButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(272, 400, 16, 16, 4));
 	gearButton->SetSpriteScale(2.f, 2.f);
-	gearButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	gearButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OnGearButtonClicked();
 		});
 	gearButton->Init(&this->uiCamera);
 
 	// Pile buttons. Each group of three frames on the sheet is idle / hover / pressed.
 	drawPileButton = std::make_shared<IconButton>(transformManager, 0, 0, PILE_BUTTON_SIZE, PILE_BUTTON_SIZE, uiSheetTex);
-	drawPileButton->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(192, 160, 16, 16, 3));
+	drawPileButton->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(192, 160, 16, 16, 3));
 	drawPileButton->SetSpriteScale(3.f, 3.f);
-	drawPileButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	drawPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Draw);
 		});
 
 	discardPileButton = std::make_shared<IconButton>(transformManager, 0, 0, PILE_BUTTON_SIZE, PILE_BUTTON_SIZE, uiSheetTex);
-	discardPileButton->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 160, 16, 16, 3));
+	discardPileButton->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 160, 16, 16, 3));
 	discardPileButton->SetSpriteScale(3.f, 3.f);
-	discardPileButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	discardPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Discard);
 		});
 
 	nullifiedPileButton = std::make_shared<IconButton>(transformManager, 0, 0, PILE_BUTTON_SIZE, PILE_BUTTON_SIZE, uiSheetTex);
-	nullifiedPileButton->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(240, 160, 16, 16, 3));
+	nullifiedPileButton->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(240, 160, 16, 16, 3));
 	nullifiedPileButton->SetSpriteScale(3.f, 3.f);
-	nullifiedPileButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	nullifiedPileButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->OpenPileView(PileKind::Nullified);
 		});
 
@@ -3410,7 +3410,7 @@ void Demo::IBattleScene::Init()
 		{.left = 96, .top = 80, .right = 144, .bottom = 96 }
 		});
 	closePileViewButton->SetSpriteScale(2.f, 2.f);
-	closePileViewButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	closePileViewButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		this->ClosePileView();
 		});
 
@@ -3418,7 +3418,7 @@ void Demo::IBattleScene::Init()
 	btnPilePrevPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
 	btnPilePrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPilePrevPage->SetTextColor(0xFF111111);
-	btnPilePrevPage->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	btnPilePrevPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (currentPilePage > 0) {
 			currentPilePage--;
 			RefreshPileView();
@@ -3429,7 +3429,7 @@ void Demo::IBattleScene::Init()
 	btnPileNextPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
 	btnPileNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnPileNextPage->SetTextColor(0xFF111111);
-	btnPileNextPage->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	btnPileNextPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (currentPilePage < maxPilePage) {
 			currentPilePage++;
 			RefreshPileView();
@@ -3437,8 +3437,8 @@ void Demo::IBattleScene::Init()
 		});
 
 	closeItemMenuButton = std::make_shared<IconButton>(transformManager, 0, 0, buttonWidth, buttonHeight, uiSheetTex);
-	closeItemMenuButton->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([&](std::function<void(void)> markFinished) {
+	closeItemMenuButton->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([&](std::function<void(void)> markFinished) {
 			this->state = State::PlayerStandBy;
 			markFinished();
 			}));
@@ -3469,7 +3469,7 @@ void Demo::IBattleScene::Init()
 	btnPrevPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
 	btnPrevPage->SetSpriteScale(2.0f, 2.0f);
 	btnPrevPage->SetTextColor(0xFF111111);
-	btnPrevPage->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	btnPrevPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (currentItemPage > 0) {
 			currentItemPage--;
 			RefreshItemMenu();
@@ -3480,7 +3480,7 @@ void Demo::IBattleScene::Init()
 	btnNextPage->SetSpriteRects({ {0, 0, 16, 16}, {0, 16, 16, 32}, {0, 32, 16, 48} });
 	btnNextPage->SetSpriteScale(2.0f, 2.0f);
 	btnNextPage->SetTextColor(0xFF111111);
-	btnNextPage->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	btnNextPage->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (currentItemPage < maxItemPage) {
 			currentItemPage++;
 			RefreshItemMenu();
@@ -3510,9 +3510,9 @@ void Demo::IBattleScene::Init()
 	LayoutAttackRowButtons();
 
 	// Init sprite
-	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	fontSprite->SetColor(0xFFFFFFFF);
-	energyIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	energyIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	energyIcon->SetSrcRect({
 		.left = 96,
 		.top = 0,
@@ -3520,7 +3520,7 @@ void Demo::IBattleScene::Init()
 		.bottom = 16
 		});
 	energyIcon->SetScale(2.f);
-	hourglassIcon = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	hourglassIcon = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	hourglassIcon->SetSrcRect({
 		.left = 112,
 		.top = 0,
@@ -3530,13 +3530,13 @@ void Demo::IBattleScene::Init()
 	hourglassIcon->SetScale(2.f);
 
 
-	itemMenuBackground = std::make_shared<DX9GF::NineSliceSprite>(
+	itemMenuBackground = std::make_shared<sdlgf::NineSliceSprite>(
 		tempTex.get(),
 		RECT{ 0, 0, 45, 45 },
 		8, 8, 8, 8
 	);
 
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	float screenW = static_cast<float>(app->GetScreenWidth());
 	float screenH = static_cast<float>(app->GetScreenHeight());
 	float targetWidth = screenW * 0.8f;
@@ -3556,11 +3556,11 @@ void Demo::IBattleScene::Init()
 		else {
 			// CardRegistry::Create returns null for an id it does not recognise (renamed/removed card,
 			// typo, stale save). Dropping it silently makes the deck - and every draw - short.
-			DX9GF::Platform::DebugLog(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
+			sdlgf::Platform::DebugLog(("IBattleScene::Init: unknown deck card id '" + cardId + "' skipped\n").c_str());
 		}
 	}
 
-	auto sh = DX9GF::Application::GetInstance()->GetScreenHeight();
+	auto sh = sdlgf::Application::GetInstance()->GetScreenHeight();
 	// Init draggables
 	mainBlockCard = std::make_shared<MainBlockCard>(transformManager, -100.f, -140.f);
 	mainBlockCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
@@ -3586,11 +3586,11 @@ void Demo::IBattleScene::Init()
 	const float battleWidth = battleBoxSize + battleBorder * 2.f;
 	const float battleHeight = battleBoxSize + battleBorder * 2.f;
 
-	std::array<std::shared_ptr<DX9GF::RectangleCollider>, 4> bounds = {
-		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleTop),
-		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleBottom),
-		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleBorder, battleHeight, battleLeft, battleTop),
-		std::make_shared<DX9GF::RectangleCollider>(transformManager, battleBorder, battleHeight, battleRight, battleTop)
+	std::array<std::shared_ptr<sdlgf::RectangleCollider>, 4> bounds = {
+		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleTop),
+		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleWidth, battleBorder, battleLeft, battleBottom),
+		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleBorder, battleHeight, battleLeft, battleTop),
+		std::make_shared<sdlgf::RectangleCollider>(transformManager, battleBorder, battleHeight, battleRight, battleTop)
 	};
 
 	for (auto& bound : bounds) {
@@ -3605,9 +3605,9 @@ void Demo::IBattleScene::Init()
 	//popUpMessage->ToggleHistory();
 
 	// Init popup
-	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	borderTex->LoadTexture(L"assets/popup-borders.png");
-	auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiTex->LoadTexture(L"assets/ui.png");
 	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 
@@ -3615,7 +3615,7 @@ void Demo::IBattleScene::Init()
 	battleMenu->Init(font.get());
 
 	//Init BGM
-	auto audio = DX9GF::AudioManager::GetInstance();
+	auto audio = sdlgf::AudioManager::GetInstance();
 	audio->Load("battle_I", IDR_BGM_BATTLE_I);
 	audio->Load("battle_I_intro", IDR_BGM_BATTLE_I_INTRO);
 	audio->Load("battle_boss", IDR_BGM_BAT_BOSS);
@@ -3663,7 +3663,7 @@ void Demo::IBattleScene::Init()
 
 void Demo::IBattleScene::Update(unsigned long long deltaTime)
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
 	this->camera.Update();
@@ -3696,7 +3696,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		while (sceMan->GetSceneCount() > 1) {
 			sceMan->PopScene();
 		}
-		DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
+		sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 1.0f);
 		sceMan->GoToScene(0);
 		return;
 	}
@@ -3705,7 +3705,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		pendingReturnToPreviousScene = false;
 		auto sceMan = game->GetSceneManager();
 		auto prevScene = sceMan->GetScene(sceMan->GetIndex() - 1);
-		auto audio = DX9GF::AudioManager::GetInstance();
+		auto audio = sdlgf::AudioManager::GetInstance();
 
 		if (dynamic_cast<Demo::TutorialWorldScene*>(prevScene)) audio->PlayBGM_Fade("bgm_tutorial", 0.5f, 3.0f);
 		else if (dynamic_cast<Demo::SecretPuzzleScene*>(prevScene)) audio->PlayBGM_Fade("bgm_secret", 0.3f, 1.0f);
@@ -3733,7 +3733,7 @@ void Demo::IBattleScene::Update(unsigned long long deltaTime)
 		if (battleMenu && battleMenu->IsPendingLeave()) {
 			auto sceMan = game->GetSceneManager();
 			sceMan->GoToScene(0);
-			auto audio = DX9GF::AudioManager::GetInstance();
+			auto audio = sdlgf::AudioManager::GetInstance();
 			audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
 			return;
 		}
@@ -3885,7 +3885,7 @@ void Demo::IBattleScene::DrawKeyboardReticleUI(unsigned long long deltaTime)
 		return;
 	}
 	auto gd = game->GetGraphicsDevice();
-	Demo::DrawKeyboardTargetReticle(gd, uiCamera, button->GetWorldX(), button->GetWorldY(), (float)button->GetWidth(), (float)button->GetHeight(), DX9GF::Platform::GetTicksMs());
+	Demo::DrawKeyboardTargetReticle(gd, uiCamera, button->GetWorldX(), button->GetWorldY(), (float)button->GetWidth(), (float)button->GetHeight(), sdlgf::Platform::GetTicksMs());
 }
 
 void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
@@ -3910,13 +3910,13 @@ void Demo::IBattleScene::DrawKeyboardReticleWorld(unsigned long long deltaTime)
 			}
 			Demo::DrawAnimatedDashedRectangle(
 				gd, camera, slot.x, slot.y, slot.width, slot.height,
-				3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
+				3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, sdlgf::Platform::GetTicksMs());
 		}
 		gd->SetAlphaBlending(false);
 
 		auto& selected = slots[selectedIndex];
 		if (!selected.inUIPass) {
-			Demo::DrawKeyboardTargetReticle(gd, camera, selected.x, selected.y, selected.width, selected.height, DX9GF::Platform::GetTicksMs());
+			Demo::DrawKeyboardTargetReticle(gd, camera, selected.x, selected.y, selected.width, selected.height, sdlgf::Platform::GetTicksMs());
 		}
 		return;
 	}
@@ -3950,13 +3950,13 @@ void Demo::IBattleScene::DrawKeyboardPlacementUI(unsigned long long deltaTime)
 		}
 		Demo::DrawAnimatedDashedRectangle(
 			gd, uiCamera, slot.x, slot.y, slot.width, slot.height,
-			3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
+			3.f, 0xFFFFFFFF, false, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, sdlgf::Platform::GetTicksMs());
 	}
 	gd->SetAlphaBlending(false);
 
 	auto& selected = slots[selectedIndex];
 	if (selected.inUIPass) {
-		Demo::DrawKeyboardTargetReticle(gd, uiCamera, selected.x, selected.y, selected.width, selected.height, DX9GF::Platform::GetTicksMs());
+		Demo::DrawKeyboardTargetReticle(gd, uiCamera, selected.x, selected.y, selected.width, selected.height, sdlgf::Platform::GetTicksMs());
 	}
 }
 
@@ -3970,7 +3970,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 		}
 		else {
 			/* Cool wave grid effect */
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			float screenWidth = static_cast<float>(app->GetScreenWidth());
 			float screenHeight = static_cast<float>(app->GetScreenHeight());
 
@@ -4004,7 +4004,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 		}
 
 		if (backgroundDimAlpha > 0.001f) {
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			float screenWidth = static_cast<float>(app->GetScreenWidth());
 			float screenHeight = static_cast<float>(app->GetScreenHeight());
 			const int dimAlphaByte = static_cast<int>(backgroundDimAlpha * 255.f);
@@ -4029,7 +4029,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 			DrawProjectedDamage(deltaTime);
 
 			if (state == State::PlayerUseGearTargeting) {
-				auto app = DX9GF::Application::GetInstance();
+				auto app = sdlgf::Application::GetInstance();
 				float screenW = static_cast<float>(app->GetScreenWidth());
 				float screenH = static_cast<float>(app->GetScreenHeight());
 				gd->SetAlphaBlending(true);
@@ -4133,7 +4133,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 		}
 
 		//tokens ui
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 
 		float startX = -screenW / 2.f + 20.f;
 		float drawY = screenH / 2.f - 20.f - 32.f - 80.f;
@@ -4189,8 +4189,8 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 		//tooltip
 		if (state == State::PlayerStandBy || state == State::PlayerAttack) {
-			auto [mouseXSc, mouseYSc] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
-			auto [mouseWX, mouseWY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, mouseXSc, mouseYSc);
+			auto [mouseXSc, mouseYSc] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&this->uiCamera);
+			auto [mouseWX, mouseWY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, mouseXSc, mouseYSc);
 
 			bool showTooltip = false;
 			std::wstring tooltipText = L"";
@@ -4223,7 +4223,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 				if (targetScX + ttW > screenW) targetScX = screenW - ttW;
 				if (targetScY < 0) targetScY = mouseYSc + 32.f;
 
-				auto [worldX, worldY] = DX9GF::Utils::WindowToWorldCoords(this->uiCamera, targetScX, targetScY);
+				auto [worldX, worldY] = sdlgf::Utils::WindowToWorldCoords(this->uiCamera, targetScX, targetScY);
 
 				gd->SetAlphaBlending(true);
 				gd->DrawRectangle(this->uiCamera, worldX, worldY, ttW, ttH, 0, 1, 1, 0, 0, D3DCOLOR_ARGB(220, 0, 0, 0), true);
@@ -4275,7 +4275,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 
 		PopupManager::GetInstance()->DrawUI(deltaTime, &this->uiCamera);
 		if (!keyboardNavigator.IsInKeyboardMode()) {
-			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+			sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
 		ImGui::Render();
 		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
@@ -4309,14 +4309,14 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 	if (gearID == 1) { // Energy Cell
 		GainEnergyNow(1);
 		currentGearCooldown = bp->maxCooldownTurns;
-		DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 		popUpMessage->QueueMessage(&commandBuffer, Tr(L"Gained 1 Energy!"), 1.5f);
 
 	}
 	else if (gearID == 2) { // Data Extractor
 		if (drawPile.empty() && discardPile.empty()) {
 			popUpMessage->QueueMessage(&commandBuffer, Tr(L"No cards left to draw!"), 1.5f);
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 		DrawCardsNow(1);
@@ -4338,20 +4338,20 @@ void Demo::IBattleScene::OnGearButtonClicked() {
 		}
 		if (!hasValidCard) {
 			popUpMessage->QueueMessage(&commandBuffer, Tr(L"No valid cards in hand to retain!"), 1.5f);
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.8f);
 			return;
 		}
 
 		state = State::PlayerUseGearTargeting;
-		DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
 	}
 }
 
 void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTime) {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = Demo::SettingsManager::GetInstance();
 
-	if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Right) ||
+	if (inpMan->MousePress(sdlgf::InputManager::MouseButton::Right) ||
 		inpMan->KeyPress(sm->GetKeybind("CANCEL")) ||
 		inpMan->KeyPress(sm->GetKeybind("BACK")) ||
 		inpMan->KeyPress(sm->GetKeybind("OPEN_INVENTORY"))) {
@@ -4363,9 +4363,9 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 	}
 
 	//hard-code mouse click handler, dirty hack. Pls dont do this
-	if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Left)) {
+	if (inpMan->MousePress(sdlgf::InputManager::MouseButton::Left)) {
 		auto [mouseXSc, mouseYSc] = inpMan->GetVirtualAbsoluteMousePos(&this->camera);
-		auto [mouseWX, mouseWY] = DX9GF::Utils::WindowToWorldCoords(this->camera, mouseXSc, mouseYSc);
+		auto [mouseWX, mouseWY] = sdlgf::Utils::WindowToWorldCoords(this->camera, mouseXSc, mouseYSc);
 
 		for (auto& card : cardHand) {
 			if (card->IsLocked() || card->IsRetained()) continue;
@@ -4387,7 +4387,7 @@ void Demo::IBattleScene::PlayerUseGearTargetingUpdate(unsigned long long deltaTi
 					pickedUpCard.reset();
 					this->state = State::PlayerAttack;
 					this->popUpMessage->QueueMessage(&this->commandBuffer, Tr(L"Card retained for next turn!"), 1.5f);
-					DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+					sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 					return;
 				}
 			}
@@ -4409,7 +4409,7 @@ void Demo::IBattleScene::UpdateCardAnimations(unsigned long long deltaTime)
 	}
 	cardAnimCommands.erase(
 		std::remove_if(cardAnimCommands.begin(), cardAnimCommands.end(),
-			[](const std::shared_ptr<DX9GF::ICommand>& command) { return command->IsFinished(); }),
+			[](const std::shared_ptr<sdlgf::ICommand>& command) { return command->IsFinished(); }),
 		cardAnimCommands.end());
 }
 

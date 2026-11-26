@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "IButton.h"
-#include "DX9GFAudioManager.h"
-void Demo::IButton::SetOnReleaseLeft(std::function<void(DX9GF::ITrigger*)> cb)
+#include "AudioManager.h"
+void Demo::IButton::SetOnReleaseLeft(std::function<void(sdlgf::ITrigger*)> cb)
 {
 	//save the button's feature
 	this->callback = cb;
@@ -42,27 +42,27 @@ void Demo::IButton::Update(unsigned long long deltaTime)
 	//isolate logic between button's state / cursor's state
 	if (this->trigger->IsHovering(deltaTime)) {
 		if (this->trigger->IsHeldLeft(deltaTime)) {
-			DX9GF::InputManager::GetInstance()->SwitchCursor(DX9GF::InputManager::CursorType::CLICK);
+			sdlgf::InputManager::GetInstance()->SwitchCursor(sdlgf::InputManager::CursorType::CLICK);
 		}
 		else {
-			DX9GF::InputManager::GetInstance()->SwitchCursor(DX9GF::InputManager::CursorType::POINTER);
+			sdlgf::InputManager::GetInstance()->SwitchCursor(sdlgf::InputManager::CursorType::POINTER);
 		}
 	}
 
 	if (oldState == ButtonState::IDLE && this->currentState == ButtonState::HOVER)
 	{
-		DX9GF::AudioManager::GetInstance()->Play(btnHoverSfxName);
+		sdlgf::AudioManager::GetInstance()->Play(btnHoverSfxName);
 	}
 
 	if (oldState != ButtonState::CLICKED && this->currentState == ButtonState::CLICKED)
 	{
-		DX9GF::AudioManager::GetInstance()->Play(btnClickSfxName);
+		sdlgf::AudioManager::GetInstance()->Play(btnClickSfxName);
 	}
 }
 
 void Demo::IButton::PlayHoverSfx()
 {
-	DX9GF::AudioManager::GetInstance()->Play(btnHoverSfxName);
+	sdlgf::AudioManager::GetInstance()->Play(btnHoverSfxName);
 }
 
 void Demo::IButton::Activate()
@@ -72,7 +72,7 @@ void Demo::IButton::Activate()
 		return;
 	}
 
-	DX9GF::AudioManager::GetInstance()->Play(btnClickSfxName);
+	sdlgf::AudioManager::GetInstance()->Play(btnClickSfxName);
 
 	if (this->callback)
 	{

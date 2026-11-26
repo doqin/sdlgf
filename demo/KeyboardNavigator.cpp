@@ -8,7 +8,7 @@
 
 void Demo::KeyboardNavigator::UpdateMode()
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = SettingsManager::GetInstance();
 
 	if (inpMan->KeyDown(sm->GetKeybind("MOVE_UP")) || inpMan->KeyDown(sm->GetKeybind("MOVE_DOWN"))
@@ -27,7 +27,7 @@ void Demo::KeyboardNavigator::Navigate(unsigned long long deltaTime, const std::
 		return;
 	}
 
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = SettingsManager::GetInstance();
 	const auto previousTarget = target;
 
@@ -107,7 +107,7 @@ void Demo::KeyboardNavigator::Navigate(unsigned long long deltaTime, const std::
 	ApplyButtonVisuals(previousTarget);
 }
 
-void Demo::KeyboardNavigator::ApplyButtonVisuals(const std::shared_ptr<DX9GF::IGameObject>& previousTarget)
+void Demo::KeyboardNavigator::ApplyButtonVisuals(const std::shared_ptr<sdlgf::IGameObject>& previousTarget)
 {
 	auto button = std::dynamic_pointer_cast<IButton>(target);
 	if (!button) {
@@ -122,7 +122,7 @@ void Demo::KeyboardNavigator::ApplyButtonVisuals(const std::shared_ptr<DX9GF::IG
 	}
 	// Buttons recompute their state from the mouse every frame in their own Update
 	// (which runs before the navigator), so this override only lasts while targeted.
-	const bool acceptHeld = DX9GF::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("ACCEPT"));
+	const bool acceptHeld = sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("ACCEPT"));
 	button->SetState(acceptHeld ? IButton::ButtonState::CLICKED : IButton::ButtonState::HOVER);
 }
 
@@ -132,17 +132,17 @@ void Demo::KeyboardNavigator::Update(unsigned long long deltaTime, const std::ve
 	Navigate(deltaTime, candidates);
 }
 
-void Demo::KeyboardNavigator::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera& camera, const std::vector<Candidate>& candidates)
+void Demo::KeyboardNavigator::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, const std::vector<Candidate>& candidates)
 {
 	if (!keyboardMode || !target) {
 		return;
 	}
 	for (auto& c : candidates) {
 		if (c.anchor == target) {
-			Demo::DrawKeyboardTargetReticle(graphicsDevice, camera, c.x, c.y, c.width, c.height, DX9GF::Platform::GetTicksMs());
+			Demo::DrawKeyboardTargetReticle(graphicsDevice, camera, c.x, c.y, c.width, c.height, sdlgf::Platform::GetTicksMs());
 			if (dynamic_cast<Demo::ICard*>(c.anchor.get()) != nullptr) {
 				graphicsDevice->SetAlphaBlending(true);
-				float alphaPhase = (std::sin(DX9GF::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
+				float alphaPhase = (std::sin(sdlgf::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 				int alpha = static_cast<int>(alphaPhase * 80.0f);
 				D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 				graphicsDevice->DrawRectangle(camera, c.x, c.y, c.width, c.height, color, true);

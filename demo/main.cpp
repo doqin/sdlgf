@@ -3,8 +3,8 @@
 // included in exactly one translation unit, the one that defines main().
 #include <SDL3/SDL_main.h>
 #include <SDL3/SDL_events.h>
-#include "DX9GF.h"
-#include "DX9GFCrashHandler.h"
+#include "sdlgf.h"
+#include "CrashHandler.h"
 #include "Game.h"
 
 #include "imgui.h"
@@ -13,10 +13,10 @@
 
 int main(int argc, char** argv)
 {
-	// Get the DX9GF Application
-	DX9GF::Application* app = DX9GF::Application::GetInstance();
+	// Get the sdlgf Application
+	sdlgf::Application* app = sdlgf::Application::GetInstance();
 
-	DX9GF::InstallCrashHandler();
+	sdlgf::InstallCrashHandler();
 
 	try {
         app->SetAppIcon(L"assets/icon.png");
@@ -45,13 +45,13 @@ int main(int argc, char** argv)
 		app->Run();
 	}
 	catch (const std::exception& e) {
-		DX9GF::Platform::ShowErrorMessage("Error", e.what());
+		sdlgf::Platform::ShowErrorMessage("Error", e.what());
 		return 1;
 	}
 	// A throw of something that isn't std::exception would otherwise vanish
 	// without a trace on machines we can't debug (sandbox/CI/end users)
 	catch (...) {
-		DX9GF::Platform::ShowErrorMessage("Error", "Unknown fatal error (non-standard exception)");
+		sdlgf::Platform::ShowErrorMessage("Error", "Unknown fatal error (non-standard exception)");
 		return 1;
 	}
 

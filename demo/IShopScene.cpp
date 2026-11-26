@@ -3,7 +3,7 @@
 #include "MainFont.h"
 #include "LocalizationManager.h"
 #include "IconButton.h"
-#include "DX9GFUtils.h"
+#include "Utils.h"
 #include <algorithm>
 #include <cmath>
 #include "ShopPurchaseGlobalData.h"
@@ -116,7 +116,7 @@ namespace {
 
 	// Greedy space-split word wrap. Measures each candidate line with the caller's font
 	// sprite, so it matches whatever scale that sprite is currently set to.
-	std::vector<std::wstring> WrapText(DX9GF::FontSprite* fontSprite, const std::wstring& text,
+	std::vector<std::wstring> WrapText(sdlgf::FontSprite* fontSprite, const std::wstring& text,
 		float maxWidth, size_t maxLines)
 	{
 		std::vector<std::wstring> lines;
@@ -163,23 +163,23 @@ Demo::IShopScene::IShopScene(Game* game, Player* player, int sw, int sh, std::st
 
 void Demo::IShopScene::Init()
 {
-	transformManager = std::make_shared<DX9GF::TransformManager>();
-	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kLargeFontSize);
-	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
+	transformManager = std::make_shared<sdlgf::TransformManager>();
+	myFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kLargeFontSize);
+	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont.get());
 
-	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiSheetTex->LoadTexture(L"assets/ui.png");
 
-	borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	borderTex->LoadTexture(L"assets/popup-borders.png");
 
-	itemsTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	itemsTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	itemsTex->LoadTexture(L"assets/items.png");
 
-	buyTabTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	buyTabTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	buyTabTex->LoadTexture(L"assets/buytab.png");
 
-	sellTabTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	sellTabTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	sellTabTex->LoadTexture(L"assets/selltab.png");
 
 	LoadItems();
@@ -196,52 +196,52 @@ void Demo::IShopScene::BuildUI()
 	const ShopLayout l = ComputeLayout(sw, sh);
 
 	// --- Panel and row chrome ---------------------------------------------------
-	panelFrameSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), PANEL_FRAME_SRC, 6, 6, 6, 6);
+	panelFrameSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), PANEL_FRAME_SRC, 6, 6, 6, 6);
 	panelFrameSprite->SetScale(PANEL_BORDER_SCALE);
 	panelFrameSprite->SetTargetSize(l.panelW, l.panelH);
 	panelFrameSprite->SetPosition(l.panelX, l.panelY);
 
-	panelSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), PANEL_FILL_SRC, 2, 2, 2, 2);
+	panelSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), PANEL_FILL_SRC, 2, 2, 2, 2);
 	panelSprite->SetScale(PANEL_BORDER_SCALE);
 	panelSprite->SetColor(TINT_PANEL_FILL);
 	panelSprite->SetTargetSize(l.panelW - PANEL_FRAME_INSET * 2.0f, l.panelH - PANEL_FRAME_INSET * 2.0f);
 	panelSprite->SetPosition(l.panelX + PANEL_FRAME_INSET, l.panelY + PANEL_FRAME_INSET);
 
-	rowSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), ROW_SRC, 2, 2, 2, 2);
+	rowSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), ROW_SRC, 2, 2, 2, 2);
 	rowSprite->SetScale(CARD_BORDER_SCALE);
 	rowSprite->SetTargetSize(l.rowW, ROW_H);
 
-	rowHoverSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), ROW_HOVER_SRC, 2, 2, 2, 2);
+	rowHoverSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), ROW_HOVER_SRC, 2, 2, 2, 2);
 	rowHoverSprite->SetScale(CARD_BORDER_SCALE);
 	rowHoverSprite->SetColor(TINT_ROW_HOVER);
 	rowHoverSprite->SetTargetSize(l.rowW, ROW_H);
 
-	descSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
+	descSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
 	descSprite->SetScale(CARD_BORDER_SCALE);
 	descSprite->SetColor(TINT_DESC);
 	descSprite->SetTargetSize(l.rowW, DESC_BOX_H);
 
-	statusTabSprite = std::make_shared<DX9GF::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
+	statusTabSprite = std::make_shared<sdlgf::NineSliceSprite>(borderTex.get(), DESC_SRC, 2, 2, 2, 2);
 	statusTabSprite->SetScale(CARD_BORDER_SCALE);
 	statusTabSprite->SetColor(TINT_STATUS_TAB);
 
-	itemIconSprite = std::make_shared<DX9GF::StaticSprite>(itemsTex.get());
+	itemIconSprite = std::make_shared<sdlgf::StaticSprite>(itemsTex.get());
 	itemIconSprite->SetScale(ICON_SCALE, ICON_SCALE);
 
 	// Card faces are drawn at 2x like in battle, so they stay pixel-exact rather than resampled.
 	cardFrame = CardFrame::Get(game->GetGraphicsDevice());
 
 	// Same sheet rects as IStatementCard::DrawStatusCover.
-	coverBodySprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	coverBodySprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	coverBodySprite->SetSrcRect({ .left = 236, .top = 272, .right = 237, .bottom = 288 });
-	coverCapSprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	coverCapSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	coverCapSprite->SetSrcRect({ .left = 253, .top = 272, .right = 256, .bottom = 288 });
-	coverPipSprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	coverPipSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	coverPipSprite->SetSrcRect({ .left = 277, .top = 277, .right = 283, .bottom = 283 });
-	coverBadgeSprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	coverBadgeSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	coverBadgeSprite->SetSrcRect({ .left = 259, .top = 290, .right = 269, .bottom = 302 });
 
-	goldIconSprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+	goldIconSprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	goldIconSprite->SetSrcRect({ 0, 240, 32, 272 });
 	goldIconSprite->SetScale(1.0f, 1.0f);
 
@@ -256,7 +256,7 @@ void Demo::IShopScene::BuildUI()
 	);
 	leaveButton->SetSpriteCoords(144, 240, 48, 32, 0, false);
 	leaveButton->SetSpriteScale(2, 2);
-	leaveButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+	leaveButton->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 		this->shouldLeave = true;
 		});
 	leaveButton->Init(&uiCamera);
@@ -265,11 +265,11 @@ void Demo::IShopScene::BuildUI()
 	// Each tab's own texture is a 144x32 strip: three 48x32 frames (idle / hover / pressed).
 	const float tabY = l.panelY + (HEADER_H - 64.0f) / 2.0f;
 	const float tabGap = 6.0f;
-	auto makeTabButton = [&](std::shared_ptr<DX9GF::Texture> tex, float x, ShopMode target) {
+	auto makeTabButton = [&](std::shared_ptr<sdlgf::Texture> tex, float x, ShopMode target) {
 		auto btn = std::make_shared<Demo::IconButton>(transformManager, x, tabY, 96, 64, tex, 3);
 		btn->SetSpriteCoords(0, 0, 48, 32, 0, false);
 		btn->SetSpriteScale(2, 2);
-		btn->SetOnReleaseLeft([this, target](DX9GF::ITrigger* t) { this->SetMode(target); });
+		btn->SetOnReleaseLeft([this, target](sdlgf::ITrigger* t) { this->SetMode(target); });
 		btn->Init(&uiCamera);
 		return btn;
 		};
@@ -277,7 +277,7 @@ void Demo::IShopScene::BuildUI()
 	btnSellTab = makeTabButton(sellTabTex, tabGap * 0.5f, ShopMode::Sell);
 
 	// --- Page arrows ------------------------------------------------------------
-	auto makePageButton = [&](const std::wstring& label, const std::function<void(DX9GF::ITrigger*)>& action) {
+	auto makePageButton = [&](const std::wstring& label, const std::function<void(sdlgf::ITrigger*)>& action) {
 		auto btn = std::make_shared<Demo::TextIconButton>(
 			transformManager, 0.0f, 0.0f, 32, 32, uiSheetTex, myFont.get(), label, 4);
 		btn->SetSpriteRects({ { 0, 0, 16, 16 }, { 0, 16, 16, 32 }, { 0, 32, 16, 48 }, { 288, 48, 304, 64 } });
@@ -288,13 +288,13 @@ void Demo::IShopScene::BuildUI()
 		return btn;
 		};
 
-	btnPrevPage = makePageButton(L"<", [this](DX9GF::ITrigger*) {
+	btnPrevPage = makePageButton(L"<", [this](sdlgf::ITrigger*) {
 		if (currentPage > 0) {
 			currentPage--;
 			RefreshPage();
 		}
 		});
-	btnNextPage = makePageButton(L">", [this](DX9GF::ITrigger*) {
+	btnNextPage = makePageButton(L">", [this](sdlgf::ITrigger*) {
 		if (currentPage < maxPage) {
 			currentPage++;
 			RefreshPage();
@@ -320,7 +320,7 @@ void Demo::IShopScene::RebuildRows()
 		buyBtn->SetSpriteCoords(0, 240, 32, 32, 0, false);
 		buyBtn->SetSpriteScale(2, 2);
 		const int index = static_cast<int>(i);
-		buyBtn->SetOnReleaseLeft([this, index](DX9GF::ITrigger* t) { this->HandleRow(index); });
+		buyBtn->SetOnReleaseLeft([this, index](sdlgf::ITrigger* t) { this->HandleRow(index); });
 		buyBtn->Init(&uiCamera);
 		buyButtons.push_back(buyBtn);
 	}
@@ -352,7 +352,7 @@ void Demo::IShopScene::HandleRow(int index)
 
 	if (shopMode == ShopMode::Buy) {
 		if (IsSoldOut(item)) {
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.3f);
 			ShowMessage(Tr(L"Sold out!"));
 			return;
 		}
@@ -360,11 +360,11 @@ void Demo::IShopScene::HandleRow(int index)
 			player->AddGold(-item.cost);
 			if (item.onBuyAction) item.onBuyAction();
 			if (item.purchaseLimit > 0) ShopPurchaseGlobalData::GetInstance()->AddPurchase(item.limitKey);
-			DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
 			ShowMessage(Tr(L"Bought ") + item.name + Tr(L"!"));
 		}
 		else {
-			DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
+			sdlgf::AudioManager::GetInstance()->Play("error", false, 0.3f);
 			ShowMessage(Tr(L"Not enough gold!"));
 		}
 		return;
@@ -373,7 +373,7 @@ void Demo::IShopScene::HandleRow(int index)
 	// Sell: the row's action removes one copy from the player's inventory; we hand back the gold.
 	if (item.onBuyAction) item.onBuyAction();
 	player->AddGold(item.cost);
-	DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
+	sdlgf::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
 	ShowMessage(Tr(L"Sold ") + item.name + Tr(L" for ") + std::to_wstring(item.cost) + Tr(L"G"));
 
 	// The inventory just changed, but we are inside a row button's own callback right now -
@@ -632,7 +632,7 @@ std::vector<Demo::KeyboardNavigator::Candidate> Demo::IShopScene::CollectKeyboar
 
 void Demo::IShopScene::Update(unsigned long long deltaTime)
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
 	if (inpMan->KeyDown(DIK_ESCAPE)) {
@@ -726,8 +726,8 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 		}
 	}
 	else {
-		auto [mouseX, mouseY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&uiCamera);
-		auto [worldMouseX, worldMouseY] = DX9GF::Utils::WindowToWorldCoords(uiCamera, mouseX, mouseY);
+		auto [mouseX, mouseY] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(&uiCamera);
+		auto [worldMouseX, worldMouseY] = sdlgf::Utils::WindowToWorldCoords(uiCamera, mouseX, mouseY);
 		for (int i = startIndex; i < endIndex; ++i) {
 			const float rowY = l.listTop + (i - startIndex) * (ROW_H + ROW_GAP);
 			if (worldMouseX >= l.rowX && worldMouseX <= l.rowX + l.rowW &&
@@ -969,7 +969,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 
 		keyboardNavigator.Draw(gd, uiCamera, CollectKeyboardCandidates());
 		if (!keyboardNavigator.IsInKeyboardMode()) {
-			DX9GF::InputManager::GetInstance()->DrawCursor(&uiCamera, deltaTime);
+			sdlgf::InputManager::GetInstance()->DrawCursor(&uiCamera, deltaTime);
 		}
 		gd->EndDraw();
 	}

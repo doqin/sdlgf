@@ -1,17 +1,17 @@
 #pragma once
 #include <memory>
 #include <vector>
-#include "DX9GFExtras.h"
-#include "DX9GFGraphicsDevice.h"
-#include "DX9GFApplication.h"
-#include "DX9GFCamera.h"
+#include "Extras.h"
+#include "GraphicsDevice.h"
+#include "Application.h"
+#include "Camera.h"
 
 namespace Demo {
     class Game;
-    class TransitionCommand : public DX9GF::ICommand {
+    class TransitionCommand : public sdlgf::ICommand {
     private:
         Game* game;
-        DX9GF::Camera* uiCamera;
+        sdlgf::Camera* uiCamera;
         float duration;
         float elapsedTime;
         bool isTransitioningIn;
@@ -20,7 +20,7 @@ namespace Demo {
         int screenHeight;
         int frame = 0;
     public:
-        TransitionCommand(Game* game, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars = 10);
+        TransitionCommand(Game* game, sdlgf::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars = 10);
         void Execute(unsigned long long deltaTime) override;
 
         static float EaseInOutQuad(float t) {

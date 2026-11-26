@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "ICard.h"
 #include "GameItems.h"
 #include "DamageTextManager.h"
@@ -9,7 +9,7 @@
 #include "ICombatant.h"
 namespace Demo {
 	class IEnemy;
-	class Player : public ICombatant, public DX9GF::ISaveable {
+	class Player : public ICombatant, public sdlgf::ISaveable {
 	private:
 		enum class State {
 			Left,
@@ -39,42 +39,42 @@ namespace Demo {
 		bool isInvincible = false;
 		float timeSinceTurnedInvincible = 0.f;
 		// Sprites
-		std::shared_ptr<DX9GF::Texture> spritesheet;
-		std::shared_ptr<DX9GF::StaticSprite> idleDown;
-		std::shared_ptr<DX9GF::StaticSprite> idleUp;
-		std::shared_ptr<DX9GF::StaticSprite> idleRight;
-		std::shared_ptr<DX9GF::StaticSprite> idleLeft;
-		std::shared_ptr<DX9GF::StaticSprite> idleDownLeft;
-		std::shared_ptr<DX9GF::StaticSprite> idleDownRight;
-		std::shared_ptr<DX9GF::StaticSprite> idleUpLeft;
-		std::shared_ptr<DX9GF::StaticSprite> idleUpRight;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingDownLeft;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingDownRight;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingUpLeft;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingUpRight;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingDown;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingUp;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingRight;
-		std::shared_ptr<DX9GF::AnimatedSprite> walkingLeft;
+		std::shared_ptr<sdlgf::Texture> spritesheet;
+		std::shared_ptr<sdlgf::StaticSprite> idleDown;
+		std::shared_ptr<sdlgf::StaticSprite> idleUp;
+		std::shared_ptr<sdlgf::StaticSprite> idleRight;
+		std::shared_ptr<sdlgf::StaticSprite> idleLeft;
+		std::shared_ptr<sdlgf::StaticSprite> idleDownLeft;
+		std::shared_ptr<sdlgf::StaticSprite> idleDownRight;
+		std::shared_ptr<sdlgf::StaticSprite> idleUpLeft;
+		std::shared_ptr<sdlgf::StaticSprite> idleUpRight;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingDownLeft;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingDownRight;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingUpLeft;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingUpRight;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingDown;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingUp;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingRight;
+		std::shared_ptr<sdlgf::AnimatedSprite> walkingLeft;
 		// Gear Drone
-		std::shared_ptr<DX9GF::Texture> gearTex;
-		std::shared_ptr<DX9GF::AnimatedSprite> activeGearAnim;
-		std::shared_ptr<DX9GF::AnimatedSprite> passiveGearAnim;
+		std::shared_ptr<sdlgf::Texture> gearTex;
+		std::shared_ptr<sdlgf::AnimatedSprite> activeGearAnim;
+		std::shared_ptr<sdlgf::AnimatedSprite> passiveGearAnim;
 		int lastActiveGearID = -2;
 		int lastPassiveGearID = -2;
 		float gearAnimTimer = 0.0f;
 		// Particles
 		const float FOOTPRINT_OFFSET = 3.f;
-		std::shared_ptr<DX9GF::Texture> footprintTexture;
-		std::unique_ptr<DX9GF::ParticleSystem> footprintEmitter;
+		std::shared_ptr<sdlgf::Texture> footprintTexture;
+		std::unique_ptr<sdlgf::ParticleSystem> footprintEmitter;
 		bool footprintsEnabled = true;
 		bool nextFootLeft = true;
 		// Colliders
-		std::shared_ptr<DX9GF::RectangleCollider> collider;
+		std::shared_ptr<sdlgf::RectangleCollider> collider;
 		// Externals
-		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
-		DX9GF::ColliderManager* colliderManager = nullptr;
-		DX9GF::Camera* camera = nullptr;
+		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
+		sdlgf::ColliderManager* colliderManager = nullptr;
+		sdlgf::Camera* camera = nullptr;
 
 		//for audio
 		float stepTimer = 0.0f;
@@ -85,17 +85,17 @@ namespace Demo {
 		static bool ignoreCollisions; // For debugging purposes
 		// In battle, projectiles and beams hit a circle of this radius centred on the collider
 		static constexpr float BATTLE_HITBOX_RADIUS = 3.f;
-		Player(std::weak_ptr<DX9GF::TransformManager> tm) : ICombatant(tm, 50.0) {}
-		Player(std::weak_ptr<DX9GF::TransformManager> tm,
+		Player(std::weak_ptr<sdlgf::TransformManager> tm) : ICombatant(tm, 50.0) {}
+		Player(std::weak_ptr<sdlgf::TransformManager> tm,
 			float x, float y, float rot = 0, float sx = 1, float sy = 1)
 			: ICombatant(tm, 50.f, x, y, rot, sx, sy) {
 		}
-		Player(std::weak_ptr<DX9GF::TransformManager> tm,
-			std::weak_ptr<DX9GF::IGameObject> parent, float x, float y, float rot = 0, float sx = 1, float sy = 1)
+		Player(std::weak_ptr<sdlgf::TransformManager> tm,
+			std::weak_ptr<sdlgf::IGameObject> parent, float x, float y, float rot = 0, float sx = 1, float sy = 1)
 			: ICombatant(tm, parent, 50.f, x, y, rot, sx, sy) {
 		}
 		~Player();
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderManager* colliderManager, DX9GF::Camera* camera, bool isBattling = false);
+		void Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderManager* colliderManager, sdlgf::Camera* camera, bool isBattling = false);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void SetFollowCamera(bool followCamera);
@@ -103,7 +103,7 @@ namespace Demo {
 		float SetVelocity(float velocity);
 		bool TakeDamage(float damage, bool ignoreArmor = false) override;
 		void DealDamage(IEnemy* target, float cardBaseDamage, bool ignoreArmor = false);
-		std::weak_ptr<DX9GF::RectangleCollider> GetCollider();
+		std::weak_ptr<sdlgf::RectangleCollider> GetCollider();
 
 		int GetHealth() const { return PlayerGlobalData::GetInstance()->GetHealth(); }
 		int GetMaxHealth() const { return PlayerGlobalData::GetInstance()->GetMaxHealth(); }
@@ -143,6 +143,6 @@ namespace Demo {
 		}
 
 		bool TakeIndirectDamage(float damage, DamageType type) override;
-		void InitGearAnim(std::shared_ptr<DX9GF::Texture> tex);
+		void InitGearAnim(std::shared_ptr<sdlgf::Texture> tex);
 	};
 }

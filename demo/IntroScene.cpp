@@ -4,8 +4,8 @@
 #include "LocalizationManager.h"
 
 void Demo::IntroScene::Init() {
-    font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-    fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+    font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+    fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 
     auto [sw, sh] = camera.GetScreenResolution();
     conversation = std::make_shared<IConversation>(fontSprite, sw, sh);
@@ -21,7 +21,7 @@ void Demo::IntroScene::Init() {
 }
 
 void Demo::IntroScene::Update(unsigned long long deltaTime) {
-    auto inpMan = DX9GF::InputManager::GetInstance();
+    auto inpMan = sdlgf::InputManager::GetInstance();
     inpMan->ReadMouse(deltaTime);
     inpMan->ReadKeyboard(deltaTime);
 
@@ -34,7 +34,7 @@ void Demo::IntroScene::Update(unsigned long long deltaTime) {
 
     if (!conversation && !hasTransitioned) {
         hasTransitioned = true;
-        DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
+        sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("bgm_tutorial", 0.5f, 5.0f);
         game->GetSceneManager()->GoToNext();
     }
 }
@@ -57,7 +57,7 @@ void Demo::IntroScene::DrawUI(unsigned long long deltaTime)
             conversation->Draw(gd, &this->uiCamera, deltaTime);
         }
 
-        DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+        sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 
         gd->EndDraw();
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DX9GFGraphicsDevice.h"
+#include "GraphicsDevice.h"
 
 namespace Demo {
 	/// <summary>
@@ -9,7 +9,7 @@ namespace Demo {
 	/// <param name="tick">Elapsed animation time in milliseconds.</param>
 	/// <param name="animationSpeed">Dash movement speed in pixels per second.</param>
 	void DrawAnimatedDashedLine(
-		DX9GF::GraphicsDevice* graphicsDevice,
+		sdlgf::GraphicsDevice* graphicsDevice,
 		float firstX,
 		float firstY,
 		float lastX,
@@ -25,8 +25,8 @@ namespace Demo {
 		unsigned long long tick);
 
 	void DrawAnimatedDashedLine(
-		DX9GF::GraphicsDevice* graphicsDevice,
-		DX9GF::Camera& camera,
+		sdlgf::GraphicsDevice* graphicsDevice,
+		sdlgf::Camera& camera,
 		float firstX,
 		float firstY,
 		float lastX,
@@ -47,7 +47,7 @@ namespace Demo {
 	/// <param name="tick">Elapsed animation time in milliseconds.</param>
 	/// <param name="animationSpeed">Dash movement speed in pixels per second.</param>
 	void DrawAnimatedDashedArrow(
-		DX9GF::GraphicsDevice* graphicsDevice,
+		sdlgf::GraphicsDevice* graphicsDevice,
 		float firstX,
 		float firstY,
 		float lastX,
@@ -65,8 +65,8 @@ namespace Demo {
 		float headWidth);
 
 	void DrawAnimatedDashedArrow(
-		DX9GF::GraphicsDevice* graphicsDevice,
-		DX9GF::Camera& camera,
+		sdlgf::GraphicsDevice* graphicsDevice,
+		sdlgf::Camera& camera,
 		float firstX,
 		float firstY,
 		float lastX,
@@ -84,7 +84,7 @@ namespace Demo {
 		float headWidth);
 
 	void DrawAnimatedDashedRectangle(
-		DX9GF::GraphicsDevice* graphicsDevice,
+		sdlgf::GraphicsDevice* graphicsDevice,
 		float x,
 		float y,
 		float width,
@@ -100,8 +100,8 @@ namespace Demo {
 		unsigned long long tick);
 
 	void DrawAnimatedDashedRectangle(
-		DX9GF::GraphicsDevice* graphicsDevice,
-		DX9GF::Camera& camera,
+		sdlgf::GraphicsDevice* graphicsDevice,
+		sdlgf::Camera& camera,
 		float x,
 		float y,
 		float width,
@@ -122,8 +122,8 @@ namespace Demo {
 	/// </summary>
 	/// <param name="tick">Elapsed animation time in milliseconds.</param>
 	void DrawKeyboardTargetReticle(
-		DX9GF::GraphicsDevice* graphicsDevice,
-		DX9GF::Camera& camera,
+		sdlgf::GraphicsDevice* graphicsDevice,
+		sdlgf::Camera& camera,
 		float x,
 		float y,
 		float width,

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "IButton.h"
-#include <DX9GF.h>
-#include "DX9GFTexture.h"
+#include <sdlgf.h>
+#include "Texture.h"
 #include <functional>
 #include <vector>
 namespace Demo
@@ -9,10 +9,10 @@ namespace Demo
 	class IconButton : public IButton
 	{
 	private:
-		std::shared_ptr<DX9GF::Texture> texture;
-		std::shared_ptr<DX9GF::StaticSprite> sprite;
+		std::shared_ptr<sdlgf::Texture> texture;
+		std::shared_ptr<sdlgf::StaticSprite> sprite;
 		//only built when slicing is enabled, draws the frame as left cap + stretched centre + right cap
-		std::shared_ptr<DX9GF::NineSliceSprite> sliceSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> sliceSprite;
 		std::vector<RECT> buttonRects;
 		float spriteOffsetX = 0.0f;
 		float spriteOffsetY = 0.0f;
@@ -24,8 +24,8 @@ namespace Demo
 		void RebuildSliceSprite();
 	public:
 
-		IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-			std::shared_ptr<DX9GF::Texture> uiSheetTex, int frames = 3);
+		IconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+			std::shared_ptr<sdlgf::Texture> uiSheetTex, int frames = 3);
 
 		//An extra flag to determine the frame cutting method.
 		IconButton* SetSpriteCoords(int startX, int startY, int imgW, int imgH, int spacing, bool isVertical = false);
@@ -37,10 +37,10 @@ namespace Demo
 		bool IsSliced() const { return this->isSliced; }
 		//Smallest width the sliced sprite can render at, i.e. both caps touching.
 		float GetSliceCapsWidth() const;
-		void Init(DX9GF::Camera* cam) override;
+		void Init(sdlgf::Camera* cam) override;
 		void SetSpriteScale(float scaleX, float scaleY);
 		void SetSpriteColor(D3DCOLOR color);
-		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
+		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) override;
 		void SetSpriteRotation(float radians);
 		void SetSpriteOrigin(float x, float y);
 		void SetSpriteOffset(float dx, float dy);

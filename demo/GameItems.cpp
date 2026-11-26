@@ -186,7 +186,7 @@ namespace Demo
 		if (id >= 0 && id < slots.size() && slots[id].quantity > 0 && !IsItemLocked(id))
 		{
 			slots[id].quantity--;
-			DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.2f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.2f);
 			return true;
 		}
 		return false;

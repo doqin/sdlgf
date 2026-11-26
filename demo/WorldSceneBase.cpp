@@ -24,7 +24,7 @@ namespace {
 	}
 }
 
-Demo::WorldSceneBase::WorldSceneBase(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh)
+Demo::WorldSceneBase::WorldSceneBase(Game* game, std::shared_ptr<sdlgf::SaveManager> sm, UINT sw, UINT sh)
 	: IScene(sw, sh), game(game), saveManager(sm) {
 }
 
@@ -40,34 +40,34 @@ void Demo::WorldSceneBase::Init() {
 void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t* mapFile)
 {
 	camera.SetZoom(2.0f);
-	transformManager = std::make_shared<DX9GF::TransformManager>();
-	colliderManager = std::make_shared<DX9GF::ColliderManager>();
+	transformManager = std::make_shared<sdlgf::TransformManager>();
+	colliderManager = std::make_shared<sdlgf::ColliderManager>();
 	player = std::make_shared<Player>(transformManager, playerX, playerY);
 	camera.SetPosition(playerX, playerY);
 	player->Init(game->GetGraphicsDevice(), colliderManager.get(), &camera);
-	gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 	player->InitGearAnim(gearTex);
-	drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
-	commandBuffer = std::make_shared<DX9GF::CommandBuffer>();
+	drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
+	commandBuffer = std::make_shared<sdlgf::CommandBuffer>();
 	popUpMessage = std::make_shared<PopUpMessage>(transformManager, game);
 	popUpMessage->SetLocalPosition(0.0f, 0.0f);
 	popUpMessage->Init(game->GetGraphicsDevice(), &this->uiCamera);
-	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
+	map = std::make_shared<sdlgf::Map>(game->GetGraphicsDevice());
 	std::wstring wMapFile(mapFile);
-	std::string sMapFile = DX9GF::Utils::WideToUtf8(wMapFile);
+	std::string sMapFile = sdlgf::Utils::WideToUtf8(wMapFile);
 	map->Create(transformManager, colliderManager, sMapFile);
 
-	font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+	font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
 	chapterTitleUI = std::make_shared<ChapterTitleUI>(font);
 
 	mapView.Init(font.get());
 	mapView.Build(*map);
 	mapView.Reveal(playerX, playerY);
 
-	auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	borderTex->LoadTexture(L"assets/popup-borders.png");
-	auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiTex->LoadTexture(L"assets/ui.png");
 	PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
 	QuestManager::GetInstance()->SetVirtualResolution(game->GetVirtualWidth(), game->GetVirtualHeight());
@@ -82,10 +82,10 @@ void Demo::WorldSceneBase::InitCore(float playerX, float playerY, const wchar_t*
 	});
 	playerHUD->Init();
 
-	map->SetAreaUpdateHandler("audio_zone_leaves", [this](const DX9GF::Map::ObjectArea&) {
+	map->SetAreaUpdateHandler("audio_zone_leaves", [this](const sdlgf::Map::ObjectArea&) {
 		GetPlayer()->SetSurface("leaves");
 	});
-	map->SetAreaUpdateHandler("audio_zone_metal", [this](const DX9GF::Map::ObjectArea&) {
+	map->SetAreaUpdateHandler("audio_zone_metal", [this](const sdlgf::Map::ObjectArea&) {
 		GetPlayer()->SetSurface("metal");
 	});
 
@@ -120,17 +120,17 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 				}
 			}
 			else if (r.type == ChestRewardType::CARD) {
-				std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
+				std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 				msg += wid + L"  ";
 			}
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
 		currentConversation = std::make_shared<IConversation>(
-			std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+			std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 		currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 	};
 
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
 
@@ -236,7 +236,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 			activeNPC->SetOnDialogueEnd(onEndCallback);
 
 			auto [sw, sh] = camera.GetScreenResolution();
-			currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 			for (auto& line : npc->GetDialogueLines()) {
 				currentConversation->AddLine(line);
 			}
@@ -292,13 +292,13 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 						}
 					}
 					else if (r.type == ChestRewardType::CARD) {
-						std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
+						std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 						msg += wid + L"  ";
 					}
 				}
 				auto [sw, sh] = camera.GetScreenResolution();
 				currentConversation = std::make_shared<IConversation>(
-					std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+					std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 				currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 			}
 		}
@@ -334,7 +334,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 	if (inventoryMenu && inventoryMenu->IsPendingLeave()) {
 		auto sceMan = game->GetSceneManager();
 		sceMan->GoToScene(0);
-		auto audio = DX9GF::AudioManager::GetInstance();
+		auto audio = sdlgf::AudioManager::GetInstance();
 		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
 		return;
 	}
@@ -442,7 +442,7 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		PopupManager::GetInstance()->DrawUI(deltaTime, &this->uiCamera);
 
 		if (!(inventoryMenu && inventoryMenu->IsInKeyboardMode())) {
-			DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+			sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
 
 		if (popUpMessage) {
@@ -474,13 +474,13 @@ void Demo::WorldSceneBase::OpenChestWithDialog(std::shared_ptr<TreasureChestNPC>
 			}
 		}
 		else if (r.type == ChestRewardType::CARD) {
-			std::wstring wid = DX9GF::Utils::Utf8ToWide(r.cardSaveID);
+			std::wstring wid = sdlgf::Utils::Utf8ToWide(r.cardSaveID);
 			msg += wid + L"  ";
 		}
 	}
 	auto [sw, sh] = camera.GetScreenResolution();
 	currentConversation = std::make_shared<IConversation>(
-		std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+		std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 	currentConversation->AddLine({ .name = Tr(L"Treasure Chest"), .content = msg, .voiceClip = std::optional<std::string>("bleep20") });
 }
 
@@ -524,7 +524,7 @@ void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, floa
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionInCommand);
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol, fastTravel](std::function<void(void)> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand, sceneIndex, targetX, targetY, bgm, bgmVol, fastTravel](std::function<void(void)> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
@@ -533,7 +533,7 @@ void Demo::WorldSceneBase::TransitionToScene(int sceneIndex, float targetX, floa
 		auto targetPlayer = MainMenu::gameSaveState->GetPlayerFromScene(targetScene);
 		targetPlayer->SetLocalPosition(targetX, targetY);
 		if (bgm) {
-			DX9GF::AudioManager::GetInstance()->PlayBGM_Fade(bgm, bgmVol, 1.5f);
+			sdlgf::AudioManager::GetInstance()->PlayBGM_Fade(bgm, bgmVol, 1.5f);
 		}
 		if (fastTravel) {
 			if (auto* world = dynamic_cast<WorldSceneBase*>(targetScene)) world->OnFastTravelArrive(targetX, targetY);
@@ -582,7 +582,7 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
 	const int tabCount = static_cast<int>(travelWorlds.size());
 	if (travelTab < 0 || travelTab >= tabCount) return;
 
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto settings = SettingsManager::GetInstance();
 	const bool inputReady = travelInputGraceMs <= 0.f;
 
@@ -620,7 +620,7 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
 	}
 
 	auto [mouseX, mouseY] = inpMan->GetVirtualAbsoluteMousePos(&uiCamera);
-	auto [mx, my] = DX9GF::Utils::WindowToWorldCoords(uiCamera, mouseX, mouseY);
+	auto [mx, my] = sdlgf::Utils::WindowToWorldCoords(uiCamera, mouseX, mouseY);
 	auto inside = [&](const MapView::Rect& r) { return mx >= r.x0 && mx <= r.x1 && my >= r.y0 && my <= r.y1; };
 
 	for (size_t i = 0; i < travelHits.tabs.size(); ++i) {
@@ -650,7 +650,7 @@ void Demo::WorldSceneBase::UpdateTravelMap(unsigned long long deltaTime)
 		return;
 	}
 	// Clicks act on release, like the rest of the UI buttons
-	if (!inpMan->MouseUp(DX9GF::InputManager::Left)) return;
+	if (!inpMan->MouseUp(sdlgf::InputManager::Left)) return;
 	if (travelHoverTab >= 0) {
 		if (travelHoverTab != travelTab) switchTab(travelHoverTab);
 		return;
@@ -701,7 +701,7 @@ void Demo::WorldSceneBase::ConfirmTravel(WorldSceneBase* world, const SavePoint&
 
 void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 	std::vector<std::string> types, bool isRand, bool isGlobal,
-	std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDraw,
+	std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDraw,
 	int tokenChance, const std::string& questEvent, const std::string& questId)
 {
 	auto enemy = EnemyFactory::CreateMapEnemy(
@@ -727,10 +727,10 @@ void Demo::WorldSceneBase::SpawnMapEnemy(float x, float y, std::string id,
 		auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 		this->drawBuffer->PushCommand(transitionIn);
 
-		this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e, questEvent, questId](std::function<void(void)> markFinished) {
+		this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionIn, e, questEvent, questId](std::function<void(void)> markFinished) {
 			if (!transitionIn->IsFinished()) return;
 
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			auto sceMan = this->game->GetSceneManager();
 			auto battleScene = new MapBattleScene(this->game, this->player, app->GetScreenWidth(), app->GetScreenHeight(), e->GetEncounterData());
 

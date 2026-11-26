@@ -18,7 +18,7 @@ namespace {
 		std::string saveId = id;
 		return {
 			saveId,
-			[saveId](std::weak_ptr<DX9GF::TransformManager> tm) -> std::shared_ptr<ICard> {
+			[saveId](std::weak_ptr<sdlgf::TransformManager> tm) -> std::shared_ptr<ICard> {
 				auto card = std::make_shared<TCard>(tm);
 				card->SetSaveID(saveId);
 				return card;
@@ -111,10 +111,10 @@ const Demo::CardDef* Demo::CardRegistry::Find(const std::string& id) const {
 
 std::shared_ptr<Demo::ICard> Demo::CardRegistry::Create(
 	const std::string& id,
-	std::weak_ptr<DX9GF::TransformManager> transformManager,
+	std::weak_ptr<sdlgf::TransformManager> transformManager,
 	std::shared_ptr<DraggableManager> draggableManager,
-	DX9GF::GraphicsDevice* graphicsDevice,
-	DX9GF::Camera* camera) const {
+	sdlgf::GraphicsDevice* graphicsDevice,
+	sdlgf::Camera* camera) const {
 	const CardDef* def = Find(id);
 	if (!def) return nullptr;
 	auto card = def->create(transformManager);

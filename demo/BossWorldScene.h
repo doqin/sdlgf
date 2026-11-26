@@ -6,8 +6,8 @@
 
 namespace Demo {
 	class BossWorldScene : public WorldSceneBase {
-		std::shared_ptr<DX9GF::Texture> gateTexture;
-		std::shared_ptr<DX9GF::StaticSprite> gateSprite;
+		std::shared_ptr<sdlgf::Texture> gateTexture;
+		std::shared_ptr<sdlgf::StaticSprite> gateSprite;
 
 		std::vector<std::shared_ptr<HackTerminal>> hackMachines;
 		std::shared_ptr<HackTerminal> mainTerminal;
@@ -20,14 +20,14 @@ namespace Demo {
 		void SetIsland(int islandID);
 
 		std::shared_ptr<KeyeproNPC> keyeproNPC;
-		std::shared_ptr<DX9GF::RectangleCollider> bossGateCollider;
+		std::shared_ptr<sdlgf::RectangleCollider> bossGateCollider;
 		std::shared_ptr<RustyChestNPC> rustyChest;
 
 		void StartKeyeproConversation();
 		void StartKeyeproBattle();
 
 	public:
-		BossWorldScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh)
+		BossWorldScene(Game* game, std::shared_ptr<sdlgf::SaveManager> sm, UINT sw, UINT sh)
 			: WorldSceneBase(game, sm, sw, sh) {
 		}
 		std::string GetSaveID() const override;
@@ -42,6 +42,6 @@ namespace Demo {
 		void OnGenerateSaveData(nlohmann::json& outData) override;
 		void OnRestoreSaveData(const nlohmann::json& inData) override;
 		void OnFastTravelArrive(float x, float y) override;
-		void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
+		void DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) override;
 	};
 }

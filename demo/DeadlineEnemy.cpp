@@ -6,21 +6,21 @@
 #include "PopUpMessage.h"
 #include <algorithm>
 
-void Demo::DeadlineEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::DeadlineEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/Deadline.png"); // TODO: change when real asset is available
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 82, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 82, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::DeadlineEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::DeadlineEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -50,7 +50,7 @@ void Demo::DeadlineEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	abilityCooldown = 3;
 }
 
-void Demo::DeadlineEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::DeadlineEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	(void)enemies; (void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 	this->player = player;
 
@@ -86,7 +86,7 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 		float spinDir = useA ? SWEEP_ANGULAR_SPEED : -SWEEP_ANGULAR_SPEED;
 		auto angleRef = useA ? angleA : angleB;
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, angleRef, pivotX, pivotY, spinDir, HAND_BULLETS, SWEEP_RADIAL_SPEED, ANGLE_STEP, HAND_DECAY_TIME](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, angleRef, pivotX, pivotY, spinDir, HAND_BULLETS, SWEEP_RADIAL_SPEED, ANGLE_STEP, HAND_DECAY_TIME](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float startAng = *angleRef;
 				for (int i = 1; i <= HAND_BULLETS; ++i) {
@@ -105,7 +105,7 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 			}));
 
 		if (t % 2 == 1) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
 					auto desc = ProjectileDesc(projTexture.get(), 8, 8, 14, 14, px, -260.f)
@@ -120,7 +120,7 @@ void Demo::DeadlineEnemy::PatternClockTickCountdown(float projDamage) {
 				}));
 		}
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(TICK_INTERVAL));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(TICK_INTERVAL));
 	}
 }
 
@@ -137,7 +137,7 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 	const float WAVE_DURATION = WAVE_SHOTS * SHOT_DELAY;
 	const float FIRE_TIME = WAVE_DURATION + 1.8f;
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float wallOffset = 55.f;
 			LaserDesc leftBeam = LaserDesc::Vertical(-wallOffset, 0.f, BEAM_LENGTH)
@@ -160,7 +160,7 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 		markFinished();
 		}));
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WARN_TIME));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WARN_TIME));
 
 	struct SpawnRange {
 		float minX, maxX;
@@ -176,7 +176,7 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 	} };
 
 	for (int i = 0; i < WAVE_SHOTS; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, i, spawnRanges](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, i, spawnRanges](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				for (const auto& range : spawnRanges) {
 					if (i % range.tickInterval != 0) continue;
@@ -193,8 +193,8 @@ void Demo::DeadlineEnemy::PatternServerMaintenance2359(float projDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SHOT_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SHOT_DELAY));
 	}
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f));
 }

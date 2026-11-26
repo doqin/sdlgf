@@ -7,25 +7,25 @@
 #include "RNG.h"
 #include <algorithm>
 
-void Demo::KeyeproEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::KeyeproEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/boss-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 128, 128, 29), 6);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 128, 128, 29), 6);
 	sprite->SetOrigin(64, 64);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/bossprojectile-Sheet.png");
-	projFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
-	shardTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
+	shardTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	shardTexture->LoadTexture(L"assets/bossshard-Sheet.png");
-	shardFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 6);
+	shardFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 6);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::KeyeproEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::KeyeproEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -60,7 +60,7 @@ int Demo::KeyeproEnemy::GetRandomPattern() {
 	return RNG::Range(1, 6);
 }
 
-void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
+void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
 	this->player = player;
 
 	float desperato = 1.f - static_cast<float>(this->GetHealth()) / static_cast<float>(this->GetMaxHealth()); // Desperation factor, ranges from 0 to 1 as health decreases
@@ -141,7 +141,7 @@ void Demo::KeyeproEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 	}
 }
 
-void Demo::KeyeproEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::KeyeproEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	this->player = player;
 
 	float baseDamage = 5.f;
@@ -176,7 +176,7 @@ void Demo::KeyeproEnemy::PatternTargetedSniping(float baseDamage) {
 	auto currentPosition = std::make_shared<int>(0);
 
 	for (int i = 0; i < ScaleCount(100); i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, currentPosition](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, currentPosition](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock(); lock && this->HasBulletRoom(1)) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 				*currentPosition = *currentPosition % 4 + 1; // Cycle through positions 1 to 4
@@ -213,7 +213,7 @@ void Demo::KeyeproEnemy::PatternTargetedSniping(float baseDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.1f * patternPace));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.1f * patternPace));
 	}
 }
 
@@ -222,7 +222,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 	const int VELOCITY = 180;
 	const int SPACING = 96;
 	std::shared_ptr<int> yOffset = std::make_shared<int>(0);
-	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset, SPACING, BULLETS](std::function<void(void)> markFinished) {
+	auto rightAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, yOffset, SPACING, BULLETS](std::function<void(void)> markFinished) {
 		if (!this->HasBulletRoom(BULLETS)) { markFinished(); return; }
 		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 		for (int i = 0; i < BULLETS; i++) {
@@ -246,7 +246,7 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 		*yOffset %= SPACING;
 		markFinished();
 		});
-	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, yOffset, BULLETS](std::function<void(void)> markFinished) {
+	auto leftAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, yOffset, BULLETS](std::function<void(void)> markFinished) {
 		if (!this->HasBulletRoom(BULLETS)) { markFinished(); return; }
 		float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 		for (int i = 0; i < BULLETS; i++) {
@@ -270,9 +270,9 @@ void Demo::KeyeproEnemy::PatternEcholocation(float baseDamage) {
 		markFinished();
 		});
 	for (int i = 0; i < ScaleCount(40); i++) {
-		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));
-		else commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*rightAttack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f * patternPace));
+		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*leftAttack));
+		else commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*rightAttack));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f * patternPace));
 	}
 }
 
@@ -280,7 +280,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 	const int BULLET_COUNT = (std::max)(4, ScaleCount(8));
 	const float ANGLE_STEP = 0.3f * 8.f / BULLET_COUNT; // keep the fan as wide as the full one
 	const float INITIAL_VELOCITY = 370.f;
-	auto rightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
+	auto rightAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock(); lock && this->HasBulletRoom(BULLET_COUNT)) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetCollider().lock()->GetWorldPosition();
@@ -312,7 +312,7 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 		}
 		markFinished();
 		});
-	auto leftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
+	auto leftAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, BULLET_COUNT, ANGLE_STEP, INITIAL_VELOCITY](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock(); lock && this->HasBulletRoom(BULLET_COUNT)) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetCollider().lock()->GetWorldPosition();
@@ -347,9 +347,9 @@ void Demo::KeyeproEnemy::PatternSwoopBite(float baseDamage) {
 
 	int dist = RNG::Range(30, 40);
 	for (int i = 0; i < ScaleCount(dist); i++) {
-		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*leftAttack));
-		else commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*rightAttack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f * patternPace));
+		if (RNG::Range(1, 2) == 1) commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*leftAttack));
+		else commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*rightAttack));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f * patternPace));
 	}
 }
 
@@ -383,7 +383,7 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 	// the pressure starts reading as a slog instead.
 	const int waves = ScaleCount(RNG::Range(8, 9));
 	for (int w = 0; w < waves; w++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, SHELLS_PER_WAVE, SHARDS](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, SHELLS_PER_WAVE, SHARDS](std::function<void(void)> markFinished) {
 			// A shell bursts into SHARDS more, so count them together against the budget.
 			if (auto lock = this->player.lock(); lock && this->HasBulletRoom(static_cast<size_t>(SHELLS_PER_WAVE) * (1 + SHARDS))) {
 				const float shellDamage = this->CalculateOutgoingDamage(baseDamage);
@@ -413,7 +413,7 @@ void Demo::KeyeproEnemy::PatternShatterVolley(float baseDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_GAP * patternPace));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_GAP * patternPace));
 	}
 }
 
@@ -436,7 +436,7 @@ void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 			float jitterDist = std::sqrt(RNG::Range(0.f, 1.f)) * JITTER_RADIUS;
 			float jitterX = std::cos(jitterAngle) * jitterDist;
 			float jitterY = std::sin(jitterAngle) * jitterDist;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, dir, SPAWN_DISTANCE, jitterX, jitterY](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, dir, SPAWN_DISTANCE, jitterX, jitterY](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock(); lock && this->HasBulletRoom(1)) {
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
@@ -455,9 +455,9 @@ void Demo::KeyeproEnemy::PatternFanning(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DELAY_BETWEEN_BULLETS));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(DELAY_BETWEEN_BULLETS));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DELAY_BETWEEN_WAVES));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(DELAY_BETWEEN_WAVES));
 	}
 
 }

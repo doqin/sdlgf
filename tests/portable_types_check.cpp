@@ -1,4 +1,4 @@
-// Compile-only check of the non-Windows branch of DX9GFPlatform.h.
+// Compile-only check of the non-Windows branch of Platform.h.
 //
 // SDLGF_PLATFORM_FORCE_PORTABLE_TYPES makes the header define the Win32 stand-in types
 // itself even on Windows, so we can verify here that their layout matches the real
@@ -6,7 +6,7 @@
 // This translation unit is built as its own OBJECT library and never linked with
 // anything that includes <windows.h>, so the duplicate type names cannot clash.
 #define SDLGF_PLATFORM_FORCE_PORTABLE_TYPES
-#include "DX9GFPlatform.h"
+#include "Platform.h"
 
 static_assert(sizeof(BYTE) == 1, "BYTE");
 static_assert(sizeof(WORD) == 2, "WORD");

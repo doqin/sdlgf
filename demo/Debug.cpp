@@ -11,8 +11,8 @@
 #include "backends/imgui_impl_sdl3.h"
 
 bool Demo::Pointable::isDrawing = false;
-std::shared_ptr<DX9GF::Font> Demo::Pointable::font = nullptr;
-std::shared_ptr<DX9GF::FontSprite> Demo::Pointable::fontSprite = nullptr;
+std::shared_ptr<sdlgf::Font> Demo::Pointable::font = nullptr;
+std::shared_ptr<sdlgf::FontSprite> Demo::Pointable::fontSprite = nullptr;
 
 void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 {
@@ -129,14 +129,14 @@ void Demo::CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEne
 	ImGui::EndFrame();
 }
 
-void Demo::Pointable::DrawPosition(unsigned long long deltaTime, DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera) const
+void Demo::Pointable::DrawPosition(unsigned long long deltaTime, sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera) const
 {
 	if (!isDrawing) return;
 	if (!font) {
-		font = std::make_shared<DX9GF::Font>(gd, Demo::kMainFontName, Demo::kMainFontSize);
+		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName, Demo::kMainFontSize);
 	}
 	if (!fontSprite) {
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	}
 	auto [worldX, worldY] = GetPoint();
 	fontSprite->SetPosition(worldX, worldY);

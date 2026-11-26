@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 #include <functional>
-#include "DX9GF.h"
+#include "sdlgf.h"
 
 namespace Demo {
 	struct OverworldSpriteData {
@@ -21,16 +21,16 @@ namespace Demo {
 	public:
 		static OverworldSpriteData GetOverworldSprite(const std::string& enemyType);
 
-		static std::shared_ptr<IEnemy> Create(const std::string& type, std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam, int maxHp = -1); // maxHp <= 0 then roll a fresh value
+		static std::shared_ptr<IEnemy> Create(const std::string& type, std::weak_ptr<sdlgf::TransformManager> tm, sdlgf::GraphicsDevice* gd, sdlgf::Camera* cam, int maxHp = -1); // maxHp <= 0 then roll a fresh value
 
 		static std::shared_ptr<MapEnemy> CreateMapEnemy(
 			float x, float y, const std::string& id,
 			const std::vector<std::string>& types, bool isRandomPool, bool useGlobalPool,
 			const std::string& bgmName,
-			std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDrawFunc,
-			std::shared_ptr<DX9GF::TransformManager> tm,
+			std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDrawFunc,
+			std::shared_ptr<sdlgf::TransformManager> tm,
 			Game* game,
-			DX9GF::ColliderManager* colMan,
+			sdlgf::ColliderManager* colMan,
 			std::shared_ptr<Player> player
 		);
 

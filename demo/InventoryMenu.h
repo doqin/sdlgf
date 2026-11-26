@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "Player.h"
 #include "TextButton.h"
@@ -33,11 +33,11 @@ namespace Demo {
 	private:
 		Game* game;
 		std::shared_ptr<Player> player;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
 		std::shared_ptr<DraggableManager> draggableManager;
-		DX9GF::Camera* uiCamera;
+		sdlgf::Camera* uiCamera;
 
-		DX9GF::Font* font;
+		sdlgf::Font* font;
 		bool isOpen = false;
 		Tab currentTab = Tab::ITEMS;
 
@@ -52,15 +52,15 @@ namespace Demo {
 		std::shared_ptr<IconButton> btnGuide;
 		std::shared_ptr<BattleTutorial> tutorial; // built lazily on the first Guide click
 
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
 		// Deck Builder Containers
 		std::shared_ptr<CardContainer> deckContainer;
 		std::shared_ptr<CardContainer> inventoryContainer;
 
 		// Tab Items
-		std::shared_ptr<DX9GF::Texture> itemSheetTex;
-		std::shared_ptr<DX9GF::Texture> uiTex;
+		std::shared_ptr<sdlgf::Texture> itemSheetTex;
+		std::shared_ptr<sdlgf::Texture> uiTex;
 		std::vector<std::shared_ptr<IconButton>> buffItems;
 		bool isItemsDirty = true;
 		std::wstring hoverDescription = L"";
@@ -71,17 +71,17 @@ namespace Demo {
 		void UseItemOutsideCombat(int itemID, const ConsumableItem& item);
 
 		// Tab Gear
-		std::shared_ptr<DX9GF::Texture> uiPlayerTex;
-		std::shared_ptr<DX9GF::StaticSprite> uiPlayerSprite;
+		std::shared_ptr<sdlgf::Texture> uiPlayerTex;
+		std::shared_ptr<sdlgf::StaticSprite> uiPlayerSprite;
 		float gearAnimTimer = 0.0f;
 
-		std::shared_ptr<DX9GF::Texture> flameTex;
-		std::shared_ptr<DX9GF::Texture> gearTex;
+		std::shared_ptr<sdlgf::Texture> flameTex;
+		std::shared_ptr<sdlgf::Texture> gearTex;
 
 		std::shared_ptr<GearSlotUI> activeSlot;
 		std::shared_ptr<GearSlotUI> passiveSlot;
-		std::shared_ptr<DX9GF::AnimatedSprite> activeGearAnim;
-		std::shared_ptr<DX9GF::AnimatedSprite> passiveGearAnim;
+		std::shared_ptr<sdlgf::AnimatedSprite> activeGearAnim;
+		std::shared_ptr<sdlgf::AnimatedSprite> passiveGearAnim;
 		std::vector<std::shared_ptr<GearSlotUI>> orbitSlots;
 
 		// Tab Quests
@@ -129,8 +129,8 @@ namespace Demo {
 		std::shared_ptr<ICard> AcquireCard(const std::string& cardId);
 		bool ItemSignatureChanged();
 
-		std::shared_ptr<DX9GF::Texture> backBufferTexture;
-		std::shared_ptr<DX9GF::StaticSprite> backBufferSprite;
+		std::shared_ptr<sdlgf::Texture> backBufferTexture;
+		std::shared_ptr<sdlgf::StaticSprite> backBufferSprite;
 
 		bool pendingLeave = false;
 
@@ -138,13 +138,13 @@ namespace Demo {
 		std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();
 
 	public:
-		InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::TransformManager> tm, std::shared_ptr<DraggableManager> dm, DX9GF::Camera* cam, DX9GF::Font* font);
+		InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, sdlgf::Font* font);
 
 		void Init();
 		void Update(unsigned long long deltaTime);
-		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 		// Host scenes call this after DraggableManager::Draw so the reticle draws above the cards.
-		void DrawKeyboardReticle(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+		void DrawKeyboardReticle(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 
 		void Toggle();
 		bool IsOpen() const { return isOpen; }

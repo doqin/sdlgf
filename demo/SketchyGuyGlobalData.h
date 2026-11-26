@@ -1,12 +1,12 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 
 namespace Demo {
 	// Save-scoped state for the card-pack peddler. He can be placed in more than one scene, so
 	// "have we met" and "has the free first pack been used" have to live in one global instance
 	// instead of on any single scene - same rationale as PlayerGlobalData.
-	class SketchyGuyGlobalData : public DX9GF::ISaveable {
+	class SketchyGuyGlobalData : public sdlgf::ISaveable {
 	private:
 		bool hasMet = false;        // the intro conversation has played to the end
 		bool hasBoughtPack = false; // the first pack (free) has been claimed

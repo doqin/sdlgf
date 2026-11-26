@@ -1,21 +1,21 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
-#include "DX9GFInputManager.h"
+#include "sdlgf.h"
+#include "Extras.h"
+#include "InputManager.h"
 #include "Player.h"
 #include <functional>
 
 namespace Demo {
-    class HackTerminal : public DX9GF::IGameObject {
+    class HackTerminal : public sdlgf::IGameObject {
     private:
-        DX9GF::GraphicsDevice* gd;
-        DX9GF::Camera* worldCamera;
-        std::weak_ptr<DX9GF::TransformManager> transformManager;
-        std::shared_ptr<DX9GF::Texture> spritesheet;
-        std::shared_ptr<DX9GF::StaticSprite> sprite;
+        sdlgf::GraphicsDevice* gd;
+        sdlgf::Camera* worldCamera;
+        std::weak_ptr<sdlgf::TransformManager> transformManager;
+        std::shared_ptr<sdlgf::Texture> spritesheet;
+        std::shared_ptr<sdlgf::StaticSprite> sprite;
         std::weak_ptr<Player> player;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
-        std::shared_ptr<DX9GF::RectangleCollider> collider;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
+        std::shared_ptr<sdlgf::RectangleCollider> collider;
 
         bool isPlayerNear = false;
         const float INTERACTION_DISTANCE = 50.0f;
@@ -31,13 +31,13 @@ namespace Demo {
         std::function<void(int)> onHackAttempt;
 
     public:
-        HackTerminal(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y, int cID, std::string name);
+        HackTerminal(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y, int cID, std::string name);
 
-        void Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::function<void(int)> hackCallback);
+        void Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::function<void(int)> hackCallback);
 
         void Update(unsigned long long deltaTime);
-        void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime);
-        void DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime);
+        void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime);
+        void DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime);
 
         void SetVisible(bool visible) { isVisible = visible; }
         bool IsVisible() const { return isVisible; }

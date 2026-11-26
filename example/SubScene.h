@@ -1,20 +1,20 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "ExampleGame.h"
 #include "Rectangle.h"
 #include "Ellipse.h"
 
-class SubScene : public DX9GF::IScene, public DX9GF::ISaveable {
+class SubScene : public sdlgf::IScene, public sdlgf::ISaveable {
 private:
 	ExampleGame* game = nullptr;
-	DX9GF::InputManager* inputManager = nullptr;
-	std::shared_ptr<DX9GF::TransformManager> transformManager;
-	std::shared_ptr<DX9GF::ColliderManager> colliderManager;
+	sdlgf::InputManager* inputManager = nullptr;
+	std::shared_ptr<sdlgf::TransformManager> transformManager;
+	std::shared_ptr<sdlgf::ColliderManager> colliderManager;
 	std::vector<std::shared_ptr<GO::Rectangle>> rects;
 	std::vector<std::shared_ptr<GO::Ellipse>> ellipses;
-	std::shared_ptr<DX9GF::RectangleTrigger> rectTrigger1;
-	std::shared_ptr<DX9GF::RectangleTrigger> rectTrigger2;
+	std::shared_ptr<sdlgf::RectangleTrigger> rectTrigger1;
+	std::shared_ptr<sdlgf::RectangleTrigger> rectTrigger2;
 public:
 	SubScene(ExampleGame* game, int width, int height) : game(game), IScene(width, height) {}
 	void Init() override;

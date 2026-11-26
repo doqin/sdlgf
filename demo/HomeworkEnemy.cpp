@@ -5,24 +5,24 @@
 #include "RNG.h"
 #include "PopUpMessage.h"
 
-void Demo::HomeworkEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::HomeworkEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/placeholder.png"); // TODO: change when real asset is available
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
-	groupProjTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	groupProjTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	groupProjTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); // TODO: change when real asset is available
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::HomeworkEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::HomeworkEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -52,7 +52,7 @@ void Demo::HomeworkEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	abilityCooldown = 2;
 }
 
-void Demo::HomeworkEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::HomeworkEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	(void)enemies; (void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 	this->player = player;
 
@@ -72,7 +72,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 
 	for (int i = 0; i < JUNK_COUNT; i++) {
 		float randY = RNG::Range(-160.f, 160.f);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, randY, JUNK_INITIAL_VELOCITY, JUNK_RETURN_ACCEL](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, randY, JUNK_INITIAL_VELOCITY, JUNK_RETURN_ACCEL](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				auto [px, py] = lock->GetWorldPosition();
 
@@ -89,7 +89,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(JUNK_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(JUNK_DELAY));
 	}
 
 	const int SINE_BULLETS = 6;
@@ -98,7 +98,7 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 	const float SINE_AMPLITUDE = 40.f;
 	const float SINE_SPAWN_X = 340.f;
 
-	auto sineWave = std::make_shared<DX9GF::CustomCommand>([this, projDamage, SINE_BULLETS, SINE_SPACING, SINE_VELOCITY, SINE_AMPLITUDE, SINE_SPAWN_X](std::function<void(void)> markFinished) {
+	auto sineWave = std::make_shared<sdlgf::CustomCommand>([this, projDamage, SINE_BULLETS, SINE_SPACING, SINE_VELOCITY, SINE_AMPLITUDE, SINE_SPAWN_X](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			bool fromLeft = RNG::Range(0, 1) == 0;
 			float spawnX = fromLeft ? -SINE_SPAWN_X : SINE_SPAWN_X;
@@ -122,8 +122,8 @@ void Demo::HomeworkEnemy::PatternPileUp(float projDamage) {
 		});
 
 	for (int i = 0; i < 6; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*sineWave));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.7f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*sineWave));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.7f));
 	}
 }
 
@@ -149,7 +149,7 @@ void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
 	default: spawnX = ARENA_HALF_WIDTH; spawnY = 0.f;                break;
 	}
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, spawnX, spawnY, CLUSTER_VELOCITY, HOLD_TIME, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, spawnX, spawnY, CLUSTER_VELOCITY, HOLD_TIME, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 16, 16, spawnX, spawnY)
 				.SetVelocity(CLUSTER_VELOCITY)
@@ -166,11 +166,11 @@ void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
 
 	const float maxTravelDistance = (std::max)(ARENA_HALF_WIDTH, ARENA_HALF_HEIGHT);
 	const float travelTime = maxTravelDistance / CLUSTER_VELOCITY;
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(travelTime + HOLD_TIME));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(travelTime + HOLD_TIME));
 
 	for (int pulse = 1; pulse < PULSE_COUNT; pulse++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(PULSE_GAP));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, PULSE_DECAY, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(PULSE_GAP));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BURST_COUNT, BURST_VELOCITY, RING_DECAY_TIME, PULSE_DECAY, RING_BULLET_SIZE](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				auto desc = ProjectileDesc(groupProjTexture.get(), 8, 8, 0, 0, 0.f, 0.f)
 					.SetSplitOnDecay(BURST_COUNT, BURST_VELOCITY)
@@ -185,5 +185,5 @@ void Demo::HomeworkEnemy::PatternGroupProject(float projDamage) {
 			}));
 	}
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.0f));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(1.0f));
 }

@@ -109,11 +109,11 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 {
 	IContainer::Draw(deltaTime);
 	if (!blockTexture) {
-		blockTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		blockTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		blockTexture->LoadTexture(L"assets/ui.png");
-		blockSprite = std::make_shared<DX9GF::StaticSprite>(blockTexture.get());
+		blockSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture.get());
 		blockSprite->SetSrcRect(GetBlockFaceRect());
-		pointerSprite = std::make_shared<DX9GF::StaticSprite>(blockTexture.get());
+		pointerSprite = std::make_shared<sdlgf::StaticSprite>(blockTexture.get());
 		pointerSprite->SetSrcRect({ .left = 128, .top = 0, .right = 144, .bottom = 16 });
 		pointerSprite->SetScale(2.f, 2.f);
 		pointerSprite->SetOrigin(8.f, 8.f);
@@ -124,8 +124,8 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 	blockSprite->Draw(*camera, deltaTime);
 	blockSprite->End();
 	if (!nameFont) {
-		nameFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-		nameFontSprite = std::make_shared<DX9GF::FontSprite>(nameFont.get());
+		nameFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+		nameFontSprite = std::make_shared<sdlgf::FontSprite>(nameFont.get());
 		nameFontSprite->SetColor(0xFF000000);
 	}
 	if (auto currentCard = GetCurrentExecutingCard()) {
@@ -161,14 +161,14 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 				if (slotY != NO_SLOT) {
 					const float barX = thisX;
 					const float barW = static_cast<float>(width);
-					draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([this, barX, slotY, barW](std::function<void(void)> markFinished) {
+					draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([this, barX, slotY, barW](std::function<void(void)> markFinished) {
 						graphicsDevice->DrawRectangle(*camera, barX, slotY - 2.f, barW, 4.f, 0xFFFFD700, true);
 						markFinished();
 						}));
 					return;
 				}
 			}
-			draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([&, width, height, thisX, thisY](std::function<void(void)> markFinished) {
+			draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([&, width, height, thisX, thisY](std::function<void(void)> markFinished) {
 				graphicsDevice->SetAlphaBlending(true);
 				Demo::DrawAnimatedDashedRectangle(
 					graphicsDevice,
@@ -185,7 +185,7 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 					20.f,
 					10.f,
 					40.f,
-					DX9GF::Platform::GetTicksMs()
+					sdlgf::Platform::GetTicksMs()
 				);
 				graphicsDevice->SetAlphaBlending(false);
 				markFinished();
@@ -318,7 +318,7 @@ bool Demo::IBlockCard::HasAllRequiredTargets() const
 	return true;
 }
 
-bool Demo::IBlockCard::TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent)
+bool Demo::IBlockCard::TryReclaim(std::weak_ptr<sdlgf::IGameObject> oldParent)
 {
 	// Block cards don't belong to any container and have no original position. 
 	// An invalid drop will just keep the card at its current dropped position instead of reverting.

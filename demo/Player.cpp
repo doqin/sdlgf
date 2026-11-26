@@ -33,39 +33,39 @@ Demo::Player::~Player() {
 	colliderManager->Remove(collider);
 }
 
-void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderManager* colliderManager, DX9GF::Camera* camera, bool isBattling) {
+void Demo::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderManager* colliderManager, sdlgf::Camera* camera, bool isBattling) {
 	// External components
 	this->graphicsDevice = graphicsDevice;
 	this->colliderManager = colliderManager;
 	this->camera = camera;
 	// Create texture
-	spritesheet = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	spritesheet = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	spritesheet->LoadTexture(IDB_PNG1);
 	// Create sprites
-	idleDown = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleDown = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleDown->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
-	idleUp = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleUp = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleUp->SetSrcRect({ .left = 0, .top = 32, .right = 32, .bottom = 64 });
-	idleRight = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleRight->SetSrcRect({ .left = 0, .top = 64, .right = 32, .bottom = 96 });
-	idleLeft = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleLeft->SetSrcRect({ .left = 0, .top = 96, .right = 32, .bottom = 128 });
-	idleDownRight = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleDownRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleDownRight->SetSrcRect({ .left = 0, .top = 128, .right = 32, .bottom = 160 });
-	idleUpRight = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleUpRight = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleUpRight->SetSrcRect({ .left = 0, .top = 160, .right = 32, .bottom = 192 });
-	idleDownLeft = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleDownLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleDownLeft->SetSrcRect({ .left = 0, .top = 192, .right = 32, .bottom = 224 });
-	idleUpLeft = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+	idleUpLeft = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleUpLeft->SetSrcRect({ .left = 0, .top = 224, .right = 32, .bottom = 256 });
-	walkingDown = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
-	walkingUp = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
-	walkingRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
-	walkingLeft = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 12));
-	walkingDownRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 16));
-	walkingUpRight = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 20));
-	walkingDownLeft = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 24));
-	walkingUpLeft = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateFrames(128, 128, 32, 32, 4, 28));
+	walkingDown = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 0));
+	walkingUp = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 4));
+	walkingRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 8));
+	walkingLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 12));
+	walkingDownRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 16));
+	walkingUpRight = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 20));
+	walkingDownLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 24));
+	walkingUpLeft = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateFrames(128, 128, 32, 32, 4, 28));
 	// Align sprites
 	idleDown->SetOrigin(16, 16);
 	idleUp->SetOrigin(16, 16);
@@ -94,21 +94,21 @@ void Demo::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::ColliderMa
 	walkingUpLeft->SetFrameRate(12);
 	this->isBattling = isBattling;
 	// Create collider
-	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, isBattling ? 6 : 14);
+	collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, shared_from_this(), 8, 4, 0, isBattling ? 6 : 14);
 	collider->SetOriginCenter();
 	// Create footprint particle emitter
-	footprintTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	footprintTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	footprintTexture->CreatePlainTexture(D3DCOLOR_ARGB(160, 90, 70, 50), 4, 4);
-	footprintEmitter = std::make_unique<DX9GF::ParticleSystem>(footprintTexture.get(), 32);
+	footprintEmitter = std::make_unique<sdlgf::ParticleSystem>(footprintTexture.get(), 32);
 	footprintEmitter->SetOrigin(2, 2);
-	DX9GF::ConfigureFootprintEmitter(*footprintEmitter);
+	sdlgf::ConfigureFootprintEmitter(*footprintEmitter);
 	footprintsEnabled = !isBattling;
 	footprintEmitter->SetEnabled(footprintsEnabled);
 	this->colliderManager->Add(collider);
 }
 
 void Demo::Player::Update(unsigned long long deltaTime) {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto sm = Demo::SettingsManager::GetInstance();
 	int keyUp = sm->GetKeybind("MOVE_UP");
 	int keyDown = sm->GetKeybind("MOVE_DOWN");
@@ -188,7 +188,7 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 
 		if (stepTimer <= 0) {
 			std::string bankName = "step_" + currentSurface;
-			DX9GF::AudioManager::GetInstance()->PlayRandom(bankName, 0.5f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom(bankName, 0.5f);
 			stepTimer = stepInterval;
 		}
 	}
@@ -263,13 +263,13 @@ void Demo::Player::Update(unsigned long long deltaTime) {
 		toggleCooldown = 300.0f;
 	}
 
-	auto setupGearAnim = [&](int currentID, int& lastID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+	auto setupGearAnim = [&](int currentID, int& lastID, std::shared_ptr<sdlgf::AnimatedSprite>& animPtr) {
 		if (currentID != lastID) {
 			lastID = currentID;
 			if (currentID != -1 && gearTex) {
 				auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
 				if (bp && !bp->frames.empty()) {
-					animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+					animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex.get(), bp->frames);
 					animPtr->SetFrameRate(12);
 					return;
 				}
@@ -300,7 +300,7 @@ void Demo::Player::Draw(unsigned long long deltaTime) {
 
 	bool showVisuals = Demo::PlayerGlobalData::GetInstance()->GetShowGearOnMap();
 
-	auto drawDrone = [&](std::shared_ptr<DX9GF::AnimatedSprite> anim, float phaseOffset, bool drawBehind) {
+	auto drawDrone = [&](std::shared_ptr<sdlgf::AnimatedSprite> anim, float phaseOffset, bool drawBehind) {
 		if (!anim) return;
 		auto [px, py] = GetWorldPosition();
 		const float gearScale = 0.75f;
@@ -515,8 +515,8 @@ bool Demo::Player::TakeDamage(float damage, bool ignoreArmor) {
 	isInvincible = true;
 	timeSinceTurnedInvincible = 0.f;
 
-	if (healthAfter <= 0 && healthBefore > 0) DX9GF::AudioManager::GetInstance()->Play("player_dead", false, 0.3f);
-	if (actualDamage > 0) DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.8f);
+	if (healthAfter <= 0 && healthBefore > 0) sdlgf::AudioManager::GetInstance()->Play("player_dead", false, 0.3f);
+	if (actualDamage > 0) sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.8f);
 
 	auto [x, y] = GetWorldPosition();
 	Demo::DamageTextManager::GetInstance()->Spawn(actualDamage, x, y - 16.0f, Demo::TextType::TakeDamage);
@@ -529,17 +529,17 @@ bool Demo::Player::TakeIndirectDamage(float damage, DamageType type) {
 	float healthAfter = healthBefore - damage;
 	globalData->SetHealth(healthAfter);
 
-	if (healthAfter < 0 && healthBefore > 0) DX9GF::AudioManager::GetInstance()->Play("player_dead", false, 0.3f);
+	if (healthAfter < 0 && healthBefore > 0) sdlgf::AudioManager::GetInstance()->Play("player_dead", false, 0.3f);
 
 	if (damage > 0) {
 		if (type == DamageType::Poison) {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
 		}
 		else if (type == DamageType::Burn) {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
 		}
 		else {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.4f);
 		}
 	}
 
@@ -561,7 +561,7 @@ void Demo::Player::DealDamage(IEnemy* target, float cardBaseDamage, bool ignoreA
 	target->TakeDamage(finalDamage, ignoreArmor);
 }
 
-std::weak_ptr<DX9GF::RectangleCollider> Demo::Player::GetCollider()
+std::weak_ptr<sdlgf::RectangleCollider> Demo::Player::GetCollider()
 {
 	return collider;
 }
@@ -578,6 +578,6 @@ void Demo::Player::SetFootprintsEnabled(bool enabled)
 	footprintEmitter->SetEnabled(enabled);
 }
 
-void Demo::Player::InitGearAnim(std::shared_ptr<DX9GF::Texture> tex) {
+void Demo::Player::InitGearAnim(std::shared_ptr<sdlgf::Texture> tex) {
 	this->gearTex = tex;
 }

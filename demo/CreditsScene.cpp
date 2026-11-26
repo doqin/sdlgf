@@ -3,10 +3,10 @@
 #include "MainFont.h"
 #include "LocalizationManager.h"
 #include "resource.h"
-#include "DX9GFInputManager.h"
+#include "InputManager.h"
 #include <algorithm>
-#include "DX9GFKeys.h"
-#include "DX9GFIScene.h"
+#include "Keys.h"
+#include "IScene.h"
 
 namespace Demo
 {
@@ -130,30 +130,30 @@ namespace Demo
 
 	void CreditsScene::Init()
 	{
-		transformManager = std::make_shared<DX9GF::TransformManager>();
+		transformManager = std::make_shared<sdlgf::TransformManager>();
 		lastScreenWidth = game->GetVirtualWidth();
 		lastScreenHeight = game->GetVirtualHeight();
 
 		// Load Assets
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 		fontSprite->SetColor(0xFFFFFFFF);
 
-		//bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		//bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		//bgTex->LoadTexture(IDB_PNG2);
 
-		uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiSheetTex->LoadTexture(L"./assets/ui.png");
 
-		placeholderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		placeholderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		placeholderTex->LoadTexture(L"./assets/ui-pack.png");
 
 		backButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, uiSheetTex, 3);
-		backButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(96, 48, 48, 16, 3));
-		backButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { this->isGoingBack = true; });
+		backButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(96, 48, 48, 16, 3));
+		backButton->SetOnReleaseLeft([this](sdlgf::ITrigger*) { this->isGoingBack = true; });
 		backButton->SetSpriteScale(2.f, 2.f);
 
-		auto CreatePageBtn = [&](int srcX, int srcY, const std::function<void(DX9GF::ITrigger*)>& action) {
+		auto CreatePageBtn = [&](int srcX, int srcY, const std::function<void(sdlgf::ITrigger*)>& action) {
 
 			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 36, 33, uiSheetTex, 3);
 
@@ -163,11 +163,11 @@ namespace Demo
 			return btn;
 			};
 
-		btnPrevPage = CreatePageBtn(240, 96, [this](DX9GF::ITrigger*) {
+		btnPrevPage = CreatePageBtn(240, 96, [this](sdlgf::ITrigger*) {
 			if (currentPage > 0) currentPage--;
 			});
 
-		btnNextPage = CreatePageBtn(240, 112, [this](DX9GF::ITrigger*) {
+		btnNextPage = CreatePageBtn(240, 112, [this](sdlgf::ITrigger*) {
 			if (currentPage < creditsPages.size() - 1) currentPage++;
 			});
 
@@ -199,7 +199,7 @@ namespace Demo
 		creditsPages.push_back({
 			Tr(L"-- PROGRAMMING & ENGINEERING --"),
 			L"",
-			L"DX9GF Custom Engine",
+			L"sdlgf Custom Engine",
 			L"C++ / DirectX 9",
 			L"",
 			Tr(L"Lead Programmer: ") + L"Khang Tuan Nguyen",
@@ -294,7 +294,7 @@ namespace Demo
 
 	void CreditsScene::Update(unsigned long long deltaTime)
 	{
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
 
@@ -338,7 +338,7 @@ namespace Demo
 
 			keyboardNavigator.Draw(gd, uiCamera, CollectKeyboardCandidates());
 			if (!keyboardNavigator.IsInKeyboardMode()) {
-				DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+				sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 			}
 			gd->EndDraw();
 		}

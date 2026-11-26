@@ -2,24 +2,24 @@
 #include "QuestMarker.h"
 
 namespace Demo {
-    void QuestMarker::Init(DX9GF::GraphicsDevice* gd) {
-        uiTex = std::make_shared<DX9GF::Texture>(gd);
+    void QuestMarker::Init(sdlgf::GraphicsDevice* gd) {
+        uiTex = std::make_shared<sdlgf::Texture>(gd);
         uiTex->LoadTexture(L"assets/ui.png");
 
         std::vector<RECT> r1 = { {240, 128, 258, 144} };
-        sprExclGray = std::make_shared<DX9GF::AnimatedSprite>(uiTex.get(), r1, 1, false);
+        sprExclGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r1, 1, false);
         sprExclGray->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r2 = { {240, 144, 258, 160} };
-        sprExclGold = std::make_shared<DX9GF::AnimatedSprite>(uiTex.get(), r2, 1, false);
+        sprExclGold = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r2, 1, false);
         sprExclGold->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r3 = { {258, 128, 276, 144} };
-        sprQuesGray = std::make_shared<DX9GF::AnimatedSprite>(uiTex.get(), r3, 1, false);
+        sprQuesGray = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r3, 1, false);
         sprQuesGray->SetOrigin(0.f, 0.f);
 
         std::vector<RECT> r4 = { {258, 144, 276, 160} };
-        sprQuesCyan = std::make_shared<DX9GF::AnimatedSprite>(uiTex.get(), r4, 1, false);
+        sprQuesCyan = std::make_shared<sdlgf::AnimatedSprite>(uiTex.get(), r4, 1, false);
         sprQuesCyan->SetOrigin(0.f, 0.f);
     }
 
@@ -30,9 +30,9 @@ namespace Demo {
         bobbingOffset = std::sin(timeAccumulator * 6.0f) * 1.0f;
     }
 
-    void QuestMarker::Draw(DX9GF::Camera* uiCamera, float x, float y, float scale) {
+    void QuestMarker::Draw(sdlgf::Camera* uiCamera, float x, float y, float scale) {
         QuestState state = QuestManager::GetInstance()->GetQuestState(questId);
-        std::shared_ptr<DX9GF::AnimatedSprite> activeSprite = nullptr;
+        std::shared_ptr<sdlgf::AnimatedSprite> activeSprite = nullptr;
 
         if (QuestManager::GetInstance()->IsReadyToTurnIn(questId)) {
             // Goal reached, waiting to be turned in: show the cyan "?"

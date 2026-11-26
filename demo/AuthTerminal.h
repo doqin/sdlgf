@@ -1,7 +1,7 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
-#include "DX9GFInputManager.h"
+#include "sdlgf.h"
+#include "Extras.h"
+#include "InputManager.h"
 #include "Player.h"
 #include "PasswordMenu.h"
 #include "Debug.h"
@@ -10,16 +10,16 @@
 namespace Demo {
 	// A terminal that guards a credential behind a 4-digit code. Interacting opens a PasswordMenu;
 	// cracking the code fires onSolved once and flips the sprite to the OK frame for good.
-	class AuthTerminal : public DX9GF::IGameObject, virtual public Pointable {
+	class AuthTerminal : public sdlgf::IGameObject, virtual public Pointable {
 	private:
-		DX9GF::GraphicsDevice* gd = nullptr;
-		DX9GF::Camera* worldCamera = nullptr;
-		std::weak_ptr<DX9GF::TransformManager> transformManager;
-		std::shared_ptr<DX9GF::Texture> spritesheet;
-		std::shared_ptr<DX9GF::StaticSprite> sprite;
+		sdlgf::GraphicsDevice* gd = nullptr;
+		sdlgf::Camera* worldCamera = nullptr;
+		std::weak_ptr<sdlgf::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::Texture> spritesheet;
+		std::shared_ptr<sdlgf::StaticSprite> sprite;
 		std::weak_ptr<Player> player;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<DX9GF::RectangleCollider> collider;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::RectangleCollider> collider;
 
 		PasswordMenu menu;
 
@@ -32,17 +32,17 @@ namespace Demo {
 		std::function<void()> onSolved;
 
 	public:
-		AuthTerminal(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y);
+		AuthTerminal(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y);
 
 		std::pair<float, float> GetPoint() const override { return { GetWorldX(), GetWorldY() }; }
 
-		void Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, DX9GF::Camera* uiCamera,
-			std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm,
-			std::shared_ptr<DX9GF::Font> font);
+		void Init(Game* game, sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, sdlgf::Camera* uiCamera,
+			std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm,
+			std::shared_ptr<sdlgf::Font> font);
 
 		void Update(unsigned long long deltaTime);
-		void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime);
-		void DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime);
+		void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime);
+		void DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime);
 
 		void SetVisible(bool visible) { isVisible = visible; }
 		bool IsVisible() const { return isVisible; }

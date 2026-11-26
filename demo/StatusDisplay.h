@@ -1,5 +1,5 @@
 #pragma once
-#include "DX9GFExtras.h"
+#include "Extras.h"
 #include "GameItems.h"
 #include <memory>
 #include <optional>
@@ -34,24 +34,24 @@ namespace Demo {
 	public:
 		static constexpr float ROW_HEIGHT = 32.f;
 
-		static std::shared_ptr<StatusRenderer> Get(DX9GF::GraphicsDevice* graphicsDevice);
-		explicit StatusRenderer(DX9GF::GraphicsDevice* graphicsDevice);
+		static std::shared_ptr<StatusRenderer> Get(sdlgf::GraphicsDevice* graphicsDevice);
+		explicit StatusRenderer(sdlgf::GraphicsDevice* graphicsDevice);
 
 		// `x`,`y` is the row's top-left corner. Returns its width, for the caller's hover hit box.
-		float DrawRow(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y, const StatusView& status);
+		float DrawRow(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y, const StatusView& status);
 
 	private:
-		DX9GF::GraphicsDevice* graphicsDevice;
-		std::shared_ptr<DX9GF::Texture> texture;
-		std::shared_ptr<DX9GF::StaticSprite> iconSprite;
+		sdlgf::GraphicsDevice* graphicsDevice;
+		std::shared_ptr<sdlgf::Texture> texture;
+		std::shared_ptr<sdlgf::StaticSprite> iconSprite;
 		// The strength is the main readout in the main font at its 2x size; the turns are in the
 		// smaller card font at its native size, so both stay pixel-exact rather than scaled copies.
-		std::shared_ptr<DX9GF::Font> bigFont;
-		std::shared_ptr<DX9GF::FontSprite> bigSprite;
-		std::shared_ptr<DX9GF::Font> smallFont;
-		std::shared_ptr<DX9GF::FontSprite> smallSprite;
+		std::shared_ptr<sdlgf::Font> bigFont;
+		std::shared_ptr<sdlgf::FontSprite> bigSprite;
+		std::shared_ptr<sdlgf::Font> smallFont;
+		std::shared_ptr<sdlgf::FontSprite> smallSprite;
 
-		float DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+		float DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 			const std::wstring& text, float x, float y, D3DCOLOR color, float outline);
 	};
 }

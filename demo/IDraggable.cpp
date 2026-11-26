@@ -2,14 +2,14 @@
 #include "IDraggable.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
-#include <DX9GF.h>
+#include <sdlgf.h>
 #include <algorithm>
 #include <cmath>
 #include "ICard.h"
 #include "RNG.h"
 // Define static member variables
-std::shared_ptr<DX9GF::Font> Demo::IDraggable::debugFont = nullptr;
-std::shared_ptr<DX9GF::FontSprite> Demo::IDraggable::debugFontSprite = nullptr;
+std::shared_ptr<sdlgf::Font> Demo::IDraggable::debugFont = nullptr;
+std::shared_ptr<sdlgf::FontSprite> Demo::IDraggable::debugFontSprite = nullptr;
 
 void Demo::DraggableManager::RebuildHierarchy()
 {
@@ -199,7 +199,7 @@ void Demo::DraggableManager::Draw(unsigned long long deltaTime)
 	drawBuffer.Update(deltaTime);
 }
 
-void Demo::DraggableManager::QueueDraw(std::shared_ptr<DX9GF::ICommand> cmd)
+void Demo::DraggableManager::QueueDraw(std::shared_ptr<sdlgf::ICommand> cmd)
 {
 	drawBuffer.StackCommand(std::move(cmd));
 }
@@ -224,12 +224,12 @@ std::vector<std::shared_ptr<Demo::IDraggable>> Demo::DraggableManager::GetDraggi
 	return isDraggingDraggables;
 }
 
-void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
 	this->draggableManager = manager;
 	this->camera = camera;
 	this->graphicsDevice = graphicsDevice;
-	trigger = std::make_shared<DX9GF::RectangleTrigger>(
+	trigger = std::make_shared<sdlgf::RectangleTrigger>(
 		this->transformManager,
 		shared_from_this(),
 		dragAreaWidth,
@@ -243,26 +243,26 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 	trigger->Init(camera);
 	//trigger->SetOriginCenter();
 
-	trigger->SetOnHeldLeft([&](DX9GF::ITrigger* thisObj) {
+	trigger->SetOnHeldLeft([&](sdlgf::ITrigger* thisObj) {
 		if (dragDisabled) return;
 		if (auto card = dynamic_cast<Demo::ICard*>(this)) {
 			if (card->IsLocked() || card->IsRetained()) {
-				DX9GF::AudioManager::GetInstance()->PlayRandom("error", 0.4f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("error", 0.4f);
 				return;
 			}
 		}
 
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
 		if (!isDragging) {
-			parent->preDragParent = parent->GetParent().has_value() ? parent->GetParent().value() : std::weak_ptr<DX9GF::IGameObject>();
+			parent->preDragParent = parent->GetParent().has_value() ? parent->GetParent().value() : std::weak_ptr<sdlgf::IGameObject>();
 			parent->preDragWorldX = parent->GetWorldX();
 			parent->preDragWorldY = parent->GetWorldY();
 			if (parent->GetParent().has_value()) {
 				parent->DetachParent();
 			}
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
 		}
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 
 		auto [dX, dY] = inpMan->GetVirtualRelativeMousePos(this->camera);
 
@@ -274,7 +274,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		float targetX = currentX + dX / zoom;
 		float targetY = currentY + dY / zoom;
 
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		float virtualW = static_cast<float>(app->GetScreenWidth());
 		float virtualH = static_cast<float>(app->GetScreenHeight());
 
@@ -293,12 +293,12 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		parent->GetTransformManager().lock()->RebuildHierarchy();
 
 		if (!isDragging) {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.4f);
 		}
 		isDragging = true;
 		});
 
-	trigger->SetOnReleaseLeft([&](DX9GF::ITrigger* thisObj) {
+	trigger->SetOnReleaseLeft([&](sdlgf::ITrigger* thisObj) {
 		if (dragDisabled) {
 			if (onClickHandler) onClickHandler(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));
 			return;
@@ -306,7 +306,7 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 		auto parent = dynamic_pointer_cast<IDraggable>(thisObj->GetParent().value().lock());
 		parent->GetDraggableManager().lock()->AttachDroppable(parent);
 		if (parent->GetParent().has_value()) {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 		}
 		else {
 			parent->OnDropMissed(parent->preDragParent, parent->preDragWorldX, parent->preDragWorldY);
@@ -317,10 +317,10 @@ void Demo::IDraggable::Init(std::shared_ptr<DraggableManager> manager, DX9GF::Gr
 	manager->Add(dynamic_pointer_cast<IDraggable>(shared_from_this()));
 	color = D3DXCOLOR(RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), RNG::Range(0.0f, 1.0f), 1);
 	if (debugFont.get() == nullptr) {
-		IDraggable::debugFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+		IDraggable::debugFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
 	}
 	if (debugFontSprite.get() == nullptr) {
-		IDraggable::debugFontSprite = std::make_shared<DX9GF::FontSprite>(debugFont.get());
+		IDraggable::debugFontSprite = std::make_shared<sdlgf::FontSprite>(debugFont.get());
 		debugFontSprite->SetColor(0xFF000000);
 	}
 }
@@ -356,12 +356,12 @@ void Demo::IDraggable::Update(unsigned long long deltaTime)
 	if (isHidden && !isDragging) return;
 	this->trigger->Update(deltaTime);
 	if (trigger->IsHeldLeft(deltaTime)) {
-		auto inpMan = DX9GF::InputManager::GetInstance();
-		inpMan->SwitchCursor(DX9GF::InputManager::CursorType::CLICK);
+		auto inpMan = sdlgf::InputManager::GetInstance();
+		inpMan->SwitchCursor(sdlgf::InputManager::CursorType::CLICK);
 	}
 	else if (trigger->IsHovering(deltaTime)) {
-		auto inpMan = DX9GF::InputManager::GetInstance();
-		inpMan->SwitchCursor(DX9GF::InputManager::CursorType::POINTER);
+		auto inpMan = sdlgf::InputManager::GetInstance();
+		inpMan->SwitchCursor(sdlgf::InputManager::CursorType::POINTER);
 	}
 }
 
@@ -383,13 +383,13 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 		debugFontSprite->Begin();
 		auto [x, y] = GetWorldPosition();
 		debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2));
-		std::wstring ws = DX9GF::Utils::Utf8ToWide(id);
+		std::wstring ws = sdlgf::Utils::Utf8ToWide(id);
 		debugFontSprite->SetText(std::move(ws));
 		debugFontSprite->Draw(*camera, deltaTime);
 		if (parent.has_value()) {
 			if (auto draggableParent = dynamic_pointer_cast<IDraggable>(parent.value().lock())) {
 				auto id = draggableParent->GetID();
-				std::wstring parentIDWs = DX9GF::Utils::Utf8ToWide(id);
+				std::wstring parentIDWs = sdlgf::Utils::Utf8ToWide(id);
 				debugFontSprite->SetText(L"Parent: " + parentIDWs);
 				debugFontSprite->SetPosition(x + dragAreaWidth / static_cast<float>(2), y + dragAreaHeight / static_cast<float>(2) + 30);
 				debugFontSprite->Draw(*camera, deltaTime);
@@ -407,9 +407,9 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 		auto height = trigger->GetHeight();
 		auto gd = this->graphicsDevice;
 		auto cam = this->camera;
-		draggableManager->QueueDraw(std::make_shared<DX9GF::CustomCommand>([gd, cam, thisX, thisY, width, height](std::function<void(void)> markFinished) {
+		draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([gd, cam, thisX, thisY, width, height](std::function<void(void)> markFinished) {
 			gd->SetAlphaBlending(true);
-			float alphaPhase = (sin(DX9GF::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
+			float alphaPhase = (sin(sdlgf::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 			int alpha = static_cast<int>(alphaPhase * 80.0f);
 			D3DCOLOR color = D3DCOLOR_ARGB(alpha, 255, 255, 255);
 			gd->DrawRectangle(*cam, thisX, thisY, width, height, color, true);
@@ -481,7 +481,7 @@ std::weak_ptr<Demo::DraggableManager> Demo::IDraggable::GetDraggableManager()
 	return draggableManager;
 }
 
-std::weak_ptr<DX9GF::RectangleTrigger> Demo::IDraggable::GetTrigger()
+std::weak_ptr<sdlgf::RectangleTrigger> Demo::IDraggable::GetTrigger()
 {
 	return trigger;
 }
@@ -501,7 +501,7 @@ void Demo::IDraggable::SetHidden(bool hidden)
 	isHidden = hidden;
 }
 
-void Demo::IDraggable::OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY)
+void Demo::IDraggable::OnDropMissed(std::weak_ptr<sdlgf::IGameObject> oldParent, float oldWorldX, float oldWorldY)
 {
 	if (TryReclaim(oldParent)) {
 		if (onDropMissedHandler) {

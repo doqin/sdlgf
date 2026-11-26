@@ -21,7 +21,7 @@ void Demo::LabInsideScene::OnInit()
 
 	SetChapterTitle(Tr(L"KAKOS LAB"), Tr(L"< What scared her off? >"));
 	RegisterPortalLayer("trigger_back");
-	map->SetAreaUpdateHandler("trigger_back", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_back", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(-1, 544.f, -928.f, "bgm_tutorial", 0.5f);
 	});
 
@@ -33,7 +33,7 @@ void Demo::LabInsideScene::OnInit()
 		}, true));
 	treasureChests.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 
-	auto bgDraw = [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) {
+	auto bgDraw = [this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) {
 		DrawBackground(gd, deltaTime);
 	};
 
@@ -63,7 +63,7 @@ void Demo::LabInsideScene::OnRestoreSaveData(const nlohmann::json& inData)
 	}
 }
 
-void Demo::LabInsideScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::LabInsideScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 

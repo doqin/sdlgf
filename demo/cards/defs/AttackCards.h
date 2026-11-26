@@ -7,7 +7,7 @@ namespace Demo {
 
 	class StrikeCard : public TargetedCard {
 	public:
-		StrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		StrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -18,7 +18,7 @@ namespace Demo {
 	// Non-persistent: a persistent copy would re-execute free on every turn of the cycle.
 	class JabCard : public TargetedCard {
 	public:
-		JabCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		JabCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 0,
 				.face = CardTemplate::Red,
@@ -29,7 +29,7 @@ namespace Demo {
 
 	class HeavyStrikeCard : public TargetedCard {
 	public:
-		HeavyStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		HeavyStrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Red,
@@ -39,7 +39,7 @@ namespace Demo {
 
 	class TwinStrikeCard : public TargetedCard {
 	public:
-		TwinStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		TwinStrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -50,7 +50,7 @@ namespace Demo {
 
 	class CleaveCard : public TargetedCard {
 	public:
-		CleaveCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		CleaveCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 2, {
 				.cost = 2,
 				.face = CardTemplate::Red,
@@ -66,7 +66,7 @@ namespace Demo {
 		static constexpr size_t MAX_TARGETS = 3;
 		std::vector<std::pair<std::shared_ptr<IEnemy>, float>> PlanHits() const;
 	public:
-		ChainLightningCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ChainLightningCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, MAX_TARGETS, { .cost = 3, .face = CardTemplate::Red }) {}
 
 		std::wstring GetDescription() const override;
@@ -81,7 +81,7 @@ namespace Demo {
 		static constexpr int DAMAGE_GAIN = 3;
 		int currentDamage = STARTING_DAMAGE;
 	public:
-		RagingStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		RagingStrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, { .cost = 1, .face = CardTemplate::Red }) {}
 
 		std::wstring GetDescription() const override;
@@ -97,7 +97,7 @@ namespace Demo {
 		static constexpr float DAMAGE_PER_PERSISTENT = 4.f;
 		float TotalDamage() const;
 	public:
-		OverloadCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		OverloadCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Red,
@@ -115,7 +115,7 @@ namespace Demo {
 		static constexpr float REDIRECTED_DAMAGE = 8.f;
 		std::shared_ptr<TargetedCard> PreviousCard() const;
 	public:
-		ChainReactionCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ChainReactionCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -127,7 +127,7 @@ namespace Demo {
 
 	class LethalHarvestCard : public TargetedCard {
 	public:
-		LethalHarvestCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		LethalHarvestCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -139,7 +139,7 @@ namespace Demo {
 
 	class ExecuteCard : public TargetedCard {
 	public:
-		ExecuteCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ExecuteCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Red,
@@ -154,7 +154,7 @@ namespace Demo {
 	private:
 		static constexpr float BASE_DAMAGE = 5.f;
 	public:
-		ArmorPiercerCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ArmorPiercerCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -168,7 +168,7 @@ namespace Demo {
 	private:
 		static constexpr float BASE_DAMAGE = 8.f;
 	public:
-		CruelStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		CruelStrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -183,7 +183,7 @@ namespace Demo {
 	private:
 		static constexpr float DAMAGE_PER_ARMOR = 1.5f;
 	public:
-		ShieldBashCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ShieldBashCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Red,
@@ -200,7 +200,7 @@ namespace Demo {
 		static constexpr float FINISHER_DAMAGE = 60.f;
 		static constexpr float FINISHER_HEALTH_RATIO = 0.4f;
 	public:
-		TerminateCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		TerminateCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 3,
 				.face = CardTemplate::Red,

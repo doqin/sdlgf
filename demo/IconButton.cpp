@@ -3,12 +3,12 @@
 #include <algorithm>
 
 
-Demo::IconButton::IconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-	std::shared_ptr<DX9GF::Texture> uiSheetTex, int frames)
+Demo::IconButton::IconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+	std::shared_ptr<sdlgf::Texture> uiSheetTex, int frames)
 	: IButton(tm, displayX, displayY, imgW, imgH, frames), texture(uiSheetTex)
 {
 	if (uiSheetTex) {
-		this->sprite = std::make_shared<DX9GF::StaticSprite>(uiSheetTex.get());
+		this->sprite = std::make_shared<sdlgf::StaticSprite>(uiSheetTex.get());
 	}
 	this->buttonRects.resize(frames);
 }
@@ -57,7 +57,7 @@ void Demo::IconButton::RebuildSliceSprite()
 
 	//top/bottom margins stay at 0, so the nine slice degenerates into the three horizontal segments we want
 	RECT src = this->buttonRects.empty() ? RECT{} : this->buttonRects[0];
-	this->sliceSprite = std::make_shared<DX9GF::NineSliceSprite>(
+	this->sliceSprite = std::make_shared<sdlgf::NineSliceSprite>(
 		this->texture.get(), src, this->sliceLeftMargin, 0, this->sliceRightMargin, 0);
 
 	//the caps keep the sprite's own zoom, only the centre segment gets stretched
@@ -65,10 +65,10 @@ void Demo::IconButton::RebuildSliceSprite()
 	if (this->sprite) this->sliceSprite->SetColor(this->sprite->GetColor());
 }
 
-void Demo::IconButton::Init(DX9GF::Camera* uiCamera)
+void Demo::IconButton::Init(sdlgf::Camera* uiCamera)
 {
 	if (!this->trigger) {
-		this->trigger = std::make_shared<DX9GF::RectangleTrigger>
+		this->trigger = std::make_shared<sdlgf::RectangleTrigger>
 			(
 				this->GetTransformManager(), shared_from_this(),
 				this->width, this->height, 0, 0, 0, 1, 1
@@ -95,7 +95,7 @@ void Demo::IconButton::SetSpriteColor(D3DCOLOR color)
 	if (this->sliceSprite) this->sliceSprite->SetColor(color);
 }
 
-void Demo::IconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::IconButton::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	//prevent from crashing
 	if (!this->sprite || !this->uiCamera || buttonRects.empty()) return;

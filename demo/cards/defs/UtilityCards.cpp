@@ -54,7 +54,7 @@ void Demo::SystemRestartCard::Resolve() {
 		owner->ClearDebuffs();
 		if (battleScene) {
 			battleScene->QueuePopUpMessage(Tr(L"Debuffs Cleared!"));
-			DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.6f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.6f);
 		}
 	}
 	else if (battleScene) {

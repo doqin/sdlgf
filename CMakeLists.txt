@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(sdlgf
     VERSION 0.1.0
-    DESCRIPTION "SDL3 + CMake port of the DX9GF game framework and demo"
+    DESCRIPTION "SDL3 + CMake port of the sdlgf game framework and demo"
     LANGUAGES CXX
 )
 

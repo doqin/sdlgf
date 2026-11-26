@@ -135,7 +135,7 @@ std::optional<Demo::StatusView> Demo::DescribeStatus(const CombatModifier& mod) 
 	return view;
 }
 
-std::shared_ptr<Demo::StatusRenderer> Demo::StatusRenderer::Get(DX9GF::GraphicsDevice* graphicsDevice) {
+std::shared_ptr<Demo::StatusRenderer> Demo::StatusRenderer::Get(sdlgf::GraphicsDevice* graphicsDevice) {
 	static std::weak_ptr<StatusRenderer> cache;
 	auto renderer = cache.lock();
 	if (!renderer || renderer->graphicsDevice != graphicsDevice) {
@@ -145,19 +145,19 @@ std::shared_ptr<Demo::StatusRenderer> Demo::StatusRenderer::Get(DX9GF::GraphicsD
 	return renderer;
 }
 
-Demo::StatusRenderer::StatusRenderer(DX9GF::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+Demo::StatusRenderer::StatusRenderer(sdlgf::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/ui.png");
-	iconSprite = std::make_shared<DX9GF::StaticSprite>(texture.get());
+	iconSprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
 	iconSprite->SetScale(2.f, 2.f);
 
-	bigFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-	bigSprite = std::make_shared<DX9GF::FontSprite>(bigFont.get());
-	smallFont = std::make_shared<DX9GF::Font>(graphicsDevice, TURNS_FONT_NAME, TURNS_FONT_SIZE);
-	smallSprite = std::make_shared<DX9GF::FontSprite>(smallFont.get());
+	bigFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+	bigSprite = std::make_shared<sdlgf::FontSprite>(bigFont.get());
+	smallFont = std::make_shared<sdlgf::Font>(graphicsDevice, TURNS_FONT_NAME, TURNS_FONT_SIZE);
+	smallSprite = std::make_shared<sdlgf::FontSprite>(smallFont.get());
 }
 
-float Demo::StatusRenderer::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+float Demo::StatusRenderer::DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 	const std::wstring& text, float x, float y, D3DCOLOR color, float outline) {
 	sprite.SetText(text);
 	sprite.SetColor(color);
@@ -169,7 +169,7 @@ float Demo::StatusRenderer::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Ca
 	return static_cast<float>(sprite.GetWidth());
 }
 
-float Demo::StatusRenderer::DrawRow(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
+float Demo::StatusRenderer::DrawRow(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y,
 	const StatusView& status) {
 	// The big font's cell is shorter than the 32px icon; centre it on the icon.
 	const float bigY = y + (ROW_HEIGHT - Demo::kMainFontSize) / 2.f;

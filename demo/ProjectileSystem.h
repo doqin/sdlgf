@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Player.h"
 #include "GameItems.h"
 #include <memory>
@@ -31,12 +31,12 @@ namespace Demo {
 	// per-class builders so spawn sites read the same as before.
 	struct ProjectileDesc {
 		// Render
-		DX9GF::Texture* texture = nullptr;
+		sdlgf::Texture* texture = nullptr;
 		std::vector<RECT> frames; // empty = draw the whole texture
 		unsigned int frameRate = 12;
 		float spriteOriginX = 0.f;
 		float spriteOriginY = 0.f;
-		DX9GF::Texture* shardTexture = nullptr; // optional override for the projectile's split children
+		sdlgf::Texture* shardTexture = nullptr; // optional override for the projectile's split children
 		std::vector<RECT> shardFrames; // empty = draw the whole shard texture
 		unsigned int shardFrameRate = 12;
 		float shardOriginX = 0.f;
@@ -87,7 +87,7 @@ namespace Demo {
 		int splitGenerations = 1;      // >1 lets the children burst again on decay
 		float splitArrivalHoldTime = 0.f;
 		// Ghost trail (afterimages reusing the projectile's own texture)
-		DX9GF::Texture* ghostTexture = nullptr;
+		sdlgf::Texture* ghostTexture = nullptr;
 		RECT ghostSrcRect{};
 		bool ghostHasSrcRect = false;
 		float ghostOriginX = 0.f;
@@ -103,7 +103,7 @@ namespace Demo {
 		int altStatusEffectDuration = 0;
 
 		ProjectileDesc(
-			DX9GF::Texture* texture,
+			sdlgf::Texture* texture,
 			float spriteOriginX,
 			float spriteOriginY,
 			float colliderWidth,
@@ -118,7 +118,7 @@ namespace Demo {
 			x(x),
 			y(y) {}
 		ProjectileDesc(
-			DX9GF::Texture* texture,
+			sdlgf::Texture* texture,
 			std::vector<RECT> frames,
 			unsigned int frameRate,
 			float spriteOriginX,
@@ -159,9 +159,9 @@ namespace Demo {
 		ProjectileDesc& SetSplitDamage(float damage);
 		ProjectileDesc& SetSplitGenerations(int generations);
 		ProjectileDesc& SetSplitHoldTime(float holdTime);
-		ProjectileDesc& SetShardTexture(DX9GF::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight);
-		ProjectileDesc& SetShardTexture(DX9GF::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight);
-		ProjectileDesc& SetGhostSprite(DX9GF::Texture* texture, RECT srcRect, float originX, float originY);
+		ProjectileDesc& SetShardTexture(sdlgf::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight);
+		ProjectileDesc& SetShardTexture(sdlgf::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight);
+		ProjectileDesc& SetGhostSprite(sdlgf::Texture* texture, RECT srcRect, float originX, float originY);
 		ProjectileDesc& SetStatusEffect(ModifierType type, float value, int duration);
 		ProjectileDesc& SetRandomStatusEffect(
 			ModifierType typeA, float valueA, int durationA,
@@ -230,7 +230,7 @@ namespace Demo {
 	class ProjectileSystem {
 	private:
 		struct RenderDesc {
-			DX9GF::Texture* texture;
+			sdlgf::Texture* texture;
 			std::vector<RECT> frames;
 			unsigned int frameRate;
 			float spriteOriginX, spriteOriginY;
@@ -311,12 +311,12 @@ namespace Demo {
 		// One batch per unique (texture, frames, frame rate, origin); every
 		// projectile in a batch is drawn through the same sprite object.
 		struct SpriteBatch {
-			DX9GF::Texture* texture = nullptr;
+			sdlgf::Texture* texture = nullptr;
 			std::vector<RECT> frames;
 			unsigned int frameRate = 12;
 			float originX = 0.f;
 			float originY = 0.f;
-			std::unique_ptr<DX9GF::StaticSprite> sprite;
+			std::unique_ptr<sdlgf::StaticSprite> sprite;
 		};
 
 		// Components (parallel arrays; index = entity)
@@ -326,7 +326,7 @@ namespace Demo {
 		std::vector<CombatComponent> combats;
 		std::vector<RenderComponent> renders;
 		std::vector<SplitComponent> splits;
-		std::vector<std::unique_ptr<DX9GF::ParticleSystem>> emitters;
+		std::vector<std::unique_ptr<sdlgf::ParticleSystem>> emitters;
 		std::vector<unsigned char> dead;
 
 		std::vector<LaserComponent> lasers;
@@ -354,7 +354,7 @@ namespace Demo {
 		std::vector<SpriteBatch> batches;
 		std::weak_ptr<Player> target;
 		ICombatant* owner = nullptr; // who fired these; credited as the source of any status they apply
-		std::shared_ptr<DX9GF::Texture> trailTexture; // shared 4x4 white square
+		std::shared_ptr<sdlgf::Texture> trailTexture; // shared 4x4 white square
 
 		// Create a new batch if no existing batch matches the projectile's texture, frames, frame rate and origin.
 		unsigned int GetOrCreateBatch(const RenderDesc& desc);
@@ -371,7 +371,7 @@ namespace Demo {
 		void Spawn(const std::shared_ptr<Player>& player, const ProjectileDesc& desc);
 		void Spawn(const std::shared_ptr<Player>& player, const LaserDesc& desc);
 		void Update(unsigned long long deltaTime);
-		void Draw(DX9GF::GraphicsDevice* graphicsDevice, const DX9GF::Camera& camera, unsigned long long deltaTime);
+		void Draw(sdlgf::GraphicsDevice* graphicsDevice, const sdlgf::Camera& camera, unsigned long long deltaTime);
 		bool IsEmpty() const { return transforms.empty() && lasers.empty(); }
 		size_t Count() const { return transforms.size() + lasers.size(); }
 	};

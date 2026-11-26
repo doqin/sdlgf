@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "Player.h"
 #include "SavePoint.h"
@@ -18,7 +18,7 @@
 #include "TextIconButton.h"
 
 namespace Demo {
-	class WorldSceneBase : public DX9GF::IScene, public DX9GF::ISaveable {
+	class WorldSceneBase : public sdlgf::IScene, public sdlgf::ISaveable {
 	protected:
 		bool isGamePaused = false;
 		bool isTransitioning = false;
@@ -45,24 +45,24 @@ namespace Demo {
 		void ConfirmTravel(WorldSceneBase* world, const SavePoint& target);
 
 		Game* game;
-		std::shared_ptr<DX9GF::ColliderManager> colliderManager;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::ColliderManager> colliderManager;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
 		std::shared_ptr<Demo::DraggableManager> draggableManager;
 		std::shared_ptr<InventoryMenu> inventoryMenu;
 		std::shared_ptr<PlayerHUD> playerHUD;
-		std::shared_ptr<DX9GF::SaveManager> saveManager;
+		std::shared_ptr<sdlgf::SaveManager> saveManager;
 
 		std::vector<std::shared_ptr<SavePoint>> savePoints;
 		std::vector<std::shared_ptr<ShopPoint>> shopPoints;
 		std::vector<std::shared_ptr<HealingPoint>> healingPoints;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::Texture> gearTex;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::Texture> gearTex;
 		// Next page of the first-gear tutorial to show (-1 = none pending); see WorldSceneBase::Update.
 		int gearTutorialPage = -1;
 		std::shared_ptr<Player> player;
-		std::shared_ptr<DX9GF::Map> map;
-		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
-		std::shared_ptr<DX9GF::CommandBuffer> commandBuffer;
+		std::shared_ptr<sdlgf::Map> map;
+		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer;
+		std::shared_ptr<sdlgf::CommandBuffer> commandBuffer;
 		std::shared_ptr<PopUpMessage> popUpMessage;
 		std::wstring chapterTitle = L"Unnamed";
 		std::wstring chapterSubtitle = L"< No Subtitle >";
@@ -74,7 +74,7 @@ namespace Demo {
 		std::vector<std::shared_ptr<MapEnemy>> mapEnemies;
 		std::function<void()> onConversationEnd;
 
-		WorldSceneBase(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh);
+		WorldSceneBase(Game* game, std::shared_ptr<sdlgf::SaveManager> sm, UINT sw, UINT sh);
 
 		void GenerateSaveData(nlohmann::json& outData) override;
 		void RestoreSaveData(const nlohmann::json& inData) override;
@@ -100,7 +100,7 @@ namespace Demo {
 		virtual void OnFastTravelArrive(float x, float y) {}
 
 		void SpawnMapEnemy(float x, float y, std::string id, std::vector<std::string> types,
-			bool isRand, bool isGlobal, std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDraw,
+			bool isRand, bool isGlobal, std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDraw,
 			int tokenChance = 30, const std::string& questEvent = "", const std::string& questId = "");
 
 		virtual void OnInit() = 0;
@@ -114,7 +114,7 @@ namespace Demo {
 		virtual void OnDrawUI(unsigned long long deltaTime) {}
 		virtual void OnGenerateSaveData(nlohmann::json& outData) {}
 		virtual void OnRestoreSaveData(const nlohmann::json& inData) {}
-		virtual void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
+		virtual void DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 	public:
 		void Init() override;

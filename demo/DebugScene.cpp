@@ -11,7 +11,7 @@ Demo::DebugScene::DebugScene(Game* game, int sw, int sh) : IScene(sw, sh), game(
 void Demo::DebugScene::Init()
 {
 	draggableManager = std::make_shared<DraggableManager>();
-	transformManager = std::make_shared<DX9GF::TransformManager>();
+	transformManager = std::make_shared<sdlgf::TransformManager>();
 	player = std::make_shared<Player>(transformManager);
 	player->Init(game->GetGraphicsDevice(), &colliderManager, &camera);
 	player->ClearDeck();
@@ -48,11 +48,11 @@ void Demo::DebugScene::Init()
 	containers.back()->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 
 	//just load resource (texture, font) 1 time and reuse it all over again
-	uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiSheetTex->LoadTexture(L"assets/ui-pack.png");
 	//Everything works fine with .png, but .bmp is causing coordinate issues. Idk how to fix bruh
-	myFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24);
-	myFontSprite = std::make_shared<DX9GF::FontSprite>(myFont.get());
+	myFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), L"Arcade Among 2 R46PV", 24);
+	myFontSprite = std::make_shared<sdlgf::FontSprite>(myFont.get());
 
 	//create 1 text button and 2 icon buttons
 	auto btnTextExit = std::make_shared<Demo::TextButton>(
@@ -60,9 +60,9 @@ void Demo::DebugScene::Init()
 		0, 0, 150, 50, //x,y,w,h
 		"EXIT GAME", //display text
 		myFont.get(), //reuse myFont
-		[](DX9GF::ITrigger* t)
+		[](sdlgf::ITrigger* t)
 		{
-			DX9GF::Application::GetInstance()->Quit();
+			sdlgf::Application::GetInstance()->Quit();
 		}
 	);
 	btnTextExit->Init(&uiCamera);
@@ -77,12 +77,12 @@ void Demo::DebugScene::Init()
 
 	auto quitBtn = std::make_shared<Demo::IconButton>(transformManager, 200, 200, 62, 30, uiSheetTex, 3);
 	quitBtn->SetSpriteCoords(385, 449, 62, 30, 2);
-	quitBtn->SetOnReleaseLeft([](DX9GF::ITrigger* t) { DX9GF::Application::GetInstance()->Quit(); });
+	quitBtn->SetOnReleaseLeft([](sdlgf::ITrigger* t) { sdlgf::Application::GetInstance()->Quit(); });
 
 	auto continueBtn = std::make_shared<Demo::IconButton>(transformManager, 150, 150, 94, 30, uiSheetTex, 3);
 	continueBtn->SetSpriteCoords(577, 193, 94, 30, 34);
 
-	continueBtn->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+	continueBtn->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 		auto [sw, sh] = this->camera.GetScreenResolution();
 		auto sceMan = this->game->GetSceneManager();
 		this->game->GetSceneManager()->PushScene(
@@ -99,13 +99,13 @@ void Demo::DebugScene::Init()
 	//continueBtn->ChangeSpriteCoords(500, 2, 60, 32, 20);
 
 	transformManager->RebuildHierarchy();
-	//DX9GF::ITrigger::drawTrigger = true;
-	//DX9GF::ICollider::drawCollider = true;
+	//sdlgf::ITrigger::drawTrigger = true;
+	//sdlgf::ICollider::drawCollider = true;
 }
 
 void Demo::DebugScene::Update(unsigned long long deltaTime)
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	inpMan->ReadMouse(deltaTime);
 	inpMan->ReadKeyboard(deltaTime);
 	if (!commandBuffer.IsBusy()) {
@@ -131,17 +131,17 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 			}
 		}
 		if (inpMan->KeyDown(DIK_F2)) {
-			DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
+			sdlgf::ITrigger::drawTrigger = !sdlgf::ITrigger::drawTrigger;
 		}
 		if (inpMan->KeyDown(DIK_F5)) {
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			auto sceMan = game->GetSceneManager();
 			sceMan->PushScene(new TestBattleScene(game, player, app->GetScreenWidth(), app->GetScreenHeight()));
 			sceMan->GoToNext();
 			return;
 		}
 
-		if (inpMan->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
+		if (inpMan->MousePress(sdlgf::InputManager::MouseButton::Middle)) {
 			auto dX = inpMan->GetRelativeMouseX();
 			auto dY = inpMan->GetRelativeMouseY();
 			auto camPos = camera.GetPosition();
@@ -171,8 +171,8 @@ void Demo::DebugScene::DrawWorld(unsigned long long deltaTime)
 	if (SUCCEEDED(gd->BeginDraw())) {
 		draggableManager->Draw(deltaTime);
 
-		Demo::DrawAnimatedDashedRectangle(gd, camera, 0, 0, 500, 500, 6.f, 0xFFFF00FF, true, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs());
-		Demo::DrawAnimatedDashedArrow(gd, camera, 0, 0, 200, 200, 3.f, 0xFFFFFFFF, false, 10.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, DX9GF::Platform::GetTicksMs(), 10.f, 10.f);
+		Demo::DrawAnimatedDashedRectangle(gd, camera, 0, 0, 500, 500, 6.f, 0xFFFF00FF, true, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, sdlgf::Platform::GetTicksMs());
+		Demo::DrawAnimatedDashedArrow(gd, camera, 0, 0, 200, 200, 3.f, 0xFFFFFFFF, false, 10.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, sdlgf::Platform::GetTicksMs(), 10.f, 10.f);
 
 		gd->EndDraw();
 	}
@@ -191,7 +191,7 @@ void Demo::DebugScene::DrawUI(unsigned long long deltaTime)
 			myFontSprite->Begin();
 			myFontSprite->SetPosition(20.0f, 50.0f);
 			myFontSprite->SetColor(0xFF00FF00);
-			myFontSprite->SetText(DX9GF::Utils::Utf8ToWide(typedText));
+			myFontSprite->SetText(sdlgf::Utils::Utf8ToWide(typedText));
 			myFontSprite->Draw(this->uiCamera, deltaTime);
 			myFontSprite->End();
 		}
@@ -200,7 +200,7 @@ void Demo::DebugScene::DrawUI(unsigned long long deltaTime)
 			activeConversation->Draw(gd, &this->uiCamera, deltaTime);
 		}
 
-		DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+		sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 
 		gd->EndDraw();
 	}

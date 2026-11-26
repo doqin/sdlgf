@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "CardCatalog.h"
 #include "CardFrame.h"
@@ -12,7 +12,7 @@ namespace Demo {
 	// explosion particle burst, then the pulled cards revealed one at a time (click to fade in the
 	// next). The cards are already in the player's inventory before this scene is pushed, so the
 	// reveal is pure presentation - quitting mid-reveal loses nothing.
-	class PackOpeningScene : public DX9GF::IScene {
+	class PackOpeningScene : public sdlgf::IScene {
 	public:
 		PackOpeningScene(Game* game, int screenWidth, int screenHeight, std::vector<std::string> cardIds);
 
@@ -28,14 +28,14 @@ namespace Demo {
 		Game* game;
 		std::vector<std::string> cardIds;
 
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		std::shared_ptr<DX9GF::Texture> packTex;
-		std::shared_ptr<DX9GF::Texture> particleTex;
-		std::shared_ptr<DX9GF::AnimatedSprite> packSprite;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::Texture> packTex;
+		std::shared_ptr<sdlgf::Texture> particleTex;
+		std::shared_ptr<sdlgf::AnimatedSprite> packSprite;
 		std::shared_ptr<CardFrame> cardFrame;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::unique_ptr<DX9GF::ParticleSystem> explosionEmitter;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::unique_ptr<sdlgf::ParticleSystem> explosionEmitter;
 
 		// What CardFrame needs to draw each revealed card, in the same order as cardIds.
 		struct CardFace {

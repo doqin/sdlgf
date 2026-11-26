@@ -5,21 +5,21 @@
 #include "RNG.h"
 #include "PopUpMessage.h"
 
-void Demo::KeyeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::KeyeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/minion-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/minionprojectile-Sheet.png");
-	projFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
+	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5);
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::KeyeEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::KeyeEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -64,7 +64,7 @@ void Demo::KeyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 	}
 }
 
-void Demo::KeyeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::KeyeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	this->player = player;
 
 	float baseDamage = 2.f;
@@ -78,7 +78,7 @@ void Demo::KeyeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<st
 void Demo::KeyeEnemy::PatternRoundCircle(float projDamage) {
 	for (int i = 0; i < 25; i++) {
 		float randX = RNG::Range(-120.f, 120.f);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, randX](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, randX](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				projectiles.Spawn(
 					lock,
@@ -91,7 +91,7 @@ void Demo::KeyeEnemy::PatternRoundCircle(float projDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f));
 	}
 }
 
@@ -118,7 +118,7 @@ void Demo::KeyeEnemy::PatternSightline(float projDamage) {
 
 	const int shots = RNG::Range(10, 13);
 	for (int i = 0; i < shots; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				auto [px, py] = lock->GetWorldPosition();
 
@@ -136,6 +136,6 @@ void Demo::KeyeEnemy::PatternSightline(float projDamage) {
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SHOT_GAP));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SHOT_GAP));
 	}
 }

@@ -6,18 +6,18 @@
 #include <cmath>
 
 namespace Demo {
-	EnergyToken::EnergyToken(std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, float x, float y)
+	EnergyToken::EnergyToken(std::weak_ptr<sdlgf::TransformManager> tm, sdlgf::GraphicsDevice* gd, float x, float y)
 		: IToken(tm, x, y)
 	{
-		texture = std::make_shared<DX9GF::Texture>(gd);
+		texture = std::make_shared<sdlgf::Texture>(gd);
 		texture->LoadTexture(L"assets/ui.png"); //TODO: Temporary reuse energy icon, change it if u have any idea about how energy fragments look like
 
-		sprite = std::make_shared<DX9GF::StaticSprite>(texture.get());
+		sprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
 		sprite->SetSrcRect({ 96, 0, 112, 16 });
 		sprite->SetScale(1.5f, 1.5f);
 		sprite->SetOrigin(8.f, 8.f);
 
-		collider = std::make_shared<DX9GF::RectangleCollider>(tm, 24.f, 24.f, x, y);
+		collider = std::make_shared<sdlgf::RectangleCollider>(tm, 24.f, 24.f, x, y);
 		collider->SetOriginCenter();
 	}
 
@@ -37,7 +37,7 @@ namespace Demo {
 		collider->SetLocalPosition(GetWorldX(), GetWorldY() + floatOffset);
 	}
 
-	void EnergyToken::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+	void EnergyToken::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 		if (alpha <= 0 || isExpired) return;
 
 		int currentAlpha = alpha;
@@ -57,7 +57,7 @@ namespace Demo {
 		isCollected = true;
 
 		scene->AddEnergyPieceToken();
-		DX9GF::AudioManager::GetInstance()->PlayRandom("token_collect", 0.3f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("token_collect", 0.3f);
 	}
 
 	bool EnergyToken::IsDone() const {

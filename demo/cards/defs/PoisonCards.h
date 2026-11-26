@@ -10,7 +10,7 @@ namespace Demo {
 	private:
 		static constexpr int POISON_TURNS = 3;
 	public:
-		PoisonCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		PoisonCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Green,
@@ -25,7 +25,7 @@ namespace Demo {
 	// The area source. Non-persistent: re-poisoning every enemy each turn would add turns forever.
 	class ToxicCloudCard : public IStatementCard {
 	public:
-		ToxicCloudCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ToxicCloudCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 2,
 				.face = CardTemplate::Green,
@@ -38,7 +38,7 @@ namespace Demo {
 	// bigger than the last instead of shrinking.
 	class FesteringCard : public IStatementCard {
 	public:
-		FesteringCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		FesteringCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 2,
 				.face = CardTemplate::Green,
@@ -52,7 +52,7 @@ namespace Demo {
 	// Copies rather than moves, so the target keeps its own Poison.
 	class ContagionCard : public TargetedCard {
 	public:
-		ContagionCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ContagionCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Green,
@@ -73,7 +73,7 @@ namespace Demo {
 		static constexpr float DAMAGE_PER_TURN = 1.f;
 		static constexpr int POISON_CAP = 8;
 	public:
-		SepticStrikeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		SepticStrikeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Green,

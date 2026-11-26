@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "IconButton.h"
-#include "DX9GFFont.h"
-#include "DX9GFSprites.h"
+#include "Font.h"
+#include "Sprites.h"
 #include <string>
 #include <unordered_map>
 
@@ -9,7 +9,7 @@ namespace Demo {
     class TextIconButton : public IconButton {
     private:
         std::wstring label;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
         float textScaleX = 1.0f;
         float textScaleY = 1.0f;
         D3DCOLOR textColor = 0xFF111111;
@@ -32,8 +32,8 @@ namespace Demo {
         float MeasureTextWidth(const std::wstring& text) const;
         void ApplyAutoResize();
     public:
-        TextIconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-            std::shared_ptr<DX9GF::Texture> uiSheetTex, DX9GF::Font* font, const std::wstring& text, int frames = 3);
+        TextIconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+            std::shared_ptr<sdlgf::Texture> uiSheetTex, sdlgf::Font* font, const std::wstring& text, int frames = 3);
 
         void SetText(const std::wstring& text) { this->label = text; }
         void SetTextColor(D3DCOLOR color) { this->textColor = color; }
@@ -53,6 +53,6 @@ namespace Demo {
 
         void SetSpriteScale(float scaleX, float scaleY);
         void Update(unsigned long long deltaTime) override;
-        void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
+        void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) override;
     };
 }

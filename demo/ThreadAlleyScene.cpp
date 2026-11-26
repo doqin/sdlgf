@@ -30,10 +30,10 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	RegisterPortalLayer("trigger_p");
 	RegisterPortalLayer("trigger_tutorial");
-	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(1, 330.f, 263.f, "bgm_bossworld", 0.3f);
 	});
-	map->SetAreaUpdateHandler("trigger_tutorial", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_tutorial", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(-3, 840.f, -1144.f, "bgm_tutorial", 0.5f);
 	});
 
@@ -103,7 +103,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 	authTerminal = std::make_shared<AuthTerminal>(transformManager, 1128.f, -280.f);
 	authTerminal->Init(game, game->GetGraphicsDevice(), &camera, &this->uiCamera, player, colliderManager, font);
-	authTerminal->SetPassword(DX9GF::Utils::Utf8ToWide(authPassword));
+	authTerminal->SetPassword(sdlgf::Utils::Utf8ToWide(authPassword));
 	authTerminal->SetVisible(true);
 	authTerminal->SetOnSolved([this]() {
 		authTerminalSolved = true;
@@ -113,7 +113,7 @@ void Demo::ThreadAlleyScene::OnInit()
 			trojanNPC->GetQuestMarker()->SetConditionMet(true);
 		}
 		auto [sw, sh] = camera.GetScreenResolution();
-		currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 		currentConversation->AddLine({ .name = Tr(L"Terminal"), .content = Tr(L"ACCESS GRANTED.\nYou obtained the Authentication Token.") });
 	});
 
@@ -182,7 +182,7 @@ void Demo::ThreadAlleyScene::OnInit()
 		treasureChests.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 	}
 
-	auto bgDraw = [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) {
+	auto bgDraw = [this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) {
 		DrawCheckerBackground(gd, deltaTime);
 	};
 
@@ -212,10 +212,10 @@ void Demo::ThreadAlleyScene::OnInit()
 			auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			this->drawBuffer->PushCommand(transitionIn);
 
-			this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
+			this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
 				if (!transitionIn->IsFinished()) return;
 
-				auto app = DX9GF::Application::GetInstance();
+				auto app = sdlgf::Application::GetInstance();
 				auto sceMan = this->game->GetSceneManager();
 				auto battleScene = new MapBattleScene(this->game, this->player, app->GetScreenWidth(), app->GetScreenHeight(), e->GetEncounterData());
 
@@ -273,7 +273,7 @@ void Demo::ThreadAlleyScene::OnInit()
 
 void Demo::ThreadAlleyScene::OnUpdate(unsigned long long deltaTime)
 {
-	auto inpMan = DX9GF::InputManager::GetInstance();
+	auto inpMan = sdlgf::InputManager::GetInstance();
 	auto* settings = SettingsManager::GetInstance();
 
 	// The auth terminal owns its own modal PasswordMenu. Pump it while the menu is
@@ -342,7 +342,7 @@ void Demo::ThreadAlleyScene::OnRestoreSaveData(const nlohmann::json& inData)
 		authPassword = inData["authTerminal"].value("password", authPassword);
 		authTerminalSolved = inData["authTerminal"].value("solved", false);
 		if (authTerminal) {
-			authTerminal->SetPassword(DX9GF::Utils::Utf8ToWide(authPassword));
+			authTerminal->SetPassword(sdlgf::Utils::Utf8ToWide(authPassword));
 			authTerminal->SetSolved(authTerminalSolved);
 		}
 	}
@@ -380,7 +380,7 @@ void Demo::ThreadAlleyScene::StartTrojanConversation()
 	}
 
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 	for (auto& line : trojanNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}
@@ -425,19 +425,19 @@ void Demo::ThreadAlleyScene::StartTrojanBattle()
 	auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->PushCommand(transitionIn);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn](std::function<void(void)> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionIn](std::function<void(void)> markFinished) {
 		if (!transitionIn->IsFinished()) return;
 
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		auto sceMan = game->GetSceneManager();
 		auto battleScene = new CustomBattleScene(game, player, app->GetScreenWidth(), app->GetScreenHeight(),
 			std::map<std::string, int>{ { "TrojanEnemy", 100 } });
 		battleScene->SetCustomBGM("battle_boss");
-		battleScene->SetCustomBackgroundDraw([this](DX9GF::GraphicsDevice* gd, unsigned long long dt) {
+		battleScene->SetCustomBackgroundDraw([this](sdlgf::GraphicsDevice* gd, unsigned long long dt) {
 			DrawCheckerBackground(gd, dt);
 		});
 		battleScene->SetOnVictoryCallback([this]() {
-			this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+			this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 				this->trojanNPC->SetPhase(TrojanNPC::Phase::Defeated);
 				auto result = QuestManager::GetInstance()->NotifyEvent("TROJAN_DEFEATED", "", this->player.get());
 				if (result.hasReward && this->popUpMessage) {
@@ -463,7 +463,7 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 
 	if (!npcData->HasMet()) {
 		auto [sw, sh] = camera.GetScreenResolution();
-		currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+		currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 		for (auto& line : sketchyGuy->GetDialogueLines()) {
 			currentConversation->AddLine(line);
 		}
@@ -478,7 +478,7 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 	std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
 		{ sketchyGuy->GetBuyConfirmLabel(cost), [this, cost]() {
 			if (player->GetGold() < cost) {
-				DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
+				sdlgf::AudioManager::GetInstance()->Play("error", false, 0.3f);
 				return;
 			}
 			player->AddGold(-cost);
@@ -488,9 +488,9 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 			for (auto& id : pulled) {
 				player->AddCardToInventory(id);
 			}
-			DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("shop_buy", false, 0.8f);
 
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			auto sceMan = game->GetSceneManager();
 			auto* packScene = new PackOpeningScene(game, app->GetScreenWidth(), app->GetScreenHeight(), pulled);
 			sceMan->InsertScene(sceMan->GetIndex() + 1, packScene);
@@ -502,7 +502,7 @@ void Demo::ThreadAlleyScene::StartSketchyGuyInteraction()
 		sketchyGuy->GetBuyPromptTitle(), sketchyGuy->GetBuyPromptText(cost), buttons);
 }
 
-void Demo::ThreadAlleyScene::DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::ThreadAlleyScene::DrawCheckerBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = uiCamera.GetScreenResolution();
 	const float w = static_cast<float>(screenWidth);
@@ -589,7 +589,7 @@ void Demo::ThreadAlleyScene::DrawCheckerBackground(DX9GF::GraphicsDevice* gd, un
 	gd->SetAlphaBlending(false);
 }
 
-void Demo::ThreadAlleyScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::ThreadAlleyScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	DrawCheckerBackground(gd, deltaTime);
 }

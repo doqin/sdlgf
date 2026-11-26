@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Player.h"
 #include "ProjectileSystem.h"
 #include <functional>
@@ -34,34 +34,34 @@ namespace Demo {
 			RECT iconRect{ 0, 0, 0, 0 };
 			std::wstring name;
 			D3DCOLOR color = 0xFFFFFFFF;
-			std::weak_ptr<DX9GF::IGameObject> target;
+			std::weak_ptr<sdlgf::IGameObject> target;
 			float targetX = 0.f;
 			float targetY = 0.f;
 			float elapsed = 0.f;
 		};
 		std::vector<DebuffEffect> debuffEffects;
 		void UpdateDebuffEffects(unsigned long long deltaTime);
-		void DrawDebuffEffects(DX9GF::Camera* camera, unsigned long long deltaTime);
+		void DrawDebuffEffects(sdlgf::Camera* camera, unsigned long long deltaTime);
 		std::function<void(int)> onRequestLockCard = nullptr;
 		// Hands a newly created enemy to the battle scene instead of touching its enemy list
 		// directly. Spawns run from deferred commands inside the scene's enemy update loop, so
 		// inserting straight into that vector would reallocate it mid-iteration.
 		std::function<void(std::shared_ptr<IEnemy>)> onRequestSpawnEnemy = nullptr;
 		std::function<void(int)> onRequestVisionDebuff = nullptr;
-		std::shared_ptr<DX9GF::RectangleTrigger> cardSpawnTrigger;
+		std::shared_ptr<sdlgf::RectangleTrigger> cardSpawnTrigger;
 		std::function<void(std::shared_ptr<IEnemy>)> onRequestEnemyCard = [](std::shared_ptr<IEnemy>) {};
 		std::vector<DamageIndicator> damageIndicators;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 		ProjectileSystem projectiles;
-		DX9GF::CommandBuffer commandBuffer;
-		DX9GF::CommandBuffer animationBuffer;
-		std::shared_ptr<DX9GF::Texture> uiTexture;
-		std::shared_ptr<DX9GF::StaticSprite> uiSprite;
+		sdlgf::CommandBuffer commandBuffer;
+		sdlgf::CommandBuffer animationBuffer;
+		std::shared_ptr<sdlgf::Texture> uiTexture;
+		std::shared_ptr<sdlgf::StaticSprite> uiSprite;
 		std::shared_ptr<StatusRenderer> statusRenderer;
-		std::shared_ptr<DX9GF::Texture> hitImpactTexture;
-		std::vector<std::shared_ptr<DX9GF::AnimatedSprite>> hitImpactSprites;
-		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
+		std::shared_ptr<sdlgf::Texture> hitImpactTexture;
+		std::vector<std::shared_ptr<sdlgf::AnimatedSprite>> hitImpactSprites;
+		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
 		unsigned long long timeSinceStart = 0;
 		// Speech bubble: lines wait in a queue and are shown one at a time next to the enemy.
 		// What each enemy type says lives in EnemyDialogue.
@@ -76,7 +76,7 @@ namespace Demo {
 		std::deque<SpeechLine> speechQueue;
 		float speechElapsed = 0.f; // how long the front line has been on screen
 		bool saidHurtLine = false;
-		std::shared_ptr<DX9GF::FontSprite> speechFontSprite;
+		std::shared_ptr<sdlgf::FontSprite> speechFontSprite;
 		void UpdateSpeech(unsigned long long deltaTime);
 		// Says the hurt line the first time this enemy drops to half health or below.
 		void CheckHurtLine();
@@ -98,7 +98,7 @@ namespace Demo {
 		int GetSmartRandomPattern(const int&& minPattern, const int&& maxPattern);
 
 		// Main body sprite, tinted/scaled by the death animation. Null means particles only.
-		virtual DX9GF::ISprite* GetBodySprite() { return nullptr; }
+		virtual sdlgf::ISprite* GetBodySprite() { return nullptr; }
 
 		// Programmatic death animation: red flash, fade + shrink, then a burst of particles.
 		// IsDoneAttacking() stays false until it finishes so the scene waits before collecting.
@@ -108,8 +108,8 @@ namespace Demo {
 		float deathTimer = 0.f;
 		float deathBaseScale = 1.f;
 		bool deathBurstSpawned = false;
-		std::shared_ptr<DX9GF::Texture> deathParticleTexture;
-		std::unique_ptr<DX9GF::ParticleSystem> deathParticles;
+		std::shared_ptr<sdlgf::Texture> deathParticleTexture;
+		std::unique_ptr<sdlgf::ParticleSystem> deathParticles;
 		void BeginDeath();
 		void UpdateDeath(unsigned long long deltaTime);
 	public:
@@ -128,19 +128,19 @@ namespace Demo {
 		// A line is on screen or still waiting in the speech queue.
 		bool IsSpeaking() const { return !speechQueue.empty(); }
 		// Drawn by the battle scene after everything else in the battle area, so nothing covers it.
-		void DrawSpeech(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
+		void DrawSpeech(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime);
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) { projectiles.SetOwner(this); }
+		IEnemy(std::weak_ptr<sdlgf::TransformManager> tm, int maxHealth) : ICombatant(tm, maxHealth) { projectiles.SetOwner(this); }
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
+		IEnemy(std::weak_ptr<sdlgf::TransformManager> tm, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
 
-		IEnemy(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
-		void InitCardSpawnTrigger(DX9GF::Camera* camera, float width, float height);
+		IEnemy(std::weak_ptr<sdlgf::TransformManager> tm, std::weak_ptr<sdlgf::IGameObject> parent, int maxHealth, float x, float y, float rot = 0, float sx = 1, float sy = 1) : ICombatant(tm, parent, maxHealth, x, y, rot, sx, sy) { projectiles.SetOwner(this); }
+		void InitCardSpawnTrigger(sdlgf::Camera* camera, float width, float height);
 		void SetOnRequestEnemyCard(std::function<void(std::shared_ptr<IEnemy>)> callback);
 		virtual void Update(unsigned long long deltaTime);
-		virtual void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime);
+		virtual void Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime);
 		bool TakeDamage(float damage, bool ignoreArmor = false);
-		virtual void StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies = nullptr, std::shared_ptr<PopUpMessage> popUpMessage = nullptr, DX9GF::GraphicsDevice* graphicsDevice = nullptr, DX9GF::Camera* camera = nullptr, int currentTurn = 1) = 0;
+		virtual void StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies = nullptr, std::shared_ptr<PopUpMessage> popUpMessage = nullptr, sdlgf::GraphicsDevice* graphicsDevice = nullptr, sdlgf::Camera* camera = nullptr, int currentTurn = 1) = 0;
 		void SetState(bool isOnStandby);
 		bool IsOnStandby() const { return isOnStandby; }
 		bool IsDoneAttacking();
@@ -152,12 +152,12 @@ namespace Demo {
 		// Deliberately separate from cardSpawnTrigger, which is the click box.
 		virtual float GetBodyWidth() const { return 128.f; }
 		virtual float GetBodyHeight() const { return 128.f; }
-		std::weak_ptr<DX9GF::RectangleTrigger> GetCardSpawnTrigger() const { return cardSpawnTrigger; }
+		std::weak_ptr<sdlgf::RectangleTrigger> GetCardSpawnTrigger() const { return cardSpawnTrigger; }
 		void SetOnRequestLockCard(std::function<void(int)> callback) { onRequestLockCard = callback; }
 		void SetOnRequestSpawnEnemy(std::function<void(std::shared_ptr<IEnemy>)> callback) { onRequestSpawnEnemy = callback; }
 		void SetOnRequestVisionDebuff(std::function<void(int)> callback) { onRequestVisionDebuff = callback; }
 		virtual void OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn) {}
-		virtual void OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
+		virtual void OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn, std::vector<std::shared_ptr<IEnemy>>* enemies, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
 			OnTurnBegin(player, popUpMessage, currentTurn);
 		}
 

@@ -48,27 +48,27 @@ namespace {
 	constexpr float FADE_IN_SPEED = 0.004f;
 }
 
-Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<DX9GF::TransformManager> transformManager, DX9GF::Camera* uiCamera, DX9GF::Font* font)
+Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, sdlgf::Font* font)
 	: game(game), player(player), transformManager(transformManager), uiCamera(uiCamera), font(font)
 {
-	fontSprite = std::make_shared<DX9GF::FontSprite>(font);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 }
 
 void Demo::PlayerHUD::Init()
 {
-	playerTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	playerTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	playerTex->LoadTexture(IDB_PNG1);
-	playerIcon = std::make_shared<DX9GF::StaticSprite>(playerTex.get());
+	playerIcon = std::make_shared<sdlgf::StaticSprite>(playerTex.get());
 	playerIcon->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
 	playerIcon->SetScale(ICON_SCALE);
 
-	uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	uiTex->LoadTexture(L"assets/ui.png");
 
 	btnInventory = std::make_shared<IconButton>(transformManager, 0.0f, 0.0f, static_cast<int>(BUTTON_W), static_cast<int>(BUTTON_H), uiTex);
-	btnInventory->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(288, 64, 32, 32, 3));
+	btnInventory->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(288, 64, 32, 32, 3));
 	btnInventory->SetSpriteScale(BUTTON_SCALE, BUTTON_SCALE);
-	btnInventory->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
+	btnInventory->SetOnReleaseLeft([this](sdlgf::ITrigger*) {
 		if (onInventoryOpen) onInventoryOpen();
 		});
 	btnInventory->Init(uiCamera);
@@ -131,7 +131,7 @@ D3DCOLOR Demo::PlayerHUD::ApplyOpacity(D3DCOLOR color) const
 	return (color & 0x00FFFFFF) | (alpha << 24);
 }
 
-void Demo::PlayerHUD::DrawPanel(DX9GF::GraphicsDevice* gd)
+void Demo::PlayerHUD::DrawPanel(sdlgf::GraphicsDevice* gd)
 {
 	// Dark outline -> cream frame -> dark inner line -> checkered interior
 	gd->DrawRectangle(*uiCamera, panelX, panelY, panelW, panelH, ApplyOpacity(PANEL_OUTLINE), true);
@@ -164,7 +164,7 @@ void Demo::PlayerHUD::DrawPanel(DX9GF::GraphicsDevice* gd)
 	}
 }
 
-void Demo::PlayerHUD::DrawStatRow(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor)
+void Demo::PlayerHUD::DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor)
 {
 	float groupX = contentX + contentW - groupW;
 
@@ -201,7 +201,7 @@ void Demo::PlayerHUD::DrawStatRow(DX9GF::GraphicsDevice* gd, unsigned long long 
 	fontSprite->End();
 }
 
-void Demo::PlayerHUD::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::PlayerHUD::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	if (!visible) return;
 

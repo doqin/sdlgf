@@ -42,12 +42,12 @@ namespace {
 	}
 }
 
-void Demo::MapView::Init(DX9GF::Font* font)
+void Demo::MapView::Init(sdlgf::Font* font)
 {
-	fontSprite = std::make_shared<DX9GF::FontSprite>(font);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 }
 
-void Demo::MapView::Build(const DX9GF::Map& map)
+void Demo::MapView::Build(const sdlgf::Map& map)
 {
 	built = false;
 	tileW = static_cast<float>((std::max)(1, map.GetTileWidth()));
@@ -63,7 +63,7 @@ void Demo::MapView::Build(const DX9GF::Map& map)
 		const std::uint8_t type = (layerName == "walls") ? Wall : Floor;
 		for (std::int64_t packed : map.GetTileCells(layerName)) {
 			int tx, ty;
-			DX9GF::Map::UnpackTile(packed, tx, ty);
+			sdlgf::Map::UnpackTile(packed, tx, ty);
 			minX = (std::min)(minX, tx); maxX = (std::max)(maxX, tx);
 			minY = (std::min)(minY, ty); maxY = (std::max)(maxY, ty);
 			tiles.emplace_back(packed, type);
@@ -80,7 +80,7 @@ void Demo::MapView::Build(const DX9GF::Map& map)
 
 	for (const auto& [packed, type] : tiles) {
 		int tx, ty;
-		DX9GF::Map::UnpackTile(packed, tx, ty);
+		sdlgf::Map::UnpackTile(packed, tx, ty);
 		std::uint8_t& cell = cells[static_cast<size_t>(ty - originY) * cols + (tx - originX)];
 		cell = (std::max)(cell, type);  // a wall tile wins over ground in the same cell
 	}
@@ -137,7 +137,7 @@ void Demo::MapView::Reveal(float worldX, float worldY)
 	}
 }
 
-void Demo::MapView::FillClipped(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float x0, float y0, float x1, float y1,
+void Demo::MapView::FillClipped(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float x0, float y0, float x1, float y1,
 	D3DCOLOR color, const ClipRect& clip) const
 {
 	x0 = (std::max)(x0, clip.x0); y0 = (std::max)(y0, clip.y0);
@@ -146,7 +146,7 @@ void Demo::MapView::FillClipped(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCame
 	gd->DrawRectangle(uiCamera, x0, y0, x1 - x0, y1 - y0, color, true);
 }
 
-void Demo::MapView::DrawCells(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
+void Demo::MapView::DrawCells(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 	float scale, const ClipRect& clip) const
 {
 	const int cx0 = (std::max)(0, static_cast<int>(std::floor((clip.x0 - screenOriginX) / scale)));
@@ -176,7 +176,7 @@ void Demo::MapView::DrawCells(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera
 	}
 }
 
-void Demo::MapView::DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, float screenOriginX, float screenOriginY,
+void Demo::MapView::DrawMarkers(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, float screenOriginX, float screenOriginY,
 	float scale, float dotSize, const ClipRect& clip, const std::vector<Marker>& markers,
 	const TravelUI* travel, TravelHits* hits) const
 {
@@ -209,7 +209,7 @@ void Demo::MapView::DrawMarkers(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCame
 	}
 }
 
-void Demo::MapView::DrawText(DX9GF::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color)
+void Demo::MapView::DrawText(sdlgf::Camera& uiCamera, const std::wstring& text, float x, float y, D3DCOLOR color)
 {
 	fontSprite->Begin();
 	fontSprite->SetColor(color);
@@ -219,7 +219,7 @@ void Demo::MapView::DrawText(DX9GF::Camera& uiCamera, const std::wstring& text, 
 	fontSprite->End();
 }
 
-void Demo::MapView::DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
+void Demo::MapView::DrawMini(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, int virtualWidth, int virtualHeight,
 	float playerX, float playerY, const std::vector<Marker>& markers)
 {
 	if (!built) return;
@@ -245,7 +245,7 @@ void Demo::MapView::DrawMini(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
 	gd->SetAlphaBlending(false);
 }
 
-void Demo::MapView::DrawFull(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera, int virtualWidth, int virtualHeight,
+void Demo::MapView::DrawFull(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera, int virtualWidth, int virtualHeight,
 	const std::vector<Marker>& markers, const std::wstring& closeKeyName, const TravelUI* travel, TravelHits* hits)
 {
 	const float halfW = virtualWidth / 2.f, halfH = virtualHeight / 2.f;

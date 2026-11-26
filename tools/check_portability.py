@@ -23,7 +23,7 @@ SKIP_FILE_PREFIXES = ('imgui', 'imstb')
 
 # Include search path used by the CMake targets (see core/ and demo/ CMakeLists).
 INCLUDE_DIRS = [
-    'core', 'core/DX9GFExtras', 'includes', 'demo',
+    'core', 'core/Extras', 'includes', 'demo',
     'demo/cards/core', 'demo/cards/targeting', 'demo/cards/registry', 'demo/cards/defs',
     'demo/backends', 'demo/misc/cpp', 'cmake/shims',
 ]

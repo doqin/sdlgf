@@ -2,7 +2,7 @@
 #include "CardRegistry.h"
 #include "InventoryMenu.h"
 #include "SettingsScene.h"
-#include "DX9GFAudioManager.h"
+#include "AudioManager.h"
 #include <algorithm>
 #include <unordered_map>
 #include "SettingsManager.h"
@@ -52,10 +52,10 @@ namespace {
 }
 namespace Demo {
 
-	InventoryMenu::InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::TransformManager> tm, std::shared_ptr<DraggableManager> dm, DX9GF::Camera* cam, DX9GF::Font* f)
+	InventoryMenu::InventoryMenu(Game* g, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::TransformManager> tm, std::shared_ptr<DraggableManager> dm, sdlgf::Camera* cam, sdlgf::Font* f)
 		: game(g), player(p), transformManager(tm), draggableManager(dm), uiCamera(cam), font(f)
 	{
-		fontSprite = std::make_shared<DX9GF::FontSprite>(f);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(f);
 	}
 
 	void InventoryMenu::Init()
@@ -84,45 +84,45 @@ namespace Demo {
 		float guideX = optionsX + buttonW + bottomGap;
 		float leaveX = guideX + buttonW + bottomGap;
 
-		itemSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		itemSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		itemSheetTex->LoadTexture(L"assets/items.png");
 
-		uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiTex->LoadTexture(L"assets/ui.png");
 
 		btnTabItems = std::make_shared<IconButton>(transformManager, startTabX, tabY, 48.0f * 2, 32.0f * 2, uiTex);
-		btnTabItems->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 144, 48, 32, 3));
-		btnTabItems->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::ITEMS); });
+		btnTabItems->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 144, 48, 32, 3));
+		btnTabItems->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->SetTab(Tab::ITEMS); });
 		btnTabItems->SetSpriteScale(2.f, 2.f);
 		btnTabItems->Init(uiCamera);
 
 		btnTabDeck = std::make_shared<IconButton>(transformManager, startTabX + buttonW + tabGap, tabY, 48.0f * 2, 32.0f * 2, uiTex);
-		btnTabDeck->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 176, 48, 32, 3));
-		btnTabDeck->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::DECK); });
+		btnTabDeck->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 176, 48, 32, 3));
+		btnTabDeck->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->SetTab(Tab::DECK); });
 		btnTabDeck->SetSpriteScale(2.f, 2.f);
 		btnTabDeck->Init(uiCamera);
 
 		btnTabGear = std::make_shared<IconButton>(transformManager, startTabX + 2 * (buttonW + tabGap), tabY, 48.0f * 2, 32.0f * 2, uiTex);
-		btnTabGear->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 464, 48, 32, 3));
-		btnTabGear->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::GEAR); });
+		btnTabGear->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 464, 48, 32, 3));
+		btnTabGear->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->SetTab(Tab::GEAR); });
 		btnTabGear->SetSpriteScale(2.f, 2.f);
 		btnTabGear->Init(uiCamera);
 
 		btnTabQuest = std::make_shared<IconButton>(transformManager, startTabX + 3 * (buttonW + tabGap), tabY, 48.0f * 2, 32.0f * 2, uiTex);
-		btnTabQuest->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 464, 48, 32, 3));
-		btnTabQuest->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->SetTab(Tab::QUEST); });
+		btnTabQuest->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 464, 48, 32, 3));
+		btnTabQuest->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->SetTab(Tab::QUEST); });
 		btnTabQuest->SetSpriteScale(2.f, 2.f);
 		btnTabQuest->Init(uiCamera);
 
 		btnResume = std::make_shared<IconButton>(transformManager, resumeX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
-		btnResume->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));
-		btnResume->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->Toggle(); });
+		btnResume->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));
+		btnResume->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->Toggle(); });
 		btnResume->SetSpriteScale(2.f, 2.f);
 		btnResume->Init(uiCamera);
 
 		btnOptions = std::make_shared<IconButton>(transformManager, optionsX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
-		btnOptions->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 208, 48, 32, 3));
-		btnOptions->SetOnReleaseLeft([this, sw, sh](DX9GF::ITrigger* t) {
+		btnOptions->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 208, 48, 32, 3));
+		btnOptions->SetOnReleaseLeft([this, sw, sh](sdlgf::ITrigger* t) {
 			auto sceMan = this->game->GetSceneManager();
 			sceMan->InsertScene(sceMan->GetIndex() + 1, new SettingsScene(this->game, sw, sh));
 			sceMan->GoToNext();
@@ -131,8 +131,8 @@ namespace Demo {
 		btnOptions->Init(uiCamera);
 
 		btnGuide = std::make_shared<IconButton>(transformManager, guideX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
-		btnGuide->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 496, 48, 32, 3));
-		btnGuide->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		btnGuide->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 496, 48, 32, 3));
+		btnGuide->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			if (!this->tutorial) {
 				this->tutorial = std::make_shared<BattleTutorial>(this->game->GetGraphicsDevice(), this->font);
 			}
@@ -142,8 +142,8 @@ namespace Demo {
 		btnGuide->Init(uiCamera);
 
 		btnLeaveGame = std::make_shared<IconButton>(transformManager, leaveX, bottomY - 50.0f, 48.0f * 2, 32.0f * 2, uiTex);
-		btnLeaveGame->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
-		btnLeaveGame->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		btnLeaveGame->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
+		btnLeaveGame->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 
 			std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
 				{ Tr(L"Yes(Y)"), [this]() {
@@ -175,40 +175,40 @@ namespace Demo {
 		inventoryContainer->SetMaxHeight(sh * 0.5f);
 		inventoryContainer->SetCulling(true);
 
-		uiPlayerTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiPlayerTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiPlayerTex->LoadTexture(L"assets/uiter-Sheet.png");
-		uiPlayerSprite = std::make_shared<DX9GF::StaticSprite>(uiPlayerTex.get());
+		uiPlayerSprite = std::make_shared<sdlgf::StaticSprite>(uiPlayerTex.get());
 		uiPlayerSprite->SetSrcRect({ 7, 7, 25, 32 });
 
-		flameTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		flameTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		flameTex->LoadTexture(L"assets/flame-slot-Sheet.png");
 
-		gearTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		gearTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		gearTex->LoadTexture(L"assets/12x12-gold-token.png"); //TODO: Change gears asset
 
 		activeSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
-		activeSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		activeSlot->GetButton()->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			if (this->activeSlot->GetGearID() != -1) {
 				this->player->UnequipGear(this->activeSlot->GetGearID());
-				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
 			}
 			});
 
 		passiveSlot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, true);
-		passiveSlot->GetButton()->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		passiveSlot->GetButton()->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			if (this->passiveSlot->GetGearID() != -1) {
 				this->player->UnequipGear(this->passiveSlot->GetGearID());
-				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
 			}
 			});
 
 		for (int i = 0; i < 8; i++) {
 			auto slot = std::make_shared<GearSlotUI>(transformManager, uiCamera, uiTex, flameTex, gearTex, false);
-			slot->GetButton()->SetOnReleaseLeft([this, i](DX9GF::ITrigger* t) {
+			slot->GetButton()->SetOnReleaseLeft([this, i](sdlgf::ITrigger* t) {
 				int id = this->orbitSlots[i]->GetGearID();
 				if (id != -1) {
 					this->player->EquipGear(id);
-					DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
+					sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.5f);
 				}
 				});
 			orbitSlots.push_back(slot);
@@ -226,9 +226,9 @@ namespace Demo {
 			btn->SetSliceMargins(4, 4);
 			btn->SetSpriteScale(2.f, 2.f);
 			btn->SetAutoResize(true, 12.f);
-			btn->SetOnReleaseLeft([this, onClick](DX9GF::ITrigger*) {
+			btn->SetOnReleaseLeft([this, onClick](sdlgf::ITrigger*) {
 				if (currentTab != Tab::DECK) return;
-				DX9GF::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("btn_click", 0.5f);
 				onClick();
 				});
 			btn->Init(uiCamera);
@@ -300,7 +300,7 @@ namespace Demo {
 	std::wstring InventoryMenu::GetDeckLabel() const
 	{
 		auto* pd = PlayerGlobalData::GetInstance();
-		return DX9GF::Utils::Utf8ToWide(pd->GetDeckName(pd->GetActiveDeckIndex())) +
+		return sdlgf::Utils::Utf8ToWide(pd->GetDeckName(pd->GetActiveDeckIndex())) +
 			L" (" + std::to_wstring(pd->GetActiveDeckIndex() + 1) + L"/" + std::to_wstring(pd->GetDeckCount()) + L")";
 	}
 
@@ -323,7 +323,7 @@ namespace Demo {
 		UpdateSortLabels();
 		SortContainer(deckContainer);
 		SortContainer(inventoryContainer);
-		DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 	}
 
 	void InventoryMenu::SortContainer(const std::shared_ptr<CardContainer>& container)
@@ -377,7 +377,7 @@ namespace Demo {
 		if (isOpen) {
 			RefreshItemsUI();
 			RefreshQuestUI();
-			DX9GF::AudioManager::GetInstance()->Play("open_inv");
+			sdlgf::AudioManager::GetInstance()->Play("open_inv");
 
 			// Items rebuild lazily in Update's ITEMS branch; only mark dirty if they changed.
 			if (ItemSignatureChanged()) {
@@ -386,7 +386,7 @@ namespace Demo {
 			SyncCards();
 		}
 		else {
-			DX9GF::AudioManager::GetInstance()->Play("close_inv");
+			sdlgf::AudioManager::GetInstance()->Play("close_inv");
 			CommitCards();
 			SetCardsHidden(true);
 		}
@@ -497,7 +497,7 @@ namespace Demo {
 				else if (p.get() == inventoryContainer.get()) to = deckContainer;
 				else return;
 				to->AddChildProgrammatically(clicked);
-				DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+				sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 				});
 		}
 		return card;
@@ -605,7 +605,7 @@ namespace Demo {
 							const float oldX = card->GetWorldX();
 							const float oldY = card->GetWorldY();
 							to->AddChildProgrammatically(card);
-							DX9GF::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
+							sdlgf::AudioManager::GetInstance()->PlayRandom("card_snap", 0.2f);
 							keyboardNavigator.RetargetNearest(oldX, oldY);
 						}
 						});
@@ -754,11 +754,11 @@ namespace Demo {
 			if (btnTabGear) btnTabGear->SetState(Demo::IButton::ButtonState::CLICKED);
 			gearAnimTimer += deltaTime;
 
-			auto setupMenuAnim = [&](int currentID, std::shared_ptr<DX9GF::AnimatedSprite>& animPtr) {
+			auto setupMenuAnim = [&](int currentID, std::shared_ptr<sdlgf::AnimatedSprite>& animPtr) {
 				if (currentID != -1 && gearTex) {
 					auto bp = Demo::ItemData::GetInstance()->GetGearBlueprint(currentID);
 					if (bp && !bp->frames.empty()) {
-						animPtr = std::make_shared<DX9GF::AnimatedSprite>(gearTex.get(), bp->frames);
+						animPtr = std::make_shared<sdlgf::AnimatedSprite>(gearTex.get(), bp->frames);
 						animPtr->SetFrameRate(12);
 						return;
 					}
@@ -805,7 +805,7 @@ namespace Demo {
 			if (btnTabQuest) btnTabQuest->SetState(Demo::IButton::ButtonState::CLICKED);
 			if (isQuestsDirty) RefreshQuestUI();
 
-			long scrollDelta = DX9GF::InputManager::GetInstance()->GetMouseScroll();
+			long scrollDelta = sdlgf::InputManager::GetInstance()->GetMouseScroll();
 			if (scrollDelta != 0) {
 				questScrollY -= scrollDelta * 0.2f;
 			}
@@ -826,7 +826,7 @@ namespace Demo {
 		}
 	}
 
-	void InventoryMenu::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+	void InventoryMenu::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen) return;
 
@@ -1252,7 +1252,7 @@ namespace Demo {
 						fontSprite->SetOutline(true, 0xFF000000, 3.0f);
 						fontSprite->SetColor(color);
 
-						std::wstring wText = DX9GF::Utils::Utf8ToWide(text);
+						std::wstring wText = sdlgf::Utils::Utf8ToWide(text);
 						fontSprite->SetText(wText);
 
 						float padX = (containerW - fontSprite->GetWidth() * 1.2f) / 2.0f;
@@ -1370,7 +1370,7 @@ namespace Demo {
 		}
 	}
 
-	void InventoryMenu::DrawKeyboardReticle(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+	void InventoryMenu::DrawKeyboardReticle(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen) return;
 		if (tutorial && tutorial->IsPanelVisible()) {
@@ -1422,7 +1422,7 @@ namespace Demo {
 				btn->SetSpriteColor(ITEM_UNUSABLE_TINT);
 			}
 			const int itemID = slot.itemID;
-			btn->SetOnReleaseLeft([this, itemID, blueprint](DX9GF::ITrigger* thisObj) {
+			btn->SetOnReleaseLeft([this, itemID, blueprint](sdlgf::ITrigger* thisObj) {
 				UseItemOutsideCombat(itemID, *blueprint);
 				});
 
@@ -1447,7 +1447,7 @@ namespace Demo {
 	void InventoryMenu::UseItemOutsideCombat(int itemID, const ConsumableItem& item)
 	{
 		if (!player) return;
-		auto audio = DX9GF::AudioManager::GetInstance();
+		auto audio = sdlgf::AudioManager::GetInstance();
 
 		if (!IsHealOnlyItem(item)) {
 			audio->PlayRandom("error", 0.4f);
@@ -1472,7 +1472,7 @@ namespace Demo {
 		for (auto& qb : questButtons) {
 			if (qb.btn) {
 				qb.btn->SetLocalPosition(-9999.0f, -9999.0f);
-				qb.btn->SetOnReleaseLeft([](DX9GF::ITrigger*) {});
+				qb.btn->SetOnReleaseLeft([](sdlgf::ITrigger*) {});
 			}
 		}
 		questButtons.clear();
@@ -1491,7 +1491,7 @@ namespace Demo {
 		auto completedQuests = QuestManager::GetInstance()->GetCompletedQuests();
 
 		auto addHeader = [&](const std::string& text, DWORD color) {
-			auto btn = std::make_shared<TextButton>(transformManager, 0, 0, containerW - 4.0f, buttonH, "", font, [](DX9GF::ITrigger*) {});
+			auto btn = std::make_shared<TextButton>(transformManager, 0, 0, containerW - 4.0f, buttonH, "", font, [](sdlgf::ITrigger*) {});
 			btn->Init(uiCamera);
 			btn->SetState(Demo::IButton::ButtonState::DISABLED);
 			btn->SetBackgroundColors(D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0), D3DXCOLOR(0, 0, 0, 0));
@@ -1505,13 +1505,13 @@ namespace Demo {
 			bool ready = isActive && QuestManager::GetInstance()->IsReadyToTurnIn(q.id);
 			const bool tracked = isActive && QuestManager::GetInstance()->IsTracked(q.id);
 			std::string prefix = ready ? "(!) " : (tracked ? "(*) " : (isActive ? "(+) " : "(-) "));
-			std::string titleStr = DX9GF::Utils::WideToUtf8(q.title);
+			std::string titleStr = sdlgf::Utils::WideToUtf8(q.title);
 
 			float questPadX = 15.0f;
 			float btnInnerW = containerW - 4.0f - (questPadX * 2);
 
 			auto btn = std::make_shared<TextButton>(transformManager, 0, 0, btnInnerW, buttonH, prefix + titleStr, font,
-				[this, qId = q.id](DX9GF::ITrigger*) {
+				[this, qId = q.id](sdlgf::ITrigger*) {
 					this->selectedQuestId = qId;
 					// Rebuilt next frame (not here: this runs inside the loop over questButtons).
 					if (QuestManager::GetInstance()->SetTrackedQuest(qId)) isQuestsDirty = true;

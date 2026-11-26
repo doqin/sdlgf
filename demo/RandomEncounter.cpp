@@ -6,21 +6,21 @@
 #include "Game.h"
 #include "TransitionCommand.h"
 
-std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
-	DX9GF::IGame* game,
+std::function<void(const sdlgf::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
+	sdlgf::IGame* game,
 	std::shared_ptr<Player> player,
 	std::vector<std::pair<std::string, int>> possibleEnemies,
-	std::shared_ptr<DX9GF::CommandBuffer> drawBuffer,
-	std::shared_ptr<DX9GF::CommandBuffer> commandBuffer,
+	std::shared_ptr<sdlgf::CommandBuffer> drawBuffer,
+	std::shared_ptr<sdlgf::CommandBuffer> commandBuffer,
 	bool* isGamePaused,
-	DX9GF::Camera* uiCamera,
-	std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> customBackgroundDraw
+	sdlgf::Camera* uiCamera,
+	std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> customBackgroundDraw
 )
 {
 	auto lastEncounterTime = std::chrono::steady_clock::now();
 	const int COOLDOWN_SECONDS = 5;
 
-	return [game, player, possibleEnemies, drawBuffer, commandBuffer, lastEncounterTime, COOLDOWN_SECONDS, isGamePaused, uiCamera, customBackgroundDraw](const DX9GF::Map::ObjectArea& area) mutable {
+	return [game, player, possibleEnemies, drawBuffer, commandBuffer, lastEncounterTime, COOLDOWN_SECONDS, isGamePaused, uiCamera, customBackgroundDraw](const sdlgf::Map::ObjectArea& area) mutable {
 		auto now = std::chrono::steady_clock::now();
 		if (std::chrono::duration_cast<std::chrono::seconds>(now - lastEncounterTime).count() < COOLDOWN_SECONDS) {
 			return;
@@ -38,7 +38,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 				}
 				auto demoGame = dynamic_cast<Demo::Game*>(game);
 
-				auto app = DX9GF::Application::GetInstance();
+				auto app = sdlgf::Application::GetInstance();
 				float sw = static_cast<float>(app->GetScreenWidth());
 				float sh = static_cast<float>(app->GetScreenHeight());
 
@@ -48,7 +48,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 				auto sceMan = game->GetSceneManager();
 				sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
-				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([isGamePaused](std::function<void()> markFinished) {
+				commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([isGamePaused](std::function<void()> markFinished) {
 					*isGamePaused = true;
 					markFinished();
 					}));
@@ -56,7 +56,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 				auto transitionInCommand = std::make_shared<TransitionCommand>(demoGame, uiCamera, 1.f, true);
 				drawBuffer->PushCommand(transitionInCommand);
 
-				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand](std::function<void()> markFinished) {
+				commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([sceMan, transitionInCommand](std::function<void()> markFinished) {
 					if (!transitionInCommand->IsFinished()) {
 						return;
 					}
@@ -66,7 +66,7 @@ std::function<void(const DX9GF::Map::ObjectArea&)> Demo::GetRandomEncounterFunc(
 
 				drawBuffer->PushCommand(std::make_shared<TransitionCommand>(demoGame, uiCamera, 1.f, false));
 
-				commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([isGamePaused, &lastEncounterTime](std::function<void()> markFinished) {
+				commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([isGamePaused, &lastEncounterTime](std::function<void()> markFinished) {
 					*isGamePaused = false;
 					lastEncounterTime = std::chrono::steady_clock::now();
 					markFinished();

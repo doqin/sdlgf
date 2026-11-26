@@ -1,6 +1,6 @@
-# directx9-game-framework
+# sdlgf
 
-Đây là một dự án dành cho học môn Nhập môn lập trình game - SE102. Để tạo một framework sử dụng các API của Direct3D trong DirectX 9.
+Đây là một dự án dành cho học môn Nhập môn lập trình game - SE102: một framework game 2D bằng C++ chạy trên SDL3 (được port từ framework DirectX 9 cũ, xem `dx9gf`).
 
 # Cách chạy demo game (CMake)
 Nhánh này đang được port sang SDL3 + CMake (xem `cmake/` và `CMakeLists.txt`). Không cần cài DirectX SDK nữa: D3DX9 được tải tự động từ NuGet, SDL3 và tmxlite được build từ source.

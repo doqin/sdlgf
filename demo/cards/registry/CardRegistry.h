@@ -19,7 +19,7 @@ namespace Demo {
 	struct CardDef {
 		// Stored in saves. Never change it for an existing card.
 		std::string id;
-		std::function<std::shared_ptr<ICard>(std::weak_ptr<DX9GF::TransformManager>)> create;
+		std::function<std::shared_ptr<ICard>(std::weak_ptr<sdlgf::TransformManager>)> create;
 		// Shop price. 0 means the card is not sold and is never rolled from a card pack.
 		int price = 0;
 		unsigned shopTiers = ShopNone;
@@ -40,10 +40,10 @@ namespace Demo {
 		// also initialised so it can be placed in a scene.
 		std::shared_ptr<ICard> Create(
 			const std::string& id,
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
 			std::shared_ptr<DraggableManager> draggableManager = nullptr,
-			DX9GF::GraphicsDevice* graphicsDevice = nullptr,
-			DX9GF::Camera* camera = nullptr
+			sdlgf::GraphicsDevice* graphicsDevice = nullptr,
+			sdlgf::Camera* camera = nullptr
 		) const;
 
 		// Cards a shop tier sells, in the order the shop lists them.

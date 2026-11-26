@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include <string>
 #include <memory>
 
@@ -15,19 +15,19 @@ namespace Demo {
 		enum class State { Hidden, FadeIn, Visible, FadeOut };
 		State state;
 
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
 		D3DCOLOR titleColor;
 		D3DCOLOR subColor;
 		D3DCOLOR shadowColor;
 
 	public:
-		ChapterTitleUI(std::shared_ptr<DX9GF::Font> font);
+		ChapterTitleUI(std::shared_ptr<sdlgf::Font> font);
 
 		void Show(const std::wstring& title, const std::wstring& sub, float duration, D3DCOLOR tColor, D3DCOLOR sColor, D3DCOLOR shColor);
 		void Update(unsigned long long deltaTime);
 
-		void Draw(DX9GF::Camera* uiCam, unsigned long long deltaTime);
+		void Draw(sdlgf::Camera* uiCam, unsigned long long deltaTime);
 
 		bool IsActive() const { return state != State::Hidden; }
 	};

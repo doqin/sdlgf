@@ -15,12 +15,12 @@ const float BAD_SECTOR_ARROW_HEAD_WIDTH = 8.f;
 const int BAD_SECTOR_ARC_SEGMENTS = 16;
 
 namespace {
-	void DrawSpiralSpinIndicator(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, float centerX, float centerY, float radius, float spinDirection, D3DCOLOR color) {
+	void DrawSpiralSpinIndicator(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, float spinDirection, D3DCOLOR color) {
 		if (graphicsDevice == nullptr || camera == nullptr || radius <= 0.f) {
 			return;
 		}
 
-		const float tick = static_cast<float>(DX9GF::Platform::GetTicksMs()) * 0.001f;
+		const float tick = static_cast<float>(sdlgf::Platform::GetTicksMs()) * 0.001f;
 		const float spinVelocity = 4.f; // radians per second
 		float arcSpan = PI * 1.5f;
 		// Spin animation is based on the current time, so the arc rotates around the center point.
@@ -56,7 +56,7 @@ namespace {
 		graphicsDevice->DrawLine(*camera, tipX, tipY, rightX, rightY, color, 2.5f);
 	}
 
-	void DrawBadSectorArmPreview(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, float centerX, float centerY, float radius, const std::vector<float>& armAngles, float spinDirection, D3DCOLOR color) {
+	void DrawBadSectorArmPreview(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, float centerX, float centerY, float radius, const std::vector<float>& armAngles, float spinDirection, D3DCOLOR color) {
 		if (graphicsDevice == nullptr || camera == nullptr || radius <= 0.f) {
 			return;
 		}
@@ -75,23 +75,23 @@ namespace {
 
 namespace Demo {
 
-	void KernelEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-		texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	void KernelEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+		texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		texture->LoadTexture(L"assets/kernel.png");
-		sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
 		sprite->SetOrigin(32, 32);
 		sprite->SetScale(2.f);
 
-		mineTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		mineTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		mineTexture->LoadTexture(L"assets/mine.png");
 
-		bulletTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		bulletTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		bulletTexture->LoadTexture(L"assets/kernelprojectile.png");
 		SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 		InitCardSpawnTrigger(camera, 128.f, 128.f);
 	}
 
-	void KernelEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+	void KernelEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 		// Marks the cell the beams are about to box the player into, which is also where
 		// the spiral will erupt from once they fire.
 		if (telegraphingCell) {
@@ -159,7 +159,7 @@ namespace Demo {
 		}
 	}
 
-	void KernelEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+	void KernelEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 		(void)popUpMessage; (void)graphicsDevice; (void)camera; (void)currentTurn;
 
 		this->player = player;
@@ -185,7 +185,7 @@ namespace Demo {
 				mines.push_back({ RNG::Range(-100.f, 100.f), RNG::Range(-100.f, 100.f), RNG::Range(0, 1) == 0 });
 			}
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, mines](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, mines](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					for (auto& m : mines) {
 						projectiles.Spawn(p, ProjectileDesc(mineTexture.get(), 8, 8, 0, 0, m.x, m.y).SetVelocity(0.f).SetDecayTime(1.5f));
@@ -194,9 +194,9 @@ namespace Demo {
 				markFinished();
 				}));
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.5f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(1.5f));
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, mines, baseDamage](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, mines, baseDamage](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -214,7 +214,7 @@ namespace Demo {
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(.7f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(.7f));
 		}
 	}
 
@@ -225,7 +225,7 @@ namespace Demo {
 		const int HOLE_WIDTH = isAlone ? 3 : 5;
 
 		for (int w = 0; w < WAVE_COUNT; ++w) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, HOLE_WIDTH](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, HOLE_WIDTH](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -252,7 +252,7 @@ namespace Demo {
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 		}
 	}
 
@@ -269,7 +269,7 @@ namespace Demo {
 
 		for (int wave = 0; wave < WAVE_COUNT; ++wave) {
 			const bool fromLeft = (wave % 2 == 0);
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, fromLeft, START_Y, STEP_Y, BULLETS_PER_WAVE, offsetY, OFFSET_STEP](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, fromLeft, START_Y, STEP_Y, BULLETS_PER_WAVE, offsetY, OFFSET_STEP](auto markFinished) {
 				if (auto p = this->player.lock()) {
 					float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 					float spawnX = fromLeft ? -ARENA_HALF * 4.f : ARENA_HALF * 4.f;
@@ -292,7 +292,7 @@ namespace Demo {
 				}
 				markFinished();
 			}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f));
 		}
 	}
 
@@ -319,7 +319,7 @@ namespace Demo {
 		const float HOLD_TIME = isAlone ? 4.0f : 3.0f;
 
 		for (int w = 0; w < WAVES; ++w) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, WARN_TIME, HOLD_TIME, MAX_ARMS](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, WARN_TIME, HOLD_TIME, MAX_ARMS](auto markFinished) {
 				this->laserVerticals.clear();
 				this->laserHorizontals.clear();
 				this->badSectorArmAngles.clear();
@@ -354,9 +354,9 @@ namespace Demo {
 				markFinished();
 				}));
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WARN_TIME));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WARN_TIME));
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, HOLD_TIME](auto markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, HOLD_TIME](auto markFinished) {
 				this->telegraphingCell = false;
 
 				if (auto p = this->player.lock()) {
@@ -389,7 +389,7 @@ namespace Demo {
 				}));
 
 			// The beams burn for HOLD_TIME, then a short breather before the next wave.
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(HOLD_TIME + 0.4f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(HOLD_TIME + 0.4f));
 		}
 	}
 }

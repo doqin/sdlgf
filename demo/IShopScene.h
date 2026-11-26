@@ -1,10 +1,10 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "Player.h"
 #include "TextButton.h"
-#include "DX9GFFont.h"
+#include "Font.h"
 #include <string>
 #include <vector>
 #include <functional>
@@ -87,7 +87,7 @@ namespace Demo {
 		std::vector<AppliedStatusEffect> statusEffects;
 	};
 
-	class IShopScene : public DX9GF::IScene {
+	class IShopScene : public sdlgf::IScene {
 	protected:
 		Game* game;
 		Player* player;
@@ -95,10 +95,10 @@ namespace Demo {
 		// Set by the subclass constructor with MakeShopKey; prefixes every row's limitKey.
 		std::string shopKey;
 
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
 
-		std::shared_ptr<DX9GF::Font> myFont;
-		std::shared_ptr<DX9GF::FontSprite> myFontSprite;
+		std::shared_ptr<sdlgf::Font> myFont;
+		std::shared_ptr<sdlgf::FontSprite> myFontSprite;
 
 		// The wares this shop sells. Filled by LoadItems() in the subclass.
 		std::vector<ShopItem> itemsForSale;
@@ -139,30 +139,30 @@ namespace Demo {
 		std::string shopTitle;
 		bool shouldLeave = false;
 
-		std::shared_ptr<DX9GF::Texture> uiSheetTex;
-		std::shared_ptr<DX9GF::Texture> borderTex;
-		std::shared_ptr<DX9GF::Texture> itemsTex;
-		std::shared_ptr<DX9GF::Texture> buyTabTex;
-		std::shared_ptr<DX9GF::Texture> sellTabTex;
+		std::shared_ptr<sdlgf::Texture> uiSheetTex;
+		std::shared_ptr<sdlgf::Texture> borderTex;
+		std::shared_ptr<sdlgf::Texture> itemsTex;
+		std::shared_ptr<sdlgf::Texture> buyTabTex;
+		std::shared_ptr<sdlgf::Texture> sellTabTex;
 
-		std::shared_ptr<DX9GF::NineSliceSprite> panelFrameSprite;
-		std::shared_ptr<DX9GF::NineSliceSprite> panelSprite;
-		std::shared_ptr<DX9GF::NineSliceSprite> rowSprite;
-		std::shared_ptr<DX9GF::NineSliceSprite> rowHoverSprite;
-		std::shared_ptr<DX9GF::NineSliceSprite> descSprite;
-		std::shared_ptr<DX9GF::NineSliceSprite> statusTabSprite;
-		std::shared_ptr<DX9GF::StaticSprite> itemIconSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> panelFrameSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> panelSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> rowSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> rowHoverSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> descSprite;
+		std::shared_ptr<sdlgf::NineSliceSprite> statusTabSprite;
+		std::shared_ptr<sdlgf::StaticSprite> itemIconSprite;
 		std::shared_ptr<CardFrame> cardFrame;
-		std::shared_ptr<DX9GF::StaticSprite> goldIconSprite;
+		std::shared_ptr<sdlgf::StaticSprite> goldIconSprite;
 
 		// The status cover a card shows in battle (uses cover panel, use pips, non-persistent
 		// badge), reproduced beside its face here. Same sheet (assets/ui.png) and geometry as
 		// IStatementCard::DrawStatusCover; shop cards are always freshly minted, so only the
 		// "full" pip variant is needed.
-		std::shared_ptr<DX9GF::StaticSprite> coverBodySprite;
-		std::shared_ptr<DX9GF::StaticSprite> coverCapSprite;
-		std::shared_ptr<DX9GF::StaticSprite> coverPipSprite;
-		std::shared_ptr<DX9GF::StaticSprite> coverBadgeSprite;
+		std::shared_ptr<sdlgf::StaticSprite> coverBodySprite;
+		std::shared_ptr<sdlgf::StaticSprite> coverCapSprite;
+		std::shared_ptr<sdlgf::StaticSprite> coverPipSprite;
+		std::shared_ptr<sdlgf::StaticSprite> coverBadgeSprite;
 		// Width, in sheet pixels, of the status cover panel for the given row - 0 when the card
 		// is persistent and unlimited, so it has nothing to show.
 		int GetCardCoverPanelWidth(const ShopItem& item) const;

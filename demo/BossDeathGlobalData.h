@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <map>
@@ -20,7 +20,7 @@ namespace Demo {
 	// usually ends in "load your last savepoint", which would roll a normally saved counter back to
 	// the save's value - so on load the higher of the two counts is kept, and the count only resets
 	// when a new game starts.
-	class BossDeathGlobalData : public DX9GF::ISaveable {
+	class BossDeathGlobalData : public sdlgf::ISaveable {
 	private:
 		std::map<std::string, int> deaths; // boss enemy id -> defeats
 

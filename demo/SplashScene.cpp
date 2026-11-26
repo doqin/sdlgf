@@ -7,14 +7,14 @@ namespace Demo {
     void SplashScene::Init() {
         auto gd = game->GetGraphicsDevice();
 
-        logo1Tex = std::make_shared<DX9GF::Texture>(gd);
+        logo1Tex = std::make_shared<sdlgf::Texture>(gd);
         logo1Tex->LoadTexture(L"assets/school_logo.png");
 
-        logo2Tex = std::make_shared<DX9GF::Texture>(gd);
+        logo2Tex = std::make_shared<sdlgf::Texture>(gd);
         logo2Tex->LoadTexture(L"assets/department_logo.png");
 
-        logo1Sprite = std::make_shared<DX9GF::StaticSprite>(logo1Tex.get());
-        logo2Sprite = std::make_shared<DX9GF::StaticSprite>(logo2Tex.get());
+        logo1Sprite = std::make_shared<sdlgf::StaticSprite>(logo1Tex.get());
+        logo2Sprite = std::make_shared<sdlgf::StaticSprite>(logo2Tex.get());
 
         //logo's location
         logo1Sprite->SetOrigin(logo1Tex->GetWidth() / 2.0f, logo1Tex->GetHeight() / 2.0f);
@@ -28,14 +28,14 @@ namespace Demo {
         logo2Sprite->SetScale(1.f);
 
         //main menu music starts during the splash and carries into the menu
-        DX9GF::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 3.0f);
+        sdlgf::AudioManager::GetInstance()->PlayBGM_Fade("bgm_sky", 0.9f, 3.0f);
 
         logo1Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
         logo2Sprite->SetColor(D3DCOLOR_ARGB(0, 255, 255, 255));
     }
 
     void SplashScene::Update(unsigned long long deltaTime) {
-        auto inpMan = DX9GF::InputManager::GetInstance();
+        auto inpMan = sdlgf::InputManager::GetInstance();
         inpMan->ReadMouse(deltaTime);
         inpMan->ReadKeyboard(deltaTime);
 
@@ -102,7 +102,7 @@ namespace Demo {
     {
         auto gd = game->GetGraphicsDevice();
         if (SUCCEEDED(gd->BeginDraw())) {
-            DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+            sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
             gd->EndDraw();
         }
     }

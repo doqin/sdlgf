@@ -5,21 +5,21 @@
 #include "resource.h"
 #include "RNG.h"
 
-void Demo::WarlockEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::WarlockEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/crawler-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f, 2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/shardprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::WarlockEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::WarlockEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -64,7 +64,7 @@ void Demo::WarlockEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared
 	}
 }
 
-void Demo::WarlockEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::WarlockEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	(void)enemies;
 	(void)popUpMessage;
 	(void)graphicsDevice;
@@ -88,7 +88,7 @@ void Demo::WarlockEnemy::PatternDarkVortex(float baseDamage, std::vector<std::sh
 	for (int ring = 0; ring < RING_COUNT; ring++) {
 		float gapRatio = RNG::Range(0.0f, 1.0f);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, ring, gapRatio, PROJECTILES_PER_RING, VELOCITY, DECAY_TIME](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, ring, gapRatio, PROJECTILES_PER_RING, VELOCITY, DECAY_TIME](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -123,7 +123,7 @@ void Demo::WarlockEnemy::PatternDarkVortex(float baseDamage, std::vector<std::sh
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DELAY_BETWEEN_RINGS));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(DELAY_BETWEEN_RINGS));
 	}
 }
 
@@ -132,7 +132,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 	const float VELOCITY = isAlone ? 250.f : 150.f;
 	const float TURN_SPEED = isAlone ? 2.f : 1.f;
 
-	auto topRightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
+	auto topRightAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetWorldPosition();
@@ -150,7 +150,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 		markFinished();
 		});
 
-	auto topLeftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
+	auto topLeftAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetWorldPosition();
@@ -168,7 +168,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 		markFinished();
 		});
 
-	auto bottomRightAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
+	auto bottomRightAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetWorldPosition();
@@ -186,7 +186,7 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 		markFinished();
 		});
 
-	auto bottomLeftAttack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
+	auto bottomLeftAttack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, VELOCITY, TURN_SPEED](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			auto [px, py] = lock->GetWorldPosition();
@@ -208,18 +208,18 @@ void Demo::WarlockEnemy::PatternHomingCurse(float baseDamage, std::vector<std::s
 		int attackIndex = RNG::Range(0, 3);
 		switch (attackIndex) {
 		case 0:
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*topRightAttack));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*topRightAttack));
 			break;
 		case 1:
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*topLeftAttack));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*topLeftAttack));
 			break;
 		case 2:
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*bottomRightAttack));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*bottomRightAttack));
 			break;
 		case 3:
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*bottomLeftAttack));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*bottomLeftAttack));
 			break;
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.3f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.3f));
 	}
 }

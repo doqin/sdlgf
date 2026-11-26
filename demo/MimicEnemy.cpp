@@ -5,21 +5,21 @@
 #include "resource.h"
 #include "RNG.h"
 
-void Demo::MimicEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::MimicEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/notresponding-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f, 2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/xprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::MimicEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::MimicEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -64,7 +64,7 @@ void Demo::MimicEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_p
 	}
 }
 
-void Demo::MimicEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::MimicEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	this->player = player;
 
 	float baseDamage = 4.f;
@@ -73,7 +73,7 @@ void Demo::MimicEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<s
 	if (patternId == 1) PatternCoinCyclone(baseDamage, enemies);
 	else PatternJunkVomit(baseDamage, enemies);
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(4.f));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(4.f));
 }
 
 void Demo::MimicEnemy::PatternCoinCyclone(float baseDamage, std::vector<std::shared_ptr<IEnemy>>* enemies) {
@@ -82,7 +82,7 @@ void Demo::MimicEnemy::PatternCoinCyclone(float baseDamage, std::vector<std::sha
 	const float RADICAL_SPEED = isAlone ? 100.f : 150.f;
 	const float ANGULAR_SPEED = isAlone ? 1.2f : 0.6f;
 
-	auto attack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, RADICAL_SPEED, ANGULAR_SPEED](std::function<void(void)> markFinished) {
+	auto attack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, RADICAL_SPEED, ANGULAR_SPEED](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -102,8 +102,8 @@ void Demo::MimicEnemy::PatternCoinCyclone(float baseDamage, std::vector<std::sha
 		});
 
 	for (int i = 0; i < ATTACK_COUNT; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*attack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*attack));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(1.f));
 	}
 }
 
@@ -115,7 +115,7 @@ void Demo::MimicEnemy::PatternJunkVomit(float baseDamage, std::vector<std::share
 	for (int i = 0; i < JUNK_COUNT; i++) {
 		float randY = RNG::Range(-196.f, 196.f);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, randY](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, randY](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -135,6 +135,6 @@ void Demo::MimicEnemy::PatternJunkVomit(float baseDamage, std::vector<std::share
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(ATTACK_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(ATTACK_DELAY));
 	}
 }

@@ -9,7 +9,7 @@ namespace Demo {
 	// A cheap way into Burn, which otherwise only comes from the cost-3 Inferno.
 	class KindleCard : public TargetedCard {
 	public:
-		KindleCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		KindleCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Orange,
@@ -22,7 +22,7 @@ namespace Demo {
 	// re-fires, so installing it early in a cycle is worth much more than late.
 	class InfernoCard : public IStatementCard {
 	public:
-		InfernoCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		InfernoCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 3,
 				.face = CardTemplate::Orange,
@@ -36,7 +36,7 @@ namespace Demo {
 	private:
 		static constexpr float BURN_ADDED = 3.f;
 	public:
-		FanTheFlamesCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		FanTheFlamesCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Orange,
@@ -59,7 +59,7 @@ namespace Demo {
 		static constexpr float FULL_RATE_BURN = 10.f;
 		static constexpr float TAPERED_RATE = 1.f;
 	public:
-		MeltdownCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		MeltdownCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Orange,

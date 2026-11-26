@@ -4,7 +4,7 @@
 #include "StatusDisplay.h"
 #include <cmath>
 #include <map>
-#include "DX9GFAudioManager.h"
+#include "AudioManager.h"
 
 namespace {
 	constexpr float floatEpsilon = 0.000001f;
@@ -46,7 +46,7 @@ namespace {
 		float halfDiagonal = 0.f;
 	};
 
-	bool BuildRectShape(DX9GF::RectangleCollider& collider, RectShape& out)
+	bool BuildRectShape(sdlgf::RectangleCollider& collider, RectShape& out)
 	{
 		const float originWorldX = collider.GetWorldX();
 		const float originWorldY = collider.GetWorldY();
@@ -176,8 +176,8 @@ namespace {
 
 	// One beam quad, rotated about its own centre.
 	void DrawBeam(
-		DX9GF::GraphicsDevice* graphicsDevice,
-		const DX9GF::Camera& camera,
+		sdlgf::GraphicsDevice* graphicsDevice,
+		const sdlgf::Camera& camera,
 		float x,
 		float y,
 		float angle,
@@ -328,7 +328,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetSplitGenerations(int generations)
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(DX9GF::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* texture, std::vector<RECT> frames, unsigned int frameRate, float originX, float originY, float colliderWidth, float colliderHeight)
 {
 	this->shardTexture = texture;
 	this->shardFrames = std::move(frames);
@@ -340,7 +340,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(DX9GF::Texture* text
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(DX9GF::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(sdlgf::Texture* texture, float originX, float originY, float colliderWidth, float colliderHeight)
 {
 	this->shardTexture = texture;
 	this->shardOriginX = originX;
@@ -350,7 +350,7 @@ Demo::ProjectileDesc& Demo::ProjectileDesc::SetShardTexture(DX9GF::Texture* text
 	return *this;
 }
 
-Demo::ProjectileDesc& Demo::ProjectileDesc::SetGhostSprite(DX9GF::Texture* texture, RECT srcRect, float originX, float originY)
+Demo::ProjectileDesc& Demo::ProjectileDesc::SetGhostSprite(sdlgf::Texture* texture, RECT srcRect, float originX, float originY)
 {
 	this->ghostTexture = texture;
 	this->ghostSrcRect = srcRect;
@@ -501,7 +501,7 @@ unsigned int Demo::ProjectileSystem::GetOrCreateBatch(const RenderDesc& desc)
 	batch.frameRate = (std::max)(1u, desc.frameRate);
 	batch.originX = desc.spriteOriginX;
 	batch.originY = desc.spriteOriginY;
-	batch.sprite = std::make_unique<DX9GF::StaticSprite>(desc.texture);
+	batch.sprite = std::make_unique<sdlgf::StaticSprite>(desc.texture);
 	batch.sprite->SetOrigin(desc.spriteOriginX, desc.spriteOriginY);
 	batches.push_back(std::move(batch));
 	return static_cast<unsigned int>(batches.size() - 1);
@@ -512,7 +512,7 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	target = player;
 
 	if (spawnSfxCooldown <= 0.f) {
-		if (sfxScale > 0.f) DX9GF::AudioManager::GetInstance()->Play("projectile_spawn", false, 0.35f * sfxScale);
+		if (sfxScale > 0.f) sdlgf::AudioManager::GetInstance()->Play("projectile_spawn", false, 0.35f * sfxScale);
 		spawnSfxCooldown = 0.05f;
 	}
 
@@ -578,21 +578,21 @@ void Demo::ProjectileSystem::Spawn(const std::shared_ptr<Player>& player, const 
 	split.holdTime = desc.splitArrivalHoldTime;
 	splits.push_back(split);
 
-	std::unique_ptr<DX9GF::ParticleSystem> emitter;
+	std::unique_ptr<sdlgf::ParticleSystem> emitter;
 	if (desc.ghostTexture != nullptr) {
-		emitter = std::make_unique<DX9GF::ParticleSystem>(desc.ghostTexture, 16);
+		emitter = std::make_unique<sdlgf::ParticleSystem>(desc.ghostTexture, 16);
 		if (desc.ghostHasSrcRect) emitter->SetSrcRect(desc.ghostSrcRect);
 		emitter->SetOrigin(desc.ghostOriginX, desc.ghostOriginY);
-		DX9GF::ConfigureGhostTrailEmitter(*emitter);
+		sdlgf::ConfigureGhostTrailEmitter(*emitter);
 	}
 	else if (desc.behavior == ProjectileBehavior::Straight || desc.behavior == ProjectileBehavior::Homing) {
 		if (!trailTexture) {
-			trailTexture = std::make_shared<DX9GF::Texture>(desc.texture->GetGraphicsDevice());
+			trailTexture = std::make_shared<sdlgf::Texture>(desc.texture->GetGraphicsDevice());
 			trailTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
 		}
-		emitter = std::make_unique<DX9GF::ParticleSystem>(trailTexture.get(), 32);
+		emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture.get(), 32);
 		emitter->SetOrigin(2, 2);
-		DX9GF::ConfigureTrailEmitter(*emitter);
+		sdlgf::ConfigureTrailEmitter(*emitter);
 	}
 	emitters.push_back(std::move(emitter));
 
@@ -795,16 +795,16 @@ void Demo::ProjectileSystem::EmitBurst(const PendingBurst& burst)
 
 		// Children travel straight, so they get the same white trail Spawn gives
 		// any straight projectile that was not handed a ghost sprite.
-		std::unique_ptr<DX9GF::ParticleSystem> emitter;
-		DX9GF::Texture* parentTexture = batches[burst.batchIndex].texture;
+		std::unique_ptr<sdlgf::ParticleSystem> emitter;
+		sdlgf::Texture* parentTexture = batches[burst.batchIndex].texture;
 		if (parentTexture != nullptr) {
 			if (!trailTexture) {
-				trailTexture = std::make_shared<DX9GF::Texture>(parentTexture->GetGraphicsDevice());
+				trailTexture = std::make_shared<sdlgf::Texture>(parentTexture->GetGraphicsDevice());
 				trailTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
 			}
-			emitter = std::make_unique<DX9GF::ParticleSystem>(trailTexture.get(), 32);
+			emitter = std::make_unique<sdlgf::ParticleSystem>(trailTexture.get(), 32);
 			emitter->SetOrigin(2, 2);
-			DX9GF::ConfigureTrailEmitter(*emitter);
+			sdlgf::ConfigureTrailEmitter(*emitter);
 		}
 		emitters.push_back(std::move(emitter));
 
@@ -860,7 +860,7 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 					life.launched = true;
 					// only projectiles that actually waited get a launch sound
 					if (life.delay > 0.f && launchSfxCooldown <= 0.f) {
-						if (sfxScale > 0.f) DX9GF::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f * sfxScale);
+						if (sfxScale > 0.f) sdlgf::AudioManager::GetInstance()->Play("projectile_launch", false, 0.4f * sfxScale);
 						launchSfxCooldown = 0.05f;
 					}
 				}
@@ -1048,7 +1048,7 @@ void Demo::ProjectileSystem::Update(unsigned long long deltaTime)
 	}
 }
 
-void Demo::ProjectileSystem::Draw(DX9GF::GraphicsDevice* graphicsDevice, const DX9GF::Camera& camera, unsigned long long deltaTime)
+void Demo::ProjectileSystem::Draw(sdlgf::GraphicsDevice* graphicsDevice, const sdlgf::Camera& camera, unsigned long long deltaTime)
 {
 	if (transforms.empty() && lasers.empty()) {
 		return;
@@ -1134,7 +1134,7 @@ void Demo::ProjectileSystem::Draw(DX9GF::GraphicsDevice* graphicsDevice, const D
 		}
 	}
 
-	if (DX9GF::ICollider::drawCollider && graphicsDevice) {
+	if (sdlgf::ICollider::drawCollider && graphicsDevice) {
 		for (const auto& laser : lasers) {
 			DrawBeam(graphicsDevice, camera, laser.x, laser.y, laser.angle,
 				laser.length, laser.thickness, 0x550000FF, false);

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "TextInputManager.h"
-#include <DX9GFInputManager.h>
-#include "DX9GFKeys.h"
+#include <InputManager.h>
+#include "Keys.h"
 
 Demo::TextInputManager* Demo::TextInputManager::instance = nullptr;
 
@@ -47,7 +47,7 @@ static const KeyMap keyMappings[] = {
 std::vector<char> Demo::TextInputManager::ReadInput()
 {
 	std::vector<char> inputChars;
-	auto input = DX9GF::InputManager::GetInstance();
+	auto input = sdlgf::InputManager::GetInstance();
 
 	bool isShiftDown = input->KeyPress(DIK_LSHIFT) || input->KeyPress(DIK_RSHIFT);
 

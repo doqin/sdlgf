@@ -6,18 +6,18 @@
 #include "PopUpMessage.h"
 const float PI = 3.14159265359f;
 
-void Demo::CupidEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::CupidEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/bubble-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 11), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	heartTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	heartTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	heartTexture->LoadTexture(L"assets/bubbleprojectile.png");
 
-	arrowTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	arrowTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	arrowTexture->LoadTexture(L"assets/bubbleprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -25,7 +25,7 @@ void Demo::CupidEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::CupidEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::CupidEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (sprite) {
 		sprite->Begin();
@@ -71,7 +71,7 @@ void Demo::CupidEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_p
 	}
 }
 
-void Demo::CupidEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn)
+void Demo::CupidEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn)
 {
 	(void)enemies;
 	(void)graphicsDevice;
@@ -114,7 +114,7 @@ void Demo::CupidEnemy::PatternHeartWave(float projDamage)
 			direction = 1.f;
 		}
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BULLET_SPEED, START_X, START_Y, DECAY_TIME, currentAngle](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BULLET_SPEED, START_X, START_Y, DECAY_TIME, currentAngle](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				D3DXVECTOR2 dir(std::cos(currentAngle), std::sin(currentAngle));
 
@@ -130,7 +130,7 @@ void Demo::CupidEnemy::PatternHeartWave(float projDamage)
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SPAWN_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SPAWN_DELAY));
 	}
 }
 
@@ -149,7 +149,7 @@ void Demo::CupidEnemy::PatternHomingArrow(float projDamage)
 		for (int i = 0; i < ARROW_COUNT; i++) {
 			float offsetX = RNG::Range(-OFFSET_RANGE, OFFSET_RANGE);
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, offsetX, BULLET_SPEED, TURN_SPEED, DROP_HEIGHT](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, offsetX, BULLET_SPEED, TURN_SPEED, DROP_HEIGHT](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [playerX, playerY] = lock->GetWorldPosition();
 					float finalX = playerX + offsetX;
@@ -169,9 +169,9 @@ void Demo::CupidEnemy::PatternHomingArrow(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SPAWN_DELAY));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SPAWN_DELAY));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 	}
 }
 
@@ -189,7 +189,7 @@ void Demo::CupidEnemy::PatternHeartNova(float projDamage)
 	for (int wave = 0; wave < WAVE_COUNT; wave++) {
 		for (int burst = 0; burst < BURST_COUNT; burst++) {
 			float angleOffset = (burst - (BURST_COUNT / 2)) * (PI / (BULLET_PER_ARC - 1)) * 0.25f;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BULLET_PER_ARC, BULLET_SPEED, SPAWN_OFFSET_Y, angleOffset, DECAY_TIME, angleShift](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BULLET_PER_ARC, BULLET_SPEED, SPAWN_OFFSET_Y, angleOffset, DECAY_TIME, angleShift](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [playerX, playerY] = lock->GetWorldPosition();
 					float originX = 0;
@@ -220,8 +220,8 @@ void Demo::CupidEnemy::PatternHeartNova(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(BURST_DELAY));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(BURST_DELAY));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.2f)); // delay between waves
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.2f)); // delay between waves
 	}
 }

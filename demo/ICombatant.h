@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "GameItems.h"
 #include <vector>
 #include <algorithm>
@@ -19,7 +19,7 @@ namespace Demo {
 		EndOfRound
 	};
 
-	class ICombatant : public DX9GF::IGameObject {
+	class ICombatant : public sdlgf::IGameObject {
 	protected:
 		int maxHealth;
 		int health;
@@ -30,11 +30,11 @@ namespace Demo {
 		float CalculateOutgoingDamage(float baseDamage) const;
 
 	public:
-		ICombatant(std::weak_ptr<DX9GF::TransformManager> tm, int maxHealth, float x = 0, float y = 0, float rotation = 0, float scaleX = 1, float scaleY = 1)
+		ICombatant(std::weak_ptr<sdlgf::TransformManager> tm, int maxHealth, float x = 0, float y = 0, float rotation = 0, float scaleX = 1, float scaleY = 1)
 			: IGameObject(tm, x, y, rotation, scaleX, scaleY), maxHealth(maxHealth), health(maxHealth) {
 		}
 
-		ICombatant(std::weak_ptr<DX9GF::TransformManager> tm, std::weak_ptr<DX9GF::IGameObject> parent, int maxHealth, float x = 0, float y = 0, float rotation = 0, float scaleX = 1, float scaleY = 1)
+		ICombatant(std::weak_ptr<sdlgf::TransformManager> tm, std::weak_ptr<sdlgf::IGameObject> parent, int maxHealth, float x = 0, float y = 0, float rotation = 0, float scaleX = 1, float scaleY = 1)
 			: IGameObject(tm, parent, x, y, rotation, scaleX, scaleY), maxHealth(maxHealth), health(maxHealth) {
 		}
 

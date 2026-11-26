@@ -27,11 +27,11 @@ namespace {
 
 namespace Demo {
 
-	void PasswordMenu::Init(DX9GF::Camera* uiCam, std::shared_ptr<DX9GF::Font> font, Game* game)
+	void PasswordMenu::Init(sdlgf::Camera* uiCam, std::shared_ptr<sdlgf::Font> font, Game* game)
 	{
 		this->uiCamera = uiCam;
 		this->game = game;
-		this->fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		this->fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	}
 
 	void PasswordMenu::Open(const std::wstring& password)
@@ -91,14 +91,14 @@ namespace Demo {
 		currentGuess.clear();
 
 		if (solved) {
-			DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.4f);
+			sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.4f);
 			if (onSolved) onSolved();
 			Close();
 			return;
 		}
 
 		statusMessage = Tr(L"ACCESS DENIED");
-		DX9GF::AudioManager::GetInstance()->PlayRandom("dialog_voice", 0.3f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("dialog_voice", 0.3f);
 		wrongGuesses++;
 		UpdateHints();
 	}
@@ -149,7 +149,7 @@ namespace Demo {
 		caretTimer += static_cast<float>(deltaTime);
 		if (caretTimer >= CARET_PERIOD) caretTimer -= CARET_PERIOD;
 
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		auto settings = SettingsManager::GetInstance();
 
 		// Consume the close key so the same press does not also reach the host scene's inventory toggle.
@@ -178,7 +178,7 @@ namespace Demo {
 		}
 	}
 
-	void PasswordMenu::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+	void PasswordMenu::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen || !uiCamera || !fontSprite || !game) return;
 

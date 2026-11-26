@@ -21,12 +21,12 @@ namespace {
 	}
 }
 
-void Demo::PopUpMessage::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::PopUpMessage::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
 	this->graphicsDevice = graphicsDevice;
 	this->camera = camera;
-	font = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+	font = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	fontSprite->SetColor(0xFF000000);
 	// Measured once on a sample carrying both an ascender and a descender: every slot in the
 	// stack has to be the same height whatever glyphs happen to land in it.
@@ -101,21 +101,21 @@ void Demo::PopUpMessage::LogMessage(const std::wstring& message)
 	if (stickToLatest) ScrollToLatest();
 }
 
-void Demo::PopUpMessage::QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message, float duration)
+void Demo::PopUpMessage::QueueMessage(sdlgf::CommandBuffer* commandBuffer, std::wstring message, float duration)
 {
 	if (commandBuffer == nullptr) {
 		ShowMessage(message, duration);
 		return;
 	}
 
-	auto commands = std::make_shared<DX9GF::MultiCommand>(std::vector<std::shared_ptr<DX9GF::ICommand>>{
-		std::make_shared<DX9GF::CustomCommand>([this, message, duration](std::function<void(void)> markFinished) {
+	auto commands = std::make_shared<sdlgf::MultiCommand>(std::vector<std::shared_ptr<sdlgf::ICommand>>{
+		std::make_shared<sdlgf::CustomCommand>([this, message, duration](std::function<void(void)> markFinished) {
 			ShowMessage(message, duration);
 			markFinished();
 		}),
 		// The line animates on its own now, so this delay is purely about pacing: a sequence
 		// that used to wait for the pop-up still waits about as long.
-		std::make_shared<DX9GF::DelayCommand>(duration)
+		std::make_shared<sdlgf::DelayCommand>(duration)
 	});
 	commandBuffer->PushCommand(commands);
 }
@@ -220,7 +220,7 @@ void Demo::PopUpMessage::UpdateHistory()
 {
 	if (!isHistoryOpen) return;
 
-	const long scroll = DX9GF::InputManager::GetInstance()->GetMouseScroll();
+	const long scroll = sdlgf::InputManager::GetInstance()->GetMouseScroll();
 	if (scroll != 0) {
 		// One wheel notch is 120 units; walk a row per notch, up toward the older entries.
 		size_t rows = static_cast<size_t>(std::abs(scroll) / 120);
@@ -240,7 +240,7 @@ void Demo::PopUpMessage::UpdateHistory()
 	if (stickToLatest || scrollOffset > maxOffset) scrollOffset = maxOffset;
 }
 
-void Demo::PopUpMessage::DrawHistory(DX9GF::Camera& uiCamera, unsigned long long deltaTime)
+void Demo::PopUpMessage::DrawHistory(sdlgf::Camera& uiCamera, unsigned long long deltaTime)
 {
 	if (!isHistoryOpen || !fontSprite || graphicsDevice == nullptr) return;
 	const float screenWidth = static_cast<float>(game->GetVirtualWidth());
@@ -335,7 +335,7 @@ float Demo::PopUpMessage::GetAnchorY() const
 		auto [resWidth, resHeight] = camera->GetScreenResolution();
 		screenHeight = static_cast<float>(resHeight);
 	}
-	else if (auto app = DX9GF::Application::GetInstance(); app != nullptr) {
+	else if (auto app = sdlgf::Application::GetInstance(); app != nullptr) {
 		screenHeight = static_cast<float>(app->GetScreenHeight());
 	}
 

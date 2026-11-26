@@ -28,7 +28,7 @@ void Demo::BossWorldScene::SetIsland(int islandID) {
 	currentIslandID = islandID;
 	//stem 0 is the shared base; islands 1-2 share a layer, then one layer each for islands 3 and 4
 	int layer = (islandID <= 2) ? 1 : (islandID == 3 ? 2 : 3);
-	DX9GF::AudioManager::GetInstance()->SetActiveStems("bgm_bossworld", { 0, layer }, 2.0f);
+	sdlgf::AudioManager::GetInstance()->SetActiveStems("bgm_bossworld", { 0, layer }, 2.0f);
 }
 
 // Fast travel teleports straight to a save point without passing the portals that normally
@@ -162,7 +162,7 @@ void Demo::BossWorldScene::OnInit()
 	for (auto& m : hackMachines) m->SetVisible(true);
 	mainTerminal->SetVisible(true);
 
-	bossGateCollider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 48.f, 736.f, -256.f);
+	bossGateCollider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 48.f, 736.f, -256.f);
 	colliderManager->Add(bossGateCollider);
 
 	rustyChest = std::make_shared<RustyChestNPC>(transformManager, 690.f, -208.f);
@@ -211,7 +211,7 @@ void Demo::BossWorldScene::OnInit()
 	);
 	shopPoints.back()->SetVisible(true);
 
-	auto bgDraw = [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) {
+	auto bgDraw = [this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) {
 		DrawBackground(gd, deltaTime);
 	};
 
@@ -235,92 +235,92 @@ void Demo::BossWorldScene::OnInit()
 	for (const char* layer : { "trigger_alley", "trigger_p_1_2", "trigger_p_2_1", "trigger_p_2_3", "trigger_p_3_2", "trigger_p_3_4", "trigger_p_4_3" }) {
 		RegisterPortalLayer(layer);
 	}
-	map->SetAreaUpdateHandler("trigger_alley", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_alley", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(-1, 1239.f, -920.f, "bgm_arcade", 0.2f);
 	});
 
-	map->SetAreaUpdateHandler("trigger_p_1_2", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_1_2", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
 		this->SetIsland(2);
 	});
-	map->SetAreaUpdateHandler("trigger_p_2_1", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_2_1", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(48, 230);
 		this->SetIsland(1);
 	});
-	map->SetAreaUpdateHandler("trigger_p_2_3", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_2_3", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(1500, 530);
 		this->SetIsland(3);
 	});
-	map->SetAreaUpdateHandler("trigger_p_2_fake", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_2_fake", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
 	});
-	map->SetAreaUpdateHandler("trigger_p_3_4", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_3_4", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(740, -50);
 		this->SetIsland(4);
 	});
-	map->SetAreaUpdateHandler("trigger_p_3_2", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_3_2", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(-1155, 0);
 		this->SetIsland(2);
 	});
-	map->SetAreaUpdateHandler("trigger_p_4_3", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_4_3", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(2640, -620);
 		this->SetIsland(3);
 	});
 
-	map->SetAreaUpdateHandler("trigger_battle_boss", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_battle_boss", [this](const sdlgf::Map::ObjectArea& area) {
 		if (!player->IsWalking()) return;
 		if (this->isBossDoorUnlocked && !this->isFinalBossDead) {
 			std::map<std::string, int> forcedEnemyMap = { {"KeyeproEnemy", 100} };
 			auto demoGame = dynamic_cast<Demo::Game*>(this->game);
-			auto app = DX9GF::Application::GetInstance();
+			auto app = sdlgf::Application::GetInstance();
 			auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), forcedEnemyMap);
 			battleScene->SetCustomBGM("battle_boss");
 			battleScene->SetOnVictoryCallback([this]() {
 				this->isFinalBossDead = true;
 			});
-			battleScene->SetCustomBackgroundDraw([this](DX9GF::GraphicsDevice* gd, unsigned long long delta) { DrawBackground(gd, delta); });
+			battleScene->SetCustomBackgroundDraw([this](sdlgf::GraphicsDevice* gd, unsigned long long delta) { DrawBackground(gd, delta); });
 			auto sceMan = this->game->GetSceneManager();
 			sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
-			commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+			commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 				this->isGamePaused = true; markFinished();
 			}));
 
 			auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			drawBuffer->StackCommand(transitionInCommand);
 
-			commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
+			commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
 				if (!transitionInCommand->IsFinished()) return;
 				sceMan->GoToNext(); markFinished();
 			}));
 
 			drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
-			drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+			drawBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 				this->isGamePaused = false;
 				markFinished();
 			}));
 		}
 	});
 
-	map->SetAreaUpdateHandler("trigger_outro", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_outro", [this](const sdlgf::Map::ObjectArea& area) {
 		if (!this->isFinalBossDead) return;
 		if (!player->IsWalking()) return;
 
 		auto sceMan = this->game->GetSceneManager();
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		sceMan->InsertScene(sceMan->GetIndex() + 1,
 			new OutroScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
 		);
 		isTransitioning = true;
 		auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 		drawBuffer->PushCommand(transitionInCommand);
-		commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand, sceMan](std::function<void(void)> markFinished) {
+		commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand, sceMan](std::function<void(void)> markFinished) {
 			if (!transitionInCommand->IsFinished()) {
 				return;
 			}
 			this->isGamePaused = true;
-			auto audio = DX9GF::AudioManager::GetInstance();
+			auto audio = sdlgf::AudioManager::GetInstance();
 			audio->StopAll();
 			sceMan->GoToNext();
 			markFinished();
@@ -328,20 +328,20 @@ void Demo::BossWorldScene::OnInit()
 		drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 	});
 
-	map->SetAreaUpdateHandler("trigger_spec_item", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_spec_item", [this](const sdlgf::Map::ObjectArea& area) {
 		if (!this->hasGottenUselessItem) {
 			player->GetInventoryItems().AddItem(11, 1);
 			this->hasGottenUselessItem = true;
 		}
 	});
 
-	auto audio = DX9GF::AudioManager::GetInstance();
+	auto audio = sdlgf::AudioManager::GetInstance();
 	audio->Load("hack_fail", IDR_TERMINAL_DENIED);
 	audio->Load("hack_success", IDR_TERMINAL_GRANTED);
 
-	gateTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	gateTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	gateTexture->LoadTexture(L"assets/gate.png");
-	gateSprite = std::make_shared<DX9GF::StaticSprite>(gateTexture.get());
+	gateSprite = std::make_shared<sdlgf::StaticSprite>(gateTexture.get());
 	gateSprite->SetPosition(46 * 16, -15 * 16);
 
 	player->SetBaseSurface("default");
@@ -354,7 +354,7 @@ void Demo::BossWorldScene::OnInit()
 void Demo::BossWorldScene::OnTerminalHacked(int terminalID) {
 	if (isBossDoorUnlocked) return;
 
-	auto audio = DX9GF::AudioManager::GetInstance();
+	auto audio = sdlgf::AudioManager::GetInstance();
 
 	std::vector<std::string> successMsgs = {
 		"Node override successful...",
@@ -433,16 +433,16 @@ void Demo::BossWorldScene::OnUpdate(unsigned long long deltaTime)
 {
 	if (keyeproNPC) {
 		keyeproNPC->Update(deltaTime);
-		if (!currentConversation && keyeproNPC->CanInteract() && DX9GF::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
+		if (!currentConversation && keyeproNPC->CanInteract() && sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			StartKeyeproConversation();
 		}
 	}
 
 	if (rustyChest && !rustyChest->GetIsOpened()) {
 		rustyChest->Update(deltaTime);
-		if (!currentConversation && rustyChest->CanInteract() && DX9GF::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
+		if (!currentConversation && rustyChest->CanInteract() && sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			auto [sw, sh] = camera.GetScreenResolution();
-			currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+			currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 
 			auto dialogBuilder = std::make_shared<NPC>(transformManager, 0, 0, NPCConfig{});
 
@@ -503,7 +503,7 @@ std::string Demo::BossWorldScene::GetSaveID() const {
 void Demo::BossWorldScene::StartKeyeproConversation()
 {
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 	for (auto& line : keyeproNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}
@@ -521,7 +521,7 @@ void Demo::BossWorldScene::StartKeyeproBattle()
 	std::map<std::string, int> forcedEnemyMap = { {"KeyeproEnemy", 100} };
 
 	auto demoGame = dynamic_cast<Demo::Game*>(this->game);
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), forcedEnemyMap);
 
 	battleScene->SetCustomBGM("battle_boss");
@@ -529,26 +529,26 @@ void Demo::BossWorldScene::StartKeyeproBattle()
 		this->isFinalBossDead = true;
 		if (keyeproNPC) keyeproNPC->SetPhase(KeyeproNPC::Phase::Defeated);
 	});
-	battleScene->SetCustomBackgroundDraw([this](DX9GF::GraphicsDevice* gd, unsigned long long delta) { DrawBackground(gd, delta); });
+	battleScene->SetCustomBackgroundDraw([this](sdlgf::GraphicsDevice* gd, unsigned long long delta) { DrawBackground(gd, delta); });
 
 	auto sceMan = this->game->GetSceneManager();
 	sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = true; markFinished();
 	}));
 
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
 		if (!transitionInCommand->IsFinished()) return;
 		sceMan->GoToNext(); markFinished();
 	}));
 
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
-	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	drawBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;
 		this->isTransitioning = false;
 		markFinished();
@@ -599,7 +599,7 @@ void Demo::BossWorldScene::OnRestoreSaveData(const nlohmann::json& inData) {
 	}
 }
 
-void Demo::BossWorldScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::BossWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	D3DCOLOR bgColor = 0xFF05101a;

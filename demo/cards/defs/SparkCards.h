@@ -7,7 +7,7 @@ namespace Demo {
 
 	class IgniteCard : public TargetedCard {
 	public:
-		IgniteCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		IgniteCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Yellow,
@@ -19,7 +19,7 @@ namespace Demo {
 	// detonator in hand. Non-persistent - a persistent copy would out-scale Ignite for the same cost.
 	class ShortCircuitCard : public TargetedCard {
 	public:
-		ShortCircuitCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ShortCircuitCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Yellow,
@@ -32,7 +32,7 @@ namespace Demo {
 	// builds Spark across the whole field while the rest of the hand plays around it.
 	class StaticChargeCard : public IStatementCard {
 	public:
-		StaticChargeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		StaticChargeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 2,
 				.face = CardTemplate::Yellow,
@@ -45,7 +45,7 @@ namespace Demo {
 		static constexpr float BASE_DAMAGE = 4.f;
 		static constexpr float DAMAGE_PER_SPARK = 8.f;
 	public:
-		FireDetonationCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		FireDetonationCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Yellow,
@@ -65,7 +65,7 @@ namespace Demo {
 		static constexpr float BASE_DAMAGE = 6.f;
 		static constexpr float DAMAGE_PER_SPARK = 8.f;
 	public:
-		ChainDetonationCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ChainDetonationCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 3,
 				.face = CardTemplate::Yellow,

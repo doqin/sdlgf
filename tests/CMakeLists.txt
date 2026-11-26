@@ -1,7 +1,7 @@
 # --- Platform layer (time, UTF conversion, executable path) ---------------------------
 add_executable(sdlgf_platform_test
     platform_test.cpp
-    "${CMAKE_SOURCE_DIR}/core/DX9GFPlatform.cpp"
+    "${CMAKE_SOURCE_DIR}/core/Platform.cpp"
 )
 target_include_directories(sdlgf_platform_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
 target_link_libraries(sdlgf_platform_test PRIVATE SDL3::SDL3)   # Platform uses SDL's message box
@@ -15,7 +15,7 @@ add_dependencies(sdlgf_platform_test sdlgf_portable_types_check)
 # --- Key translation (DIK <-> SDL scancode) -----------------------------------------
 add_executable(sdlgf_keys_test
     keys_test.cpp
-    "${CMAKE_SOURCE_DIR}/core/DX9GFKeys.cpp"
+    "${CMAKE_SOURCE_DIR}/core/Keys.cpp"
 )
 target_include_directories(sdlgf_keys_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
 target_link_libraries(sdlgf_keys_test PRIVATE SDL3::SDL3)
@@ -41,7 +41,7 @@ if(Python3_FOUND)
 endif()
 
 if(WIN32)
-    # DX9GFKeys.h must agree with the real <dinput.h>: a differing value is a macro
+    # Keys.h must agree with the real <dinput.h>: a differing value is a macro
     # redefinition (C4005), which this target turns into an error.
     add_library(sdlgf_dik_values_check OBJECT dik_values_check.cpp)
     target_include_directories(sdlgf_dik_values_check PRIVATE "${CMAKE_SOURCE_DIR}/core")

@@ -1,5 +1,5 @@
-// Tests for DX9GFPlatform (time, UTF conversion). Plain asserts, no framework.
-#include "DX9GFPlatform.h"
+// Tests for Platform (time, UTF conversion). Plain asserts, no framework.
+#include "Platform.h"
 
 #include <chrono>
 #include <cstdio>
@@ -11,8 +11,8 @@ static int g_failures = 0;
 #define CHECK(cond) \
 	do { if (!(cond)) { std::fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); ++g_failures; } } while (0)
 
-using DX9GF::Platform::Utf8ToWide;
-using DX9GF::Platform::WideToUtf8;
+using sdlgf::Platform::Utf8ToWide;
+using sdlgf::Platform::WideToUtf8;
 
 // Builds a wide string holding the single code point cp, in the platform's encoding.
 static std::wstring WideFromCodePoint(char32_t cp)
@@ -31,9 +31,9 @@ static std::wstring WideFromCodePoint(char32_t cp)
 
 static void TestTicks()
 {
-	const auto t1 = DX9GF::Platform::GetTicksMs();
+	const auto t1 = sdlgf::Platform::GetTicksMs();
 	std::this_thread::sleep_for(std::chrono::milliseconds(30));
-	const auto t2 = DX9GF::Platform::GetTicksMs();
+	const auto t2 = sdlgf::Platform::GetTicksMs();
 	CHECK(t2 >= t1);
 	CHECK(t2 - t1 >= 25);   // slept 30 ms; allow scheduler slack
 	CHECK(t2 - t1 < 2000);

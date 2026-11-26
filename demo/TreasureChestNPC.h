@@ -23,16 +23,16 @@ namespace Demo {
         bool isOpened = false;
         bool randomPick = false;
         std::vector<ChestReward> rewards;
-		std::shared_ptr<DX9GF::Texture> openedTexture;
-		std::shared_ptr<DX9GF::AnimatedSprite> openedSprite;
+		std::shared_ptr<sdlgf::Texture> openedTexture;
+		std::shared_ptr<sdlgf::AnimatedSprite> openedSprite;
 		void MapCharacterVoices(std::unordered_map<std::wstring, std::string>& voiceMap) override {
 			voiceMap[L"Treasure Chest"] = "bleep20";
 		}
     public:
-        TreasureChestNPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y,
+        TreasureChestNPC(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y,
             std::vector<ChestReward> rewards, bool randomPick = false);
-        void Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) override;
-        void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) override;
+        void Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer) override;
+        void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime) override;
         std::vector<ChestReward> Open(Player* p);
         bool CanInteract()  const override { return isPlayerNear && !isOpened; }
         bool GetIsOpened()  const { return isOpened; }

@@ -1,33 +1,33 @@
 #include "pch.h"
 #include "SubScene.h"
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include <utility>
 
 void SubScene::Init()
 {
-	inputManager = DX9GF::InputManager::GetInstance();
-	auto app = DX9GF::Application::GetInstance();
+	inputManager = sdlgf::InputManager::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	auto graphicsDevice = game->GetGraphicsDevice();
-	transformManager = std::make_shared<DX9GF::TransformManager>();
+	transformManager = std::make_shared<sdlgf::TransformManager>();
 
-	rectTrigger1 = std::make_shared<DX9GF::RectangleTrigger>(transformManager, 150, 150, 200, 200);
+	rectTrigger1 = std::make_shared<sdlgf::RectangleTrigger>(transformManager, 150, 150, 200, 200);
 	rectTrigger1->Init(&camera);
 	rectTrigger1->SetOriginCenter();
-	rectTrigger1->SetOnHeldLeft([](DX9GF::ITrigger* t) {
-		auto input = DX9GF::InputManager::GetInstance();
+	rectTrigger1->SetOnHeldLeft([](sdlgf::ITrigger* t) {
+		auto input = sdlgf::InputManager::GetInstance();
 		t->SetLocalPosition(t->GetLocalX() + input->GetRelativeMouseX(), t->GetLocalY() + input->GetRelativeMouseY());
 		});
 
-	rectTrigger2 = std::make_shared<DX9GF::RectangleTrigger>(transformManager, 50, 200, 200, 200);
+	rectTrigger2 = std::make_shared<sdlgf::RectangleTrigger>(transformManager, 50, 200, 200, 200);
 	rectTrigger2->Init(&camera);
 	rectTrigger2->SetOriginCenter();
-	rectTrigger2->SetOnHeldLeft([](DX9GF::ITrigger* t) {
-		auto input = DX9GF::InputManager::GetInstance();
+	rectTrigger2->SetOnHeldLeft([](sdlgf::ITrigger* t) {
+		auto input = sdlgf::InputManager::GetInstance();
 		t->SetLocalPosition(t->GetLocalX() + input->GetRelativeMouseX(), t->GetLocalY() + input->GetRelativeMouseY());
 		});
 
-	colliderManager = std::make_shared<DX9GF::ColliderManager>();
+	colliderManager = std::make_shared<sdlgf::ColliderManager>();
 
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 100, 100, -200, 200));
 	rects.push_back(std::make_shared<GO::Rectangle>(transformManager, 50, 200, -200, 60));
@@ -71,10 +71,10 @@ void SubScene::DrawWorld(unsigned long long deltaTime)
 {
 	auto dev = game->GetGraphicsDevice();
 	if (SUCCEEDED(dev->BeginDraw())) {
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
-		DX9GF::Debug::DrawGrid(
+		sdlgf::DebugDraw::DrawGrid(
 			dev,
 			0,
 			0,

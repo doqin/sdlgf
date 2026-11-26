@@ -1,0 +1,44 @@
+#pragma once
+#include "ITrigger.h"
+namespace sdlgf {
+	class EllipseTrigger : public ITrigger {
+	private:
+		float width;
+		float height;
+		float originX;
+		float originY;
+	protected:
+	public:
+		EllipseTrigger(std::weak_ptr<TransformManager> transformManager) : width(0), height(0), originX(0), originY(0), ITrigger(transformManager) {}
+		EllipseTrigger(
+			std::weak_ptr<TransformManager> transformManager,
+			float width,
+			float height,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : width(width), height(height), originX(0), originY(0), ITrigger(transformManager, x, y, rotation, scaleX, scaleY) {
+		}
+		EllipseTrigger(
+			std::weak_ptr<TransformManager> transformManager,
+			std::weak_ptr<IGameObject> parent,
+			float width,
+			float height,
+			float x = 0,
+			float y = 0,
+			float rotation = 0,
+			float scaleX = 1,
+			float scaleY = 1
+		) : width(width), height(height), originX(0), originY(0), ITrigger(transformManager, parent, x, y, rotation, scaleX, scaleY) {
+		}
+		void SetOrigin(float x, float y);
+		void SetOriginCenter();
+		float GetOriginX() const;
+		float GetOriginY() const;
+		bool IsHovering(unsigned long long deltaTime) override;
+
+		void Draw(GraphicsDevice* graphicsDevice, const Camera& camera) override;
+	};
+}

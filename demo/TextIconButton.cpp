@@ -4,12 +4,12 @@
 #include <cmath>
 
 namespace Demo {
-    TextIconButton::TextIconButton(std::shared_ptr<DX9GF::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
-        std::shared_ptr<DX9GF::Texture> uiSheetTex, DX9GF::Font* font, const std::wstring& text, int frames)
+    TextIconButton::TextIconButton(std::shared_ptr<sdlgf::TransformManager> tm, float displayX, float displayY, int imgW, int imgH,
+        std::shared_ptr<sdlgf::Texture> uiSheetTex, sdlgf::Font* font, const std::wstring& text, int frames)
         : IconButton(tm, displayX, displayY, imgW, imgH, uiSheetTex, frames), label(text)
     {
         if (font) {
-            this->fontSprite = std::make_shared<DX9GF::FontSprite>(font);
+            this->fontSprite = std::make_shared<sdlgf::FontSprite>(font);
         }
 
         this->baseTextOffsetY = -2.5f;
@@ -77,7 +77,7 @@ namespace Demo {
         this->stateOffsetsY[ButtonState::DISABLED] = 3.0f * scaleY;
     }
 
-    void Demo::TextIconButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+    void Demo::TextIconButton::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
     {
         //keep the width in sync even on frames where Update did not run
         ApplyAutoResize();

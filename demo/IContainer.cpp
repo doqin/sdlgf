@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "IContainer.h"
 #include "LocalizationManager.h"
-#include "DX9GFInputManager.h"
-#include "DX9GFUtils.h"
+#include "InputManager.h"
+#include "Utils.h"
 
 size_t Demo::IContainer::GetMaxWidthOfChildren()
 {
@@ -95,12 +95,12 @@ void Demo::IContainer::Update(unsigned long long deltaTime)
 	IDraggable::Update(deltaTime);
 
 	if (maxHeight > 0 && GetHeightOfChildren() > maxHeight) {
-		auto inputManager = DX9GF::InputManager::GetInstance();
+		auto inputManager = sdlgf::InputManager::GetInstance();
 		auto mouseX = (float)inputManager->GetAbsoluteMouseX();
 		auto mouseY = (float)inputManager->GetAbsoluteMouseY();
 		auto [thisX, thisY] = GetWorldPosition();
 
-		auto [winX, winY] = DX9GF::Utils::WorldToWindowCoords(*camera, thisX, thisY);
+		auto [winX, winY] = sdlgf::Utils::WorldToWindowCoords(*camera, thisX, thisY);
 
 		auto width = (float)(std::max)(dragAreaWidth, GetMaxWidthOfChildren());
 		auto height = (float)(maxHeight + dragAreaHeight);
@@ -172,8 +172,8 @@ void Demo::IContainer::Draw(unsigned long long deltaTime)
 
 	if (maxHeight > 0) {
 		auto [worldX, worldY] = GetWorldPosition();
-		auto [tlX, tlY] = DX9GF::Utils::WorldToWindowCoords(*camera, worldX, worldY + dragAreaHeight);
-		auto [brX, brY] = DX9GF::Utils::WorldToWindowCoords(*camera, worldX + (std::max)(dragAreaWidth, GetMaxWidthOfChildren()), worldY + dragAreaHeight + maxHeight);
+		auto [tlX, tlY] = sdlgf::Utils::WorldToWindowCoords(*camera, worldX, worldY + dragAreaHeight);
+		auto [brX, brY] = sdlgf::Utils::WorldToWindowCoords(*camera, worldX + (std::max)(dragAreaWidth, GetMaxWidthOfChildren()), worldY + dragAreaHeight + maxHeight);
 
 		RECT rect;
 		rect.left = (long)tlX;
@@ -204,7 +204,7 @@ void Demo::IContainer::Draw(unsigned long long deltaTime)
 
 		if (GetHeightOfChildren() > maxHeight && scrollOffset < (float)GetHeightOfChildren() - maxHeight) {
 			if (auto manager = draggableManager) {
-				auto cmd = std::make_shared<DX9GF::CustomCommand>([this, deltaTime](std::function<void()> markFinished) {
+				auto cmd = std::make_shared<sdlgf::CustomCommand>([this, deltaTime](std::function<void()> markFinished) {
 					if (debugFontSprite) {
 						auto [worldX, worldY] = GetWorldPosition();
 						float textX = worldX + 8;

@@ -24,7 +24,7 @@ namespace Demo {
 		D3DCOLOR bgBaseColor1 = D3DCOLOR_ARGB(0, 20, 20, 20);
 		D3DCOLOR bgBaseColor2 = 0xFF793a80;
 
-		void DrawCheckerBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+		void DrawCheckerBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 		void StartTrojanConversation();
 		void StartTrojanBattle();
 		// After the Trojan's lines, points the player at the token terminal until it's cracked.
@@ -32,7 +32,7 @@ namespace Demo {
 		void StartSketchyGuyInteraction();
 
 	public:
-		ThreadAlleyScene(Game* game, std::shared_ptr<DX9GF::SaveManager> sm, UINT sw, UINT sh)
+		ThreadAlleyScene(Game* game, std::shared_ptr<sdlgf::SaveManager> sm, UINT sw, UINT sh)
 			: WorldSceneBase(game, sm, sw, sh) {
 		}
 		std::string GetSaveID() const override;
@@ -46,6 +46,6 @@ namespace Demo {
 		void OnDrawUI(unsigned long long deltaTime) override;
 		void OnGenerateSaveData(nlohmann::json& outData) override;
 		void OnRestoreSaveData(const nlohmann::json& inData) override;
-		void DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) override;
+		void DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) override;
 	};
 }

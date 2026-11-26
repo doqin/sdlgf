@@ -55,7 +55,7 @@ void Demo::CardShop::AddShopCard(const CardDef& def)
 {
 	auto prototype = def.create(this->transformManager);
 	itemsForSale.push_back({
-		Tr(DX9GF::Utils::Utf8ToWide(ShopLabel(def.id))),
+		Tr(sdlgf::Utils::Utf8ToWide(ShopLabel(def.id))),
 		CardCatalog::GetPrice(def.id),
 		prototype->GetDescription(),
 		[this, id = def.id]() { this->player->AddCardToInventory(id); },

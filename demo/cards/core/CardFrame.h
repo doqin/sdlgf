@@ -1,5 +1,5 @@
 #pragma once
-#include "DX9GFExtras.h"
+#include "Extras.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -49,9 +49,9 @@ namespace Demo {
 		// One frame is shared by every card on a graphics device - it owns the texture, the font and
 		// the sprites, none of which are worth building per card. Held weakly, so it goes away with the
 		// last card and never outlives the device.
-		static std::shared_ptr<CardFrame> Get(DX9GF::GraphicsDevice* graphicsDevice);
+		static std::shared_ptr<CardFrame> Get(sdlgf::GraphicsDevice* graphicsDevice);
 
-		explicit CardFrame(DX9GF::GraphicsDevice* graphicsDevice);
+		explicit CardFrame(sdlgf::GraphicsDevice* graphicsDevice);
 
 		// Width of a card face carrying `name` and its input signature. Independent of the cost - room
 		// for one digit is always reserved - and of which slots are filled, so a card's width never
@@ -61,7 +61,7 @@ namespace Demo {
 
 		// `x`,`y` is the top-left corner. `tint` multiplies the whole face, text included, which is how
 		// the shop greys out cards the player cannot afford.
-		void Draw(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
+		void Draw(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y,
 			CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost,
 			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF);
 
@@ -75,13 +75,13 @@ namespace Demo {
 		static void EndCollect();
 		static bool IsCollecting();
 		static void FlushCollected();
-		void Queue(const DX9GF::Camera& camera, float x, float y,
+		void Queue(const sdlgf::Camera& camera, float x, float y,
 			CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost,
 			float scale = 2.f, D3DCOLOR tint = 0xFFFFFFFF, const RECT* scissor = nullptr);
 
 	private:
 		struct Entry {
-			const DX9GF::Camera* camera;
+			const sdlgf::Camera* camera;
 			float x, y;
 			CardTemplate cardTemplate;
 			std::wstring name;
@@ -96,18 +96,18 @@ namespace Demo {
 		static std::vector<Entry> pending;
 		static CardFrame* pendingOwner;
 
-		DX9GF::GraphicsDevice* graphicsDevice;
-		std::shared_ptr<DX9GF::Texture> texture;
+		sdlgf::GraphicsDevice* graphicsDevice;
+		std::shared_ptr<sdlgf::Texture> texture;
 		// Every slice of the sheet (caps, body column, orb) goes through this one sprite.
-		std::shared_ptr<DX9GF::StaticSprite> sheet;
+		std::shared_ptr<sdlgf::StaticSprite> sheet;
 		// The card font in three cuts of the same metrics: every row (cost digit, measuring), and the
 		// rows above / below the card's light-to-dark band split, which the name is drawn in two colours.
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<DX9GF::Font> topFont;
-		std::shared_ptr<DX9GF::FontSprite> topSprite;
-		std::shared_ptr<DX9GF::Font> bottomFont;
-		std::shared_ptr<DX9GF::FontSprite> bottomSprite;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::Font> topFont;
+		std::shared_ptr<sdlgf::FontSprite> topSprite;
+		std::shared_ptr<sdlgf::Font> bottomFont;
+		std::shared_ptr<sdlgf::FontSprite> bottomSprite;
 		// Width of one digit in the font's native pixels; the cost column is this wide.
 		float digitWidth = 0.f;
 
@@ -117,9 +117,9 @@ namespace Demo {
 		std::unordered_map<std::wstring, float> widthCache;
 
 		// Draw one slice / label inside an already-begun sprite.
-		void DrawSlice(DX9GF::StaticSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+		void DrawSlice(sdlgf::StaticSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 			RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint);
-		void DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+		void DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 			const std::wstring& text, float x, float y, float scale, D3DCOLOR color, bool outlined, D3DCOLOR tint);
 		// Draws `count` faces that share a camera and scissor state: one sheet pass, then one per font.
 		void DrawGroup(unsigned long long deltaTime, const Entry* entries, size_t count);

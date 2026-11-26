@@ -1,16 +1,16 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
-#include "DX9GFIScene.h"
+#include "sdlgf.h"
+#include "Extras.h"
+#include "IScene.h"
 #include "Game.h"
 #include "IConversation.h"
 
 namespace Demo {
-    class OutroScene : public DX9GF::IScene {
+    class OutroScene : public sdlgf::IScene {
     private:
         Game* game;
-        std::shared_ptr<DX9GF::Font> font;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
+        std::shared_ptr<sdlgf::Font> font;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
         std::shared_ptr<IConversation> conversation;
         bool hasTransitioned = false;
     public:

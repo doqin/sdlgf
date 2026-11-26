@@ -4,7 +4,7 @@
 #include "World1Scene.h"
 #include "MainMenu.h"
 #include "SettingsScene.h"
-#include "DX9GFAudioManager.h"
+#include "AudioManager.h"
 #include "resource.h"
 #include <cwchar>
 #include <iterator>
@@ -17,7 +17,7 @@ void Demo::Game::Init()
 	SettingsManager::GetInstance()->LoadSettings();
 	SettingsManager::GetInstance()->ApplyResolution();
 
-	auto audio = DX9GF::AudioManager::GetInstance();
+	auto audio = sdlgf::AudioManager::GetInstance();
 	audio->Init();
 
 	// Load sound effects
@@ -158,23 +158,23 @@ void Demo::Game::Init()
 	audio->SetActiveStems("bgm_bossworld", { 0, 1 }, 0.0f);
 	audio->Load("bgm_arcade", IDR_BGM_ARCADE);
 
-	auto app = DX9GF::Application::GetInstance();
-	DX9GF::Font::AddFont(L"assets/arcade-among-2-r46pv.ttf");
-	DX9GF::Font::AddFont(L"assets/statusplz.ttf");
-	DX9GF::Font::AddFont(L"assets/cardpixel.ttf");
-	DX9GF::Font::AddFont(L"assets/cardpixel-top.ttf");
-	DX9GF::Font::AddFont(L"assets/cardpixel-bottom.ttf");
-	DX9GF::Font::AddFont(L"assets/135openpixel-v2-3.ttf");
+	auto app = sdlgf::Application::GetInstance();
+	sdlgf::Font::AddFont(L"assets/arcade-among-2-r46pv.ttf");
+	sdlgf::Font::AddFont(L"assets/statusplz.ttf");
+	sdlgf::Font::AddFont(L"assets/cardpixel.ttf");
+	sdlgf::Font::AddFont(L"assets/cardpixel-top.ttf");
+	sdlgf::Font::AddFont(L"assets/cardpixel-bottom.ttf");
+	sdlgf::Font::AddFont(L"assets/135openpixel-v2-3.ttf");
 	//Load cursor textures
-	auto input = DX9GF::InputManager::GetInstance();
+	auto input = sdlgf::InputManager::GetInstance();
 	auto gd = GetGraphicsDevice();
 
 	//hotspot (hX, hY) must be multiplied by the scale factor
-	input->AddCursor(DX9GF::InputManager::CursorType::CURSOR, gd, L"assets/cursor.png", 0.2f, 0.0f, 0.0f);
-	input->AddCursor(DX9GF::InputManager::CursorType::POINTER, gd, L"assets/pointer.png", 0.2f, 0.0f, 0.0f);
-	input->AddCursor(DX9GF::InputManager::CursorType::CLICK, gd, L"assets/click.png", 0.2f, 4.0f, 6.0f);
-	input->AddCursor(DX9GF::InputManager::CursorType::GRAB, gd, L"assets/grab.png", 0.2f, 14.8f, 14.8);
-	input->AddCursor(DX9GF::InputManager::CursorType::TEXTSELECT, gd, L"assets/text-select.png", 0.2f, 10.0f, 16.0f);
+	input->AddCursor(sdlgf::InputManager::CursorType::CURSOR, gd, L"assets/cursor.png", 0.2f, 0.0f, 0.0f);
+	input->AddCursor(sdlgf::InputManager::CursorType::POINTER, gd, L"assets/pointer.png", 0.2f, 0.0f, 0.0f);
+	input->AddCursor(sdlgf::InputManager::CursorType::CLICK, gd, L"assets/click.png", 0.2f, 4.0f, 6.0f);
+	input->AddCursor(sdlgf::InputManager::CursorType::GRAB, gd, L"assets/grab.png", 0.2f, 14.8f, 14.8);
+	input->AddCursor(sdlgf::InputManager::CursorType::TEXTSELECT, gd, L"assets/text-select.png", 0.2f, 10.0f, 16.0f);
 #ifdef TESTING
 	this->sceneManager->PushScene(new DebugScene(this, app->GetScreenWidth(), app->GetScreenHeight()));
 #else
@@ -197,7 +197,7 @@ void Demo::Game::Update(unsigned long long deltaTime)
 		float msPerFrame = (float)fpsAccumulator / fpsFrames;
 		wchar_t buf[256];
 		std::swprintf(buf, std::size(buf), L"%ls - FPS: %d (%.2f ms/frame)", GAME_TITLE, fpsFrames, msPerFrame);
-		DX9GF::Application::GetInstance()->SetTitle(buf);
+		sdlgf::Application::GetInstance()->SetTitle(buf);
 
 		fpsAccumulator = 0;
 		fpsFrames = 0;

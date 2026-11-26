@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "Player.h"
 #include "IconButton.h"
@@ -16,14 +16,14 @@ namespace Demo {
 	class PlayerHUD {
 		Game* game;
 		std::shared_ptr<Player> player;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		DX9GF::Camera* uiCamera;
-		DX9GF::Font* font;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
+		sdlgf::Camera* uiCamera;
+		sdlgf::Font* font;
 
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<DX9GF::Texture> playerTex;
-		std::shared_ptr<DX9GF::StaticSprite> playerIcon;
-		std::shared_ptr<DX9GF::Texture> uiTex;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::Texture> playerTex;
+		std::shared_ptr<sdlgf::StaticSprite> playerIcon;
+		std::shared_ptr<sdlgf::Texture> uiTex;
 		std::shared_ptr<IconButton> btnInventory;
 
 		std::function<void()> onInventoryOpen;
@@ -40,14 +40,14 @@ namespace Demo {
 		float panelX = 0, panelY = 0, panelW = 0, panelH = 0;
 		float contentX = 0, contentY = 0, contentW = 0, contentH = 0;
 		void UpdateLayout();
-		void DrawPanel(DX9GF::GraphicsDevice* gd);
-		void DrawStatRow(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor);
+		void DrawPanel(sdlgf::GraphicsDevice* gd);
+		void DrawStatRow(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime, float rowY, const wchar_t* label, const std::wstring& value, D3DCOLOR digitColor);
 	public:
-		PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<DX9GF::TransformManager> transformManager, DX9GF::Camera* uiCamera, DX9GF::Font* font);
+		PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shared_ptr<sdlgf::TransformManager> transformManager, sdlgf::Camera* uiCamera, sdlgf::Font* font);
 
 		void Init();
 		void Update(unsigned long long deltaTime);
-		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 
 		void SetOnInventoryOpen(std::function<void()> callback) { onInventoryOpen = callback; }
 		void SetVisible(bool value) { visible = value; }

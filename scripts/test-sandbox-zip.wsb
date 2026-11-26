@@ -1,6 +1,6 @@
 <Configuration>
   <!-- End-to-end test of the real distribution artifact: the runner
-       (run-sandbox-zip-test.cmd) extracts dist\DX9GF-Demo.zip inside the
+       (run-sandbox-zip-test.cmd) extracts dist\sdlgf-demo.zip inside the
        sandbox like a player would, runs the game from a local path, and
        copies any demo.exe.crash.log back to the mapped dist folder. -->
   <MappedFolders>

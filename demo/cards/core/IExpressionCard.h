@@ -6,10 +6,10 @@
 namespace Demo {
  class IExpressionCard : public ICard, public IDraggable {
 	public:
-       inline IExpressionCard(std::weak_ptr<DX9GF::TransformManager> transformManager)
+       inline IExpressionCard(std::weak_ptr<sdlgf::TransformManager> transformManager)
 			: IGameObject(transformManager), ICard(transformManager), IDraggable(transformManager) {}
 		inline IExpressionCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			float x = 0,
@@ -21,8 +21,8 @@ namespace Demo {
 			ICard(transformManager, x, y, rotation, scaleX, scaleY),
 			IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY) {}
 		inline IExpressionCard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::IGameObject> parent,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			float x = 0,

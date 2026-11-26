@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "GameItems.h"
 #include <string>
 #include <vector>
@@ -11,7 +11,7 @@ namespace Demo {
 	// Every scene constructs its own Player instance, and battles construct a further transient
 	// battlePlayer on top of that - routing this state through one global instance means all of
 	// them automatically share it, instead of needing to be manually copied around.
-	class PlayerGlobalData : public DX9GF::ISaveable {
+	class PlayerGlobalData : public sdlgf::ISaveable {
 	private:
 		float baseMaxHealth = 50.f;
 		float health = 50.f;

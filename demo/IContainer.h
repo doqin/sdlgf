@@ -1,5 +1,5 @@
 #pragma once
-#include "DX9GFExtras.h"
+#include "Extras.h"
 #include "IDraggable.h"
 
 namespace Demo {
@@ -21,10 +21,10 @@ namespace Demo {
 		// Parents, positions (at the next stacking slot) and appends child to the children list, skipping the hit-test in OnDrop.
 		void AttachChild(std::shared_ptr<IDraggable> child);
 	public:
-       inline IContainer(std::weak_ptr<DX9GF::TransformManager> transformManager)
+       inline IContainer(std::weak_ptr<sdlgf::TransformManager> transformManager)
 			: IGameObject(transformManager), IDraggable(transformManager), maxHeight(0), scrollOffset(0) { }
 		inline IContainer(
-			std::weak_ptr<DX9GF::TransformManager> transformManager, 
+			std::weak_ptr<sdlgf::TransformManager> transformManager, 
 			size_t dragAreaWidth, 
 			size_t dragAreaHeight,
 			size_t maxHeight = 0,
@@ -37,8 +37,8 @@ namespace Demo {
 		 IDraggable(transformManager, dragAreaWidth, dragAreaHeight, x, y, rotation, scaleX, scaleY),
 		 maxHeight(maxHeight), scrollOffset(0) { }
 		inline IContainer(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::IGameObject> parent,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			size_t maxHeight = 0,

@@ -9,27 +9,27 @@ namespace {
 }
 
 namespace Demo {
-	AuthTerminal::AuthTerminal(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+	AuthTerminal::AuthTerminal(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y)
 		: IGameObject(tm, x, y), transformManager(tm) {
 	}
 
-	void AuthTerminal::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, DX9GF::Camera* uiCamera,
-		std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm,
-		std::shared_ptr<DX9GF::Font> font)
+	void AuthTerminal::Init(Game* game, sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, sdlgf::Camera* uiCamera,
+		std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm,
+		std::shared_ptr<sdlgf::Font> font)
 	{
 		this->gd = gd;
 		this->worldCamera = camera;
 		this->player = p;
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 
-		collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
+		collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<DX9GF::Texture>(gd);
+		spritesheet = std::make_shared<sdlgf::Texture>(gd);
 		spritesheet->LoadTexture(L"assets/terminals.png");
 
-		sprite = std::make_shared<DX9GF::StaticSprite>(spritesheet.get());
+		sprite = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 		sprite->SetSrcRect(isSolved ? SRC_OK : SRC_GREEN);
 		sprite->SetOrigin(8.f, 16.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());
@@ -59,7 +59,7 @@ namespace Demo {
 		float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
 		isPlayerNear = (distance <= INTERACTION_DISTANCE);
 
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		int interactKey = SettingsManager::GetInstance()->GetKeybind("INTERACT");
 
 		if (isPlayerNear && !isSolved && inpMan->KeyDown(interactKey)) {
@@ -68,7 +68,7 @@ namespace Demo {
 		}
 	}
 
-	void AuthTerminal::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime)
+	void AuthTerminal::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime)
 	{
 		if (!isVisible) return;
 		sprite->Begin();
@@ -78,7 +78,7 @@ namespace Demo {
 		DrawPosition(deltaTime, gd, camera);
 	}
 
-	void AuthTerminal::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime)
+	void AuthTerminal::DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime)
 	{
 		if (!isVisible || !uiCamera || !fontSprite || !worldCamera) return;
 

@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "IConversation.h"
-#include <DX9GFInputManager.h>
-#include <DX9GFApplication.h>
-#include "DX9GFAudioManager.h"
+#include <InputManager.h>
+#include <Application.h>
+#include "AudioManager.h"
 #include "SettingsManager.h"
 #include <cmath>
 #include <algorithm>
-Demo::IConversation::IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite, int screenWidth, int screenHeight)
+Demo::IConversation::IConversation(std::shared_ptr<sdlgf::FontSprite> fontSprite, int screenWidth, int screenHeight)
 	: fontSprite(fontSprite), virtualWidth((float)screenWidth), virtualHeight((float)screenHeight)
 {
 }
@@ -37,7 +37,7 @@ void Demo::IConversation::Execute(unsigned long long deltaTime)
 				displayedContent = currentLine.content.substr(0, currentCharIndex);
 				//skip space
 				if (currentLine.content[currentCharIndex - 1] != L' ') {
-					DX9GF::AudioManager::GetInstance()->Play(currentLine.voiceClip.has_value() ? currentLine.voiceClip.value() : "bleep5");
+					sdlgf::AudioManager::GetInstance()->Play(currentLine.voiceClip.has_value() ? currentLine.voiceClip.value() : "bleep5");
 				}
 			}
 			else {
@@ -46,11 +46,11 @@ void Demo::IConversation::Execute(unsigned long long deltaTime)
 		}
 	}
 
-	auto input = DX9GF::InputManager::GetInstance();
+	auto input = sdlgf::InputManager::GetInstance();
 	const int keyAccept = SettingsManager::GetInstance()->GetKeybind("ACCEPT");
 	bool advance = false;
-	if (input->MouseDown(DX9GF::InputManager::MouseButton::Left)) {
-		input->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
+	if (input->MouseDown(sdlgf::InputManager::MouseButton::Left)) {
+		input->ConsumeMouseButton(sdlgf::InputManager::MouseButton::Left);
 		advance = true;
 	}
 	else if (input->KeyDown(keyAccept)) {
@@ -75,7 +75,7 @@ void Demo::IConversation::Execute(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera, unsigned long long deltaTime)
+void Demo::IConversation::Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera* uiCamera, unsigned long long deltaTime)
 {
 	if (dialogueQueue.empty() || IsFinished() || !gd || !uiCamera) return;
 
@@ -140,7 +140,7 @@ void Demo::IConversation::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamer
 	if (!isTyping) {
 		const float triangleWidth = 16.0f;
 		const float triangleHeight = 10.0f;
-		const float bounce = std::sin(static_cast<float>(DX9GF::Platform::GetTicksMs()) * 0.006f) * 3.0f;
+		const float bounce = std::sin(static_cast<float>(sdlgf::Platform::GetTicksMs()) * 0.006f) * 3.0f;
 		const float triangleTopY = boxY + boxHeight - triangleHeight - 10.0f + bounce;
 		gd->DrawTriangle(*uiCamera, boxX + boxWidth / 2.0f, triangleTopY, triangleWidth, triangleHeight, 0xFF000000, true);
 	}

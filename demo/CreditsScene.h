@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
-#include "DX9GFIScene.h"
+#include "sdlgf.h"
+#include "Extras.h"
+#include "IScene.h"
 #include "Game.h"
 #include "IconButton.h"
 #include "KeyboardNavigator.h"
@@ -10,19 +10,19 @@
 
 namespace Demo
 {
-	class CreditsScene : public DX9GF::IScene
+	class CreditsScene : public sdlgf::IScene
 	{
 	private:
 		Game* game;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
 
-		std::shared_ptr<DX9GF::StaticSprite> bgSprite;
-		std::shared_ptr<DX9GF::Texture> bgTex;
-		std::shared_ptr<DX9GF::Texture> uiSheetTex;
-		std::shared_ptr<DX9GF::Texture> placeholderTex;
+		std::shared_ptr<sdlgf::StaticSprite> bgSprite;
+		std::shared_ptr<sdlgf::Texture> bgTex;
+		std::shared_ptr<sdlgf::Texture> uiSheetTex;
+		std::shared_ptr<sdlgf::Texture> placeholderTex;
 
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
 		std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
 		std::shared_ptr<IconButton> backButton;

@@ -5,10 +5,10 @@
 #include <cmath>
 
 namespace Demo {
-	GoldToken::GoldToken(std::weak_ptr<DX9GF::TransformManager> tm, DX9GF::GraphicsDevice* gd, float x, float y, int value)
+	GoldToken::GoldToken(std::weak_ptr<sdlgf::TransformManager> tm, sdlgf::GraphicsDevice* gd, float x, float y, int value)
 		: IToken(tm, x, y), goldValue(value)
 	{
-		texture = std::make_shared<DX9GF::Texture>(gd);
+		texture = std::make_shared<sdlgf::Texture>(gd);
 		texture->LoadTexture(L"assets/gold-token.png");
 
 		std::vector<RECT> frames = {
@@ -22,10 +22,10 @@ namespace Demo {
 			{239, 7, 258, 26}
 		};
 
-		sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), frames, 12, true);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), frames, 12, true);
 		sprite->SetOrigin(9.5f, 9.5f);
 
-		collider = std::make_shared<DX9GF::RectangleCollider>(tm, 19.f, 19.f, x, y);
+		collider = std::make_shared<sdlgf::RectangleCollider>(tm, 19.f, 19.f, x, y);
 		collider->SetOriginCenter();
 	}
 
@@ -45,7 +45,7 @@ namespace Demo {
 		collider->SetLocalPosition(GetWorldX(), GetWorldY() + floatOffset);
 	}
 
-	void GoldToken::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+	void GoldToken::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 		if (alpha <= 0 || isExpired) return;
 
 		int currentAlpha = alpha;
@@ -73,7 +73,7 @@ namespace Demo {
 		if (isCollected) return;
 		isCollected = true;
 		scene->AddPendingGoldTokenReward(goldValue);
-		DX9GF::AudioManager::GetInstance()->PlayRandom("token_collect", 0.3f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("token_collect", 0.3f);
 	}
 
 	bool GoldToken::IsDone() const {

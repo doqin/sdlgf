@@ -28,8 +28,8 @@ namespace Demo
 	{
 		this->game = gameContext;
 		//set font and size for damage text, should not use fontsize < 11
-		font = std::make_unique<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
-		fontSprite = std::make_unique<DX9GF::FontSprite>(font.get());
+		font = std::make_unique<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
+		fontSprite = std::make_unique<sdlgf::FontSprite>(font.get());
 	}
 
 	//it is necessary to call this func when release the game
@@ -109,7 +109,7 @@ namespace Demo
 			}
 		}
 	}
-	void DamageTextManager::Draw(DX9GF::Camera& camera, unsigned long long deltaTime)
+	void DamageTextManager::Draw(sdlgf::Camera& camera, unsigned long long deltaTime)
 	{
 		if (!fontSprite) return;
 		fontSprite->Begin();

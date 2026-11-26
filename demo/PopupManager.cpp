@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "PopupManager.h"
-#include "DX9GFInputManager.h"
+#include "InputManager.h"
 #include <algorithm>
 #include <cmath>
 #include "TextIconButton.h"
@@ -19,7 +19,7 @@ namespace Demo {
     static constexpr float NARRATION_MSG_WIDTH = 560.0f;
 
     // Greedy word-wrap of `text` (honouring newlines) to `maxWidth` using the sprite's metrics.
-    static std::vector<std::wstring> WrapMessage(DX9GF::FontSprite* fs, const std::wstring& text, float maxWidth) {
+    static std::vector<std::wstring> WrapMessage(sdlgf::FontSprite* fs, const std::wstring& text, float maxWidth) {
         std::vector<std::wstring> lines;
         size_t pos = 0;
         while (pos <= text.size()) {
@@ -60,11 +60,11 @@ namespace Demo {
         return instance;
     }
 
-    void PopupManager::Init(Game* game, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont) {
+    void PopupManager::Init(Game* game, std::shared_ptr<sdlgf::Texture> borderTex, std::shared_ptr<sdlgf::Texture> uiTex, std::shared_ptr<sdlgf::Font> popupFont) {
         this->game = game;
         this->font = popupFont;
-        this->fontSprite = std::make_shared<DX9GF::FontSprite>(this->font.get());
-        this->internalTm = std::make_shared<DX9GF::TransformManager>();
+        this->fontSprite = std::make_shared<sdlgf::FontSprite>(this->font.get());
+        this->internalTm = std::make_shared<sdlgf::TransformManager>();
 
         this->borderSheetTex = borderTex;
         this->uiSheetTex = uiTex;
@@ -113,7 +113,7 @@ namespace Demo {
         this->iconTexture = nullptr;
         this->iconSize = 0.0f;
         this->activeButtons.clear();
-        this->internalTm = std::make_shared<DX9GF::TransformManager>();
+        this->internalTm = std::make_shared<sdlgf::TransformManager>();
 
         PopupStyle& style = styles[styleName];
 
@@ -175,7 +175,7 @@ namespace Demo {
         const float titleBlock = currentTitle.empty() ? 0.0f : titleH + paddingMid;
         this->popupHeight = paddingTop + titleBlock + std::max(msgH, sideIconSize) + paddingMid + btnH + paddingBot;
 
-        this->backgroundSprite = std::make_shared<DX9GF::NineSliceSprite>(
+        this->backgroundSprite = std::make_shared<sdlgf::NineSliceSprite>(
             borderSheetTex.get(), style.bgSrcRect,
             style.marginL, style.marginT, style.marginR, style.marginB
         );
@@ -198,7 +198,7 @@ namespace Demo {
             auto popupBtn = std::make_shared<PopupDynamicButton>(textBtn, btnData.first, btnData.second);
 
             auto cb = btnData.second;
-            textBtn->SetOnReleaseLeft([this, cb](DX9GF::ITrigger* t) {
+            textBtn->SetOnReleaseLeft([this, cb](sdlgf::ITrigger* t) {
                 if (cb) cb();
                 this->Close();
                 });
@@ -212,13 +212,13 @@ namespace Demo {
 
     void PopupManager::ShowWithIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
         const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
-        std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
+        std::shared_ptr<sdlgf::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
     {
         Show(styleName, title, message, buttons);
         if (!isActive || !iconTex || iconFrames.empty()) return;
 
         this->iconTexture = iconTex;
-        this->iconSprite = std::make_shared<DX9GF::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex.get(), iconFrames);
         this->iconSprite->SetFrameRate(12);
         this->iconSize = iconSize;
         float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
@@ -234,7 +234,7 @@ namespace Demo {
 
     void PopupManager::ShowWithSideIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
         const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
-        std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
+        std::shared_ptr<sdlgf::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize)
     {
         // Show lays the popup out with the icon column already reserved, so no resize is needed here.
         if (iconTex && !iconFrames.empty()) pendingSideIconSize = iconSize;
@@ -242,7 +242,7 @@ namespace Demo {
         if (!isActive || sideIconSize <= 0.0f) return;
 
         this->iconTexture = iconTex;
-        this->iconSprite = std::make_shared<DX9GF::AnimatedSprite>(iconTex.get(), iconFrames);
+        this->iconSprite = std::make_shared<sdlgf::AnimatedSprite>(iconTex.get(), iconFrames);
         this->iconSprite->SetFrameRate(12);
         this->iconSize = sideIconSize;
         float frameH = static_cast<float>(iconFrames[0].bottom - iconFrames[0].top);
@@ -340,7 +340,7 @@ namespace Demo {
         keyboardNavigator.Reset();
     }
 
-    void PopupManager::Update(unsigned long long deltaTime, DX9GF::Camera* uiCamera) {
+    void PopupManager::Update(unsigned long long deltaTime, sdlgf::Camera* uiCamera) {
         if (!isActive) return;
 
         internalTm->UpdateAll();
@@ -354,7 +354,7 @@ namespace Demo {
         // first Update, and its position has to follow.
         if (isActive) LayoutButtons();
         if (isActive) {
-            auto inpMan = DX9GF::InputManager::GetInstance();
+            auto inpMan = sdlgf::InputManager::GetInstance();
             for (auto& popupBtn : activeButtons) {
                 // Any label carrying a "(Y)" / "(N)" hotkey hint, not just "Yes(Y)" / "No(N)".
                 bool isYesKey = (popupBtn->label.find(L"(Y)") != std::wstring::npos && inpMan->KeyPress(DIK_Y));
@@ -371,7 +371,7 @@ namespace Demo {
         }
     }
 
-    void PopupManager::DrawUI(unsigned long long deltaTime, DX9GF::Camera* uiCamera) {
+    void PopupManager::DrawUI(unsigned long long deltaTime, sdlgf::Camera* uiCamera) {
         if (!isActive || !game) return;
 
         float sw = static_cast<float>(game->GetVirtualWidth());

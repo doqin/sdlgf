@@ -2,10 +2,10 @@
 #include "GearSlotUI.h"
 #include "GameItems.h"
 namespace Demo {
-	GearSlotUI::GearSlotUI(std::shared_ptr<DX9GF::TransformManager> tm, DX9GF::Camera* cam,
-		std::shared_ptr<DX9GF::Texture> uiTex,
-		std::shared_ptr<DX9GF::Texture> flameTex,
-		std::shared_ptr<DX9GF::Texture> gearTex,
+	GearSlotUI::GearSlotUI(std::shared_ptr<sdlgf::TransformManager> tm, sdlgf::Camera* cam,
+		std::shared_ptr<sdlgf::Texture> uiTex,
+		std::shared_ptr<sdlgf::Texture> flameTex,
+		std::shared_ptr<sdlgf::Texture> gearTex,
 		bool coreSlot, float uiScale)
 	{
 		this->isCore = coreSlot;
@@ -16,23 +16,23 @@ namespace Demo {
 		button->SetSpriteRects({ {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0} });
 		button->Init(cam);
 
-		frameSprite = std::make_shared<DX9GF::StaticSprite>(uiTex.get());
+		frameSprite = std::make_shared<sdlgf::StaticSprite>(uiTex.get());
 		if (isCore) frameSprite->SetSrcRect({ 192, 144, 208, 160 });
 		else frameSprite->SetSrcRect({ 208, 144, 224, 160 });
 		frameSprite->SetScale(scale, scale);
 
-		glowSprite = std::make_shared<DX9GF::StaticSprite>(uiTex.get());
+		glowSprite = std::make_shared<sdlgf::StaticSprite>(uiTex.get());
 		glowSprite->SetSrcRect({ 224, 144, 240, 160 });
 		glowSprite->SetScale(scale, scale);
 
-		gearSprite = std::make_shared<DX9GF::StaticSprite>(gearTex.get());
+		gearSprite = std::make_shared<sdlgf::StaticSprite>(gearTex.get());
 		gearSprite->SetSrcRect({ 7, 7, 19, 19 });
 		gearSprite->SetScale(scale, scale);
 
 		std::vector<RECT> flameFrames = {
 			{0, 0, 16, 16}, {16, 0, 32, 16}, {32, 0, 48, 16}, {48, 0, 64, 16}
 		};
-		flameAnim = std::make_shared<DX9GF::AnimatedSprite>(flameTex.get(), flameFrames);
+		flameAnim = std::make_shared<sdlgf::AnimatedSprite>(flameTex.get(), flameFrames);
 		flameAnim->SetFrameRate(10);
 		flameAnim->SetScale(scale, scale);
 	}
@@ -57,7 +57,7 @@ namespace Demo {
 		button->Update(deltaTime);
 	}
 
-	void GearSlotUI::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* cam, unsigned long long deltaTime) {
+	void GearSlotUI::Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera* cam, unsigned long long deltaTime) {
 		button->Draw(gd, deltaTime);
 
 		if (gearID == -1) {

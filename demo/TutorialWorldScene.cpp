@@ -26,14 +26,14 @@ void Demo::TutorialWorldScene::OnInit()
 	// trigger_secret is intentionally left off the map - the secret room should stay a discovery
 	RegisterPortalLayer("trigger_p");
 	RegisterPortalLayer("trigger_lab");
-	map->SetAreaUpdateHandler("trigger_p", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p", [this](const sdlgf::Map::ObjectArea& area) {
 		if (!spamBossDefeated) return;   // locked until the Spam boss guarding it is beaten
 		CreatePortalTransition(3, -417.f, 144.f, "bgm_arcade", 0.2f);
 	});
-	map->SetAreaUpdateHandler("trigger_lab", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_lab", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(1, 64.f, -1.f, "bgm_secret", 0.3f);
 	});
-	map->SetAreaUpdateHandler("trigger_secret", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_secret", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(2, -84 * 16, -39 * 16, "bgm_secret", 0.3f);
 	});
 
@@ -220,7 +220,7 @@ void Demo::TutorialWorldScene::OnInit()
 	}, true));
 	treasureChests.back()->Init(game->GetGraphicsDevice(), &camera, player, colliderManager, font, drawBuffer);
 
-	auto bgDraw = [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) {
+	auto bgDraw = [this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) {
 		DrawBackground(gd, deltaTime);
 	};
 
@@ -253,7 +253,7 @@ void Demo::TutorialWorldScene::OnUpdate(unsigned long long deltaTime)
 	if (spamNPC) {
 		spamNPC->Update(deltaTime);
 		if (!currentConversation && spamNPC->CanInteract() &&
-			DX9GF::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
+			sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			StartSpamConversation();
 		}
 	}
@@ -272,7 +272,7 @@ void Demo::TutorialWorldScene::OnDrawUI(unsigned long long deltaTime)
 void Demo::TutorialWorldScene::StartSpamConversation()
 {
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 	for (auto& line : spamNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}
@@ -290,12 +290,12 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 	std::map<std::string, int> forcedEnemyMap = { {"SpamEnemy", 100} };
 
 	auto demoGame = dynamic_cast<Demo::Game*>(this->game);
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), forcedEnemyMap);
 
 	battleScene->SetCustomBGM("battle_boss");
 	battleScene->SetOnVictoryCallback([this]() {
-		this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+		this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 			this->spamBossDefeated = true;
 			if (this->spamNPC) this->spamNPC->SetPhase(SpamNPC::Phase::Defeated);
 			this->player->AddGear(0); // Titan Core
@@ -304,12 +304,12 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 		}));
 	});
 
-	battleScene->SetCustomBackgroundDraw([this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) { DrawBackground(gd, deltaTime); });
+	battleScene->SetCustomBackgroundDraw([this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) { DrawBackground(gd, deltaTime); });
 
 	auto sceMan = this->game->GetSceneManager();
 	sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = true;
 		markFinished();
 	}));
@@ -317,7 +317,7 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
@@ -327,7 +327,7 @@ void Demo::TutorialWorldScene::StartSpamBattle()
 
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
-	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	drawBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;
 		this->isTransitioning = false;
 		markFinished();
@@ -353,7 +353,7 @@ std::string Demo::TutorialWorldScene::GetSaveID() const
 	return "TutorialWorldScene";
 }
 
-void Demo::TutorialWorldScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::TutorialWorldScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 

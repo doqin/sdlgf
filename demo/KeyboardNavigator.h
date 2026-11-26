@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -12,7 +12,7 @@ namespace Demo {
 	class KeyboardNavigator {
 	public:
 		struct Candidate {
-			std::shared_ptr<DX9GF::IGameObject> anchor; // identity + lifetime
+			std::shared_ptr<sdlgf::IGameObject> anchor; // identity + lifetime
 			float x; // top-left world position; NOT always anchor->GetWorldX() (e.g. center-origin triggers)
 			float y;
 			float width;
@@ -36,10 +36,10 @@ namespace Demo {
 		void Update(unsigned long long deltaTime, const std::vector<Candidate>& candidates);
 		// Draws the pulsing reticle over the current target (no-op outside keyboard mode
 		// or when the target isn't among the given candidates).
-		void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera& camera, const std::vector<Candidate>& candidates);
+		void Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera& camera, const std::vector<Candidate>& candidates);
 
 		bool IsInKeyboardMode() const { return keyboardMode; }
-		std::shared_ptr<DX9GF::IGameObject> GetTarget() const { return target; }
+		std::shared_ptr<sdlgf::IGameObject> GetTarget() const { return target; }
 		void Reset();
 		// On the next Navigate call, move the target to the candidate nearest (x, y)
 		// instead of following the current target object. Used by activations that
@@ -61,12 +61,12 @@ namespace Demo {
 
 	private:
 		bool keyboardMode = false;
-		std::shared_ptr<DX9GF::IGameObject> target;
+		std::shared_ptr<sdlgf::IGameObject> target;
 		bool hasPendingRetarget = false;
 		float retargetX = 0.f;
 		float retargetY = 0.f;
 		// Reflects the keyboard cursor in button sprites: HOVER while targeted (with the
 		// hover sfx when the cursor lands), CLICKED while the ACCEPT key is held.
-		void ApplyButtonVisuals(const std::shared_ptr<DX9GF::IGameObject>& previousTarget);
+		void ApplyButtonVisuals(const std::shared_ptr<sdlgf::IGameObject>& previousTarget);
 	};
 }

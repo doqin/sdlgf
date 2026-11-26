@@ -11,18 +11,18 @@ GO::Player::~Player()
 	playerCount--;
 }
 
-void GO::Player::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::CommandBuffer* commandBuffer, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager)
+void GO::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::CommandBuffer* commandBuffer, sdlgf::Camera* camera, std::shared_ptr<sdlgf::ColliderManager> colliderManager)
 {
 	this->graphicsDevice = graphicsDevice;
 	this->commandBuffer = commandBuffer;
 	this->camera = camera;
 	this->colliderManager = colliderManager;
-	marioTexture = std::make_shared<DX9GF::Texture>(this->graphicsDevice);
+	marioTexture = std::make_shared<sdlgf::Texture>(this->graphicsDevice);
 	marioTexture->LoadTexture(IDB_PNG3, 156, 7497);
-	mario = std::make_shared<DX9GF::AnimatedSprite>(marioTexture.get(), DX9GF::Utils::CreateFrames(156, 7497, 39, 51, 3), 12);
+	mario = std::make_shared<sdlgf::AnimatedSprite>(marioTexture.get(), sdlgf::Utils::CreateFrames(156, 7497, 39, 51, 3), 12);
 	mario->SetOrigin(17.0f, 51.0f / 3.0f);
 	mario->SetScale(2, 2);
-	collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, shared_from_this(), 39, 51, 0, 0);
+	collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, shared_from_this(), 39, 51, 0, 0);
 	collider->SetOriginCenter();
 	this->colliderManager->Add(collider);
 }
@@ -33,7 +33,7 @@ void GO::Player::Update(unsigned long long deltaTime)
 		if (commandBuffer && commandBuffer->IsBusy()) {
 			return;
 		}
-		auto inputManager = DX9GF::InputManager::GetInstance();
+		auto inputManager = sdlgf::InputManager::GetInstance();
 		float xDir = 0;
 		float yDir = 0;
 		const float velocity = 200;
@@ -43,7 +43,7 @@ void GO::Player::Update(unsigned long long deltaTime)
 		if (inputManager->KeyPress(DIK_S)) yDir += 1;
 		if (inputManager->KeyPress(DIK_E)) SetLocalRotation(GetLocalRotation() + 25.f * deltaTime / 1000);
 		if (inputManager->KeyPress(DIK_Q)) SetLocalRotation(GetLocalRotation() - 25.f * deltaTime / 1000);
-		if (inputManager->KeyPress(DIK_X)) commandBuffer->PushCommand(std::make_shared<DX9GF::DestroyObjectCommand>(shared_from_this(), [this]() {}));
+		if (inputManager->KeyPress(DIK_X)) commandBuffer->PushCommand(std::make_shared<sdlgf::DestroyObjectCommand>(shared_from_this(), [this]() {}));
 		auto dX = xDir * velocity * deltaTime / 1000;
 		auto dY = yDir * velocity * deltaTime / 1000;
 		if (colliderManager) {

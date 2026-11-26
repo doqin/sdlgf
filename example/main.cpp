@@ -1,6 +1,6 @@
 #include "pch.h"
 #include <Windows.h>
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include "ExampleGame.h"
 #include <format>
 
@@ -11,12 +11,12 @@ int WINAPI WinMain(
 	int nCmdShow
 )
 {
-	// Get the DX9GF Application
-	DX9GF::Application* app = DX9GF::Application::GetInstance();
+	// Get the sdlgf Application
+	sdlgf::Application* app = sdlgf::Application::GetInstance();
 	try {
 		app->Init(hInstance, L"Example game", 620, 480);
 		// Create your game that interfaces with IGame
-		DX9GF::SaveManager saveManager;
+		sdlgf::SaveManager saveManager;
 		std::shared_ptr<ExampleGame> game = std::make_shared<ExampleGame>(app->GetHWnd(), 620, 480, &saveManager);
 		// Attach your game to the application
 		app->AttachGame(game.get());

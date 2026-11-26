@@ -2,7 +2,7 @@
 #include <string>
 #include <array>
 #include <memory>
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include "Game.h"
 namespace Demo
 {
@@ -32,8 +32,8 @@ namespace Demo
 		std::array<DamageText, MAX_TEXTS> pool;
 
 		//i want to prevent leaking memory by using unique_ptr, just switch to shared_ptr if u want to
-		std::unique_ptr<DX9GF::Font> font;
-		std::unique_ptr<DX9GF::FontSprite> fontSprite;
+		std::unique_ptr<sdlgf::Font> font;
+		std::unique_ptr<sdlgf::FontSprite> fontSprite;
 
 		DamageTextManager() {}
 	public:
@@ -52,7 +52,7 @@ namespace Demo
 		//use const and pass by ref to enhance perf 
 		void Spawn(float damageValue, float x, float y, TextType type);
 		void Update(unsigned long long deltaTime);
-		void Draw(DX9GF::Camera& camera, unsigned long long deltaTime);
+		void Draw(sdlgf::Camera& camera, unsigned long long deltaTime);
 	};
 }
 

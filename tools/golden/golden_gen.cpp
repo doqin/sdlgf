@@ -11,8 +11,8 @@
 // Usage: sdlgf_golden_gen <output directory>
 #include <SDL3/SDL.h>
 
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 
 #include <cstdio>
 #include <filesystem>
@@ -26,15 +26,15 @@ namespace {
 	std::ofstream g_metrics;
 
 	struct Canvas {
-		DX9GF::GraphicsDevice* gd;
-		std::shared_ptr<DX9GF::Texture> target;
+		sdlgf::GraphicsDevice* gd;
+		std::shared_ptr<sdlgf::Texture> target;
 		UINT width, height;
 		std::string name;
 	};
 
-	Canvas BeginCanvas(DX9GF::GraphicsDevice* gd, const std::string& name, UINT w, UINT h, D3DCOLOR clear)
+	Canvas BeginCanvas(sdlgf::GraphicsDevice* gd, const std::string& name, UINT w, UINT h, D3DCOLOR clear)
 	{
-		Canvas c{ gd, std::make_shared<DX9GF::Texture>(gd), w, h, name };
+		Canvas c{ gd, std::make_shared<sdlgf::Texture>(gd), w, h, name };
 		c.target->CreateRenderTarget(w, h);
 		gd->SetRenderTarget(c.target.get());
 		gd->SetViewport(0, 0, w, h, 0.0f, 1.0f);
@@ -70,17 +70,17 @@ namespace {
 		std::printf("wrote %s (%ux%u)\n", path.c_str(), c.width, c.height);
 	}
 
-	std::shared_ptr<DX9GF::Texture> Load(DX9GF::GraphicsDevice* gd, const wchar_t* path)
+	std::shared_ptr<sdlgf::Texture> Load(sdlgf::GraphicsDevice* gd, const wchar_t* path)
 	{
-		auto t = std::make_shared<DX9GF::Texture>(gd);
+		auto t = std::make_shared<sdlgf::Texture>(gd);
 		t->LoadTexture(path);
 		return t;
 	}
 
 	// Camera that maps world coordinates 1:1 to the canvas (what the engine's defaultCamera does).
-	DX9GF::Camera IdentityCamera(UINT w, UINT h)
+	sdlgf::Camera IdentityCamera(UINT w, UINT h)
 	{
-		DX9GF::Camera cam(static_cast<int>(w), static_cast<int>(h));
+		sdlgf::Camera cam(static_cast<int>(w), static_cast<int>(h));
 		cam.SetPosition(w / 2.0f, h / 2.0f);
 		return cam;
 	}
@@ -100,7 +100,7 @@ namespace {
 		float yFraction = 0.0f;
 	};
 
-	void RenderTextSheet(DX9GF::GraphicsDevice* gd, const wchar_t* family, int size, const char* fileTag)
+	void RenderTextSheet(sdlgf::GraphicsDevice* gd, const wchar_t* family, int size, const char* fileTag)
 	{
 		const std::vector<TextRow> rows = {
 			{ "latin",       L"The quick brown fox jumps over 0123456789" },
@@ -128,10 +128,10 @@ namespace {
 		const UINT height = static_cast<UINT>(step * rows.size()) + 16;
 		auto canvas = BeginCanvas(gd, std::string("text_") + fileTag, width, height, 0xFF303030);
 
-		DX9GF::Font font(gd, family, size);
+		sdlgf::Font font(gd, family, size);
 		float y = 8.0f;
 		for (const auto& row : rows) {
-			DX9GF::FontSprite sprite(&font);
+			sdlgf::FontSprite sprite(&font);
 			sprite.SetText(std::wstring(row.text));
 			sprite.SetColor(row.color);
 			sprite.SetBold(row.bold);
@@ -141,7 +141,7 @@ namespace {
 			// Measure unscaled: this is what D3DXFont's DT_CALCRECT reports.
 			g_metrics << fileTag << " " << row.id << " width=" << sprite.GetWidth() << " height=" << sprite.GetHeight() << "\n";
 
-			DX9GF::Camera cam = IdentityCamera(width, height);
+			sdlgf::Camera cam = IdentityCamera(width, height);
 			cam.SetZoom(row.zoom);
 			// With zoom the camera pivots on its position; keep the sprite's top-left where it would be at 1x.
 			const float cx = width / 2.0f, cy = height / 2.0f;
@@ -157,14 +157,14 @@ namespace {
 
 	// ---- sprites ------------------------------------------------------------------------------
 
-	void RenderSprites(DX9GF::GraphicsDevice* gd)
+	void RenderSprites(sdlgf::GraphicsDevice* gd)
 	{
 		const UINT w = 480, h = 320;
 		auto canvas = BeginCanvas(gd, "sprites", w, h, 0xFF303030);
 		auto token = Load(gd, L"assets/12x12-gold-token.png"); // 264x110 sheet
 		auto sheet = Load(gd, L"assets/hkhang-Sheet.png");     // 64x32
 		auto borders = Load(gd, L"assets/popup-borders.png");  // 320x160
-		DX9GF::Camera cam = IdentityCamera(w, h);
+		sdlgf::Camera cam = IdentityCamera(w, h);
 		const RECT tokenRect = { 0, 0, 12, 12 };
 
 		struct Item { float x, y, sx, sy, rot; D3DCOLOR color; bool flipH; };
@@ -180,7 +180,7 @@ namespace {
 			{ 328,  8,    3,    1,   0.0f,  0xFFFFFFFF, false },  // stretched
 		};
 		for (const auto& it : items) {
-			DX9GF::StaticSprite s(token.get());
+			sdlgf::StaticSprite s(token.get());
 			s.SetSrcRect(tokenRect);
 			s.SetPosition(it.x, it.y);
 			s.SetScale(it.sx, it.sy);
@@ -192,13 +192,13 @@ namespace {
 
 		// Whole texture, no source rect
 		{
-			DX9GF::StaticSprite s(sheet.get());
+			sdlgf::StaticSprite s(sheet.get());
 			s.SetPosition(8, 70);
 			s.Begin(); s.Draw(cam, 0); s.End();
 		}
 		// Rotation about a centred origin
 		{
-			DX9GF::StaticSprite s(sheet.get());
+			sdlgf::StaticSprite s(sheet.get());
 			s.SetPosition(120, 90);
 			s.SetOrigin(32, 16);
 			s.SetRotation(0.7f);
@@ -206,9 +206,9 @@ namespace {
 		}
 		// Animated sprite: frames of 16x16 from the sheet
 		{
-			auto frames = DX9GF::Utils::CreateFrames(64, 32, 16, 16, 8);
+			auto frames = sdlgf::Utils::CreateFrames(64, 32, 16, 16, 8);
 			for (unsigned i : { 0u, 3u, 5u }) {
-				DX9GF::AnimatedSprite s(sheet.get(), frames, 12, true);
+				sdlgf::AnimatedSprite s(sheet.get(), frames, 12, true);
 				s.SetFrame(i);
 				s.SetPosition(180.0f + i * 40.0f, 70);
 				s.SetScale(2.0f, 2.0f);
@@ -221,7 +221,7 @@ namespace {
 			{ 8, 140, 48, 48, 1 }, { 70, 140, 100, 40, 1 }, { 190, 140, 120, 80, 2 }, { 340, 140, 90, 60, 1.5f },
 		};
 		for (const auto& n : nines) {
-			DX9GF::NineSliceSprite s(borders.get(), RECT{ 0, 0, 48, 48 }, 16, 16, 16, 16);
+			sdlgf::NineSliceSprite s(borders.get(), RECT{ 0, 0, 48, 48 }, 16, 16, 16, 16);
 			s.SetTargetSize(n.tw, n.th);
 			s.SetScale(n.scale);
 			s.SetPosition(n.x, n.y);
@@ -229,10 +229,10 @@ namespace {
 		}
 		// Zoomed camera with an offset position
 		{
-			DX9GF::Camera zoomed = IdentityCamera(w, h);
+			sdlgf::Camera zoomed = IdentityCamera(w, h);
 			zoomed.SetZoom(2.0f);
 			zoomed.SetPosition(w / 2.0f + 30.5f, h / 2.0f + 70.25f);
-			DX9GF::StaticSprite s(token.get());
+			sdlgf::StaticSprite s(token.get());
 			s.SetSrcRect(tokenRect);
 			s.SetPosition(w / 2.0f + 10.0f, h / 2.0f + 90.0f);
 			s.Begin(); s.Draw(zoomed, 0); s.End();
@@ -242,12 +242,12 @@ namespace {
 
 	// ---- primitives -----------------------------------------------------------------------------
 
-	void RenderPrimitives(DX9GF::GraphicsDevice* gd)
+	void RenderPrimitives(sdlgf::GraphicsDevice* gd)
 	{
 		const UINT w = 480, h = 320;
 		auto canvas = BeginCanvas(gd, "primitives", w, h, 0xFF303030);
 		auto token = Load(gd, L"assets/12x12-gold-token.png");
-		DX9GF::Camera cam = IdentityCamera(w, h);
+		sdlgf::Camera cam = IdentityCamera(w, h);
 
 		for (int pass = 0; pass < 2; ++pass) {
 			const bool blend = pass == 1;
@@ -273,7 +273,7 @@ namespace {
 			gd->DrawTriangle(ox + 90, 130, 40, 24, b, false);
 
 			// camera-space draws at zoom 2 with a fractional camera position
-			DX9GF::Camera zoomed = IdentityCamera(w, h);
+			sdlgf::Camera zoomed = IdentityCamera(w, h);
 			zoomed.SetZoom(2.0f);
 			zoomed.SetPosition(w / 2.0f + 0.5f, h / 2.0f + 0.25f);
 			gd->DrawLine(zoomed, ox + 10, 90, ox + 60, 110, c);
@@ -305,23 +305,23 @@ namespace {
 
 	// ---- tile map -------------------------------------------------------------------------------
 
-	void RenderMap(DX9GF::GraphicsDevice* gd, const char* tmx, const char* name, float camX, float camY, float zoom)
+	void RenderMap(sdlgf::GraphicsDevice* gd, const char* tmx, const char* name, float camX, float camY, float zoom)
 	{
 		const UINT w = 480, h = 360;
-		auto transformManager = std::make_shared<DX9GF::TransformManager>();
-		auto colliderManager = std::make_shared<DX9GF::ColliderManager>();
-		DX9GF::Map map(gd);
+		auto transformManager = std::make_shared<sdlgf::TransformManager>();
+		auto colliderManager = std::make_shared<sdlgf::ColliderManager>();
+		sdlgf::Map map(gd);
 		map.Create(transformManager, colliderManager, tmx);
 
 		auto canvas = BeginCanvas(gd, name, w, h, 0xFF303030);
-		DX9GF::Camera cam(static_cast<int>(w), static_cast<int>(h));
+		sdlgf::Camera cam(static_cast<int>(w), static_cast<int>(h));
 		cam.SetZoom(zoom);
 		cam.SetPosition(camX, camY);
 		map.Draw(cam);
 		EndCanvas(canvas);
 	}
 
-	class GoldenGame : public DX9GF::IGame {
+	class GoldenGame : public sdlgf::IGame {
 	public:
 		using IGame::IGame;
 	};
@@ -335,7 +335,7 @@ int main(int argc, char** argv)
 		g_metrics.open(g_outDir / "text_metrics.txt");
 		g_metrics << "# Sizes reported by ID3DXFont (DT_CALCRECT) for each text row. Generated by sdlgf_golden_gen.\n";
 
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		app->Init(L"golden", 960, 720, false);
 		// Assets are referenced relative to the demo directory
 		std::filesystem::current_path(SDLGF_GOLDEN_ASSET_DIR);
@@ -348,7 +348,7 @@ int main(int argc, char** argv)
 			L"assets/135openpixel-v2-3.ttf", L"assets/cardpixel.ttf", L"assets/cardpixel-top.ttf",
 			L"assets/cardpixel-bottom.ttf", L"assets/arcade-among-2-r46pv.ttf",
 		};
-		for (auto f : fonts) DX9GF::Font::AddFont(f);
+		for (auto f : fonts) sdlgf::Font::AddFont(f);
 
 		RenderTextSheet(gd, L"135OpenPixel v2.3", 13, "openpixel13");
 		RenderTextSheet(gd, L"135OpenPixel v2.3", 26, "openpixel26");

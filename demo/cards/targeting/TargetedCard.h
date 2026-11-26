@@ -23,7 +23,7 @@ namespace Demo {
 
 		bool HasEffectTarget() const override;
 	public:
-		TargetedCard(std::weak_ptr<DX9GF::TransformManager> tm, size_t maxTargets, CardSpec cardSpec);
+		TargetedCard(std::weak_ptr<sdlgf::TransformManager> tm, size_t maxTargets, CardSpec cardSpec);
 
 		bool OnDrop(std::shared_ptr<IDraggable> other) override;
 		void Update(unsigned long long deltaTime) override;

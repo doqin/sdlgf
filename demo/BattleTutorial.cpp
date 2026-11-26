@@ -44,7 +44,7 @@ namespace Demo {
 		constexpr float CAPTION_LINE_SPACING = 4.f;
 
 		// Greedy word-wrap of `text` (honouring newlines) to `maxWidth` using the sprite's metrics.
-		std::vector<std::wstring> WrapText(DX9GF::FontSprite* fs, const std::wstring& text, float maxWidth)
+		std::vector<std::wstring> WrapText(sdlgf::FontSprite* fs, const std::wstring& text, float maxWidth)
 		{
 			std::vector<std::wstring> lines;
 			size_t pos = 0;
@@ -81,19 +81,19 @@ namespace Demo {
 		constexpr float SKIP_MARGIN = 24.f;
 	}
 
-	BattleTutorial::BattleTutorial(DX9GF::GraphicsDevice* gd, DX9GF::Font* font)
+	BattleTutorial::BattleTutorial(sdlgf::GraphicsDevice* gd, sdlgf::Font* font)
 		: device(gd), uiFont(font)
 	{
-		sheet = std::make_shared<DX9GF::Texture>(gd);
+		sheet = std::make_shared<sdlgf::Texture>(gd);
 		sheet->LoadTexture(L"assets/tutorial-notext.png");
-		sprite = std::make_shared<DX9GF::StaticSprite>(sheet.get());
+		sprite = std::make_shared<sdlgf::StaticSprite>(sheet.get());
 		sprite->SetScale(PANEL_SCALE, PANEL_SCALE);
 
-		dodgeTex = std::make_shared<DX9GF::Texture>(gd);
+		dodgeTex = std::make_shared<sdlgf::Texture>(gd);
 		dodgeTex->LoadTexture(L"assets/tutorial-dodge.png");
-		dodgeSprite = std::make_shared<DX9GF::StaticSprite>(dodgeTex.get());
+		dodgeSprite = std::make_shared<sdlgf::StaticSprite>(dodgeTex.get());
 
-		uiTex = std::make_shared<DX9GF::Texture>(gd);
+		uiTex = std::make_shared<sdlgf::Texture>(gd);
 		uiTex->LoadTexture(L"assets/ui.png");
 	}
 
@@ -143,13 +143,13 @@ namespace Demo {
 			return;
 		}
 
-		auto inp = DX9GF::InputManager::GetInstance();
+		auto inp = sdlgf::InputManager::GetInstance();
 
 		if (skipBtn) {
 			skipBtn->Update(deltaTime);
 			if (skipRequested) {
 				skipRequested = false;
-				inp->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
+				inp->ConsumeMouseButton(sdlgf::InputManager::MouseButton::Left);
 				Skip();
 				return;
 			}
@@ -159,12 +159,12 @@ namespace Demo {
 		}
 
 		const bool dismiss =
-			inp->MouseDown(DX9GF::InputManager::MouseButton::Left) ||
+			inp->MouseDown(sdlgf::InputManager::MouseButton::Left) ||
 			inp->KeyDown(DIK_SPACE) ||
 			inp->KeyDown(DIK_RETURN);
 		if (!dismiss) return;
 
-		inp->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
+		inp->ConsumeMouseButton(sdlgf::InputManager::MouseButton::Left);
 		queue.pop_front();
 		if (!queue.empty()) {
 			inputCooldown = OPEN_INPUT_COOLDOWN_MS;
@@ -172,8 +172,8 @@ namespace Demo {
 		}
 	}
 
-	void BattleTutorial::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
-		DX9GF::FontSprite* fontSprite, float screenW, float screenH,
+	void BattleTutorial::Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera,
+		sdlgf::FontSprite* fontSprite, float screenW, float screenH,
 		unsigned long long deltaTime)
 	{
 		if (queue.empty()) {
@@ -285,10 +285,10 @@ namespace Demo {
 		for (bool& h : handled) h = true;
 	}
 
-	void BattleTutorial::EnsureSkipButton(DX9GF::Camera& uiCamera)
+	void BattleTutorial::EnsureSkipButton(sdlgf::Camera& uiCamera)
 	{
 		if (skipBtn) return;
-		uiTransformManager = std::make_shared<DX9GF::TransformManager>();
+		uiTransformManager = std::make_shared<sdlgf::TransformManager>();
 		skipBtn = std::make_shared<TextIconButton>(uiTransformManager, 0.f, 0.f,
 			static_cast<int>(SKIP_W), static_cast<int>(SKIP_H), uiTex, uiFont, L"Skip>>", 4);
 		skipBtn->SetSpriteRects({ { 16, 0, 48, 16 }, { 16, 16, 48, 32 }, { 16, 32, 48, 48 }, { 304, 48, 336, 64 } });
@@ -296,7 +296,7 @@ namespace Demo {
 		skipBtn->SetTextScale(1.f, 1.f);
 		skipBtn->SetTextColor(0xFF000000);
 		skipBtn->SetDynamicTextGetter([]() { return Tr(L"Skip >>"); });
-		skipBtn->SetOnReleaseLeft([this](DX9GF::ITrigger*) { skipRequested = true; });
+		skipBtn->SetOnReleaseLeft([this](sdlgf::ITrigger*) { skipRequested = true; });
 		skipBtn->Init(&uiCamera);
 		uiTransformManager->RebuildHierarchy();
 	}

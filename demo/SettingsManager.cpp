@@ -2,7 +2,7 @@
 #include "SettingsManager.h"
 #include <fstream>
 #include <cctype> 
-#include "DX9GFAudioManager.h"
+#include "AudioManager.h"
 
 namespace Demo
 {
@@ -108,19 +108,19 @@ namespace Demo
 	void SettingsManager::SetMusicVolume(float vol)
 	{
 		this->musicVolume = vol;
-		DX9GF::AudioManager::GetInstance()->SetMusicVolume(vol); //connect to AudioManager and push vol
+		sdlgf::AudioManager::GetInstance()->SetMusicVolume(vol); //connect to AudioManager and push vol
 	}
 
 	void SettingsManager::SetMasterVolume(float vol)
 	{
 		this->masterVolume = vol;
-		DX9GF::AudioManager::GetInstance()->SetMasterVolume(vol);
+		sdlgf::AudioManager::GetInstance()->SetMasterVolume(vol);
 	}
 
 	void SettingsManager::SetSfxVolume(float vol)
 	{
 		this->sfxVolume = vol;
-		DX9GF::AudioManager::GetInstance()->SetSfxVolume(vol);
+		sdlgf::AudioManager::GetInstance()->SetSfxVolume(vol);
 	}
 
 	void SettingsManager::SetKeybind(std::string actionName, int keyCode)
@@ -142,7 +142,7 @@ namespace Demo
 	void SettingsManager::SetFullscreen(bool fs)
 	{
 		this->isFullscreen = fs;
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		if (app && app->GetWindow()) {
 			app->SetFullscreen(fs);
 		}
@@ -155,7 +155,7 @@ namespace Demo
 	}
 
 	void SettingsManager::ApplyResolution() {
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		if (!app || !app->GetWindow()) return;
 
 		if (isFullscreen) {

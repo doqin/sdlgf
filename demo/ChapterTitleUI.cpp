@@ -3,12 +3,12 @@
 #include <algorithm>
 
 namespace Demo {
-	ChapterTitleUI::ChapterTitleUI(std::shared_ptr<DX9GF::Font> font)
+	ChapterTitleUI::ChapterTitleUI(std::shared_ptr<sdlgf::Font> font)
 		: state(State::Hidden), timer(0), maxTime(0), alpha(0),
 		titleColor(0xFFFFFFFF), subColor(0xFFFFFFFF), shadowColor(0xFF000000)
 	{
 		if (font) {
-			fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+			fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 		}
 	}
 
@@ -57,7 +57,7 @@ namespace Demo {
 		}
 	}
 
-	void ChapterTitleUI::Draw(DX9GF::Camera* uiCam, unsigned long long deltaTime) {
+	void ChapterTitleUI::Draw(sdlgf::Camera* uiCam, unsigned long long deltaTime) {
 		if (state == State::Hidden || !fontSprite || !uiCam) return;
 
 		int a = static_cast<int>((std::max)(0.f, (std::min)(255.f, alpha * 255.f)));

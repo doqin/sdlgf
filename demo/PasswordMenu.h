@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include <functional>
 #include <string>
@@ -25,8 +25,8 @@ namespace Demo {
 		static constexpr size_t MAX_VISIBLE_ROWS = 8;
 
 		Game* game = nullptr;
-		DX9GF::Camera* uiCamera = nullptr;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		sdlgf::Camera* uiCamera = nullptr;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 
 		bool isOpen = false;
 		std::wstring password;
@@ -56,7 +56,7 @@ namespace Demo {
 		void Submit();
 
 	public:
-		void Init(DX9GF::Camera* uiCam, std::shared_ptr<DX9GF::Font> font, Game* game);
+		void Init(sdlgf::Camera* uiCam, std::shared_ptr<sdlgf::Font> font, Game* game);
 
 		// password must be CODE_LENGTH characters, each '0'-'9'.
 		void Open(const std::wstring& password);
@@ -66,6 +66,6 @@ namespace Demo {
 		void SetOnSolved(std::function<void()> cb) { onSolved = std::move(cb); }
 
 		void Update(unsigned long long deltaTime);
-		void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime);
+		void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime);
 	};
 }

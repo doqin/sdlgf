@@ -1,15 +1,15 @@
 ﻿#include "pch.h"
 #include "TextButton.h"
 
-Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
+Demo::TextButton::TextButton(std::shared_ptr<sdlgf::TransformManager> tm,
 	float x, float y, float w, float h,
-	std::string txtContent, DX9GF::Font* f,
-	std::function<void(DX9GF::ITrigger*)> onClick)
+	std::string txtContent, sdlgf::Font* f,
+	std::function<void(sdlgf::ITrigger*)> onClick)
 	: IButton(tm, x, y, w, h, 4)
 {
 	this->text = txtContent;
-	this->wText = DX9GF::Utils::Utf8ToWide(txtContent);
-	this->fontSprite = std::make_shared<DX9GF::FontSprite>(f);
+	this->wText = sdlgf::Utils::Utf8ToWide(txtContent);
+	this->fontSprite = std::make_shared<sdlgf::FontSprite>(f);
 
 	//Color & bg init
 	this->textColors =
@@ -40,7 +40,7 @@ Demo::TextButton::TextButton(std::shared_ptr<DX9GF::TransformManager> tm,
 Demo::TextButton* Demo::TextButton::SetText(std::string newText)
 {
 	this->text = newText;
-	this->wText = DX9GF::Utils::Utf8ToWide(newText);
+	this->wText = sdlgf::Utils::Utf8ToWide(newText);
 	return this;
 }
 
@@ -74,9 +74,9 @@ Demo::TextButton* Demo::TextButton::SetPadding(float px, float py)
 	return this;
 }
 
-void Demo::TextButton::Init(DX9GF::Camera* cam)
+void Demo::TextButton::Init(sdlgf::Camera* cam)
 {
-	this->trigger = std::make_shared<DX9GF::RectangleTrigger>
+	this->trigger = std::make_shared<sdlgf::RectangleTrigger>
 		(
 			this->GetTransformManager(), shared_from_this(),
 			this->width + this->paddingX * 2, this->height + this->paddingY * 2, 0, 0, 0, 1, 1
@@ -90,7 +90,7 @@ void Demo::TextButton::Init(DX9GF::Camera* cam)
 	this->trigger->SetOnReleaseLeft(this->callback);
 }
 
-void Demo::TextButton::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::TextButton::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 
 	if (!this->fontSprite) return;

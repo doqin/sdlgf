@@ -28,15 +28,15 @@ void Demo::SecretPuzzleScene::OnInit()
 	RegisterPortalLayer("trigger_p_back");
 	RegisterPortalLayer("trigger_p_next_world");
 	RegisterPortalLayer("trigger_p_next");
-	map->SetAreaUpdateHandler("trigger_p_back", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_back", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(-2, -263.f, -295.f, "bgm_tutorial", 0.5f);
 	});
 
-	map->SetAreaUpdateHandler("trigger_p_next_world", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_next_world", [this](const sdlgf::Map::ObjectArea& area) {
 		CreatePortalTransition(1, -417.f, 144.f, "bgm_arcade", 0.2f);
 	});
 
-	map->SetAreaUpdateHandler("trigger_p_next", [this](const DX9GF::Map::ObjectArea& area) {
+	map->SetAreaUpdateHandler("trigger_p_next", [this](const sdlgf::Map::ObjectArea& area) {
 		player->SetLocalPosition(31 * 16, 36 * 16);
 	});
 
@@ -77,7 +77,7 @@ void Demo::SecretPuzzleScene::OnInit()
 	addChest(-11, -31, { ChestReward::Item(2,1), ChestReward::Item(3,1), ChestReward::Card("CleaveCard") }, true);
 	addChest(80, 48, { ChestReward::Item(4,1), ChestReward::Item(5,1), ChestReward::Card("TwinStrikeCard") }, true);
 
-	auto bgDraw = [this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) {
+	auto bgDraw = [this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) {
 		DrawBackground(gd, deltaTime);
 	};
 
@@ -107,10 +107,10 @@ void Demo::SecretPuzzleScene::OnInit()
 			auto transitionIn = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			this->drawBuffer->PushCommand(transitionIn);
 
-			this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
+			this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionIn, e](std::function<void(void)> markFinished) {
 				if (!transitionIn->IsFinished()) return;
 
-				auto app = DX9GF::Application::GetInstance();
+				auto app = sdlgf::Application::GetInstance();
 				auto sceMan = this->game->GetSceneManager();
 				auto battleScene = new MapBattleScene(this->game, this->player, app->GetScreenWidth(), app->GetScreenHeight(), e->GetEncounterData());
 
@@ -213,7 +213,7 @@ void Demo::SecretPuzzleScene::OnUpdate(unsigned long long deltaTime)
 {
 	if (cupidNPC) {
 		cupidNPC->Update(deltaTime);
-		if (!currentConversation && cupidNPC->CanInteract() && DX9GF::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
+		if (!currentConversation && cupidNPC->CanInteract() && sdlgf::InputManager::GetInstance()->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
 			StartCupidConversation();
 		}
 	}
@@ -237,7 +237,7 @@ std::string Demo::SecretPuzzleScene::GetSaveID() const
 void Demo::SecretPuzzleScene::StartCupidConversation()
 {
 	auto [sw, sh] = camera.GetScreenResolution();
-	currentConversation = std::make_shared<IConversation>(std::make_shared<DX9GF::FontSprite>(font.get()), sw, sh);
+	currentConversation = std::make_shared<IConversation>(std::make_shared<sdlgf::FontSprite>(font.get()), sw, sh);
 	for (auto& line : cupidNPC->GetDialogueLines()) {
 		currentConversation->AddLine(line);
 	}
@@ -255,11 +255,11 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 	std::map<std::string, int> forcedEnemyMap = { {"CupidEnemy", 100} };
 
 	auto demoGame = dynamic_cast<Demo::Game*>(this->game);
-	auto app = DX9GF::Application::GetInstance();
+	auto app = sdlgf::Application::GetInstance();
 	auto battleScene = new CustomBattleScene(demoGame, player, app->GetScreenWidth(), app->GetScreenHeight(), forcedEnemyMap);
 
 	battleScene->SetOnVictoryCallback([this]() {
-		this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+		this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 			this->isBossDead = true;
 			if (this->cupidNPC) this->cupidNPC->SetPhase(CupidNPC::Phase::Defeated);
 
@@ -273,12 +273,12 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 		}));
 	});
 
-	battleScene->SetCustomBackgroundDraw([this](DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) { DrawBackground(gd, deltaTime); });
+	battleScene->SetCustomBackgroundDraw([this](sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) { DrawBackground(gd, deltaTime); });
 
 	auto sceMan = this->game->GetSceneManager();
 	sceMan->InsertScene(sceMan->GetIndex() + 1, battleScene);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = true;
 		markFinished();
 	}));
@@ -286,7 +286,7 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 	auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 	drawBuffer->StackCommand(transitionInCommand);
 
-	commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
+	commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([sceMan, transitionInCommand, this](std::function<void()> markFinished) {
 		if (!transitionInCommand->IsFinished()) {
 			return;
 		}
@@ -296,7 +296,7 @@ void Demo::SecretPuzzleScene::StartCupidBattle()
 
 	drawBuffer->PushCommand(std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, false));
 
-	drawBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void()> markFinished) {
+	drawBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void()> markFinished) {
 		this->isGamePaused = false;
 		this->isTransitioning = false;
 		markFinished();
@@ -325,7 +325,7 @@ void Demo::SecretPuzzleScene::OnRestoreSaveData(const nlohmann::json& inData)
 	}
 }
 
-void Demo::SecretPuzzleScene::DrawBackground(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+void Demo::SecretPuzzleScene::DrawBackground(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 {
 	auto [screenWidth, screenHeight] = camera.GetScreenResolution();
 	gd->DrawRectangle(0.0f, 0.0f, static_cast<float>(screenWidth), static_cast<float>(screenHeight), 0xFF403353, true);

@@ -30,11 +30,11 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: DX9GF-Demo-portable
-          path: dist/DX9GF-Demo.zip
+          name: sdlgf-demo-portable
+          path: dist/sdlgf-demo.zip
 
       - name: Attach to GitHub Release (tags only)
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/DX9GF-Demo.zip
+          files: dist/sdlgf-demo.zip

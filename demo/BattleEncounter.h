@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <functional> 
-#include "DX9GF.h"
+#include "sdlgf.h"
 
 namespace Demo {
 	enum class EventType {
@@ -18,7 +18,7 @@ namespace Demo {
 		std::vector<std::string> randomPool;
 		bool useGlobalPool = false;
 		std::string bgmName = "battle_bgm";
-		std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> bgDrawFunc = nullptr;
+		std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> bgDrawFunc = nullptr;
 
 		std::wstring mapTexturePath;
 		int spriteWidth;

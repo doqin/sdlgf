@@ -1,8 +1,8 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFSprites.h"
-#include "DX9GFFont.h"
-#include "DX9GFTexture.h"
+#include "sdlgf.h"
+#include "Sprites.h"
+#include "Font.h"
+#include "Texture.h"
 #include "IconButton.h"
 #include "KeyboardNavigator.h"
 #include <string>
@@ -38,14 +38,14 @@ namespace Demo {
         static PopupManager* instance;
 
         Game* game = nullptr;
-        DX9GF::Camera* uiCamera = nullptr;
+        sdlgf::Camera* uiCamera = nullptr;
 
-        std::shared_ptr<DX9GF::Texture> uiSheetTex;
-        std::shared_ptr<DX9GF::Texture> borderSheetTex;
-        std::shared_ptr<DX9GF::Font> font;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
-        std::shared_ptr<DX9GF::NineSliceSprite> backgroundSprite;
-        std::shared_ptr<DX9GF::TransformManager> internalTm;
+        std::shared_ptr<sdlgf::Texture> uiSheetTex;
+        std::shared_ptr<sdlgf::Texture> borderSheetTex;
+        std::shared_ptr<sdlgf::Font> font;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
+        std::shared_ptr<sdlgf::NineSliceSprite> backgroundSprite;
+        std::shared_ptr<sdlgf::TransformManager> internalTm;
 
         bool isActive = false;
         std::wstring currentTitle;
@@ -60,8 +60,8 @@ namespace Demo {
         std::vector<RECT> btnRectsLarge;
 
         // Optional animated icon drawn between the title and the message (e.g. an obtained gear).
-        std::shared_ptr<DX9GF::Texture> iconTexture; // keeps the texture iconSprite points at alive
-        std::shared_ptr<DX9GF::AnimatedSprite> iconSprite;
+        std::shared_ptr<sdlgf::Texture> iconTexture; // keeps the texture iconSprite points at alive
+        std::shared_ptr<sdlgf::AnimatedSprite> iconSprite;
         float iconSize = 0.0f;
 
         // Set by ShowWithSideIcon: the icon then sits left of the message instead of above it, so a
@@ -96,9 +96,9 @@ namespace Demo {
 
         static PopupManager* GetInstance();
 
-        void Init(Game* game, std::shared_ptr<DX9GF::Texture> borderTex, std::shared_ptr<DX9GF::Texture> uiTex, std::shared_ptr<DX9GF::Font> popupFont);
+        void Init(Game* game, std::shared_ptr<sdlgf::Texture> borderTex, std::shared_ptr<sdlgf::Texture> uiTex, std::shared_ptr<sdlgf::Font> popupFont);
 
-        void SetUICamera(DX9GF::Camera* camera) { this->uiCamera = camera; }
+        void SetUICamera(sdlgf::Camera* camera) { this->uiCamera = camera; }
 
         void RegisterStyle(const std::string& styleName, const PopupStyle& style);
 
@@ -109,13 +109,13 @@ namespace Demo {
         // scaled so its first frame is iconSize pixels tall.
         void ShowWithIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
             const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
-            std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
+            std::shared_ptr<sdlgf::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
 
         // Same as ShowWithIcon, but the icon sits left of the message, vertically centred with it.
         // Used for long messages, where an icon above them would push the popup off a small screen.
         void ShowWithSideIcon(const std::string& styleName, const std::wstring& title, const std::wstring& message,
             const std::vector<std::pair<std::wstring, std::function<void()>>>& buttons,
-            std::shared_ptr<DX9GF::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
+            std::shared_ptr<sdlgf::Texture> iconTex, const std::vector<RECT>& iconFrames, float iconSize = 96.0f);
 
         // A narrator's note: no title, justified message, centred on screen like any popup.
         void ShowNarration(const std::string& styleName, const std::wstring& message,
@@ -125,7 +125,7 @@ namespace Demo {
         bool IsActive() const { return isActive; }
         bool IsKeyboardNavigating() const { return isActive && keyboardNavigator.IsInKeyboardMode(); }
 
-        void Update(unsigned long long deltaTime, DX9GF::Camera* uiCamera);
-        void DrawUI(unsigned long long deltaTime, DX9GF::Camera* uiCamera);
+        void Update(unsigned long long deltaTime, sdlgf::Camera* uiCamera);
+        void DrawUI(unsigned long long deltaTime, sdlgf::Camera* uiCamera);
     };
 }

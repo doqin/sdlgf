@@ -46,7 +46,7 @@ void Demo::TestBattleScene::Init()
 		strikeCard->Init(draggableManager, game->GetGraphicsDevice(), &camera);
 		drawPile.push_back(strikeCard);
 	}*/
-	auto audioManager = DX9GF::AudioManager::GetInstance();
+	auto audioManager = sdlgf::AudioManager::GetInstance();
 	audioManager->SetMasterVolume(0.f);
 
 	//auto bat = std::make_shared<VampireBatEnemy>(transformManager, 45.f);

@@ -1,5 +1,5 @@
 #pragma once
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include <memory>
 #include <deque>
 #include "TextIconButton.h" 
@@ -23,7 +23,7 @@ namespace Demo {
 	// and swallows battle input while one is on screen (a click / Space / Enter advances).
 	class BattleTutorial {
 	public:
-		BattleTutorial(DX9GF::GraphicsDevice* gd, DX9GF::Font* font);
+		BattleTutorial(sdlgf::GraphicsDevice* gd, sdlgf::Font* font);
 
 		// Re-evaluates the triggers and queues any newly-due panel. No-op once every panel
 		// has been shown.
@@ -37,8 +37,8 @@ namespace Demo {
 		void Update(unsigned long long deltaTime);
 
 		// Full-screen dim + the current panel art (3x) + a pulsing "continue" hint.
-		void Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera& uiCamera,
-			DX9GF::FontSprite* fontSprite, float screenW, float screenH,
+		void Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera& uiCamera,
+			sdlgf::FontSprite* fontSprite, float screenW, float screenH,
 			unsigned long long deltaTime);
 
 		// Queue all nine panels in teaching order (used by the Guide button). Ignores what was already shown.
@@ -70,19 +70,19 @@ namespace Demo {
 
 		void TryQueue(Step s, bool condition);
 
-		void EnsureSkipButton(DX9GF::Camera& uiCamera);
+		void EnsureSkipButton(sdlgf::Camera& uiCamera);
 
-		DX9GF::GraphicsDevice* device = nullptr;
-		std::shared_ptr<DX9GF::Texture> uiTex;
-		std::shared_ptr<DX9GF::TransformManager> uiTransformManager;
-		DX9GF::Font* uiFont = nullptr;
+		sdlgf::GraphicsDevice* device = nullptr;
+		std::shared_ptr<sdlgf::Texture> uiTex;
+		std::shared_ptr<sdlgf::TransformManager> uiTransformManager;
+		sdlgf::Font* uiFont = nullptr;
 		std::shared_ptr<TextIconButton> skipBtn;
 		bool skipRequested = false;
 
-		std::shared_ptr<DX9GF::Texture> sheet;
-		std::shared_ptr<DX9GF::StaticSprite> sprite;
-		std::shared_ptr<DX9GF::Texture> dodgeTex;   // assets/tutorial-dodge.png, used by STEP_DODGE
-		std::shared_ptr<DX9GF::StaticSprite> dodgeSprite;
+		std::shared_ptr<sdlgf::Texture> sheet;
+		std::shared_ptr<sdlgf::StaticSprite> sprite;
+		std::shared_ptr<sdlgf::Texture> dodgeTex;   // assets/tutorial-dodge.png, used by STEP_DODGE
+		std::shared_ptr<sdlgf::StaticSprite> dodgeSprite;
 		bool handled[STEP_COUNT] = { false }; // shown, or currently queued
 		std::deque<Step> queue;               // pending panels, front() = the visible one
 		float inputCooldown = 0.f;            // debounces the action that opened the panel

@@ -1,16 +1,16 @@
 #pragma once
-#include <DX9GFExtras\DX9GFICommand.h>
-#include <DX9GFSprites.h>
-#include <DX9GFGraphicsDevice.h>
-#include <DX9GFCamera.h>
+#include <Extras\ICommand.h>
+#include <Sprites.h>
+#include <GraphicsDevice.h>
+#include <Camera.h>
 #include <queue>
 #include "DialogueLine.h"
 
 namespace Demo {
-	class IConversation : public DX9GF::ICommand {
+	class IConversation : public sdlgf::ICommand {
 	private:
 		std::queue<DialogueLine> dialogueQueue;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 		float virtualWidth;
 		float virtualHeight;
 		std::wstring displayedContent;
@@ -25,13 +25,13 @@ namespace Demo {
 		void ResetAnimation();
 		std::wstring WrapToWidth(const std::wstring& text, float maxWidth);
 	public:
-		IConversation(std::shared_ptr<DX9GF::FontSprite> fontSprite, int screenWidth, int screenHeight);
+		IConversation(std::shared_ptr<sdlgf::FontSprite> fontSprite, int screenWidth, int screenHeight);
 
 		void AddLine(const DialogueLine& line);
 
 		void Execute(unsigned long long deltaTime) override;
 
-		void Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera, unsigned long long deltaTime);
+		void Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera* uiCamera, unsigned long long deltaTime);
 	};
 }
 

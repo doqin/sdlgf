@@ -2,18 +2,18 @@
 #include "CardContainer.h"
 #include <algorithm>
 
-void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
 	IContainer::Init(manager, graphicsDevice, camera);
 	if (trigger) {
-		trigger->SetOnHeldLeft([](DX9GF::ITrigger* thisObj) {
+		trigger->SetOnHeldLeft([](sdlgf::ITrigger* thisObj) {
 			});
-		trigger->SetOnReleaseLeft([](DX9GF::ITrigger* thisObj) {
+		trigger->SetOnReleaseLeft([](sdlgf::ITrigger* thisObj) {
 			});
 	}
 }
 
-void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::vector<std::shared_ptr<ICard>>* playedPile)
+void Demo::CardContainer::Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, std::vector<std::shared_ptr<ICard>>* playedPile)
 {
 	this->playedPile = playedPile;
 	this->Init(manager, graphicsDevice, camera);

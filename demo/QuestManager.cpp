@@ -100,19 +100,19 @@ Demo::QuestInfo* Demo::QuestManager::GetQuestInfo(const std::string& questId) {
 	return nullptr;
 }
 
-void Demo::QuestManager::Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::TransformManager> tm,
-	DX9GF::Camera* uiCamera, std::shared_ptr<DX9GF::Font> font)
+void Demo::QuestManager::Init(sdlgf::GraphicsDevice* gd, std::shared_ptr<sdlgf::TransformManager> tm,
+	sdlgf::Camera* uiCamera, std::shared_ptr<sdlgf::Font> font)
 {
 	if (!fontSprite || this->font.get() != font.get()) {
 		this->font = font;
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	}
 	if (!uiTex) {
-		uiTex = std::make_shared<DX9GF::Texture>(gd);
+		uiTex = std::make_shared<sdlgf::Texture>(gd);
 		uiTex->LoadTexture(L"assets/ui.png");
 	}
 	if (!uiTransformManager) {
-		uiTransformManager = std::make_shared<DX9GF::TransformManager>();
+		uiTransformManager = std::make_shared<sdlgf::TransformManager>();
 	}
 
 	if (!btnToggle) {
@@ -121,7 +121,7 @@ void Demo::QuestManager::Init(DX9GF::GraphicsDevice* gd, std::shared_ptr<DX9GF::
 		btnToggle->SetSpriteCoords(240, 336, 13, 16, 0);
 		btnToggle->SetSpriteScale(ARROW_SIZE / 13.0f, ARROW_SIZE / 13.0f);
 		btnToggle->Init(uiCamera);
-		btnToggle->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
+		btnToggle->SetOnReleaseLeft([this](sdlgf::ITrigger*) {
 			questMenuRequested = true;
 			});
 	}
@@ -184,7 +184,7 @@ void Demo::QuestManager::Update(unsigned long long deltaTime)
 	}
 }
 
-void Demo::QuestManager::Draw(DX9GF::GraphicsDevice* gd, DX9GF::Camera* uiCamera, unsigned long long deltaTime)
+void Demo::QuestManager::Draw(sdlgf::GraphicsDevice* gd, sdlgf::Camera* uiCamera, unsigned long long deltaTime)
 {
 	if (!isVisible) return;
 	if (btnToggle) btnToggle->Draw(gd, deltaTime);
@@ -250,7 +250,7 @@ void Demo::QuestManager::AcceptQuest(const std::string& questId) {
 	if (questDatabase.count(questId)) {
 		SetQuest(Tr(L"Quest: ") + questDatabase[questId].currentObjective);
 	}
-	DX9GF::AudioManager::GetInstance()->Play("quest_active", false, 0.05f);
+	sdlgf::AudioManager::GetInstance()->Play("quest_active", false, 0.05f);
 }
 
 namespace {
@@ -296,7 +296,7 @@ Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventT
 			auto* bp = ItemData::GetInstance()->GetItemBlueprint(10);
 			std::wstring msg = Tr(L"You found: Midas Chip & ");
 			if (bp) msg += bp->GetName();
-			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			return { true, msg };
 		}
 	}
@@ -309,7 +309,7 @@ Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventT
 					questStates["Quest_BossWorld"] = QuestState::Completed;
 					questDatabase["Quest_BossWorld"].currentObjective = Tr(L"Terminals Hacked! The Gate is open.");
 					SetQuest(Tr(L"Quest: ") + questDatabase["Quest_BossWorld"].currentObjective);
-					DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+					sdlgf::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 					return { true, Tr(L"Quest Completed: System Override") };
 				}
 				else {
@@ -350,7 +350,7 @@ Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventT
 				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_ThreadAlley_Start"].currentObjective);
 			}
 			player->AddGear(1); // energy cell
-			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			return { true, Tr(L"50 Gold & Energy Cell - Quest Completed: Defeated the Trojan") };
 		}
 	}
@@ -371,7 +371,7 @@ Demo::QuestEventResult Demo::QuestManager::HandleEvent(const std::string& eventT
 				questDatabase["Quest_AdminLog"].currentObjective = Tr(L"The log was real after all.");
 				SetQuest(Tr(L"Quest: ") + questDatabase["Quest_AdminLog"].currentObjective);
 			}
-			DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+			sdlgf::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 			player->AddGear(3); // Memory Locker
 			return { true, Tr(L"Memory Locker - Quest Completed: The Admin's Echo") };
 		}
@@ -473,7 +473,7 @@ Demo::QuestEventResult Demo::QuestManager::MarkReadyToTurnIn(const std::string& 
 
 	readyQuests.insert(questId);
 	it->second.currentObjective = Tr(L"Return to ") + it->second.turnInNpc;
-	DX9GF::AudioManager::GetInstance()->Play("quest_active", false, 0.05f); // placeholder sound
+	sdlgf::AudioManager::GetInstance()->Play("quest_active", false, 0.05f); // placeholder sound
 
 	QuestEventResult result;
 	result.hintMessage = Tr(L"Objective complete! Return to ") + it->second.turnInNpc;
@@ -499,7 +499,7 @@ Demo::QuestEventResult Demo::QuestManager::TurnInQuest(const std::string& questI
 		msg = Tr(L"100 Gold & Aegis Plating - Quest Completed: Kako's Lab");
 	}
 
-	DX9GF::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
+	sdlgf::AudioManager::GetInstance()->Play("quest_completed", false, 0.8f);
 	SyncTrackedQuest();
 	return { true, msg };
 }

@@ -3,11 +3,11 @@
 #include "SettingsManager.h"
 
 namespace Demo {
-	void INPC::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) {
+	void INPC::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer) {
 		player = p;
 		this->gd = gd;
 		this->worldCamera = camera;
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 		this->drawBuffer = drawBuffer;
 		MapCharacterVoices(characterVoices);
 		if (questMarker) questMarker->Init(gd);
@@ -28,11 +28,11 @@ namespace Demo {
 		}
 	}
 
-	void INPC::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
+	void INPC::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime) {
 		DrawPosition(deltaTime, gd, camera);
 	}
 
-	void INPC::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime) {
+	void INPC::DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime) {
 		if (!fontSprite || !uiCamera || !worldCamera) return;
 
 		auto [worldX, worldY] = GetWorldPosition();

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Game.h"
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "IconButton.h"
 #include "TextIconButton.h"
 #include "KeyboardNavigator.h"
@@ -29,19 +29,19 @@ namespace Demo
     //save offset to center the keybinds into box (just UI)
     constexpr int BTN_VISUAL_SHADOW_OFFSET = -2;
 
-    class SettingsScene : public DX9GF::IScene
+    class SettingsScene : public sdlgf::IScene
     {
     private:
         Game* game;
-        std::shared_ptr<DX9GF::TransformManager> transformManager;
+        std::shared_ptr<sdlgf::TransformManager> transformManager;
 
-        std::shared_ptr<DX9GF::StaticSprite> bgSprite;
-        std::shared_ptr<DX9GF::Texture> bgTex;
+        std::shared_ptr<sdlgf::StaticSprite> bgSprite;
+        std::shared_ptr<sdlgf::Texture> bgTex;
 
-        std::shared_ptr<DX9GF::Font> font;
-        std::shared_ptr<DX9GF::FontSprite> fontSprite;
-        std::shared_ptr<DX9GF::Texture> placeholderTex;
-        std::shared_ptr<DX9GF::Texture> uiSheetTex;
+        std::shared_ptr<sdlgf::Font> font;
+        std::shared_ptr<sdlgf::FontSprite> fontSprite;
+        std::shared_ptr<sdlgf::Texture> placeholderTex;
+        std::shared_ptr<sdlgf::Texture> uiSheetTex;
         std::vector<std::shared_ptr<Demo::IButton>> uiButtons;
         std::shared_ptr<IconButton> backButton;
         std::shared_ptr<Demo::IconButton> btnResPrev;
@@ -65,8 +65,8 @@ namespace Demo
         int lastScreenHeight;
 
         //volume UI
-        std::shared_ptr<DX9GF::NineSliceSprite> trackMaster, trackMusic, trackSFX;
-        std::shared_ptr<DX9GF::NineSliceSprite> trackMasterFill, trackMusicFill, trackSFXFill;
+        std::shared_ptr<sdlgf::NineSliceSprite> trackMaster, trackMusic, trackSFX;
+        std::shared_ptr<sdlgf::NineSliceSprite> trackMasterFill, trackMusicFill, trackSFXFill;
 
         std::shared_ptr<Demo::IconButton> btnMasterDec, btnMasterInc;
         std::shared_ptr<Demo::IconButton> btnMusicDec, btnMusicInc;
@@ -90,7 +90,7 @@ namespace Demo
 
         //helper methods
         void DrawBackground(unsigned long long deltaTime);
-        void DrawVolumeTrack(std::shared_ptr<DX9GF::NineSliceSprite> bg, std::shared_ptr<DX9GF::NineSliceSprite> fill, float vol, RECT originalRect, unsigned long long deltaTime);
+        void DrawVolumeTrack(std::shared_ptr<sdlgf::NineSliceSprite> bg, std::shared_ptr<sdlgf::NineSliceSprite> fill, float vol, RECT originalRect, unsigned long long deltaTime);
 
     public:
         SettingsScene(Game* game, int screenWidth, int screenHeight)

@@ -6,9 +6,9 @@
 #include "ICard.h"
 #include "RNG.h"
 #include "SettingsManager.h"
-#include <DX9GFInputManager.h>
-#include "DX9GFAudioManager.h"
-#include "DX9GFUtils.h"
+#include <InputManager.h>
+#include "AudioManager.h"
+#include "Utils.h"
 #include <algorithm>
 #include <cmath>
 
@@ -34,27 +34,27 @@ namespace Demo {
 	void PackOpeningScene::Init()
 	{
 		auto gd = game->GetGraphicsDevice();
-		transformManager = std::make_shared<DX9GF::TransformManager>();
+		transformManager = std::make_shared<sdlgf::TransformManager>();
 
-		packTex = std::make_shared<DX9GF::Texture>(gd);
+		packTex = std::make_shared<sdlgf::Texture>(gd);
 		packTex->LoadTexture(L"assets/packopening-Sheet.png");
 		// 992x64 sheet -> 31 frames, 32x64 each. Non-looping: it plays once and we watch for the end.
-		packSprite = std::make_shared<DX9GF::AnimatedSprite>(
-			packTex.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 64, 31), 18, false);
+		packSprite = std::make_shared<sdlgf::AnimatedSprite>(
+			packTex.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 64, 31), 18, false);
 		packSprite->SetOrigin(16.f, 32.f);
 		packSprite->SetPosition(0.f, 0.f);
 		packSprite->SetScale(PACK_SCALE, PACK_SCALE);
 
 		cardFrame = CardFrame::Get(gd);
 
-		font = std::make_shared<DX9GF::Font>(gd, Demo::kMainFontName, Demo::kLargeFontSize);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		font = std::make_shared<sdlgf::Font>(gd, Demo::kMainFontName, Demo::kLargeFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 
-		particleTex = std::make_shared<DX9GF::Texture>(gd);
+		particleTex = std::make_shared<sdlgf::Texture>(gd);
 		particleTex->CreatePlainTexture(0xFFFFFFFF, 4, 4);
-		explosionEmitter = std::make_unique<DX9GF::ParticleSystem>(particleTex.get(), 80);
+		explosionEmitter = std::make_unique<sdlgf::ParticleSystem>(particleTex.get(), 80);
 		explosionEmitter->SetOrigin(2.f, 2.f);
-		DX9GF::ConfigureExplosionEmitter(*explosionEmitter);
+		sdlgf::ConfigureExplosionEmitter(*explosionEmitter);
 
 		for (const auto& id : cardIds) {
 			auto card = CardRegistry::Get().Create(id, transformManager);
@@ -67,7 +67,7 @@ namespace Demo {
 
 	void PackOpeningScene::Update(unsigned long long deltaTime)
 	{
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
 		uiCamera.Update();
@@ -76,8 +76,8 @@ namespace Demo {
 		const int keyAccept = SettingsManager::GetInstance()->GetKeybind("ACCEPT");
 		const int keyInteract = SettingsManager::GetInstance()->GetKeybind("INTERACT");
 		bool advance = false;
-		if (inpMan->MouseDown(DX9GF::InputManager::MouseButton::Left)) {
-			inpMan->ConsumeMouseButton(DX9GF::InputManager::MouseButton::Left);
+		if (inpMan->MouseDown(sdlgf::InputManager::MouseButton::Left)) {
+			inpMan->ConsumeMouseButton(sdlgf::InputManager::MouseButton::Left);
 			advance = true;
 		}
 		else if (inpMan->KeyDown(keyAccept)) {
@@ -101,7 +101,7 @@ namespace Demo {
 						RNG::Range(0.8f, 1.7f), RNG::Range(0.8f, 1.7f), 0xFFFFFFFF,
 						std::cos(ang) * speed, std::sin(ang) * speed);
 				}
-				DX9GF::AudioManager::GetInstance()->Play("shop_buy", false, 0.7f);
+				sdlgf::AudioManager::GetInstance()->Play("shop_buy", false, 0.7f);
 				holdTimer = 320.f;
 				state = State::Revealing;
 				revealIndex = 0;
@@ -115,7 +115,7 @@ namespace Demo {
 			}
 			else {
 				if (pendingCardSound) {
-					DX9GF::AudioManager::GetInstance()->PlayRandom("card_draw", 0.5f);
+					sdlgf::AudioManager::GetInstance()->PlayRandom("card_draw", 0.5f);
 					pendingCardSound = false;
 				}
 				cardAlpha = (std::min)(1.f, cardAlpha + (float)deltaTime / FADE_MS);

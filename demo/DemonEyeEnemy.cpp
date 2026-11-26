@@ -5,23 +5,23 @@
 #include "resource.h"
 #include "RNG.h"
 
-void Demo::DemonEyeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::DemonEyeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/computerbug-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	tearProjectileTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	tearProjectileTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	tearProjectileTexture->LoadTexture(L"assets/bugprojectile-Sheet.png");
-	tearProjectileFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
+	tearProjectileFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::DemonEyeEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::DemonEyeEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (sprite) {
 		sprite->Begin();
@@ -69,7 +69,7 @@ void Demo::DemonEyeEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::share
 	}
 }
 
-void Demo::DemonEyeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn)
+void Demo::DemonEyeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn)
 {
 	(void)enemies;
 	(void)popUpMessage;
@@ -99,7 +99,7 @@ void Demo::DemonEyeEnemy::PatternBloodRain(float baseDamage, std::vector<std::sh
 	for (int i = 0; i < BULLET_COUNT; i++) {
 		float offsetX = RNG::Range(-OFFSET_RANGE, OFFSET_RANGE);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, offsetX, DROP_HEIGHT, BULLET_SPEED](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, offsetX, DROP_HEIGHT, BULLET_SPEED](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -120,7 +120,7 @@ void Demo::DemonEyeEnemy::PatternBloodRain(float baseDamage, std::vector<std::sh
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SPAWN_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SPAWN_DELAY));
 	}
 }
 
@@ -141,7 +141,7 @@ void Demo::DemonEyeEnemy::PatternBloodWall(float baseDamage, std::vector<std::sh
 		//random hole
 		int emptyHole = RNG::Range(0, BULLET_PER_WAVE - 1);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, emptyHole, BULLET_PER_WAVE, BULLET_SPEED, DROP_HEIGHT, WALL_START_X, BULLET_SPACING, BULLET_DECAY_TIME, bulletOffset](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, emptyHole, BULLET_PER_WAVE, BULLET_SPEED, DROP_HEIGHT, WALL_START_X, BULLET_SPACING, BULLET_DECAY_TIME, bulletOffset](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -167,7 +167,7 @@ void Demo::DemonEyeEnemy::PatternBloodWall(float baseDamage, std::vector<std::sh
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 	}
 }
 
@@ -185,7 +185,7 @@ void Demo::DemonEyeEnemy::PatternBloodCross(float baseDamage, std::vector<std::s
 	for (int i = 0; i < BULLET_COUNT; i++) {
 		float offsetX = RNG::Range(OFFSET_MIN, OFFSET_MAX);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, offsetX, BULLET_SPEED, DROP_HEIGHT](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, offsetX, BULLET_SPEED, DROP_HEIGHT](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -206,6 +206,6 @@ void Demo::DemonEyeEnemy::PatternBloodCross(float baseDamage, std::vector<std::s
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(SPAWN_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(SPAWN_DELAY));
 	}
 }

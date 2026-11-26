@@ -4,9 +4,9 @@
 namespace Demo {
 	class DeadlineEnemy : public EnemyBase<DeadlineEnemy> {
 	private:
-		std::shared_ptr<DX9GF::Texture> texture;
-		std::shared_ptr<DX9GF::AnimatedSprite> sprite;
-		std::shared_ptr<DX9GF::Texture> projTexture;
+		std::shared_ptr<sdlgf::Texture> texture;
+		std::shared_ptr<sdlgf::AnimatedSprite> sprite;
+		std::shared_ptr<sdlgf::Texture> projTexture;
 		std::weak_ptr<Player> player;
 
 		int abilityCooldown = 0;
@@ -21,11 +21,11 @@ namespace Demo {
 
 	public:
 		using EnemyBase<DeadlineEnemy>::EnemyBase;
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
-		void Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) override;
-		DX9GF::ISprite* GetBodySprite() override { return sprite.get(); }
+		void Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera);
+		void Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) override;
+		sdlgf::ISprite* GetBodySprite() override { return sprite.get(); }
 
 		void OnTurnBegin(std::shared_ptr<Player> player, std::shared_ptr<PopUpMessage> popUpMessage, int currentTurn) override;
-		void StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) override;
+		void StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) override;
 	};
 }

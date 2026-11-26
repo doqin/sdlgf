@@ -2,7 +2,7 @@
 #include "CardFrame.h"
 #include "MainFont.h"
 #include "LocalizationManager.h"
-#include "DX9GFUtils.h"
+#include "Utils.h"
 #include <algorithm>
 #include <cmath>
 #include <tuple>
@@ -101,7 +101,7 @@ std::wstring Demo::CardDisplayNameFromSaveID(const std::string& saveID) {
 	if (id.size() > suffix.size() && id.compare(id.size() - suffix.size(), suffix.size(), suffix) == 0) {
 		id.resize(id.size() - suffix.size());
 	}
-	return DX9GF::Utils::Utf8ToWide(id);
+	return sdlgf::Utils::Utf8ToWide(id);
 }
 
 std::wstring Demo::CardInputSignature(size_t slots, size_t filled) {
@@ -113,7 +113,7 @@ std::wstring Demo::CardInputSignature(size_t slots, size_t filled) {
 	return signature + L")";
 }
 
-std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(DX9GF::GraphicsDevice* graphicsDevice) {
+std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(sdlgf::GraphicsDevice* graphicsDevice) {
 	static std::weak_ptr<CardFrame> cache;
 	auto frame = cache.lock();
 	if (!frame || frame->graphicsDevice != graphicsDevice) {
@@ -123,17 +123,17 @@ std::shared_ptr<Demo::CardFrame> Demo::CardFrame::Get(DX9GF::GraphicsDevice* gra
 	return frame;
 }
 
-Demo::CardFrame::CardFrame(DX9GF::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+Demo::CardFrame::CardFrame(sdlgf::GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/cardtemplates.png");
-	sheet = std::make_shared<DX9GF::StaticSprite>(texture.get());
+	sheet = std::make_shared<sdlgf::StaticSprite>(texture.get());
 
-	font = std::make_shared<DX9GF::Font>(graphicsDevice, CARD_FONT_NAME, CARD_FONT_SIZE);
-	fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
-	topFont = std::make_shared<DX9GF::Font>(graphicsDevice, CARD_FONT_TOP_NAME, CARD_FONT_SIZE);
-	topSprite = std::make_shared<DX9GF::FontSprite>(topFont.get());
-	bottomFont = std::make_shared<DX9GF::Font>(graphicsDevice, CARD_FONT_BOTTOM_NAME, CARD_FONT_SIZE);
-	bottomSprite = std::make_shared<DX9GF::FontSprite>(bottomFont.get());
+	font = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_NAME, CARD_FONT_SIZE);
+	fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
+	topFont = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_TOP_NAME, CARD_FONT_SIZE);
+	topSprite = std::make_shared<sdlgf::FontSprite>(topFont.get());
+	bottomFont = std::make_shared<sdlgf::Font>(graphicsDevice, CARD_FONT_BOTTOM_NAME, CARD_FONT_SIZE);
+	bottomSprite = std::make_shared<sdlgf::FontSprite>(bottomFont.get());
 	fontSprite->SetText(std::wstring(L"0"));
 	digitWidth = static_cast<float>(fontSprite->GetWidth());
 }
@@ -164,7 +164,7 @@ float Demo::CardFrame::MeasureWidth(const std::wstring& name, const std::wstring
 	return std::ceil((sheetW * scale + textW + digitW) / scale) * scale;
 }
 
-void Demo::CardFrame::DrawSlice(DX9GF::StaticSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+void Demo::CardFrame::DrawSlice(sdlgf::StaticSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 	RECT src, float x, float y, float scaleX, float scaleY, D3DCOLOR tint) {
 	sprite.SetSrcRect(src);
 	sprite.SetColor(tint);
@@ -173,7 +173,7 @@ void Demo::CardFrame::DrawSlice(DX9GF::StaticSprite& sprite, const DX9GF::Camera
 	sprite.Draw(camera, deltaTime);
 }
 
-void Demo::CardFrame::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& camera, unsigned long long deltaTime,
+void Demo::CardFrame::DrawLabel(sdlgf::FontSprite& sprite, const sdlgf::Camera& camera, unsigned long long deltaTime,
 	const std::wstring& text, float x, float y, float scale, D3DCOLOR color, bool outlined, D3DCOLOR tint) {
 	sprite.SetText(text);
 	sprite.SetColor(color);
@@ -185,7 +185,7 @@ void Demo::CardFrame::DrawLabel(DX9GF::FontSprite& sprite, const DX9GF::Camera& 
 
 void Demo::CardFrame::DrawGroup(unsigned long long deltaTime, const Entry* entries, size_t count) {
 	if (count == 0) return;
-	const DX9GF::Camera& camera = *entries[0].camera;
+	const sdlgf::Camera& camera = *entries[0].camera;
 
 	struct Layout {
 		float width;
@@ -277,7 +277,7 @@ void Demo::CardFrame::DrawGroup(unsigned long long deltaTime, const Entry* entri
 	fontSprite->End();
 }
 
-void Demo::CardFrame::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime, float x, float y,
+void Demo::CardFrame::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime, float x, float y,
 	CardTemplate cardTemplate, const std::wstring& name, const std::wstring& inputs, size_t cost, float scale, D3DCOLOR tint) {
 	// Anything queued before this face was drawn before it, so it has to land first.
 	FlushCollected();
@@ -301,7 +301,7 @@ bool Demo::CardFrame::IsCollecting() {
 std::vector<Demo::CardFrame::Entry> Demo::CardFrame::pending;
 Demo::CardFrame* Demo::CardFrame::pendingOwner = nullptr;
 
-void Demo::CardFrame::Queue(const DX9GF::Camera& camera, float x, float y,
+void Demo::CardFrame::Queue(const sdlgf::Camera& camera, float x, float y,
 	CardTemplate cardTemplate, std::wstring name, std::wstring inputs, size_t cost, float scale, D3DCOLOR tint, const RECT* scissor) {
 	// Faces from another device's frame can't share a batch.
 	if (pendingOwner && pendingOwner != this) FlushCollected();

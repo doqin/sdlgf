@@ -3,7 +3,7 @@
 #include "Game.h"
 
 namespace Demo {
-    TransitionCommand::TransitionCommand(Game* game, DX9GF::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars)
+    TransitionCommand::TransitionCommand(Game* game, sdlgf::Camera* uiCamera, float duration, bool isTransitioningIn, int numPillars)
         : game(game), uiCamera(uiCamera), duration(duration), elapsedTime(0.0f), isTransitioningIn(isTransitioningIn), numPillars(numPillars)
     {
         screenWidth = game->GetVirtualWidth();

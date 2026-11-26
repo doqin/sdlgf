@@ -7,25 +7,25 @@
 #include <cmath>
 
 namespace Demo {
-    SavePoint::SavePoint(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+    SavePoint::SavePoint(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y)
         : IGameObject(tm, x, y), transformManager(tm) {
     }
 
-    void SavePoint::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* worldCamera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::SaveManager> sm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) {
+    void SavePoint::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* worldCamera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::SaveManager> sm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer) {
         this->player = p;
         this->worldCamera = worldCamera;
         this->saveManager = sm;
-        this->fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+        this->fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
         this->drawBuffer = drawBuffer;
         this->gd = gd;
 
-        collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 8.f, GetWorldX(), GetWorldY() + 12.f);
+        collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 8.f, GetWorldX(), GetWorldY() + 12.f);
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<DX9GF::Texture>(gd);
+        spritesheet = std::make_shared<sdlgf::Texture>(gd);
         spritesheet->LoadTexture(L"assets/savepoint-Sheet.png");
-        sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 10), 12, true);
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 10), 12, true);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }
@@ -44,21 +44,21 @@ namespace Demo {
         float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
         isPlayerNear = (distance <= INTERACTION_DISTANCE);
 
-        auto inpMan = DX9GF::InputManager::GetInstance();
+        auto inpMan = sdlgf::InputManager::GetInstance();
         if (isPlayerNear && inpMan->KeyPress(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
             // Interacting unlocks the point as a fast travel destination. The unlock is part of
             // the save, so it only survives a reload once the player saves.
             const bool newlyUnlocked = !id.empty() && PlayerGlobalData::GetInstance()->UnlockSavePoint(id);
             if (newlyUnlocked) {
-                DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
+                sdlgf::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
             }
 
             std::vector<std::pair<std::wstring, std::function<void()>>> buttons = {
                 { Tr(L"Save"), [this]() {
                     if (auto smLock = this->saveManager.lock()) {
                         smLock->Save("savegame.json");
-                        DX9GF::Platform::DebugLog("Successfully saved!\n");
-                        DX9GF::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
+                        sdlgf::Platform::DebugLog("Successfully saved!\n");
+                        sdlgf::AudioManager::GetInstance()->Play("checkpoint", false, 0.7f);
                     }
                 }},
                 { Tr(L"Open Map"), [this]() {
@@ -78,7 +78,7 @@ namespace Demo {
         return !id.empty() && PlayerGlobalData::GetInstance()->IsSavePointUnlocked(id);
     }
 
-    void SavePoint::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
+    void SavePoint::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime) {
         if (!isVisible) return;
         indicatorTime += static_cast<float>(deltaTime);
         // A save point that hasn't been used yet looks dormant
@@ -89,7 +89,7 @@ namespace Demo {
 		DrawPosition(deltaTime, gd, camera);
     }
 
-    void SavePoint::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime) {
+    void SavePoint::DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime) {
         if (!isVisible || !uiCamera || !worldCamera) return;
 
         auto [worldX, worldY] = GetWorldPosition();

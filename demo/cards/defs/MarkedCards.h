@@ -9,7 +9,7 @@ namespace Demo {
 	// kept being refreshed, so Marked climbed without limit and out-scaled every other deck.
 	class MarkCard : public TargetedCard {
 	public:
-		MarkCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		MarkCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 0,
 				.face = CardTemplate::Periwinkle,
@@ -21,7 +21,7 @@ namespace Demo {
 	// Four hits, so every point of Marked is counted four times.
 	class BarrageCard : public TargetedCard {
 	public:
-		BarrageCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		BarrageCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 2,
 				.face = CardTemplate::Periwinkle,
@@ -35,7 +35,7 @@ namespace Demo {
 	// Mark's strength for 1 energy does, and the spread to every other enemy is the bonus on top.
 	class DragnetCard : public IStatementCard {
 	public:
-		DragnetCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		DragnetCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Periwinkle,
@@ -48,7 +48,7 @@ namespace Demo {
 	// spending a card per turn on it.
 	class HunterCard : public TargetedCard {
 	public:
-		HunterCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		HunterCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Periwinkle,

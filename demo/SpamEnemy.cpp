@@ -11,15 +11,15 @@ namespace {
 	constexpr float SPAM_PI = 3.14159265359f;
 }
 
-void Demo::SpamEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::SpamEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/spam-Sheet.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/spamprojectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
@@ -27,7 +27,7 @@ void Demo::SpamEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera*
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::SpamEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::SpamEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (sprite) {
 		sprite->Begin();
@@ -62,7 +62,7 @@ void Demo::SpamEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 	}
 }
 
-void Demo::SpamEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn)
+void Demo::SpamEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn)
 {
 	(void)enemies;
 	(void)popUpMessage;
@@ -100,7 +100,7 @@ void Demo::SpamEnemy::PatternInboxFlood(float projDamage)
 		for (int c = 0; c < COLUMNS; c++) {
 			if (c == gap || c == gap + 1) continue;
 			float x = -SPAN * 0.5f + c * STEP;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, x, BULLET_SPEED, SPAWN_Y](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, x, BULLET_SPEED, SPAWN_Y](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					projectiles.Spawn(
 						lock,
@@ -113,11 +113,11 @@ void Demo::SpamEnemy::PatternInboxFlood(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.01f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.01f));
 		}
 		// Nudge the gap one or two columns each wave so it slides rather than teleports.
 		gap = std::clamp(gap + RNG::Range(-2, 2), 0, COLUMNS - 2);
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 	}
 }
 
@@ -133,7 +133,7 @@ void Demo::SpamEnemy::PatternChainLetter(float projDamage)
 
 	auto angle = std::make_shared<float>(RNG::Range(0.f, SPAM_PI * 2.f));
 	for (int t = 0; t < TICKS; t++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, angle, ARMS, ANGLE_STEP, BULLET_SPEED](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, angle, ARMS, ANGLE_STEP, BULLET_SPEED](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				for (int a = 0; a < ARMS; a++) {
 					float dirAngle = *angle + a * (SPAM_PI * 2.f / ARMS);
@@ -152,7 +152,7 @@ void Demo::SpamEnemy::PatternChainLetter(float projDamage)
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(TICK_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(TICK_DELAY));
 	}
 }
 
@@ -169,7 +169,7 @@ void Demo::SpamEnemy::PatternMassMailer(float projDamage)
 
 	for (int v = 0; v < VOLLEYS; v++) {
 		float sign = (v % 2 == 0) ? -1.f : 1.f;
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, sign, FAN, SPREAD, WALL_X, BULLET_SPEED](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, sign, FAN, SPREAD, WALL_X, BULLET_SPEED](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				auto [px, py] = lock->GetWorldPosition();
 				float spawnX = sign * WALL_X;
@@ -190,7 +190,7 @@ void Demo::SpamEnemy::PatternMassMailer(float projDamage)
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(VOLLEY_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(VOLLEY_DELAY));
 	}
 }
 
@@ -209,7 +209,7 @@ void Demo::SpamEnemy::PatternPopupAds(float projDamage)
 	for (int w = 0; w < WAVES; w++) {
 		for (int i = 0; i < PER_WAVE; i++) {
 			float ang = RNG::Range(0.f, SPAM_PI * 2.f);
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, ang, RING_RADIUS, TELEGRAPH, TURN_SPEED, BULLET_SPEED](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, ang, RING_RADIUS, TELEGRAPH, TURN_SPEED, BULLET_SPEED](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px + std::cos(ang) * RING_RADIUS;
@@ -227,9 +227,9 @@ void Demo::SpamEnemy::PatternPopupAds(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.04f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.04f));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 	}
 }
 
@@ -248,7 +248,7 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 
 	const int beams = RNG::Range(3, 4);
 	for (int b = 0; b < beams; b++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, BEAM_LENGTH, WARN_TIME, FIRE_TIME, WARN_COLOR, GLOW_COLOR, CORE_COLOR](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				auto [px, py] = lock->GetWorldPosition();
 				LaserDesc beam = (RNG::Range(1, 2) == 1)
@@ -268,7 +268,7 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 		// Filler envelopes drifting down while the beam telegraphs / burns.
 		const int filler = 5;
 		for (int f = 0; f < filler; f++) {
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					projectiles.Spawn(
 						lock,
@@ -281,7 +281,7 @@ void Demo::SpamEnemy::PatternUnsubscribe(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(BEAM_GAP / filler));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(BEAM_GAP / filler));
 		}
 	}
 }

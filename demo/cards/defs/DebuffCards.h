@@ -4,7 +4,7 @@
 namespace Demo {
 	class VulnerableCard : public TargetedCard {
 	public:
-		VulnerableCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		VulnerableCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Magenta,
@@ -15,7 +15,7 @@ namespace Demo {
 
 	class WeaknessCard : public TargetedCard {
 	public:
-		WeaknessCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		WeaknessCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 1,
 				.face = CardTemplate::Rose,
@@ -27,7 +27,7 @@ namespace Demo {
 	// Not sold in any shop.
 	class StunCard : public TargetedCard {
 	public:
-		StunCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		StunCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), TargetedCard(tm, 1, {
 				.cost = 3,
 				.face = CardTemplate::Forest,

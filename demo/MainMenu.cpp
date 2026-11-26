@@ -19,14 +19,14 @@
 
 namespace Demo
 {
-	class WhiteFadeOutCommand : public DX9GF::ICommand {
-		DX9GF::GraphicsDevice* gd;
-		DX9GF::Camera* camera;
+	class WhiteFadeOutCommand : public sdlgf::ICommand {
+		sdlgf::GraphicsDevice* gd;
+		sdlgf::Camera* camera;
 		float duration;
 		float timer = 0.0f;
 		int vw, vh;
 	public:
-		WhiteFadeOutCommand(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, float duration, int vw, int vh) 
+		WhiteFadeOutCommand(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, float duration, int vw, int vh) 
 			: gd(gd), camera(camera), duration(duration), vw(vw), vh(vh) {}
 		void Execute(unsigned long long deltaTime) override {
 			if (IsFinished()) return;
@@ -56,7 +56,7 @@ namespace Demo
 
 		if (!bgSprite)
 		{
-			bgSprite = std::make_shared<DX9GF::StaticSprite>(bgTex.get());
+			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex.get());
 			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
 		}
 
@@ -104,7 +104,7 @@ namespace Demo
 			scene->GetCamera().SetPosition(focusX, focusY);
 			scene->GetCamera().SetZoom(zoom);
 
-			mapPreviews[index] = std::make_shared<DX9GF::Texture>(gd);
+			mapPreviews[index] = std::make_shared<sdlgf::Texture>(gd);
 			mapPreviews[index]->CreateRenderTarget(PREVIEW_SIZE, PREVIEW_SIZE);
 
 			gd->SetRenderTarget(mapPreviews[index].get());
@@ -250,10 +250,10 @@ namespace Demo
 
 	void MainMenu::Init()
 	{
-		drawBuffer = std::make_shared<DX9GF::CommandBuffer>();
-		commandBuffer = std::make_shared<DX9GF::CommandBuffer>();
-		transformManager = std::make_shared<DX9GF::TransformManager>();
-		saveManager = std::make_shared<DX9GF::SaveManager>();
+		drawBuffer = std::make_shared<sdlgf::CommandBuffer>();
+		commandBuffer = std::make_shared<sdlgf::CommandBuffer>();
+		transformManager = std::make_shared<sdlgf::TransformManager>();
+		saveManager = std::make_shared<sdlgf::SaveManager>();
 		gameSaveState = std::make_shared<SaveGameState>(game, saveManager);
 
 		auto [camW, camH] = camera.GetScreenResolution();
@@ -261,25 +261,25 @@ namespace Demo
 		lastScreenHeight = camH;
 
 		//load textures
-		buttonSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		buttonSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		buttonSheetTex->LoadTexture(L"assets/ui.png");
 
-		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		bgTex->LoadTexture(IDB_PNG2);
 
-		titleTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		titleTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		titleTex->LoadTexture(IDB_PNG3);
 
 
 		// Sprites
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 		fontSprite->SetColor(0xFF000000);
 
 		//LOCAL FUNCTION to init a menu text-icon button: blank slice-able frame + auto-sizing translated label
 		auto InitMenuButton = [&](std::shared_ptr<Demo::TextIconButton>& btn, const std::wstring& english) {
 			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 96, 32, buttonSheetTex, font.get(), L"", 4);
-			auto rects = DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3);
+			auto rects = sdlgf::Utils::CreateRectsVertical(0, 0, 16, 16, 3);
 			rects.push_back({ 288, 48, 304, 64 }); // disabled frame
 			btn->SetSpriteRects(rects);
 			btn->SetSliceMargins(4, 4);
@@ -296,10 +296,10 @@ namespace Demo
 		InitMenuButton(continueButton, L"Continue");
 		/*continueButton->SetState(IButton::ButtonState::DISABLED);*/
 
-		auto borderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		auto borderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		borderTex->LoadTexture(L"assets/popup-borders.png");
 
-		auto uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		auto uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiTex->LoadTexture(L"assets/ui.png");
 
 		PopupManager::GetInstance()->Init(game, borderTex, uiTex, font);
@@ -317,7 +317,7 @@ namespace Demo
 			isTransitioning = true;
 			auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 			drawBuffer->PushCommand(transitionInCommand);
-			commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
+			commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 				if (!transitionInCommand->IsFinished()) {
 					return;
 				}
@@ -329,13 +329,13 @@ namespace Demo
 			};
 
 
-		continueButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		continueButton->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			doContinueGame();
 			});
 
 		//New Game Button
 		InitMenuButton(newGameButton, L"New Game");
-		newGameButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		newGameButton->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			if (isTransitioning) return;
 
 			//check save file
@@ -346,14 +346,14 @@ namespace Demo
 				auto transitionInCommand = std::make_shared<TransitionCommand>(game, &this->uiCamera, 1.f, true);
 
 				this->drawBuffer->PushCommand(transitionInCommand);
-				this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
+				this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this, transitionInCommand](std::function<void(void)> markFinished) {
 					if (!transitionInCommand->IsFinished()) return;
 
 					std::remove(SaveGameState::SAVE_FILE);
 					gameSaveState = SaveGameState::StartNewGame(this->game, this->saveManager);
 					this->isTransitioning = false;
 
-					this->commandBuffer->PushCommand(std::make_shared<DX9GF::CustomCommand>([this](std::function<void(void)> markFinished1) {
+					this->commandBuffer->PushCommand(std::make_shared<sdlgf::CustomCommand>([this](std::function<void(void)> markFinished1) {
 						continueButton->SetState(SaveGameState::HasSaveFile() ? IButton::ButtonState::IDLE : IButton::ButtonState::DISABLED);
 						markFinished1();
 						}));
@@ -377,8 +377,8 @@ namespace Demo
 
 		//Options Button
 		InitMenuButton(optionsButton, L"Options");
-		optionsButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
-			auto app = DX9GF::Application::GetInstance();
+		optionsButton->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
+			auto app = sdlgf::Application::GetInstance();
 			//push Settings Scene
 			auto sceMan = this->game->GetSceneManager();
 			sceMan->InsertScene(sceMan->GetIndex() + 1,
@@ -389,8 +389,8 @@ namespace Demo
 
 		//Credits Button
 		InitMenuButton(creditsButton, L"Credits");
-		creditsButton->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
-			auto app = DX9GF::Application::GetInstance();
+		creditsButton->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
+			auto app = sdlgf::Application::GetInstance();
 			auto sceMan = this->game->GetSceneManager();
 			sceMan->InsertScene(sceMan->GetIndex() + 1,
 				new CreditsScene(this->game, app->GetScreenWidth(), app->GetScreenHeight())
@@ -400,7 +400,7 @@ namespace Demo
 
 		//Quit Button
 		InitMenuButton(quitButton, L"Quit");
-		quitButton->SetOnReleaseLeft([](DX9GF::ITrigger* t) { DX9GF::Application::GetInstance()->Quit(); });
+		quitButton->SetOnReleaseLeft([](sdlgf::ITrigger* t) { sdlgf::Application::GetInstance()->Quit(); });
 
 		//active buttons
 		std::shared_ptr<Demo::IButton> buttons[] = { continueButton, newGameButton, optionsButton, creditsButton, quitButton };
@@ -413,7 +413,7 @@ namespace Demo
 			}
 		}
 
-		auto audio = DX9GF::AudioManager::GetInstance();
+		auto audio = sdlgf::AudioManager::GetInstance();
 
 		audio->Load("bgm_sky", IDR_BGM_SKY);
 		audio->PlayBGM_Fade("bgm_sky", 0.9f, 1.5f);
@@ -461,7 +461,7 @@ namespace Demo
 			}
 		}
 
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
 
@@ -533,7 +533,7 @@ namespace Demo
 			drawBuffer->Update(deltaTime);
 			PopupManager::GetInstance()->DrawUI(deltaTime, &this->uiCamera);
 			if (!keyboardNavigator.IsInKeyboardMode() && !PopupManager::GetInstance()->IsKeyboardNavigating()) {
-				DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+				sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 			}
 			gd->EndDraw();
 		}

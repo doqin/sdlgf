@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Player.h"
 #include "Game.h"
 #include "IDraggable.h"
@@ -21,7 +21,7 @@
 #include <typeindex>
 
 namespace Demo {
-	class IBattleScene : public DX9GF::IScene {
+	class IBattleScene : public sdlgf::IScene {
 	protected:
 		enum class State {
 			PlayerStandBy,
@@ -115,7 +115,7 @@ namespace Demo {
 		bool isDraggingBlockCardViaKeyboard = false;
 		// Set while a StatementCard/EnemyCard has been "picked up" (first Enter) and is awaiting
 		// a second Enter to confirm which highlighted destination it should be placed at.
-		std::shared_ptr<DX9GF::IGameObject> pickedUpCard;
+		std::shared_ptr<sdlgf::IGameObject> pickedUpCard;
 		size_t placementSlotIndex = 0;
 		const float KEYBOARD_BLOCK_CARD_SPEED = 300.f; // px/sec
 		// Externals
@@ -123,13 +123,13 @@ namespace Demo {
 		std::shared_ptr<Player> player;
 		std::shared_ptr<Player> battlePlayer;
 
-		std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> customBackgroundDraw;
+		std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> customBackgroundDraw;
 		// Managers
-		DX9GF::CommandBuffer commandBuffer;
-		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer;
+		sdlgf::CommandBuffer commandBuffer;
+		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer;
 		std::shared_ptr<DraggableManager> draggableManager;
-		std::shared_ptr<DX9GF::TransformManager> transformManager;
-		DX9GF::ColliderManager colliderManager;
+		std::shared_ptr<sdlgf::TransformManager> transformManager;
+		sdlgf::ColliderManager colliderManager;
 		// Battle cards
 		std::shared_ptr<MainBlockCard> mainBlockCard;
 		std::shared_ptr<InitBlockCard> initBlockCard;
@@ -153,13 +153,13 @@ namespace Demo {
 		float enemyCardRemoveAreaWidth = 180.f;
 		float enemyCardRemoveAreaHeight = 80.f;
 		float battleBoxSize = 256.f;
-		std::vector<std::shared_ptr<DX9GF::RectangleCollider>> battleBounds;
+		std::vector<std::shared_ptr<sdlgf::RectangleCollider>> battleBounds;
 		// UI
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
-		std::shared_ptr<DX9GF::Texture> uiSheetTex;
-		std::shared_ptr<DX9GF::Texture> tempTex;
-		std::shared_ptr<DX9GF::Texture> itemsTex;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
+		std::shared_ptr<sdlgf::Texture> uiSheetTex;
+		std::shared_ptr<sdlgf::Texture> tempTex;
+		std::shared_ptr<sdlgf::Texture> itemsTex;
 		std::shared_ptr<IconButton> attackButton;
 		std::shared_ptr<IconButton> itemsButton;
 		std::shared_ptr<IconButton> fleeButton;
@@ -168,7 +168,7 @@ namespace Demo {
 		std::shared_ptr<IconButton> runInitButton;
 		std::shared_ptr<IconButton> closeItemMenuButton;
 		std::shared_ptr<BattleMenu> battleMenu;
-		std::shared_ptr<DX9GF::Texture> gearTex;
+		std::shared_ptr<sdlgf::Texture> gearTex;
 		std::shared_ptr<IconButton> gearButton;
 		int currentGearCooldown = 0;
 		void OnGearButtonClicked();
@@ -234,12 +234,12 @@ namespace Demo {
 		std::shared_ptr<BattleTutorial> battleTutorial;
 
 		std::shared_ptr<PopUpMessage> popUpMessage;
-		std::shared_ptr<DX9GF::StaticSprite> energyIcon;
-		std::shared_ptr<DX9GF::StaticSprite> hourglassIcon;
-		std::shared_ptr<DX9GF::NineSliceSprite> itemMenuBackground;
-		std::shared_ptr<DX9GF::StaticSprite> attackBuffIcon;
-		std::shared_ptr<DX9GF::StaticSprite> defenseBuffIcon;
-		std::shared_ptr<DX9GF::StaticSprite> activeItemIcon;
+		std::shared_ptr<sdlgf::StaticSprite> energyIcon;
+		std::shared_ptr<sdlgf::StaticSprite> hourglassIcon;
+		std::shared_ptr<sdlgf::NineSliceSprite> itemMenuBackground;
+		std::shared_ptr<sdlgf::StaticSprite> attackBuffIcon;
+		std::shared_ptr<sdlgf::StaticSprite> defenseBuffIcon;
+		std::shared_ptr<sdlgf::StaticSprite> activeItemIcon;
 		bool pendingLockMessage = false;
 		std::function<void()> onVictoryCallback = nullptr;
 		std::string customBGMName;
@@ -267,15 +267,15 @@ namespace Demo {
 		float startingHealthForFlawless = 0.f;
 		float startingDefenseForFlawless = 0.f;
 
-		std::shared_ptr<DX9GF::Texture> energyTokenTex;
-		std::shared_ptr<DX9GF::StaticSprite> energyTokenUI;
-		std::shared_ptr<DX9GF::StaticSprite> goldTokenUI;
-		std::shared_ptr<DX9GF::Texture> goldTex;
+		std::shared_ptr<sdlgf::Texture> energyTokenTex;
+		std::shared_ptr<sdlgf::StaticSprite> energyTokenUI;
+		std::shared_ptr<sdlgf::StaticSprite> goldTokenUI;
+		std::shared_ptr<sdlgf::Texture> goldTex;
 		int currentEnergyPieces = 0;
 	private:
 		// Deal animations run here instead of in commandBuffer, so they never hold up button handlers.
 		// Each card gets its own command and all of them advance every frame.
-		std::vector<std::shared_ptr<DX9GF::ICommand>> cardAnimCommands;
+		std::vector<std::shared_ptr<sdlgf::ICommand>> cardAnimCommands;
 		void UpdateCardAnimations(unsigned long long deltaTime);
 		// Moves a card from queuedToDraw into the hand. Safe to call for a card that already landed.
 		void LandDrawnCard(const std::shared_ptr<ICard>& card);
@@ -385,9 +385,9 @@ namespace Demo {
 		void ComputeProjectedDamage(std::unordered_map<IEnemy*, float>& out);
 		// That total, drawn at each enemy's bottom-left through the attack phase.
 		void DrawProjectedDamage(unsigned long long deltaTime);
-		void DrawHealthAndDefenseBar(const float y, DX9GF::GraphicsDevice* gd, const float extraH = 0.f, const float minContentW = 0.f);
-		void DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, DX9GF::GraphicsDevice* gd);
-		void DrawModifierIcons(const float x, const float y, DX9GF::GraphicsDevice* gd);
+		void DrawHealthAndDefenseBar(const float y, sdlgf::GraphicsDevice* gd, const float extraH = 0.f, const float minContentW = 0.f);
+		void DrawTooltip(std::wstring& activeTooltipText, float screenX, float screenY, sdlgf::GraphicsDevice* gd);
+		void DrawModifierIcons(const float x, const float y, sdlgf::GraphicsDevice* gd);
 		// The row of used-item icons beside the health bar. Returns the tooltip text for whichever
 		// icon the mouse is over (empty if none), so it can share the bar's tooltip renderer.
 		std::wstring DrawActiveItems(const float barRightX, const float y);
@@ -397,7 +397,7 @@ namespace Demo {
 		void Update(unsigned long long deltaTime) override;
 		void DrawWorld(unsigned long long deltaTime) override;
 		void DrawUI(unsigned long long deltaTime) override;
-		void SetCustomBackgroundDraw(std::function<void(DX9GF::GraphicsDevice*, unsigned long long)> drawFunc) { customBackgroundDraw = drawFunc; }
+		void SetCustomBackgroundDraw(std::function<void(sdlgf::GraphicsDevice*, unsigned long long)> drawFunc) { customBackgroundDraw = drawFunc; }
 		//
 		void SetOnVictoryCallback(std::function<void()> cb) { onVictoryCallback = cb; }
 		void SetCustomBGM(const std::string& name) { customBGMName = name; }

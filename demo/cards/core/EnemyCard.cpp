@@ -13,21 +13,21 @@ void Demo::EnemyCard::Draw(unsigned long long deltaTime)
 {
 	IExpressionCard::Draw(deltaTime);
 	if (!uiTexture) {
-		uiTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		uiTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		uiTexture->LoadTexture(L"assets/ui.png");
-		untargetedSprite = std::make_shared<DX9GF::StaticSprite>(uiTexture.get());
+		untargetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
 		untargetedSprite->SetSrcRect({ .left = 80, .top = 272, .right = 128, .bottom = 288 });
 		untargetedSprite->SetScale(2.f, 2.f);
-		targetedSprite = std::make_shared<DX9GF::StaticSprite>(uiTexture.get());
+		targetedSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
 		targetedSprite->SetSrcRect({ .left = 80, .top = 288, .right = 128, .bottom = 304 });
 		targetedSprite->SetScale(2.f, 2.f);
-		targetSprite = std::make_shared<DX9GF::StaticSprite>(uiTexture.get());
+		targetSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
 		targetSprite->SetSrcRect({ .left = 128, .top = 16, .right = 144, .bottom = 48 });
 		targetSprite->SetScale(2.f, 2.f);
 		targetSprite->SetOrigin(8.f, 16.f);
-		arrowTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		arrowTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		arrowTexture->LoadTexture(L"assets/arrow.png");
-		arrowSprite = std::make_shared<DX9GF::StaticSprite>(arrowTexture.get());
+		arrowSprite = std::make_shared<sdlgf::StaticSprite>(arrowTexture.get());
 		arrowSprite->SetScale(2.f);
 		auto [w, h] = arrowTexture->GetSize();
 		arrowSprite->SetOrigin(w / 2.0f, h / 2.0f);
@@ -84,7 +84,7 @@ bool Demo::EnemyCard::OnDrop(std::shared_ptr<IDraggable> draggable)
 	return false;
 }
 
-void Demo::EnemyCard::OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY)
+void Demo::EnemyCard::OnDropMissed(std::weak_ptr<sdlgf::IGameObject> oldParent, float oldWorldX, float oldWorldY)
 {
 	if (auto manager = GetDraggableManager().lock()) {
 		manager->Remove(std::dynamic_pointer_cast<IDraggable>(shared_from_this()));

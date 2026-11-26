@@ -11,7 +11,7 @@ namespace Demo {
 	// Spend 1 energy now to start the next turn with one extra.
 	class EnergyCard : public IStatementCard {
 	public:
-		EnergyCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		EnergyCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Cyan,
@@ -22,7 +22,7 @@ namespace Demo {
 
 	class BraceCard : public IStatementCard {
 	public:
-		BraceCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		BraceCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 0,
 				.face = CardTemplate::Steel,
@@ -38,7 +38,7 @@ namespace Demo {
 	// main block they arrive as the turn ends and are discarded with the rest of the hand.
 	class PrefetchCard : public IStatementCard {
 	public:
-		PrefetchCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		PrefetchCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 0,
 				.face = CardTemplate::Blue,
@@ -51,7 +51,7 @@ namespace Demo {
 
 	class OverclockCard : public IStatementCard {
 	public:
-		OverclockCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		OverclockCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 0,
 				.face = CardTemplate::Cyan,
@@ -67,7 +67,7 @@ namespace Demo {
 	// keeps paying out every turn until the program clears.
 	class JumpstartCard : public IStatementCard {
 	public:
-		JumpstartCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		JumpstartCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Cyan,
@@ -79,7 +79,7 @@ namespace Demo {
 
 	class ForesightCard : public IStatementCard {
 	public:
-		ForesightCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ForesightCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Blue,
@@ -90,7 +90,7 @@ namespace Demo {
 
 	class ImmunityCard : public IStatementCard {
 	public:
-		ImmunityCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		ImmunityCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Aqua,
@@ -102,7 +102,7 @@ namespace Demo {
 	// A legendary utility card that clears all debuffs from the player.
 	class SystemRestartCard : public IStatementCard {
 	public:
-		SystemRestartCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		SystemRestartCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 1,
 				.face = CardTemplate::Sage,
@@ -119,7 +119,7 @@ namespace Demo {
 		static constexpr float ATTACK_BUFF = 2.f;
 		static constexpr float REGEN_BUFF = 6.f;
 	public:
-		OverdriveCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		OverdriveCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 3,
 				.face = CardTemplate::Chartreuse,
@@ -134,7 +134,7 @@ namespace Demo {
 
 	class SystemPurgeCard : public IStatementCard {
 	public:
-		SystemPurgeCard(std::weak_ptr<DX9GF::TransformManager> tm)
+		SystemPurgeCard(std::weak_ptr<sdlgf::TransformManager> tm)
 			: IGameObject(tm), IStatementCard(tm, {
 				.cost = 4,
 				.face = CardTemplate::Pine,

@@ -8,7 +8,7 @@ namespace Demo {
 	protected:
 		RECT GetBlockFaceRect() const override { return { .left = 0, .top = 272, .right = 80, .bottom = 288 }; }
 	public:
-	   MainBlockCard(std::weak_ptr<DX9GF::TransformManager> tm, float x = 0, float y = 0)
+	   MainBlockCard(std::weak_ptr<sdlgf::TransformManager> tm, float x = 0, float y = 0)
 			: IGameObject(tm, x, y), IBlockCard(tm, 160, 32, x, y) {}
 	};
 }

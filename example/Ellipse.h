@@ -1,18 +1,18 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 namespace GO {
-	class Ellipse : public DX9GF::IGameObject {
+	class Ellipse : public sdlgf::IGameObject {
 	private:
-		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
-		DX9GF::Camera* camera = nullptr;
-		std::shared_ptr<DX9GF::EllipseTrigger> trigger = nullptr;
-		std::shared_ptr<DX9GF::EllipseCollider> collider = nullptr;
+		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
+		sdlgf::Camera* camera = nullptr;
+		std::shared_ptr<sdlgf::EllipseTrigger> trigger = nullptr;
+		std::shared_ptr<sdlgf::EllipseCollider> collider = nullptr;
 		float width, height;
 	protected:
 	public:
 		Ellipse(
-			std::weak_ptr<DX9GF::TransformManager> transformManager, 
+			std::weak_ptr<sdlgf::TransformManager> transformManager, 
 			float width, 
 			float height, 
 			float x = 0, 
@@ -24,7 +24,7 @@ namespace GO {
 			width(width),
 			height(height) { }
 		Ellipse(
-			std::weak_ptr<DX9GF::TransformManager> transformManager, 
+			std::weak_ptr<sdlgf::TransformManager> transformManager, 
 			std::weak_ptr<IGameObject> parent, 
 			float width, 
 			float height, 
@@ -36,8 +36,8 @@ namespace GO {
 		) : IGameObject(transformManager, parent, x, y, rotation, scaleX, scaleY),
 			width(width),
 			height(height) { }
-		std::weak_ptr<DX9GF::EllipseCollider> GetCollider();
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, std::shared_ptr<DX9GF::ColliderManager> colliderManager);
+		std::weak_ptr<sdlgf::EllipseCollider> GetCollider();
+		void Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, std::shared_ptr<sdlgf::ColliderManager> colliderManager);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
 		void Dispose();

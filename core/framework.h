@@ -1,2 +1,2 @@
 #pragma once
-#include "DX9GFPlatform.h"
+#include "Platform.h"

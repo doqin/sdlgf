@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "BattleMenu.h"
 #include "SettingsScene.h"
-#include "DX9GFAudioManager.h"
+#include "AudioManager.h"
 
 namespace {
 	struct BottomRowX { float resume, options, guide, leave; };
@@ -21,33 +21,33 @@ namespace {
 
 namespace Demo {
 
-	BattleMenu::BattleMenu(Game* g, std::shared_ptr<DX9GF::TransformManager> tm, DX9GF::Camera* cam)
+	BattleMenu::BattleMenu(Game* g, std::shared_ptr<sdlgf::TransformManager> tm, sdlgf::Camera* cam)
 		: game(g), transformManager(tm), uiCamera(cam)
 	{
 	}
 
-	void BattleMenu::Init(DX9GF::Font* f)
+	void BattleMenu::Init(sdlgf::Font* f)
 	{
 		font = f;
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font);
 
 		float sw = static_cast<float>(game->GetVirtualWidth());
 		float sh = static_cast<float>(game->GetVirtualHeight());
 		const BottomRowX x = ComputeRowX();
 		float resumeX = x.resume, optionsX = x.options, guideX = x.guide, leaveX = x.leave;
 
-		uiTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiTex->LoadTexture(L"assets/ui.png");
 
 		btnResume = std::make_shared<IconButton>(transformManager, resumeX, 0, 48.0f * 2, 32.0f * 2, uiTex);
-		btnResume->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));
-		btnResume->SetOnReleaseLeft([this](DX9GF::ITrigger* t) { this->Toggle(); });
+		btnResume->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 176, 48, 32, 3));
+		btnResume->SetOnReleaseLeft([this](sdlgf::ITrigger* t) { this->Toggle(); });
 		btnResume->SetSpriteScale(2.f, 2.f);
 		btnResume->Init(uiCamera);
 
 		btnOptions = std::make_shared<IconButton>(transformManager, optionsX, 0, 48.0f * 2, 32.0f * 2, uiTex);
-		btnOptions->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(0, 208, 48, 32, 3));
-		btnOptions->SetOnReleaseLeft([this, sw, sh](DX9GF::ITrigger* t) {
+		btnOptions->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(0, 208, 48, 32, 3));
+		btnOptions->SetOnReleaseLeft([this, sw, sh](sdlgf::ITrigger* t) {
 			auto sceMan = this->game->GetSceneManager();
 			sceMan->InsertScene(sceMan->GetIndex() + 1, new SettingsScene(this->game, sw, sh));
 			sceMan->GoToNext();
@@ -56,8 +56,8 @@ namespace Demo {
 		btnOptions->Init(uiCamera);
 
 		btnGuide = std::make_shared<IconButton>(transformManager, guideX, 0, 48.0f * 2, 32.0f * 2, uiTex);
-		btnGuide->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 496, 48, 32, 3));
-		btnGuide->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		btnGuide->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 496, 48, 32, 3));
+		btnGuide->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			if (!this->tutorial) {
 				this->tutorial = std::make_shared<BattleTutorial>(this->game->GetGraphicsDevice(), this->font);
 			}
@@ -67,8 +67,8 @@ namespace Demo {
 		btnGuide->Init(uiCamera);
 
 		btnLeaveGame = std::make_shared<IconButton>(transformManager, leaveX, 0, 48.0f * 2, 32.0f * 2, uiTex);
-		btnLeaveGame->SetSpriteRects(DX9GF::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
-		btnLeaveGame->SetOnReleaseLeft([this](DX9GF::ITrigger* t) {
+		btnLeaveGame->SetSpriteRects(sdlgf::Utils::CreateRectsHorizontal(144, 208, 48, 32, 3));
+		btnLeaveGame->SetOnReleaseLeft([this](sdlgf::ITrigger* t) {
 			this->pendingLeave = true;
 			});
 		btnLeaveGame->SetSpriteScale(2.f, 2.f);
@@ -81,10 +81,10 @@ namespace Demo {
 
 		isOpen = !isOpen;
 		if (isOpen) {
-			DX9GF::AudioManager::GetInstance()->Play("open_inv");
+			sdlgf::AudioManager::GetInstance()->Play("open_inv");
 		}
 		else {
-			DX9GF::AudioManager::GetInstance()->Play("close_inv");
+			sdlgf::AudioManager::GetInstance()->Play("close_inv");
 		}
 	}
 
@@ -138,7 +138,7 @@ namespace Demo {
 		keyboardNavigator.Update(deltaTime, CollectKeyboardCandidates());
 	}
 
-	void BattleMenu::Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+	void BattleMenu::Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen) return;
 
@@ -158,7 +158,7 @@ namespace Demo {
 		btnLeaveGame->Draw(gd, deltaTime);
 	}
 
-	void BattleMenu::DrawKeyboardReticle(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime)
+	void BattleMenu::DrawKeyboardReticle(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime)
 	{
 		if (!isOpen) return;
 		if (tutorial && tutorial->IsPanelVisible()) {

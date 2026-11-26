@@ -1,15 +1,15 @@
 #pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include "Game.h"
 #include "Player.h"
 
 namespace Demo {
-	class World1Scene : public DX9GF::IScene {
+	class World1Scene : public sdlgf::IScene {
 	Game* game;
 	std::shared_ptr<Player> player;
-	DX9GF::ColliderManager colliderManager;
-	std::shared_ptr<DX9GF::TransformManager> transformManager;
+	sdlgf::ColliderManager colliderManager;
+	std::shared_ptr<sdlgf::TransformManager> transformManager;
 	public:
 		World1Scene(Game* game, int screenWidth, int screenHeight) : IScene(screenWidth, screenHeight), game(game) {}
 		void Init() override;

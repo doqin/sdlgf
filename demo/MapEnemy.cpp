@@ -8,7 +8,7 @@
 namespace Demo {
 	bool MapEnemy::isDisabled = false;
 
-	MapEnemy::MapEnemy(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y, const BattleEncounter& data)
+	MapEnemy::MapEnemy(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y, const BattleEncounter& data)
 		: IGameObject(tm, x, y), startX(x), startY(y), encounterData(data) {
 	}
 
@@ -18,22 +18,22 @@ namespace Demo {
 		}
 	}
 
-	void MapEnemy::Init(Game* game, DX9GF::GraphicsDevice* gd, DX9GF::ColliderManager* colMan, std::shared_ptr<Player> player) {
+	void MapEnemy::Init(Game* game, sdlgf::GraphicsDevice* gd, sdlgf::ColliderManager* colMan, std::shared_ptr<Player> player) {
 		this->game = game;
 		this->colliderManager = colMan;
 		this->targetPlayer = player;
 
-		static std::map<std::wstring, std::shared_ptr<DX9GF::Texture>> enemyTextureCache;
+		static std::map<std::wstring, std::shared_ptr<sdlgf::Texture>> enemyTextureCache;
 
 		if (enemyTextureCache.find(encounterData.mapTexturePath) == enemyTextureCache.end()) {
-			auto newTex = std::make_shared<DX9GF::Texture>(gd);
+			auto newTex = std::make_shared<sdlgf::Texture>(gd);
 			newTex->LoadTexture(encounterData.mapTexturePath.c_str());
 			enemyTextureCache[encounterData.mapTexturePath] = newTex;
 		}
 		this->texture = enemyTextureCache[encounterData.mapTexturePath];
 
-		sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(),
-			DX9GF::Utils::CreateRectsHorizontal(0, 0, encounterData.spriteWidth, encounterData.spriteHeight, encounterData.frameCount), encounterData.frameCount);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(),
+			sdlgf::Utils::CreateRectsHorizontal(0, 0, encounterData.spriteWidth, encounterData.spriteHeight, encounterData.frameCount), encounterData.frameCount);
 
 		sprite->SetOrigin(encounterData.spriteWidth / 2.f, encounterData.spriteHeight / 2.f);
 
@@ -47,7 +47,7 @@ namespace Demo {
 		float offsetX = -hitBoxW / 2.0f;
 		float offsetY = (originalHitBoxH / 2.0f) - hitBoxH;
 
-		collider = std::make_shared<DX9GF::RectangleCollider>(
+		collider = std::make_shared<sdlgf::RectangleCollider>(
 			transformManager,
 			shared_from_this(),
 			hitBoxW, hitBoxH,
@@ -56,10 +56,10 @@ namespace Demo {
 
 		collider->SetOrigin(0.f, 0.f);
 
-		particleTex = std::make_shared<DX9GF::Texture>(gd);
+		particleTex = std::make_shared<sdlgf::Texture>(gd);
 		particleTex->LoadTexture(L"assets/ui.png");
 
-		wealthyAura = std::make_unique<DX9GF::ParticleSystem>(particleTex.get(), 16);
+		wealthyAura = std::make_unique<sdlgf::ParticleSystem>(particleTex.get(), 16);
 		wealthyAura->SetSrcRect({ 261, 277, 267, 283});
 		wealthyAura->SetOrigin(6.f, 6.f);
 		wealthyAura->SetEmissionInterval(100.f);
@@ -114,9 +114,9 @@ namespace Demo {
 			float dy = py - ey;
 			float distanceSq = dx * dx + dy * dy;
 
-			auto pCol = std::dynamic_pointer_cast<DX9GF::RectangleCollider>(player->GetCollider().lock());
+			auto pCol = std::dynamic_pointer_cast<sdlgf::RectangleCollider>(player->GetCollider().lock());
 			if (pCol && this->collider) {
-				auto getBounds = [](std::shared_ptr<DX9GF::RectangleCollider> c) {
+				auto getBounds = [](std::shared_ptr<sdlgf::RectangleCollider> c) {
 					float sx = std::abs(c->GetWorldScaleX());
 					float sy = std::abs(c->GetWorldScaleY());
 					float left = c->GetWorldX() - (c->GetOriginX() * sx);
@@ -273,7 +273,7 @@ namespace Demo {
 		}
 	}
 
-	void MapEnemy::Draw(DX9GF::Camera* camera, unsigned long long deltaTime) {
+	void MapEnemy::Draw(sdlgf::Camera* camera, unsigned long long deltaTime) {
 		if (isDefeated) return;
 		if (postBattleCooldown > 0 && static_cast<int>(postBattleCooldown * 10) % 2 == 0) return;
 
@@ -324,7 +324,7 @@ namespace Demo {
 					if (c == player->GetCollider().lock()) continue;
 				}
 
-				if (auto rect = std::dynamic_pointer_cast<DX9GF::RectangleCollider>(c)) {
+				if (auto rect = std::dynamic_pointer_cast<sdlgf::RectangleCollider>(c)) {
 					float sx = std::abs(rect->GetWorldScaleX());
 					float sy = std::abs(rect->GetWorldScaleY());
 
@@ -346,12 +346,12 @@ namespace Demo {
 		encounterData.eventType = type;
 		if (wealthyAura) wealthyAura->SetEnabled(type != EventType::None);
 	}
-	void MapEnemy::DrawHpLabel(DX9GF::Camera* camera, unsigned long long deltaTime, float x, float y) {
+	void MapEnemy::DrawHpLabel(sdlgf::Camera* camera, unsigned long long deltaTime, float x, float y) {
 		if (!game || !game->GetGraphicsDevice()) return;
 		if (!hpFont) {
 			// A smaller font renders crisper than scaling the main one down.
-			hpFont = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
-			hpFontSprite = std::make_shared<DX9GF::FontSprite>(hpFont.get());
+			hpFont = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kSmallFontSize);
+			hpFontSprite = std::make_shared<sdlgf::FontSprite>(hpFont.get());
 		}
 
 		// Only a lone enemy has a number worth showing; a group stays hidden on purpose.

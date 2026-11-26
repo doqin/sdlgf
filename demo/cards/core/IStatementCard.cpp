@@ -23,7 +23,7 @@ int Demo::IStatementCard::GetStatusCoverPanelWidth() const
 	return contentWidth + USES_COVER_PAD_LEFT + USES_COVER_PAD_RIGHT + USES_COVER_CAP_WIDTH;
 }
 
-void Demo::IStatementCard::Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::IStatementCard::Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
 	// The face is as wide as its name needs, so the drag area is sized here, before the base class
 	// builds the trigger from it. The constructor's width only stands in until a device exists.
@@ -56,20 +56,20 @@ void Demo::IStatementCard::DrawStatusCover(unsigned long long deltaTime)
 	}
 
 	if (!usesTexture) {
-		usesTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		usesTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		usesTexture->LoadTexture(L"assets/ui.png");
 		// The panel body is a single uniform column (sheet columns 224-252 are identical), so
 		// one slice stretched to any width reproduces it. Sampling from the middle keeps
 		// filtering from bleeding in the transparent pixels beside the panel.
-		usesCoverBody = std::make_shared<DX9GF::StaticSprite>(usesTexture.get());
+		usesCoverBody = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
 		usesCoverBody->SetSrcRect({ .left = 236, .top = 272, .right = 237, .bottom = 288 });
-		usesCoverCap = std::make_shared<DX9GF::StaticSprite>(usesTexture.get());
+		usesCoverCap = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
 		usesCoverCap->SetSrcRect({ .left = 253, .top = 272, .right = 256, .bottom = 288 });
-		usesPipFull = std::make_shared<DX9GF::StaticSprite>(usesTexture.get());
+		usesPipFull = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
 		usesPipFull->SetSrcRect({ .left = 277, .top = 277, .right = 283, .bottom = 283 });
-		usesPipSpent = std::make_shared<DX9GF::StaticSprite>(usesTexture.get());
+		usesPipSpent = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
 		usesPipSpent->SetSrcRect({ .left = 261, .top = 277, .right = 267, .bottom = 283 });
-		nonPersistentBadge = std::make_shared<DX9GF::StaticSprite>(usesTexture.get());
+		nonPersistentBadge = std::make_shared<sdlgf::StaticSprite>(usesTexture.get());
 		nonPersistentBadge->SetSrcRect({ .left = 259, .top = 290, .right = 269, .bottom = 302 });
 	}
 
@@ -171,8 +171,8 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
+			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
 		}
 
 		descFontSprite->Begin();
@@ -193,8 +193,8 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 		graphicsDevice->SetAlphaBlending(false);
 
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
+			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
 		}
 
 		descFontSprite->Begin();
@@ -209,11 +209,11 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 
 	if (trigger && trigger->IsHovering(deltaTime)) {
 		if (!descFont) {
-			descFont = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-			descFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
+			descFont = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+			descFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
 		}
 		if (!statusFontSprite) {
-			statusFontSprite = std::make_shared<DX9GF::FontSprite>(descFont.get());
+			statusFontSprite = std::make_shared<sdlgf::FontSprite>(descFont.get());
 		}
 		// The lock overlay shares this sprite and leaves its own colour and outline behind, so
 		// re-apply the tooltip's styling every frame instead of only on first creation.
@@ -254,8 +254,8 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 			// The command is queued now and executed when the manager flushes its draw buffer.
 			// If the card dies in between - pile-view cards are destroyed when that menu closes -
 			// a captured raw 'this' would dangle, so gate the body on a weak reference.
-			std::weak_ptr<DX9GF::IGameObject> self = weak_from_this();
-			auto cmd = std::make_shared<DX9GF::CustomCommand>([this, self, deltaTime, hasStatusTab](std::function<void()> markFinished) {
+			std::weak_ptr<sdlgf::IGameObject> self = weak_from_this();
+			auto cmd = std::make_shared<sdlgf::CustomCommand>([this, self, deltaTime, hasStatusTab](std::function<void()> markFinished) {
 				if (self.expired()) {
 					markFinished();
 					return;
@@ -301,7 +301,7 @@ void Demo::IStatementCard::Draw(unsigned long long deltaTime) {
 	}
 }
 
-bool Demo::IStatementCard::TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent)
+bool Demo::IStatementCard::TryReclaim(std::weak_ptr<sdlgf::IGameObject> oldParent)
 {
 	auto p = oldParent.lock();
 	if (!p) return false;

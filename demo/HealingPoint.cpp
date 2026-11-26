@@ -4,24 +4,24 @@
 #include <cmath>
 
 namespace Demo {
-    HealingPoint::HealingPoint(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+    HealingPoint::HealingPoint(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y)
         : IGameObject(tm, x, y), transformManager(tm) {
     }
 
-    void HealingPoint::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font, std::shared_ptr<DX9GF::CommandBuffer> drawBuffer) {
+    void HealingPoint::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p, std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font, std::shared_ptr<sdlgf::CommandBuffer> drawBuffer) {
         player = p;
         this->worldCamera = camera;
-        fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+        fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
         this->drawBuffer = drawBuffer;
         this->gd = gd;
-        collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 8.f, GetWorldX(), GetWorldY() + 12.f);
+        collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 8.f, GetWorldX(), GetWorldY() + 12.f);
         collider->SetOriginCenter();
         cm->Add(collider);
 
-        spritesheet = std::make_shared<DX9GF::Texture>(gd);
+        spritesheet = std::make_shared<sdlgf::Texture>(gd);
         spritesheet->LoadTexture(L"assets/healingpoint-Sheet.png");
 
-        sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12);
+        sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 5), 12);
         sprite->SetOrigin(16.f, 16.f);
         sprite->SetPosition(GetWorldX(), GetWorldY());
     }
@@ -43,24 +43,24 @@ namespace Demo {
         float distance = std::sqrt((px - sx) * (px - sx) + (py - sy) * (py - sy));
         isPlayerNear = (distance <= INTERACTION_DISTANCE);
 
-        auto inpMan = DX9GF::InputManager::GetInstance();
+        auto inpMan = sdlgf::InputManager::GetInstance();
 
         if (isPlayerNear && inpMan->KeyDown(SettingsManager::GetInstance()->GetKeybind("INTERACT"))) {
             if (pLock->GetHealth() < pLock->GetMaxHealth()) {
                 pLock->SetHealth(pLock->GetMaxHealth());
                 statusMessage = "Healed to FULL HP!";
-                DX9GF::AudioManager::GetInstance()->PlayRandom("power_up", 0.2f);
+                sdlgf::AudioManager::GetInstance()->PlayRandom("power_up", 0.2f);
                 messageTimer = 1.5f;
             }
             else {
                 statusMessage = "HP is already full!";
-                DX9GF::AudioManager::GetInstance()->Play("error", false, 0.3f);
+                sdlgf::AudioManager::GetInstance()->Play("error", false, 0.3f);
                 messageTimer = 1.0f;
             }
         }
     }
 
-    void HealingPoint::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime) {
+    void HealingPoint::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime) {
         if (!isVisible) return;
         sprite->Begin();
         sprite->Draw(camera, deltaTime);
@@ -68,7 +68,7 @@ namespace Demo {
 		DrawPosition(deltaTime, gd, camera);
     }
 
-    void HealingPoint::DrawUI(DX9GF::Camera* uiCamera, unsigned long long deltaTime) {
+    void HealingPoint::DrawUI(sdlgf::Camera* uiCamera, unsigned long long deltaTime) {
         if (!isVisible || !uiCamera || !fontSprite || !worldCamera) return;
 
         auto [x, y] = GetWorldPosition();
@@ -81,7 +81,7 @@ namespace Demo {
             float scale = 0.8f * zoom;
 
             fontSprite->Begin();
-            fontSprite->SetText(DX9GF::Utils::Utf8ToWide(statusMessage));
+            fontSprite->SetText(sdlgf::Utils::Utf8ToWide(statusMessage));
             fontSprite->SetScale(scale);
             fontSprite->SetColor(0xFF55FF55);
 

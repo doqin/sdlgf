@@ -1,25 +1,25 @@
 ﻿#pragma once
-#include "DX9GFExtras.h"
-#include "DX9GF.h"
+#include "Extras.h"
+#include "sdlgf.h"
 
 namespace Demo {
 	class DraggableManager;
-  class IDraggable : virtual public DX9GF::IGameObject {
+  class IDraggable : virtual public sdlgf::IGameObject {
 	protected:
-		std::weak_ptr<DX9GF::IGameObject> preDragParent;
+		std::weak_ptr<sdlgf::IGameObject> preDragParent;
 		float preDragWorldX = 0;
 		float preDragWorldY = 0;
 		inline static size_t nextID = 0;
 		std::string id;
 		size_t dragAreaWidth;
 		size_t dragAreaHeight;
-		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
+		std::shared_ptr<sdlgf::RectangleTrigger> trigger;
 		std::shared_ptr<Demo::DraggableManager> draggableManager;
-		DX9GF::Camera* camera = nullptr;
-		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
+		sdlgf::Camera* camera = nullptr;
+		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
 		D3DXCOLOR color;
-		static std::shared_ptr<DX9GF::Font> debugFont;
-		static std::shared_ptr<DX9GF::FontSprite> debugFontSprite;
+		static std::shared_ptr<sdlgf::Font> debugFont;
+		static std::shared_ptr<sdlgf::FontSprite> debugFontSprite;
 		bool isDragging = false;
 		RECT scissorRect;
 		bool isCropped = false;
@@ -27,11 +27,11 @@ namespace Demo {
 		bool dragDisabled = false;
 	public:
 		inline static bool debug = false;
-		inline IDraggable(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager), dragAreaWidth(0), dragAreaHeight(0) { 
+		inline IDraggable(std::weak_ptr<sdlgf::TransformManager> transformManager) : IGameObject(transformManager), dragAreaWidth(0), dragAreaHeight(0) { 
 			id = "draggable" + std::to_string(nextID++); 
 		}
 		inline IDraggable(
-			std::weak_ptr<DX9GF::TransformManager> transformManager, 
+			std::weak_ptr<sdlgf::TransformManager> transformManager, 
 			size_t dragAreaWidth, 
 			size_t dragAreaHeight, 
 			float x = 0, 
@@ -45,8 +45,8 @@ namespace Demo {
 			id = "draggable" + std::to_string(nextID++);
 		}
 		inline IDraggable(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::IGameObject> parent,
 			size_t dragAreaWidth,
 			size_t dragAreaHeight,
 			float x = 0,
@@ -59,14 +59,14 @@ namespace Demo {
 			dragAreaHeight(dragAreaHeight) {
 			id = "draggable" + std::to_string(nextID++);
 		}
-		virtual void Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
+		virtual void Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera);
 		void SetParent(std::weak_ptr<IGameObject> parent);
 		void DetachParent();
 		virtual void Update(unsigned long long deltaTime);
 		virtual void Draw(unsigned long long deltaTime);
 		virtual bool OnDrop(std::shared_ptr<IDraggable> other);
 		virtual bool OnHover(std::shared_ptr<IDraggable> other);
-		virtual void OnDropMissed(std::weak_ptr<DX9GF::IGameObject> oldParent, float oldWorldX, float oldWorldY);
+		virtual void OnDropMissed(std::weak_ptr<sdlgf::IGameObject> oldParent, float oldWorldX, float oldWorldY);
 		using DropMissedCallback = std::function<void(std::shared_ptr<IDraggable>)>;
 		DropMissedCallback onDropMissedHandler;
 		void SetOnDropMissedHandler(DropMissedCallback handler) { onDropMissedHandler = handler; }
@@ -75,8 +75,8 @@ namespace Demo {
 		ClickCallback onClickHandler;
 		void SetOnClickHandler(ClickCallback handler) { onClickHandler = handler; }
 		void SetDragDisabled(bool disabled) { dragDisabled = disabled; }
-		std::weak_ptr<DX9GF::IGameObject> GetPreDragParent() const { return preDragParent; }
-		virtual bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) { return false; }
+		std::weak_ptr<sdlgf::IGameObject> GetPreDragParent() const { return preDragParent; }
+		virtual bool TryReclaim(std::weak_ptr<sdlgf::IGameObject> oldParent) { return false; }
 		virtual bool CanBeStoredInContainer() const { return true; }
 
 		void SetScissorRect(const RECT& rect);
@@ -85,7 +85,7 @@ namespace Demo {
 		virtual size_t GetWidth() const;
 		virtual size_t GetHeight() const;
 		std::weak_ptr<DraggableManager> GetDraggableManager();
-		std::weak_ptr<DX9GF::RectangleTrigger> GetTrigger();
+		std::weak_ptr<sdlgf::RectangleTrigger> GetTrigger();
 		bool IsDragging() const;
 		bool IsHidden() const;
 		void SetHidden(bool hidden);
@@ -101,7 +101,7 @@ namespace Demo {
 		std::vector<LevelBatch> levels;
 		std::unordered_map<std::string, std::shared_ptr<IDraggable>> objectMap;
 		std::vector<std::shared_ptr<IDraggable>> isDraggingDraggables;
-		DX9GF::CommandBuffer drawBuffer;
+		sdlgf::CommandBuffer drawBuffer;
 		// While set, Add/Remove and IDraggable::SetParent/DetachParent skip the O(n^2)
 		// RebuildHierarchy(); the batch's owner flips it back off (which rebuilds once).
 		bool deferRebuild = false;
@@ -118,7 +118,7 @@ namespace Demo {
 		void AttachDroppable(std::shared_ptr<IDraggable> obj);
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
-		void QueueDraw(std::shared_ptr<DX9GF::ICommand> cmd);
+		void QueueDraw(std::shared_ptr<sdlgf::ICommand> cmd);
 		// Draw() flushes the queue itself. Callers that draw draggables directly, without going
 		// through Draw(), must flush too - otherwise queued commands outlive the objects that
 		// queued them and run against freed memory.

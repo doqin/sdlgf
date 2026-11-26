@@ -1,5 +1,5 @@
-// Tests for DX9GFKeys: DIK <-> SDL scancode translation.
-#include "DX9GFKeys.h"
+// Tests for Keys: DIK <-> SDL scancode translation.
+#include "Keys.h"
 
 #include <SDL3/SDL_scancode.h>
 
@@ -9,8 +9,8 @@ static int g_failures = 0;
 #define CHECK(cond) \
 	do { if (!(cond)) { std::fprintf(stderr, "FAIL %s:%d: %s\n", __FILE__, __LINE__, #cond); ++g_failures; } } while (0)
 
-using DX9GF::Keys::FromSDLScancode;
-using DX9GF::Keys::ToSDLScancode;
+using sdlgf::Keys::FromSDLScancode;
+using sdlgf::Keys::ToSDLScancode;
 
 static void TestKnownKeys()
 {
@@ -70,7 +70,7 @@ static void TestUnknownAndOutOfRange()
 	CHECK(FromSDLScancode(100000) == 0);
 	CHECK(ToSDLScancode(0) == SDL_SCANCODE_UNKNOWN);
 	CHECK(ToSDLScancode(-5) == SDL_SCANCODE_UNKNOWN);
-	CHECK(ToSDLScancode(DX9GF::Keys::KeyCount) == SDL_SCANCODE_UNKNOWN);
+	CHECK(ToSDLScancode(sdlgf::Keys::KeyCount) == SDL_SCANCODE_UNKNOWN);
 	CHECK(ToSDLScancode(0xFF) == SDL_SCANCODE_UNKNOWN);   // no key has this ID
 	CHECK(FromSDLScancode(SDL_SCANCODE_MEDIA_PLAY) == 0);   // media key with no DIK
 }
@@ -78,7 +78,7 @@ static void TestUnknownAndOutOfRange()
 static void TestRoundTrip()
 {
 	int mapped = 0;
-	for (int dik = 1; dik < DX9GF::Keys::KeyCount; ++dik) {
+	for (int dik = 1; dik < sdlgf::Keys::KeyCount; ++dik) {
 		const int sdl = ToSDLScancode(dik);
 		if (sdl == 0) continue;
 		++mapped;

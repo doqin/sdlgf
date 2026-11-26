@@ -5,7 +5,7 @@
  Run after: cmake -S . -B build -A x64 ; cmake --build build --config Release
 #>
 param(
-    [string]$OutDir   = "dist/DX9GF-Demo",
+    [string]$OutDir   = "dist/sdlgf-demo",
     [string]$BuildDir = "build/bin/Release"
 )
 $ErrorActionPreference = "Stop"

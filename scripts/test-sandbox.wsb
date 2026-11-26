@@ -7,7 +7,7 @@
        so it appears on the host automatically. -->
   <MappedFolders>
     <MappedFolder>
-      <HostFolder>D:\repos\doqin\dx9gf\dist\DX9GF-Demo</HostFolder>
+      <HostFolder>D:\repos\doqin\dx9gf\dist\sdlgf-demo</HostFolder>
       <ReadOnly>false</ReadOnly>
     </MappedFolder>
     <MappedFolder>

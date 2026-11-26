@@ -6,16 +6,16 @@
 #include <algorithm>
 #include "DrawUtils.h"
 #include "RNG.h"
-#include "DX9GFInputManager.h"
+#include "InputManager.h"
 #include "PopUpMessage.h"
 #include "StatusDisplay.h"
 #include <typeinfo>
-void Demo::IEnemy::InitCardSpawnTrigger(DX9GF::Camera* camera, float width, float height)
+void Demo::IEnemy::InitCardSpawnTrigger(sdlgf::Camera* camera, float width, float height)
 {
-	cardSpawnTrigger = std::make_shared<DX9GF::RectangleTrigger>(transformManager, shared_from_this(), width, height);
+	cardSpawnTrigger = std::make_shared<sdlgf::RectangleTrigger>(transformManager, shared_from_this(), width, height);
 	cardSpawnTrigger->SetOriginCenter();
 	cardSpawnTrigger->Init(camera);
-	cardSpawnTrigger->SetOnClickLeft([this](DX9GF::ITrigger* trigger) {
+	cardSpawnTrigger->SetOnClickLeft([this](sdlgf::ITrigger* trigger) {
 		onRequestEnemyCard(std::dynamic_pointer_cast<IEnemy>(shared_from_this()));
 		});
 }
@@ -62,13 +62,13 @@ void Demo::IEnemy::BeginDeath()
 		deathBaseScale = body->GetScale().x;
 	}
 	if (graphicsDevice) {
-		deathParticleTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		deathParticleTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		deathParticleTexture->CreatePlainTexture(0xFFFFFFFF, 4, 4);
-		deathParticles = std::make_unique<DX9GF::ParticleSystem>(deathParticleTexture.get(), 60);
+		deathParticles = std::make_unique<sdlgf::ParticleSystem>(deathParticleTexture.get(), 60);
 		deathParticles->SetOrigin(2.f, 2.f);
-		DX9GF::ConfigureExplosionEmitter(*deathParticles);
+		sdlgf::ConfigureExplosionEmitter(*deathParticles);
 	}
-	DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 1.0f);
+	sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 1.0f);
 }
 
 void Demo::IEnemy::UpdateDeath(unsigned long long deltaTime)
@@ -108,7 +108,7 @@ void Demo::IEnemy::UpdateDeath(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::IEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (!graphicsDevice || !camera) {
 		return;
@@ -116,13 +116,13 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	this->graphicsDevice = graphicsDevice;
 
 	if (!font) {
-		font = std::make_shared<DX9GF::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		font = std::make_shared<sdlgf::Font>(graphicsDevice, Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 	}
 	if (!uiTexture) {
-		uiTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		uiTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		uiTexture->LoadTexture(L"assets/ui.png");
-		uiSprite = std::make_shared<DX9GF::StaticSprite>(uiTexture.get());
+		uiSprite = std::make_shared<sdlgf::StaticSprite>(uiTexture.get());
 		uiSprite->SetScale(2.0f);
 	}
 	if (!statusRenderer) {
@@ -166,7 +166,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 				20.f,
 				10.f,
 				40.f,
-				DX9GF::Platform::GetTicksMs()
+				sdlgf::Platform::GetTicksMs()
 			);
 
 			{
@@ -271,8 +271,8 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 	float statusOffsetX = 64.f;
 	float statusOffsetY = -20.f;
 
-	auto [screenX, screenY] = DX9GF::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(camera);
-	auto [mouseX, mouseY] = DX9GF::Utils::WindowToWorldCoords(*camera, screenX, screenY);
+	auto [screenX, screenY] = sdlgf::InputManager::GetInstance()->GetVirtualAbsoluteMousePos(camera);
+	auto [mouseX, mouseY] = sdlgf::Utils::WindowToWorldCoords(*camera, screenX, screenY);
 
 	for (const auto& mod : modifiers) {
 		if (isDying) break;
@@ -306,7 +306,7 @@ void Demo::IEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* ca
 				targetScreenY = screenY + 32.f;
 			}
 
-			auto [worldDrawX, worldDrawY] = DX9GF::Utils::WindowToWorldCoords(*camera, targetScreenX, targetScreenY);
+			auto [worldDrawX, worldDrawY] = sdlgf::Utils::WindowToWorldCoords(*camera, targetScreenX, targetScreenY);
 
 			fontSprite->End();
 			graphicsDevice->SetAlphaBlending(true);
@@ -348,7 +348,7 @@ namespace {
 		return (color & 0x00FFFFFF) | (static_cast<D3DCOLOR>(a) << 24);
 	}
 
-	void DrawRing(DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera, float cx, float cy, float r, D3DCOLOR color, float thickness)
+	void DrawRing(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float r, D3DCOLOR color, float thickness)
 	{
 		constexpr int SEGMENTS = 28;
 		constexpr float TWO_PI = 6.2831853f;
@@ -360,7 +360,7 @@ namespace {
 		}
 	}
 
-	void DrawSquare(DX9GF::GraphicsDevice* gd, const DX9GF::Camera& camera, float cx, float cy, float size, D3DCOLOR color)
+	void DrawSquare(sdlgf::GraphicsDevice* gd, const sdlgf::Camera& camera, float cx, float cy, float size, D3DCOLOR color)
 	{
 		gd->DrawRectangle(camera, cx - size / 2.f, cy - size / 2.f, size, size, color, true);
 	}
@@ -398,7 +398,7 @@ void Demo::IEnemy::UpdateDebuffEffects(unsigned long long deltaTime)
 		[](const DebuffEffect& e) { return e.elapsed >= DEBUFF_TOTAL_MS; }), debuffEffects.end());
 }
 
-void Demo::IEnemy::DrawDebuffEffects(DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::IEnemy::DrawDebuffEffects(sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (debuffEffects.empty() || isDying || !graphicsDevice || !camera) return;
 
@@ -483,7 +483,7 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 	if (health < 0) health = 0;
 	CheckHurtLine();
 
-	if (actualDamage > 0) DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.8f);
+	if (actualDamage > 0) sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.8f);
 
 	damageIndicators.push_back(DamageIndicator{
 		L"-" + std::to_wstring(static_cast<int>(std::round(actualDamage))),
@@ -496,10 +496,10 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 		});
 
 	if (!hitImpactTexture && graphicsDevice) {
-		hitImpactTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+		hitImpactTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 		hitImpactTexture->LoadTexture(L"assets/hitimpact-Sheet.png");
 	}
-	hitImpactSprites.push_back(std::make_shared<DX9GF::AnimatedSprite>(hitImpactTexture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
+	hitImpactSprites.push_back(std::make_shared<sdlgf::AnimatedSprite>(hitImpactTexture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 4), 24, false));
 
 	hitImpactSprites.back()->SetPosition(GetWorldX() + RNG::Range(-16.f, 16.f), GetWorldY() + RNG::Range(-16.f, 16.f));
 	hitImpactSprites.back()->SetScale(RNG::Range(2.f, 3.f));
@@ -509,11 +509,11 @@ bool Demo::IEnemy::TakeDamage(float damage, bool ignoreArmor)
 	float oy = GetWorldY();
 
 	if (!animationBuffer.IsBusy()) {
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox - 8.f, oy - 6.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox + 8.f, oy + 6.f, 0.1f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox - 4.f, oy - 4.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox + 4.f, oy + 2.f, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox - 8.f, oy - 6.f, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox + 8.f, oy + 6.f, 0.1f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox - 4.f, oy - 4.f, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox + 4.f, oy + 2.f, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox, oy, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
 	}
 
 	if (IsDead()) BeginDeath();
@@ -530,19 +530,19 @@ bool Demo::IEnemy::TakeIndirectDamage(float damage, DamageType type) {
 
 	if (type == DamageType::Poison) {
 		textColor = 0xFFba4aed; //purple
-		DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.5f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.5f);
 	}
 	else if (type == DamageType::Burn) {
 		textColor = 0xFFff8800; //orange
-		DX9GF::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.5f);
+		sdlgf::AudioManager::GetInstance()->PlayRandom("take_dmg", 0.5f);
 	}
 
 	float ox = GetWorldX();
 	float oy = GetWorldY();
 	if (!animationBuffer.IsBusy()) {
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox - 2.f, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox + 2.f, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
-		animationBuffer.PushCommand(std::make_shared<DX9GF::GoToCommand>(shared_from_this(), ox, oy, 0.05f, DX9GF::TimeTag{}, DX9GF::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox - 2.f, oy, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox + 2.f, oy, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
+		animationBuffer.PushCommand(std::make_shared<sdlgf::GoToCommand>(shared_from_this(), ox, oy, 0.05f, sdlgf::TimeTag{}, sdlgf::EaseInOutTag{}));
 	}
 
 	damageIndicators.push_back(DamageIndicator{
@@ -610,13 +610,13 @@ void Demo::IEnemy::SpawnHealText(int actualHeal) {
 }
 
 void Demo::IEnemy::CastAbility(std::function<void()> effect, std::shared_ptr<PopUpMessage> popUpMessage, const std::wstring& message) {
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([effect](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([effect](std::function<void(void)> markFinished) {
 		if (effect) effect();
 		markFinished();
 		}));
 
 
-	commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, popUpMessage, message](std::function<void(void)> markFinished) {
+	commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, popUpMessage, message](std::function<void(void)> markFinished) {
 		// An ability with a line in EnemyDialogue is said in the speech bubble instead of popping up;
 		// its popup text still goes to the battle log.
 		const std::wstring speech = FindAbilitySpeech(message);
@@ -629,7 +629,7 @@ void Demo::IEnemy::CastAbility(std::function<void()> effect, std::shared_ptr<Pop
 		}
 		markFinished();
 		}));
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.5f));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.5f));
 }
 
 std::vector<std::string> Demo::IEnemy::RollCardDrops() const
@@ -713,10 +713,10 @@ void Demo::IEnemy::UpdateSpeech(unsigned long long deltaTime)
 	}
 }
 
-void Demo::IEnemy::DrawSpeech(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::IEnemy::DrawSpeech(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (speechQueue.empty() || speechQueue.front().delayMs > 0.f || isDying || IsDead() || !gd || !camera || !font) return;
-	if (!speechFontSprite) speechFontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+	if (!speechFontSprite) speechFontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 
 	constexpr float PAD = 10.f, BORDER = 2.f, TAIL_LEN = 16.f, TAIL_HALF = 8.f;
 
@@ -739,7 +739,7 @@ void Demo::IEnemy::DrawSpeech(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, 
 	const float anchorX = GetWorldX() - GetBodyWidth() * 0.35f;
 	const float anchorY = GetWorldY() - GetBodyHeight() * 0.25f;
 	const float bubbleX = anchorX - TAIL_LEN - bubbleW;
-	const float screenTop = camera->GetPosition().y - static_cast<float>(DX9GF::Application::GetInstance()->GetScreenHeight()) / 2.f;
+	const float screenTop = camera->GetPosition().y - static_cast<float>(sdlgf::Application::GetInstance()->GetScreenHeight()) / 2.f;
 	const float bubbleY = (std::max)(screenTop + 8.f, anchorY - bubbleH * 0.6f);
 	const float tailY = std::clamp(anchorY, bubbleY + TAIL_HALF + BORDER, bubbleY + bubbleH - TAIL_HALF - BORDER);
 	const float tailBaseX = bubbleX + bubbleW;

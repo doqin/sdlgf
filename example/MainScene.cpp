@@ -1,37 +1,37 @@
 #include "pch.h"
 #include "MainScene.h"
-#include <DX9GFUtils.h>
-#include "DX9GFGraphicsDevice.h"
-#include "DX9GFSceneManager.h"
+#include <Utils.h>
+#include "GraphicsDevice.h"
+#include "SceneManager.h"
 #include "resource.h"
 
 void MainScene::Init()
 {
-	inputManager = DX9GF::InputManager::GetInstance();
-	audioManager = DX9GF::AudioManager::GetInstance();
+	inputManager = sdlgf::InputManager::GetInstance();
+	audioManager = sdlgf::AudioManager::GetInstance();
 	audioManager->Load("ALOVU", IDR_WAVE_ALOVU);
-	transformManager = std::make_shared<DX9GF::TransformManager>();
-	colliderManager = std::make_shared<DX9GF::ColliderManager>();
-	map = std::make_shared<DX9GF::Map>(game->GetGraphicsDevice());
+	transformManager = std::make_shared<sdlgf::TransformManager>();
+	colliderManager = std::make_shared<sdlgf::ColliderManager>();
+	map = std::make_shared<sdlgf::Map>(game->GetGraphicsDevice());
 	map->Create(transformManager, colliderManager, "./Resources/map.tmx");
-	fontArial = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Arial", 32);
-	whiteTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	fontArial = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), L"Arial", 32);
+	whiteTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	whiteTexture->CreatePlainTexture(0xFFFFFFFF, 500, 500);
-	dawgTexture = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+	dawgTexture = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 	dawgTexture->LoadTexture(IDR_RCDATA1, 100, 100);
-	fontSpriteArial = std::make_shared<DX9GF::FontSprite>(fontArial.get());
+	fontSpriteArial = std::make_shared<sdlgf::FontSprite>(fontArial.get());
 	fontSpriteArial->SetOrigin(16, 16);
 	fontSpriteArial->SetPosition(64, -64);
 	fontSpriteArial->SetText(L"Hello world!");
 
-	DX9GF::Font::AddFont(L"./Resources/detemination.ttf");
-	fontdetemination = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), L"Determination", 32);
-	fontSpritedetemination = std::make_shared<DX9GF::FontSprite>(fontdetemination.get());
+	sdlgf::Font::AddFont(L"./Resources/detemination.ttf");
+	fontdetemination = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), L"Determination", 32);
+	fontSpritedetemination = std::make_shared<sdlgf::FontSprite>(fontdetemination.get());
 	fontSpritedetemination->SetOrigin(16, 16);
 	fontSpritedetemination->SetPosition(64, -128);
 	fontSpritedetemination->SetText(L"Hello world!!!!!");
 
-	DX9GF::Debug::Init(game->GetGraphicsDevice());
+	sdlgf::DebugDraw::Init(game->GetGraphicsDevice());
 
 	players.push_back(std::make_shared<GO::Player>(transformManager));
 	for (auto& player : players) {
@@ -39,9 +39,9 @@ void MainScene::Init()
 	}
 	rect = std::make_shared<GO::Rectangle>(transformManager, 64, 128, 64, 128);
 	rect->Init(game->GetGraphicsDevice(), &camera, colliderManager);
-	colorRec = std::make_shared<DX9GF::StaticSprite>(whiteTexture.get());
-	textureRec = std::make_shared<DX9GF::StaticSprite>(dawgTexture.get());
-	auto app = DX9GF::Application::GetInstance();
+	colorRec = std::make_shared<sdlgf::StaticSprite>(whiteTexture.get());
+	textureRec = std::make_shared<sdlgf::StaticSprite>(dawgTexture.get());
+	auto app = sdlgf::Application::GetInstance();
 	transformManager->RebuildHierarchy();
 }
 
@@ -63,16 +63,16 @@ void MainScene::Update(unsigned long long deltaTime)
 			float originalZoom = camera.GetZoom();
 			float originalRectRotation = rect->GetLocalRotation();
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, 0.0f, 0.0f));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 0.5f, 2.0f));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::PlaySoundCommand>("ALOVU"));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, rect->GetWorldX(), rect->GetWorldY()));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 3.0f, 3.0f));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation + 720.0f, 360.0f));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::PlaySoundCommand>("ALOVU"));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
-			commandBuffer.StackCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation, 360.0f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::SetCameraPositionCommand>(&camera, 0.0f, 0.0f));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::ZoomCameraCommand>(&camera, 0.5f, 2.0f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::PlaySoundCommand>("ALOVU"));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::SetCameraPositionCommand>(&camera, rect->GetWorldX(), rect->GetWorldY()));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::ZoomCameraCommand>(&camera, 3.0f, 3.0f));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::RotateCommand>(rect, originalRectRotation + 720.0f, 360.0f));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::PlaySoundCommand>("ALOVU"));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
+			commandBuffer.StackCommand(std::make_shared<sdlgf::RotateCommand>(rect, originalRectRotation, 360.0f));
 		}
 
 		float cameraXDir = 0;
@@ -96,11 +96,11 @@ void MainScene::Update(unsigned long long deltaTime)
 			cameraPos.y += cameraYDir * cameraVelocity * deltaTime / 1000;
 			camera.SetPosition(cameraPos);
 		}
-		if (inputManager->KeyDown(DIK_F1))  DX9GF::ICollider::drawCollider = !DX9GF::ICollider::drawCollider;
-		if (inputManager->KeyDown(DIK_F2))  DX9GF::ITrigger::drawTrigger = !DX9GF::ITrigger::drawTrigger;
-		if (inputManager->KeyDown(DIK_F3))  DX9GF::Debug::drawGrid = !DX9GF::Debug::drawGrid;
-		if (inputManager->KeyDown(DIK_F4))  DX9GF::Debug::drawAxis = !DX9GF::Debug::drawAxis;
-		if (inputManager->MousePress(DX9GF::InputManager::MouseButton::Middle)) {
+		if (inputManager->KeyDown(DIK_F1))  sdlgf::ICollider::drawCollider = !sdlgf::ICollider::drawCollider;
+		if (inputManager->KeyDown(DIK_F2))  sdlgf::ITrigger::drawTrigger = !sdlgf::ITrigger::drawTrigger;
+		if (inputManager->KeyDown(DIK_F3))  sdlgf::DebugDraw::drawGrid = !sdlgf::DebugDraw::drawGrid;
+		if (inputManager->KeyDown(DIK_F4))  sdlgf::DebugDraw::drawAxis = !sdlgf::DebugDraw::drawAxis;
+		if (inputManager->MousePress(sdlgf::InputManager::MouseButton::Middle)) {
 			auto [dX, dY] = inputManager->GetRelativeMousePos();
 			auto cameraPos = camera.GetPosition();
 			cameraPos.x -= dX;
@@ -138,12 +138,12 @@ void MainScene::Update(unsigned long long deltaTime)
 			float chestY = rect->GetWorldY();
 
 			// Cutscene
-			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, chestX, chestY));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, 2.0f, 1.5f));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::RotateCommand>(rect, rect->GetLocalRotation() + 360.0f, 180.0f));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::RotateCommand>(rect, originalRectRotation, 180.0f));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::SetCameraPositionCommand>(&camera, chestX, chestY));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::ZoomCameraCommand>(&camera, 2.0f, 1.5f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::RotateCommand>(rect, rect->GetLocalRotation() + 360.0f, 180.0f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::ZoomCameraCommand>(&camera, originalZoom, 2.0f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::RotateCommand>(rect, originalRectRotation, 180.0f));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::SetCameraPositionCommand>(&camera, originalCamPos.x, originalCamPos.y));
 		}
 
 		wasInTrigger = isInside;
@@ -152,7 +152,7 @@ void MainScene::Update(unsigned long long deltaTime)
 	camera.Update();
 	commandBuffer.Update(deltaTime);
 	for (auto& player : players) {
-		if (player && player->GetState() == DX9GF::IGameObject::State::Destroyed) {
+		if (player && player->GetState() == sdlgf::IGameObject::State::Destroyed) {
 			auto it = std::find(players.begin(), players.end(), player);
 			players.erase(it);
 		}
@@ -212,12 +212,12 @@ void MainScene::DrawWorld(unsigned long long deltaTime)
 	auto dev = game->GetGraphicsDevice();
 
 	if (SUCCEEDED(dev->BeginDraw())) {
-		auto app = DX9GF::Application::GetInstance();
+		auto app = sdlgf::Application::GetInstance();
 		auto width = app->GetScreenWidth();
 		auto height = app->GetScreenHeight();
 		map->Draw(camera);
-		if(DX9GF::Debug::drawGrid){
-			DX9GF::Debug::DrawGrid(
+		if(sdlgf::DebugDraw::drawGrid){
+			sdlgf::DebugDraw::DrawGrid(
 				dev,
 				camera,
 				0,
@@ -228,8 +228,8 @@ void MainScene::DrawWorld(unsigned long long deltaTime)
 				32,
 				0xFFFF0000);
 		}
-		if (DX9GF::Debug::drawAxis) {
-			DX9GF::Debug::DrawAxis(camera, 3000, 32, 0xFFFF0000);
+		if (sdlgf::DebugDraw::drawAxis) {
+			sdlgf::DebugDraw::DrawAxis(camera, 3000, 32, 0xFFFF0000);
 		}
 		textureRec->Begin();
 		textureRec->Draw(camera, deltaTime);

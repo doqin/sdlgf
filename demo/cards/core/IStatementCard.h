@@ -15,7 +15,7 @@ namespace Demo {
 		static constexpr size_t PLACEHOLDER_WIDTH = 160;
 		static constexpr size_t FACE_HEIGHT = 32;
 
-		inline IStatementCard(std::weak_ptr<DX9GF::TransformManager> transformManager, CardSpec cardSpec)
+		inline IStatementCard(std::weak_ptr<sdlgf::TransformManager> transformManager, CardSpec cardSpec)
 			: IGameObject(transformManager), ICard(transformManager),
 			IDraggable(transformManager, PLACEHOLDER_WIDTH, FACE_HEIGHT) {
 			Configure(std::move(cardSpec));
@@ -57,7 +57,7 @@ namespace Demo {
 		// EnemyCard-only logic.
 		bool OnDrop(std::shared_ptr<IDraggable> other) override { return false; }
 
-		bool TryReclaim(std::weak_ptr<DX9GF::IGameObject> oldParent) override;
+		bool TryReclaim(std::weak_ptr<sdlgf::IGameObject> oldParent) override;
 	protected:
 		bool isDone = false;
 		int stepsDone = 0;
@@ -79,11 +79,11 @@ namespace Demo {
 		// EnemyCard::OnDropMissed (handling for being rejected everywhere).
 		bool IsQueuedInBlock() const;
 		std::shared_ptr<IBlockCard> GetParentBlock() const;
-		std::shared_ptr<DX9GF::Font> descFont;
-		std::shared_ptr<DX9GF::FontSprite> descFontSprite;
+		std::shared_ptr<sdlgf::Font> descFont;
+		std::shared_ptr<sdlgf::FontSprite> descFontSprite;
 
 		// The status-effect tab drawn under the description tooltip.
-		std::shared_ptr<DX9GF::FontSprite> statusFontSprite;
+		std::shared_ptr<sdlgf::FontSprite> statusFontSprite;
 
 		// Cover panel drawn off the card's right edge, holding the non-persistent badge and one
 		// pip per use. Geometry below is in ui.png pixels; cards render at USES_COVER_SCALE.
@@ -105,12 +105,12 @@ namespace Demo {
 		static constexpr int NON_PERSISTENT_BADGE_HEIGHT = 12;
 		static constexpr int NON_PERSISTENT_BADGE_TOP = 2;
 
-		std::shared_ptr<DX9GF::Texture> usesTexture;
-		std::shared_ptr<DX9GF::StaticSprite> usesCoverBody;
-		std::shared_ptr<DX9GF::StaticSprite> usesCoverCap;
-		std::shared_ptr<DX9GF::StaticSprite> usesPipFull;
-		std::shared_ptr<DX9GF::StaticSprite> usesPipSpent;
-		std::shared_ptr<DX9GF::StaticSprite> nonPersistentBadge;
+		std::shared_ptr<sdlgf::Texture> usesTexture;
+		std::shared_ptr<sdlgf::StaticSprite> usesCoverBody;
+		std::shared_ptr<sdlgf::StaticSprite> usesCoverCap;
+		std::shared_ptr<sdlgf::StaticSprite> usesPipFull;
+		std::shared_ptr<sdlgf::StaticSprite> usesPipSpent;
+		std::shared_ptr<sdlgf::StaticSprite> nonPersistentBadge;
 
 		// Panel width in sheet pixels, sized to its contents so there is no dead grey space.
 		int GetStatusCoverPanelWidth() const;
@@ -125,7 +125,7 @@ namespace Demo {
 		virtual void DrawCardFace(unsigned long long deltaTime);
 
 	public:
-		virtual void Init(std::shared_ptr<DraggableManager> manager, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) override;
+		virtual void Init(std::shared_ptr<DraggableManager> manager, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) override;
 		// How far the status cover extends past the card on screen, net of its overlap, or 0 when
 		// the card is persistent and unlimited. Included in GetWidth() so containers size and
 		// crop to it instead of clipping it off.

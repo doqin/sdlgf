@@ -1,6 +1,6 @@
 #pragma once
-#include "DX9GFExtras.h"
-#include "DX9GF.h"
+#include "Extras.h"
+#include "sdlgf.h"
 #include <deque>
 #include <string>
 #include "Game.h"
@@ -14,7 +14,7 @@ namespace Demo {
 	/// messages can share the screen - including ones pushed from different buffers, e.g. the
 	/// scene's and an enemy's - and clearing a buffer can no longer strand a message on screen.
 	/// </summary>
-	class PopUpMessage : public DX9GF::IGameObject {
+	class PopUpMessage : public sdlgf::IGameObject {
 	public:
 		struct HistoryEntry {
 			unsigned long long stampMs; // milliseconds since the log was last cleared
@@ -63,10 +63,10 @@ namespace Demo {
 		static constexpr float HISTORY_PADDING = 8.f;
 		static constexpr float HISTORY_MARGIN = 12.f;  // gap between the panel and the screen edge
 
-		DX9GF::GraphicsDevice* graphicsDevice = nullptr;
-		DX9GF::Camera* camera = nullptr;
-		std::shared_ptr<DX9GF::Font> font;
-		std::shared_ptr<DX9GF::FontSprite> fontSprite;
+		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
+		sdlgf::Camera* camera = nullptr;
+		std::shared_ptr<sdlgf::Font> font;
+		std::shared_ptr<sdlgf::FontSprite> fontSprite;
 		float lineHeight = 0.f;
 
 		std::deque<Line> lines;
@@ -88,8 +88,8 @@ namespace Demo {
 		std::wstring TruncateToWidth(const std::wstring& text, float maxWidth) const;
 		Game* game = nullptr;
 	public:
-		PopUpMessage(std::weak_ptr<DX9GF::TransformManager> tm, Game* game) : IGameObject(tm), game(game) {}
-		void Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera);
+		PopUpMessage(std::weak_ptr<sdlgf::TransformManager> tm, Game* game) : IGameObject(tm), game(game) {}
+		void Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera);
 
 		/// <summary>
 		/// Shows a message right away. Nothing waits on it - use this for feedback that answers
@@ -103,7 +103,7 @@ namespace Demo {
 		/// Shows a message from a command buffer, keeping that buffer busy for the duration so
 		/// the surrounding sequence still paces around the message.
 		/// </summary>
-		void QueueMessage(DX9GF::CommandBuffer* commandBuffer, std::wstring message, float duration = 1.0f);
+		void QueueMessage(sdlgf::CommandBuffer* commandBuffer, std::wstring message, float duration = 1.0f);
 
 		void Update(unsigned long long deltaTime);
 		void Draw(unsigned long long deltaTime);
@@ -119,7 +119,7 @@ namespace Demo {
 		void ToggleHistory();
 		bool IsHistoryOpen() const { return isHistoryOpen; }
 		void UpdateHistory();
-		void DrawHistory(DX9GF::Camera& uiCamera, unsigned long long deltaTime);
+		void DrawHistory(sdlgf::Camera& uiCamera, unsigned long long deltaTime);
 		const std::deque<HistoryEntry>& GetHistory() const { return history; }
 	};
 }

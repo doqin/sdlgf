@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include <unordered_map>
 namespace Demo
 {

@@ -5,23 +5,23 @@
 #include "RNG.h"
 #include "PopUpMessage.h"
 
-void Demo::TrojanEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera) {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+void Demo::TrojanEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera) {
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/trojan.png");
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 96, 96, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 96, 96, 12), 12);
 	sprite->SetOrigin(52, 52);
 	sprite->SetScale(2.f);
 
-	projTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	projTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	projTexture->LoadTexture(L"assets/arrow_1.png"); //TODO: Change the projectile asset to a proper one
-	projFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
+	projFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	SetCardDropPool({ "StaticChargeCard", "WeaknessCard", "BarrageCard" }, 1, 3);
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::TrojanEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime) {
+void Demo::TrojanEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime) {
 	if (sprite) {
 		sprite->Begin();
 		auto [x, y] = GetWorldPosition();
@@ -57,7 +57,7 @@ void Demo::TrojanEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_
 	}
 }
 
-void Demo::TrojanEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::TrojanEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	this->player = player;
 
 	auto pattern = GetSmartRandomPattern(1, 3);
@@ -95,7 +95,7 @@ void Demo::TrojanEnemy::PatternTrojanBolt(float projDamage) {
 				y = RNG::Range(-100.f, 100.f);
 				break;
 			}
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, x, y](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, x, y](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
 					auto desc = ProjectileDesc(projTexture.get(), projFrames, 12, 8, 8, 16, 16, x, y)
@@ -112,9 +112,9 @@ void Demo::TrojanEnemy::PatternTrojanBolt(float projDamage) {
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(BURST_DELAY));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(BURST_DELAY));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(BURST_DELAY * BULLET_PER_BURST + DELAY_BETWEEN_WAVES));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(BURST_DELAY * BULLET_PER_BURST + DELAY_BETWEEN_WAVES));
 	}
 }
 
@@ -137,7 +137,7 @@ void Demo::TrojanEnemy::PatternVirusSpread(float projDamage) {
 			float jitterX = std::cos(jitterAngle) * jitterDist;
 			float jitterY = std::sin(jitterAngle) * jitterDist;
 
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, dir, waveAmp, waveFreq, jitterX, jitterY, SPAWN_DISTANCE](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, dir, waveAmp, waveFreq, jitterX, jitterY, SPAWN_DISTANCE](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
 
@@ -159,7 +159,7 @@ void Demo::TrojanEnemy::PatternVirusSpread(float projDamage) {
 				markFinished();
 				}));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(wave == 0 ? 0.35f : 1.f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(wave == 0 ? 0.35f : 1.f));
 	}
 }
 
@@ -182,7 +182,7 @@ void Demo::TrojanEnemy::PatternFanning(float projDamage)
 			float jitterDist = std::sqrt(RNG::Range(0.f, 1.f)) * JITTER_RADIUS;
 			float jitterX = std::cos(jitterAngle) * jitterDist;
 			float jitterY = std::sin(jitterAngle) * jitterDist;
-			commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, projDamage, dir, SPAWN_DISTANCE, jitterX, jitterY](std::function<void(void)> markFinished) {
+			commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, projDamage, dir, SPAWN_DISTANCE, jitterX, jitterY](std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
 					auto [px, py] = lock->GetWorldPosition();
 					float spawnX = px - dir.x * SPAWN_DISTANCE + jitterX;
@@ -201,9 +201,9 @@ void Demo::TrojanEnemy::PatternFanning(float projDamage)
 				}
 				markFinished();
 				}));
-			commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DELAY_BETWEEN_BULLETS));
+			commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(DELAY_BETWEEN_BULLETS));
 		}
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(DELAY_BETWEEN_WAVES));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(DELAY_BETWEEN_WAVES));
 	}
 
 }

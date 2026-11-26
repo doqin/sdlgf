@@ -1,11 +1,11 @@
 ﻿#pragma once
-#include "DX9GF.h"
-#include "DX9GFExtras.h"
+#include "sdlgf.h"
+#include "Extras.h"
 #include <memory>
 #include <functional>
 namespace Demo
 {
-	class IButton : public DX9GF::IGameObject
+	class IButton : public sdlgf::IGameObject
 	{
 	public:
 		//button state to change its appearance, have to set it public for scene to use
@@ -19,15 +19,15 @@ namespace Demo
 		//to reuse component as buttons may have different frame counts.
 		int frameCount;
 
-		std::shared_ptr<DX9GF::RectangleTrigger> trigger;
-		std::function<void(DX9GF::ITrigger*)> callback;
-		DX9GF::Camera* uiCamera = nullptr;
+		std::shared_ptr<sdlgf::RectangleTrigger> trigger;
+		std::function<void(sdlgf::ITrigger*)> callback;
+		sdlgf::Camera* uiCamera = nullptr;
 
 		std::string btnHoverSfxName = "btn_hover";
 		std::string btnClickSfxName = "btn_click";
 	public:
 
-		IButton(std::shared_ptr<DX9GF::TransformManager> tm, float x, float y, float w, float h, int frames = 3)
+		IButton(std::shared_ptr<sdlgf::TransformManager> tm, float x, float y, float w, float h, int frames = 3)
 			: IGameObject(tm, x, y)
 		{
 			this->width = w;
@@ -36,12 +36,12 @@ namespace Demo
 			this->frameCount = frames;
 		}
 
-		virtual void Init(DX9GF::Camera* uiCamera) = 0;
+		virtual void Init(sdlgf::Camera* uiCamera) = 0;
 		//abstract function to determine whether the button displays text or an icon
-		virtual void Draw(DX9GF::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
+		virtual void Draw(sdlgf::GraphicsDevice* gd, unsigned long long deltaTime) = 0;
 
 
-		virtual void SetOnReleaseLeft(std::function<void(DX9GF::ITrigger*)> cb);
+		virtual void SetOnReleaseLeft(std::function<void(sdlgf::ITrigger*)> cb);
 
 		//check if the cursor is hovering over the button.
 		virtual void Update(unsigned long long deltaTime);
@@ -62,7 +62,7 @@ namespace Demo
 
 		void SetState(ButtonState state) { this->currentState = state; }
 		ButtonState GetState() const { return this->currentState; }
-		std::shared_ptr<DX9GF::RectangleTrigger> GetTrigger() { return this->trigger; }
+		std::shared_ptr<sdlgf::RectangleTrigger> GetTrigger() { return this->trigger; }
 
 		float GetWidth() const { return this->width; }
 		float GetHeight() const { return this->height; }

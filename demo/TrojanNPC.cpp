@@ -2,7 +2,7 @@
 #include "TrojanNPC.h"
 
 namespace Demo {
-	TrojanNPC::TrojanNPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+	TrojanNPC::TrojanNPC(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y)
 		: INPC(tm, x, y) {
 	}
 
@@ -15,9 +15,9 @@ namespace Demo {
 		lines.push_back(std::move(line));
 	}
 
-	void TrojanNPC::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p,
-		std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font,
-		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer)
+	void TrojanNPC::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p,
+		std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font,
+		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer)
 	{
 		INPC::Init(gd, camera, p, cm, font, drawBuffer);
 		this->uiOffsetY = 70.0f;
@@ -26,13 +26,13 @@ namespace Demo {
 		this->colliderManager = cm;
 
 		// 32x32 centred on the object covers the 2x2 tile block it is standing on.
-		collider = std::make_shared<DX9GF::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
+		collider = std::make_shared<sdlgf::RectangleCollider>(transformManager, 32.f, 32.f, GetWorldX(), GetWorldY());
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<DX9GF::Texture>(gd);
+		spritesheet = std::make_shared<sdlgf::Texture>(gd);
 		spritesheet->LoadTexture(L"assets/Trojan_outside.png");
-		sprite = std::make_shared<DX9GF::AnimatedSprite>(spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 6, true);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 64, 64, 12), 6, true);
 		sprite->SetOrigin(32.f, 48.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());
 
@@ -41,7 +41,7 @@ namespace Demo {
 		if (phase == Phase::Defeated) SetPhase(Phase::Defeated);
 	}
 
-	void TrojanNPC::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime)
+	void TrojanNPC::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime)
 	{
 		if (phase == Phase::Defeated) return;
 

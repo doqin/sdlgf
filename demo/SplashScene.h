@@ -1,15 +1,15 @@
 #pragma once
-#include "DX9GFIScene.h"
-#include "DX9GFTexture.h"
-#include "DX9GFSprites.h"
+#include "IScene.h"
+#include "Texture.h"
+#include "Sprites.h"
 #include "Game.h"
 
 namespace Demo {
-    class SplashScene : public DX9GF::IScene {
+    class SplashScene : public sdlgf::IScene {
     private:
         Game* game;
-        std::shared_ptr<DX9GF::Texture> logo1Tex, logo2Tex;
-        std::shared_ptr<DX9GF::StaticSprite> logo1Sprite, logo2Sprite;
+        std::shared_ptr<sdlgf::Texture> logo1Tex, logo2Tex;
+        std::shared_ptr<sdlgf::StaticSprite> logo1Sprite, logo2Sprite;
 
         float timer = 0.0f;
         float alpha = 0.0f;

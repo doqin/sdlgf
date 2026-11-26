@@ -38,13 +38,13 @@ namespace Demo
 			return english;
 		}
 
-		std::string key = DX9GF::Utils::WideToUtf8(english);
+		std::string key = sdlgf::Utils::WideToUtf8(english);
 		auto it = viDictionary.find(key);
 		if (it == viDictionary.end()) {
 			return english;
 		}
 
-		return DX9GF::Utils::Utf8ToWide(it->second);
+		return sdlgf::Utils::Utf8ToWide(it->second);
 	}
 
 	std::wstring Tr(const std::wstring& english)

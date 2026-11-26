@@ -4,21 +4,21 @@
 #include "resource.h"
 #include "RNG.h"
 
-void Demo::TestEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::TestEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(IDB_PNG4);
-	sprite = std::make_shared<DX9GF::StaticSprite>(texture.get());
+	sprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
 	sprite->SetOrigin(32, 32);
 
-	roundProjectileTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	roundProjectileTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	roundProjectileTexture->LoadTexture(IDB_PNG5);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 64.f, 64.f);
 }
 
-void Demo::TestEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::TestEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (sprite) {
 		sprite->Begin();
@@ -63,7 +63,7 @@ void Demo::TestEnemy::OnTurnBegin(std::shared_ptr<Player> player, std::shared_pt
 	}
 }
 
-void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, int currentTurn) {
+void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies, std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, int currentTurn) {
 	(void)enemies;
 	(void)popUpMessage;
 	(void)graphicsDevice;
@@ -76,7 +76,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<st
 		auto x = RNG::Range(-200, 200);
 		auto y = RNG::Range(-200, 200);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, x, y, baseDamage](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, x, y, baseDamage](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -95,7 +95,7 @@ void Demo::TestEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<st
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(0.1f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(0.1f));
 	}
-	commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(5.f));
+	commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(5.f));
 }

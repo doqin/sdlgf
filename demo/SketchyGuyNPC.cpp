@@ -3,28 +3,28 @@
 #include "LocalizationManager.h"
 
 namespace Demo {
-	SketchyGuyNPC::SketchyGuyNPC(std::weak_ptr<DX9GF::TransformManager> tm, float x, float y)
+	SketchyGuyNPC::SketchyGuyNPC(std::weak_ptr<sdlgf::TransformManager> tm, float x, float y)
 		: INPC(tm, x, y) {
 	}
 
-	void SketchyGuyNPC::Init(DX9GF::GraphicsDevice* gd, DX9GF::Camera* camera, std::shared_ptr<Player> p,
-		std::shared_ptr<DX9GF::ColliderManager> cm, std::shared_ptr<DX9GF::Font> font,
-		std::shared_ptr<DX9GF::CommandBuffer> drawBuffer)
+	void SketchyGuyNPC::Init(sdlgf::GraphicsDevice* gd, sdlgf::Camera* camera, std::shared_ptr<Player> p,
+		std::shared_ptr<sdlgf::ColliderManager> cm, std::shared_ptr<sdlgf::Font> font,
+		std::shared_ptr<sdlgf::CommandBuffer> drawBuffer)
 	{
 		INPC::Init(gd, camera, p, cm, font, drawBuffer);
 		this->gd = gd;
 		this->colliderManager = cm;
 
-		collider = std::make_shared<DX9GF::RectangleCollider>(
+		collider = std::make_shared<sdlgf::RectangleCollider>(
 			transformManager, 20.f, 10.f, GetWorldX(), GetWorldY() + 8.f);
 		collider->SetOriginCenter();
 		cm->Add(collider);
 
-		spritesheet = std::make_shared<DX9GF::Texture>(gd);
+		spritesheet = std::make_shared<sdlgf::Texture>(gd);
 		spritesheet->LoadTexture(L"assets/sketchyguy-Sheet.png");
 		// 64x32 sheet -> two 32x32 idle frames.
-		sprite = std::make_shared<DX9GF::AnimatedSprite>(
-			spritesheet.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 32, 32, 2), 4, true);
+		sprite = std::make_shared<sdlgf::AnimatedSprite>(
+			spritesheet.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 32, 32, 2), 4, true);
 		sprite->SetOrigin(16.f, 24.f);
 		sprite->SetPosition(GetWorldX(), GetWorldY());
 
@@ -37,7 +37,7 @@ namespace Demo {
 		AddLine(Tr(L"Player"), Tr(L"I already regret this. Catch me next time you're skulking around."));
 	}
 
-	void SketchyGuyNPC::Draw(const DX9GF::Camera& camera, unsigned long long deltaTime)
+	void SketchyGuyNPC::Draw(const sdlgf::Camera& camera, unsigned long long deltaTime)
 	{
 		sprite->Begin();
 		sprite->Draw(camera, deltaTime);

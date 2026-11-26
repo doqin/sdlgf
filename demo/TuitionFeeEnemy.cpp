@@ -6,23 +6,23 @@
 #include "RNG.h"
 #include <cmath>
 
-void Demo::TuitionFeeEnemy::Init(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera)
+void Demo::TuitionFeeEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
-	texture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	texture->LoadTexture(L"assets/tuition.png"); //TODO: change to the real asset path
-	sprite = std::make_shared<DX9GF::AnimatedSprite>(texture.get(), DX9GF::Utils::CreateRectsHorizontal(0, 0, 83, 64, 12), 12);
+	sprite = std::make_shared<sdlgf::AnimatedSprite>(texture.get(), sdlgf::Utils::CreateRectsHorizontal(0, 0, 83, 64, 12), 12);
 	sprite->SetOrigin(32, 32);
 	sprite->SetScale(2.f);
 
-	bulletTexture = std::make_shared<DX9GF::Texture>(graphicsDevice);
+	bulletTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
 	bulletTexture->LoadTexture(L"assets/placeholder-round-projectile.png"); //TODO: change to the real asset path
-	bulletFrames = DX9GF::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
+	bulletFrames = sdlgf::Utils::CreateRectsHorizontal(0, 0, 16, 16, 4);
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 128.f, 128.f);
 }
 
-void Demo::TuitionFeeEnemy::Draw(DX9GF::GraphicsDevice* graphicsDevice, DX9GF::Camera* camera, unsigned long long deltaTime)
+void Demo::TuitionFeeEnemy::Draw(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera, unsigned long long deltaTime)
 {
 	if (sprite) {
 		sprite->Begin();
@@ -98,8 +98,8 @@ void Demo::TuitionFeeEnemy::BanRandomItems(std::shared_ptr<Player> player, std::
 }
 
 void Demo::TuitionFeeEnemy::StartAttack(std::shared_ptr<Player> player, std::vector<std::shared_ptr<IEnemy>>* enemies,
-	std::shared_ptr<PopUpMessage> popUpMessage, DX9GF::GraphicsDevice* graphicsDevice,
-	DX9GF::Camera* camera, int currentTurn)
+	std::shared_ptr<PopUpMessage> popUpMessage, sdlgf::GraphicsDevice* graphicsDevice,
+	sdlgf::Camera* camera, int currentTurn)
 {
 	(void)popUpMessage;
 	(void)graphicsDevice;
@@ -132,7 +132,7 @@ void Demo::TuitionFeeEnemy::PatternSideWall(float baseDamage, std::vector<std::s
 	for (int wave = 0; wave < WAVE_COUNT; wave++) {
 		int emptyHole = RNG::Range(0, BULLET_PER_WAVE - 1);
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>([this, baseDamage, emptyHole, BULLET_PER_WAVE, BULLET_SPEED, SPAWN_X, WALL_START_Y, BULLET_SPACING, BULLET_DECAY_TIME, bulletOffset](std::function<void(void)> markFinished) {
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>([this, baseDamage, emptyHole, BULLET_PER_WAVE, BULLET_SPEED, SPAWN_X, WALL_START_Y, BULLET_SPACING, BULLET_DECAY_TIME, bulletOffset](std::function<void(void)> markFinished) {
 			if (auto lock = this->player.lock()) {
 				float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 
@@ -158,7 +158,7 @@ void Demo::TuitionFeeEnemy::PatternSideWall(float baseDamage, std::vector<std::s
 			}
 			markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(WAVE_DELAY));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(WAVE_DELAY));
 	}
 }
 
@@ -172,7 +172,7 @@ void Demo::TuitionFeeEnemy::PatternDualSpiral(float baseDamage, std::vector<std:
 	const float SPAWN_DIST = 220.f;
 	const int BULLETS_PER_RING = 8;
 
-	auto attack = std::make_shared<DX9GF::CustomCommand>([this, baseDamage, RADIAL_SPEED, ANGULAR_SPEED, SPAWN_DIST, BULLETS_PER_RING](std::function<void(void)> markFinished) {
+	auto attack = std::make_shared<sdlgf::CustomCommand>([this, baseDamage, RADIAL_SPEED, ANGULAR_SPEED, SPAWN_DIST, BULLETS_PER_RING](std::function<void(void)> markFinished) {
 		if (auto lock = this->player.lock()) {
 			float finalDamage = this->CalculateOutgoingDamage(baseDamage);
 			struct SpawnPoint { float x, y; float spinDir; };
@@ -197,8 +197,8 @@ void Demo::TuitionFeeEnemy::PatternDualSpiral(float baseDamage, std::vector<std:
 		markFinished();
 		});
 	for (int i = 0; i < ATTACK_COUNT; i++) {
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(*attack));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(1.2f));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(*attack));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(1.2f));
 	}
 }
 
@@ -222,7 +222,7 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 		int dirB = RNG::Range(0, 2);
 		if (dirB >= dirA) dirB++; 
 
-		commandBuffer.PushCommand(std::make_shared<DX9GF::CustomCommand>(
+		commandBuffer.PushCommand(std::make_shared<sdlgf::CustomCommand>(
 			[this, baseDamage, bulletSpeed, bulletWidth, bulletHeight, decayTime, spawnOvershoot, dirA, dirB]
 			(std::function<void(void)> markFinished) {
 				if (auto lock = this->player.lock()) {
@@ -297,6 +297,6 @@ void Demo::TuitionFeeEnemy::PatternDebtCollector(float baseDamage, std::vector<s
 				}
 				markFinished();
 			}));
-		commandBuffer.PushCommand(std::make_shared<DX9GF::DelayCommand>(VOLLEY_INTERVAL));
+		commandBuffer.PushCommand(std::make_shared<sdlgf::DelayCommand>(VOLLEY_INTERVAL));
 	}
 }

@@ -7,13 +7,13 @@
 #include "LocalizationManager.h"
 #include <algorithm>
 #include <cmath>
-#include "DX9GFKeys.h"
+#include "Keys.h"
 namespace Demo
 {
 	//Extra helpers, use to get keyname and string
 	std::wstring ToWString(const std::string& s)
 	{
-		return DX9GF::Utils::Utf8ToWide(s);
+		return sdlgf::Utils::Utf8ToWide(s);
 	}
 	std::string GetKeyName(int dikCode)
 	{
@@ -81,7 +81,7 @@ namespace Demo
 		}
 	}
 
-	void SettingsScene::DrawVolumeTrack(std::shared_ptr<DX9GF::NineSliceSprite> bg, std::shared_ptr<DX9GF::NineSliceSprite> fill, float vol, RECT originalRect, unsigned long long deltaTime)
+	void SettingsScene::DrawVolumeTrack(std::shared_ptr<sdlgf::NineSliceSprite> bg, std::shared_ptr<sdlgf::NineSliceSprite> fill, float vol, RECT originalRect, unsigned long long deltaTime)
 	{
 		if (bg)
 		{
@@ -172,7 +172,7 @@ namespace Demo
 		float bgImageH = (float)bgTex->GetHeight();
 		if (!bgSprite)
 		{
-			bgSprite = std::make_shared<DX9GF::StaticSprite>(bgTex.get());
+			bgSprite = std::make_shared<sdlgf::StaticSprite>(bgTex.get());
 			bgSprite->SetSrcRect({ 0, 0, (LONG)bgImageW, (LONG)bgImageH });
 		}
 		bgSprite->SetScale(std::max(screenW / bgImageW, screenH / bgImageH));
@@ -184,7 +184,7 @@ namespace Demo
 		float rowSpacing = SPACING_Y * 1.5f;
 
 		//LOCAL FUNCTION to set Row Slider positions to keep the code clean
-		auto SetVolumeRowPosition = [&](std::shared_ptr<DX9GF::NineSliceSprite> track, std::shared_ptr<DX9GF::NineSliceSprite> fill,
+		auto SetVolumeRowPosition = [&](std::shared_ptr<sdlgf::NineSliceSprite> track, std::shared_ptr<sdlgf::NineSliceSprite> fill,
 			std::shared_ptr<IconButton> btnD, std::shared_ptr<IconButton> btnI, float y)
 			{
 				float gap = 5.0f;
@@ -238,27 +238,27 @@ namespace Demo
 
 	void SettingsScene::Init()
 	{
-		transformManager = std::make_shared<DX9GF::TransformManager>();
+		transformManager = std::make_shared<sdlgf::TransformManager>();
 		auto [camW, camH] = camera.GetScreenResolution();
 		lastScreenWidth = camW;
 		lastScreenHeight = camH;
 
 		//Load assets
-		font = std::make_shared<DX9GF::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
-		fontSprite = std::make_shared<DX9GF::FontSprite>(font.get());
+		font = std::make_shared<sdlgf::Font>(game->GetGraphicsDevice(), Demo::kMainFontName, Demo::kMainFontSize);
+		fontSprite = std::make_shared<sdlgf::FontSprite>(font.get());
 		fontSprite->SetColor(0xFF000000);
 
-		placeholderTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		placeholderTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		placeholderTex->LoadTexture(L"assets/ui-pack.png");
-		uiSheetTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiSheetTex->LoadTexture(L"assets/ui.png");
-		bgTex = std::make_shared<DX9GF::Texture>(game->GetGraphicsDevice());
+		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		bgTex->LoadTexture(IDB_PNG2);
 
 		//LOCAL FUNCTION to init track and trackfill
-		auto InitTrack = [&](std::shared_ptr<DX9GF::NineSliceSprite>& track, std::shared_ptr<DX9GF::NineSliceSprite>& fill, RECT trackR, RECT fillR) {
-			track = std::make_shared<DX9GF::NineSliceSprite>(placeholderTex.get(), trackR, 4, 2, 4, 2);
-			fill = std::make_shared<DX9GF::NineSliceSprite>(placeholderTex.get(), fillR, 4, 2, 4, 2);
+		auto InitTrack = [&](std::shared_ptr<sdlgf::NineSliceSprite>& track, std::shared_ptr<sdlgf::NineSliceSprite>& fill, RECT trackR, RECT fillR) {
+			track = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex.get(), trackR, 4, 2, 4, 2);
+			fill = std::make_shared<sdlgf::NineSliceSprite>(placeholderTex.get(), fillR, 4, 2, 4, 2);
 			};
 
 		InitTrack(trackMaster, trackMasterFill, { 113, 483, 160, 490 }, { 65, 483, 112, 490 });
@@ -266,11 +266,11 @@ namespace Demo
 		InitTrack(trackSFX, trackSFXFill, { 113, 515, 160, 522 }, { 65, 515, 112, 522 });
 
 		//LOCAL FUNCTION to init decs,inc buttons
-		auto CreateVolBtn = [&](int srcX, int srcY, const std::function<void(DX9GF::ITrigger*)>& action) {
+		auto CreateVolBtn = [&](int srcX, int srcY, const std::function<void(sdlgf::ITrigger*)>& action) {
 			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 12, 11, uiSheetTex);
 			btn->SetSpriteCoords(srcX, srcY, 16, 16, 0);
 
-			btn->SetOnReleaseLeft([action](DX9GF::ITrigger* t)
+			btn->SetOnReleaseLeft([action](sdlgf::ITrigger* t)
 				{
 					action(t);
 					SettingsManager::GetInstance()->SaveSettings();
@@ -279,25 +279,25 @@ namespace Demo
 			};
 
 		auto sm = SettingsManager::GetInstance();
-		btnMasterDec = CreateVolBtn(240, 96, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetMasterVolume(std::max(0.0f, SettingsManager::GetInstance()->GetMasterVolume() - 0.2f)); });
-		btnMasterInc = CreateVolBtn(240, 112, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetMasterVolume(std::min(1.0f, SettingsManager::GetInstance()->GetMasterVolume() + 0.2f)); });
+		btnMasterDec = CreateVolBtn(240, 96, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetMasterVolume(std::max(0.0f, SettingsManager::GetInstance()->GetMasterVolume() - 0.2f)); });
+		btnMasterInc = CreateVolBtn(240, 112, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetMasterVolume(std::min(1.0f, SettingsManager::GetInstance()->GetMasterVolume() + 0.2f)); });
 
-		btnMusicDec = CreateVolBtn(240, 96, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetMusicVolume(std::max(0.0f, SettingsManager::GetInstance()->GetMusicVolume() - 0.2f)); });
-		btnMusicInc = CreateVolBtn(240, 112, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetMusicVolume(std::min(1.0f, SettingsManager::GetInstance()->GetMusicVolume() + 0.2f)); });
+		btnMusicDec = CreateVolBtn(240, 96, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetMusicVolume(std::max(0.0f, SettingsManager::GetInstance()->GetMusicVolume() - 0.2f)); });
+		btnMusicInc = CreateVolBtn(240, 112, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetMusicVolume(std::min(1.0f, SettingsManager::GetInstance()->GetMusicVolume() + 0.2f)); });
 
-		btnSFXDec = CreateVolBtn(240, 96, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::max(0.0f, SettingsManager::GetInstance()->GetSfxVolume() - 0.2f)); });
-		btnSFXInc = CreateVolBtn(240, 112, [](DX9GF::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::min(1.0f, SettingsManager::GetInstance()->GetSfxVolume() + 0.2f)); });
+		btnSFXDec = CreateVolBtn(240, 96, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::max(0.0f, SettingsManager::GetInstance()->GetSfxVolume() - 0.2f)); });
+		btnSFXInc = CreateVolBtn(240, 112, [](sdlgf::ITrigger*) { SettingsManager::GetInstance()->SetSfxVolume(std::min(1.0f, SettingsManager::GetInstance()->GetSfxVolume() + 0.2f)); });
 
 		backButton = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 96, 32, uiSheetTex, 3);
-		backButton->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(96, 48, 48, 16, 3));
-		backButton->SetOnReleaseLeft([this](DX9GF::ITrigger*) { this->isGoingBack = true; });
+		backButton->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(96, 48, 48, 16, 3));
+		backButton->SetOnReleaseLeft([this](sdlgf::ITrigger*) { this->isGoingBack = true; });
 		backButton->SetSpriteScale(2.f, 2.f);
 
 		// Init 2 Checkboxes
 		btnWindowedCheck = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnWindowedCheck->SetSpriteCoords(sm->GetFullscreen() ? 256 : 272, 352, 16, 16, 0, true);
 		btnWindowedCheck->SetSpriteScale(2.f, 2.f);
-		btnWindowedCheck->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnWindowedCheck->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (sm->GetFullscreen()) {
 				sm->SetFullscreen(false);
@@ -309,7 +309,7 @@ namespace Demo
 		btnFullscreenCheck = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnFullscreenCheck->SetSpriteCoords(sm->GetFullscreen() ? 272 : 256, 352, 16, 16, 0, true);
 		btnFullscreenCheck->SetSpriteScale(2.f, 2.f);
-		btnFullscreenCheck->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnFullscreenCheck->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (!sm->GetFullscreen()) {
 				sm->SetFullscreen(true);
@@ -322,7 +322,7 @@ namespace Demo
 		btnLangEN = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnLangEN->SetSpriteCoords(sm->GetLanguage() == Language::EN ? 272 : 256, 352, 16, 16, 0, true);
 		btnLangEN->SetSpriteScale(2.f, 2.f);
-		btnLangEN->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnLangEN->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (sm->GetLanguage() != Language::EN) {
 				sm->SetLanguage(Language::EN);
@@ -333,7 +333,7 @@ namespace Demo
 		btnLangVI = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnLangVI->SetSpriteCoords(sm->GetLanguage() == Language::VI ? 272 : 256, 352, 16, 16, 0, true);
 		btnLangVI->SetSpriteScale(2.f, 2.f);
-		btnLangVI->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnLangVI->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (sm->GetLanguage() != Language::VI) {
 				sm->SetLanguage(Language::VI);
@@ -345,7 +345,7 @@ namespace Demo
 		btnMoveSprint = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnMoveSprint->SetSpriteCoords(sm->GetMovementStyle() == MovementStyle::ShiftToSprint ? 272 : 256, 352, 16, 16, 0, true);
 		btnMoveSprint->SetSpriteScale(2.f, 2.f);
-		btnMoveSprint->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnMoveSprint->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (sm->GetMovementStyle() != MovementStyle::ShiftToSprint) {
 				sm->SetMovementStyle(MovementStyle::ShiftToSprint);
@@ -356,7 +356,7 @@ namespace Demo
 		btnMoveSlow = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
 		btnMoveSlow->SetSpriteCoords(sm->GetMovementStyle() == MovementStyle::ShiftToSlow ? 272 : 256, 352, 16, 16, 0, true);
 		btnMoveSlow->SetSpriteScale(2.f, 2.f);
-		btnMoveSlow->SetOnReleaseLeft([](DX9GF::ITrigger*) {
+		btnMoveSlow->SetOnReleaseLeft([](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			if (sm->GetMovementStyle() != MovementStyle::ShiftToSlow) {
 				sm->SetMovementStyle(MovementStyle::ShiftToSlow);
@@ -370,7 +370,7 @@ namespace Demo
 		btnResPrev->SetSpriteOrigin(8.f, 8.f); //center of sprite
 		btnResPrev->SetSpriteRotation(1.5708f);
 		btnResPrev->SetSpriteOffset(16.f, 16.f);
-		btnResPrev->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
+		btnResPrev->SetOnReleaseLeft([this](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			int idx = sm->GetCurrentResolutionIndex();
 			if (idx > 0) {
@@ -387,7 +387,7 @@ namespace Demo
 		btnResNext->SetSpriteOrigin(8.f, 8.f);
 		btnResNext->SetSpriteRotation(1.5708f);
 		btnResNext->SetSpriteOffset(16.f, 16.f);
-		btnResNext->SetOnReleaseLeft([this](DX9GF::ITrigger*) {
+		btnResNext->SetOnReleaseLeft([this](sdlgf::ITrigger*) {
 			auto sm = SettingsManager::GetInstance();
 			int idx = sm->GetCurrentResolutionIndex();
 			if (idx < sm->GetSupportedResolutions().size() - 1) {
@@ -403,7 +403,7 @@ namespace Demo
 			keybindRows.push_back({ action, label, nullptr, false });
 			auto& btn = keybindRows.back().button;
 			btn = std::make_shared<Demo::TextIconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, font.get(), L"", 3);
-			btn->SetSpriteRects(DX9GF::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
+			btn->SetSpriteRects(sdlgf::Utils::CreateRectsVertical(0, 0, 16, 16, 3));
 			btn->SetSpriteScale(2.f, 2.f);
 
 			//long key names ("Shift", "Backspace") widen the button instead of spilling out of it
@@ -422,7 +422,7 @@ namespace Demo
 				return ToWString(GetKeyName(sm->GetKeybind(action)));
 				});
 
-			btn->SetOnReleaseLeft([this, rawBtn, rowIndex](DX9GF::ITrigger*) {
+			btn->SetOnReleaseLeft([this, rawBtn, rowIndex](sdlgf::ITrigger*) {
 				this->ResetListening();
 				keybindRows[rowIndex].listening = true;
 				rawBtn->SetState(Demo::IButton::ButtonState::LISTENING);
@@ -458,7 +458,7 @@ namespace Demo
 
 	void SettingsScene::Update(unsigned long long deltaTime)
 	{
-		auto inpMan = DX9GF::InputManager::GetInstance();
+		auto inpMan = sdlgf::InputManager::GetInstance();
 		inpMan->ReadMouse(deltaTime);
 		inpMan->ReadKeyboard(deltaTime);
 
@@ -642,7 +642,7 @@ namespace Demo
 
 			keyboardNavigator.Draw(gd, uiCamera, CollectKeyboardCandidates());
 			if (!keyboardNavigator.IsInKeyboardMode()) {
-				DX9GF::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
+				sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 			}
 			gd->EndDraw();
 		}

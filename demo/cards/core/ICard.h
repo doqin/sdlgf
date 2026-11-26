@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DX9GFExtras.h"
+#include "Extras.h"
 #include "GameItems.h"
 #include "CardFrame.h"
 #include "CardSpec.h"
@@ -9,7 +9,7 @@
 namespace Demo {
 	class Player;
 	class IBattleScene;
-	class ICard : virtual public DX9GF::IGameObject, public DX9GF::ISaveable, public CardState {
+	class ICard : virtual public sdlgf::IGameObject, public sdlgf::ISaveable, public CardState {
 	protected:
 		Player* owner = nullptr;
 		IBattleScene* battleScene = nullptr;
@@ -25,9 +25,9 @@ namespace Demo {
 			if (spec.maxUses) SetMaxUses(*spec.maxUses);
 		}
 	public:
-		inline ICard(std::weak_ptr<DX9GF::TransformManager> transformManager) : IGameObject(transformManager) {}
+		inline ICard(std::weak_ptr<sdlgf::TransformManager> transformManager) : IGameObject(transformManager) {}
 		inline ICard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
 			float x,
 			float y,
 			float rotation = 0,
@@ -36,8 +36,8 @@ namespace Demo {
 		) : IGameObject(transformManager, x, y, rotation, scaleX, scaleY) {
 		}
 		inline ICard(
-			std::weak_ptr<DX9GF::TransformManager> transformManager,
-			std::weak_ptr<DX9GF::IGameObject> parent,
+			std::weak_ptr<sdlgf::TransformManager> transformManager,
+			std::weak_ptr<sdlgf::IGameObject> parent,
 			float x,
 			float y,
 			float rotation = 0,

@@ -9,7 +9,7 @@ target_include_directories(sdlgf_demo PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/targeting"
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/registry"
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/defs"
-    "${CMAKE_SOURCE_DIR}/core/DX9GFExtras"
+    "${CMAKE_SOURCE_DIR}/core/Extras"
 )
 
 target_link_libraries(sdlgf_demo PRIVATE sdlgf::core)

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "DX9GF.h"
+#include "sdlgf.h"
 #include "QuestManager.h"
 #include <string>
 #include <memory>
@@ -16,21 +16,21 @@ namespace Demo {
         float timeAccumulator = 0.0f;
         float bobbingOffset = 0.0f;
 
-        std::shared_ptr<DX9GF::Texture> uiTex;
+        std::shared_ptr<sdlgf::Texture> uiTex;
 
-        std::shared_ptr<DX9GF::AnimatedSprite> sprExclGray;
-        std::shared_ptr<DX9GF::AnimatedSprite> sprExclGold;
-        std::shared_ptr<DX9GF::AnimatedSprite> sprQuesGray;
-        std::shared_ptr<DX9GF::AnimatedSprite> sprQuesCyan;
+        std::shared_ptr<sdlgf::AnimatedSprite> sprExclGray;
+        std::shared_ptr<sdlgf::AnimatedSprite> sprExclGold;
+        std::shared_ptr<sdlgf::AnimatedSprite> sprQuesGray;
+        std::shared_ptr<sdlgf::AnimatedSprite> sprQuesCyan;
 
     public:
         QuestMarker(const std::string& qId, QuestMarkerRole r)
             : questId(qId), role(r) {
         }
 
-        void Init(DX9GF::GraphicsDevice* gd);
+        void Init(sdlgf::GraphicsDevice* gd);
         void Update(unsigned long long deltaTime);
-        void Draw(DX9GF::Camera* uiCamera, float x, float y, float scale);
+        void Draw(sdlgf::Camera* uiCamera, float x, float y, float scale);
 
         void SetConditionMet(bool met) { conditionMet = met; }
         bool IsConditionMet() const { return conditionMet; }

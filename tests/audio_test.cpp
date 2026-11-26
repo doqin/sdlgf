@@ -328,10 +328,12 @@ static void TestManager()
 	const std::string loopB = WriteWav("loopB.wav", 48000, 2, 16, false, 48000, [](int i, int) { return 0.2 * std::sin(i * 0.07); });
 	const std::string intro = WriteWav("intro.wav", 48000, 2, 16, false, 4800, [](int i, int) { return 0.2 * std::sin(i * 0.09); });
 
+	std::fputs("audio_test:   manager: init\n", stderr);
 	SDL_SetHint(SDL_HINT_AUDIO_DRIVER, "dummy");
 	AudioManager* audio = AudioManager::GetInstance();
 	CHECK(audio->Init());
 	CHECK(audio->Init()); // second call is harmless
+	std::fputs("audio_test:   manager: load\n", stderr);
 
 	audio->Load("click", click);
 	audio->Load("loopA", loopA);
@@ -346,6 +348,7 @@ static void TestManager()
 	audio->Play("never-loaded");
 	CHECK(audio->GetActiveVoiceCount() == 0);
 
+	std::fputs("audio_test:   manager: one-shot\n", stderr);
 	// a one-shot plays through the real device and is cleaned up by Update
 	audio->Play("click");
 	CHECK(audio->GetActiveVoiceCount() == 1);
@@ -360,6 +363,7 @@ static void TestManager()
 	audio->Update(10);
 	CHECK(audio->GetActiveVoiceCount() == 0);
 
+	std::fputs("audio_test:   manager: bgm\n", stderr);
 	// background music loops until it is stopped
 	audio->PlayBGM_Fade("loopA", 0.5f, 0.1f);
 	CHECK(audio->GetActiveVoiceCount() == 1);
@@ -390,6 +394,7 @@ static void TestManager()
 	audio->Update(10);
 	CHECK(audio->GetActiveVoiceCount() == 0);
 
+	std::fputs("audio_test:   manager: volumes\n", stderr);
 	// volumes can be changed while sounds play
 	audio->Play("loopA", true, 1.0f, AudioType::MUSIC);
 	audio->SetMasterVolume(0.5f);
@@ -397,12 +402,15 @@ static void TestManager()
 	audio->SetSfxVolume(0.75f);
 	audio->Update(10);
 
+	std::fputs("audio_test:   manager: shutdown\n", stderr);
 	audio->Shutdown();
+	std::fputs("audio_test:   manager: shut down\n", stderr);
 	CHECK(audio->GetActiveVoiceCount() == 0);
 	CHECK(!audio->HasSound("click"));
 	// after Shutdown there is no device: playing does nothing instead of crashing
 	audio->Play("click");
 	CHECK(audio->GetActiveVoiceCount() == 0);
+	std::fputs("audio_test:   manager: destroy\n", stderr);
 	AudioManager::DestroyInstance();
 }
 
@@ -411,7 +419,13 @@ int main()
 	// Report what killed the test: on Windows an uncaught exception otherwise just shows up as
 	// exit code 0xc0000409 in the CI log, with no message.
 	std::set_terminate([] {
-		std::fputs("audio_test: std::terminate called (uncaught exception)\n", stderr);
+		std::fputs("audio_test: std::terminate called\n", stderr);
+		try {
+			if (std::current_exception()) std::rethrow_exception(std::current_exception());
+			std::fputs("audio_test: ...no active exception (noexcept violation or a joinable thread)\n", stderr);
+		}
+		catch (const std::exception& e) { std::fprintf(stderr, "audio_test: active exception: %s\n", e.what()); }
+		catch (...) { std::fputs("audio_test: active exception of unknown type\n", stderr); }
 		std::abort();
 	});
 

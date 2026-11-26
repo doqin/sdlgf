@@ -1,6 +1,6 @@
 #pragma once
 #include "IGameObject.h"
-#include "../GraphicsDevice.h"
+#include "../graphics/GraphicsDevice.h"
 #include <optional>
 #include <tuple>
 

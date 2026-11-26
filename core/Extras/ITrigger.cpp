@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ITrigger.h"
-#include "../InputManager.h"
+#include "../input/InputManager.h"
 
 namespace {
 	bool IsClickedButton(sdlgf::ITrigger* trigger, unsigned long long deltaTime, sdlgf::InputManager::MouseButton button)

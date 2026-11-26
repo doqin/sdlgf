@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "EllipseTrigger.h"
-#include "../InputManager.h"
-#include "../Utils.h"
+#include "../input/InputManager.h"
+#include "../util/Utils.h"
 #include <cmath>
 
 namespace {

@@ -1,6 +1,6 @@
 #pragma once
 #include "ICommand.h"
-#include "../AudioManager.h"
+#include "../audio/AudioManager.h"
 #include <string>
 
 namespace sdlgf {

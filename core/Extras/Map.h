@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <cstdint>
-#include "../Camera.h"
-#include "../Texture.h"
+#include "../graphics/Camera.h"
+#include "../graphics/Texture.h"
 #include "MapLayer.h"
 #include "ICollider.h"
 #include "ColliderManager.h"

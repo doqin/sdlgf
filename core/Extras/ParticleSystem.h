@@ -1,7 +1,7 @@
 #pragma once
-#include "../Sprites.h"
-#include "../Texture.h"
-#include "../Camera.h"
+#include "../graphics/Sprites.h"
+#include "../graphics/Texture.h"
+#include "../graphics/Camera.h"
 #include <vector>
 #include <memory>
 

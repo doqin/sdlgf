@@ -9,6 +9,13 @@ target_include_directories(sdlgf_demo PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/targeting"
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/registry"
     "${CMAKE_CURRENT_SOURCE_DIR}/cards/defs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/scenes"
+    "${CMAKE_CURRENT_SOURCE_DIR}/enemies"
+    "${CMAKE_CURRENT_SOURCE_DIR}/npcs"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+    "${CMAKE_CURRENT_SOURCE_DIR}/items"
+    "${CMAKE_CURRENT_SOURCE_DIR}/data"
+    "${CMAKE_CURRENT_SOURCE_DIR}/systems"
     "${CMAKE_SOURCE_DIR}/core/Extras"
 )
 

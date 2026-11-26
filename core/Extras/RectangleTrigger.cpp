@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "RectangleTrigger.h"
-#include "../InputManager.h"
-#include "../Utils.h"
+#include "../input/InputManager.h"
+#include "../util/Utils.h"
 #include "../Application.h"
 #include <array>
 #include <cmath>

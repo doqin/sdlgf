@@ -1,8 +1,8 @@
 #pragma once
 #include "IGameObject.h"
 #include <functional>
-#include "../Camera.h"
-#include "../GraphicsDevice.h"
+#include "../graphics/Camera.h"
+#include "../graphics/GraphicsDevice.h"
 
 namespace sdlgf {
 	class ITrigger : public IGameObject {

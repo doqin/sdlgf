@@ -23,7 +23,11 @@ SKIP_FILE_PREFIXES = ('imgui', 'imstb')
 
 # Include search path used by the CMake targets (see core/ and demo/ CMakeLists).
 INCLUDE_DIRS = [
-    'core', 'core/Extras', 'includes', 'demo',
+    'core', 'core/Extras', 'core/audio', 'core/graphics', 'core/input',
+    'core/platform', 'core/scene', 'core/util',
+    'includes', 'demo',
+    'demo/scenes', 'demo/enemies', 'demo/npcs', 'demo/ui', 'demo/items',
+    'demo/data', 'demo/systems',
     'demo/cards/core', 'demo/cards/targeting', 'demo/cards/registry', 'demo/cards/defs',
     'demo/backends', 'demo/misc/cpp', 'cmake/shims',
 ]

@@ -5,6 +5,12 @@ add_library(sdlgf::core ALIAS sdlgf_core)
 
 target_include_directories(sdlgf_core PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/audio"
+    "${CMAKE_CURRENT_SOURCE_DIR}/graphics"
+    "${CMAKE_CURRENT_SOURCE_DIR}/input"
+    "${CMAKE_CURRENT_SOURCE_DIR}/platform"
+    "${CMAKE_CURRENT_SOURCE_DIR}/scene"
+    "${CMAKE_CURRENT_SOURCE_DIR}/util"
     "${CMAKE_SOURCE_DIR}/includes"
 )
 

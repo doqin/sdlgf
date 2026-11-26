@@ -1,29 +1,41 @@
+# core/ is split into role folders; tests that compile core sources directly (rather than
+# linking sdlgf::core) need every one of them on the include path for bare-name includes.
+set(SDLGF_CORE_INCLUDES
+    "${CMAKE_SOURCE_DIR}/core"
+    "${CMAKE_SOURCE_DIR}/core/audio"
+    "${CMAKE_SOURCE_DIR}/core/graphics"
+    "${CMAKE_SOURCE_DIR}/core/input"
+    "${CMAKE_SOURCE_DIR}/core/platform"
+    "${CMAKE_SOURCE_DIR}/core/scene"
+    "${CMAKE_SOURCE_DIR}/core/util"
+)
+
 # --- Platform layer (time, UTF conversion, executable path) ---------------------------
 add_executable(sdlgf_platform_test
     platform_test.cpp
-    "${CMAKE_SOURCE_DIR}/core/Platform.cpp"
+    "${CMAKE_SOURCE_DIR}/core/platform/Platform.cpp"
 )
-target_include_directories(sdlgf_platform_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
+target_include_directories(sdlgf_platform_test PRIVATE ${SDLGF_CORE_INCLUDES})
 target_link_libraries(sdlgf_platform_test PRIVATE SDL3::SDL3)   # Platform uses SDL's message box
 add_test(NAME platform COMMAND sdlgf_platform_test)
 
 # Compile-only: verifies the non-Windows type stand-ins have Win32-compatible layout.
 add_library(sdlgf_portable_types_check OBJECT portable_types_check.cpp)
-target_include_directories(sdlgf_portable_types_check PRIVATE "${CMAKE_SOURCE_DIR}/core")
+target_include_directories(sdlgf_portable_types_check PRIVATE ${SDLGF_CORE_INCLUDES})
 add_dependencies(sdlgf_platform_test sdlgf_portable_types_check)
 
 # --- Key translation (DIK <-> SDL scancode) -----------------------------------------
 add_executable(sdlgf_keys_test
     keys_test.cpp
-    "${CMAKE_SOURCE_DIR}/core/Keys.cpp"
+    "${CMAKE_SOURCE_DIR}/core/input/Keys.cpp"
 )
-target_include_directories(sdlgf_keys_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
+target_include_directories(sdlgf_keys_test PRIVATE ${SDLGF_CORE_INCLUDES})
 target_link_libraries(sdlgf_keys_test PRIVATE SDL3::SDL3)
 add_test(NAME keys COMMAND sdlgf_keys_test)
 
 # --- Math types (Vec/Mat/Colour); with -DSDLGF_D3DX_CROSSCHECK=ON also compared against the real D3DX9 --
 add_executable(sdlgf_math_test math_test.cpp)
-target_include_directories(sdlgf_math_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
+target_include_directories(sdlgf_math_test PRIVATE ${SDLGF_CORE_INCLUDES})
 if(WIN32 AND SDLGF_D3DX_CROSSCHECK)
     target_compile_definitions(sdlgf_math_test PRIVATE SDLGF_HAVE_D3DX)
     target_link_libraries(sdlgf_math_test PRIVATE sdlgf_d3dx9)
@@ -36,10 +48,10 @@ add_test(NAME math COMMAND sdlgf_math_test)
 # --- Text layout/rasterisation (SDL_ttf), checked against the golden images and GDI measurements ----
 add_executable(sdlgf_text_test
     text_test.cpp
-    "${CMAKE_SOURCE_DIR}/core/Text.cpp"
-    "${CMAKE_SOURCE_DIR}/core/Platform.cpp"
+    "${CMAKE_SOURCE_DIR}/core/graphics/Text.cpp"
+    "${CMAKE_SOURCE_DIR}/core/platform/Platform.cpp"
 )
-target_include_directories(sdlgf_text_test PRIVATE "${CMAKE_SOURCE_DIR}/core" "${CMAKE_CURRENT_SOURCE_DIR}/golden")
+target_include_directories(sdlgf_text_test PRIVATE ${SDLGF_CORE_INCLUDES} "${CMAKE_CURRENT_SOURCE_DIR}/golden")
 target_compile_definitions(sdlgf_text_test PRIVATE
     SDLGF_ASSET_DIR="${CMAKE_SOURCE_DIR}/demo"
     SDLGF_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
@@ -85,7 +97,7 @@ if(WIN32)
     # Keys.h must agree with the real <dinput.h>: a differing value is a macro
     # redefinition (C4005), which this target turns into an error.
     add_library(sdlgf_dik_values_check OBJECT dik_values_check.cpp)
-    target_include_directories(sdlgf_dik_values_check PRIVATE "${CMAKE_SOURCE_DIR}/core")
+    target_include_directories(sdlgf_dik_values_check PRIVATE ${SDLGF_CORE_INCLUDES})
     target_compile_options(sdlgf_dik_values_check PRIVATE /we4005)
     add_dependencies(sdlgf_keys_test sdlgf_dik_values_check)
 endif()

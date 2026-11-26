@@ -1,7 +1,7 @@
 #pragma once
-#include "../Camera.h"
-#include "../GraphicsDevice.h"
-#include "../Texture.h"
+#include "../graphics/Camera.h"
+#include "../graphics/GraphicsDevice.h"
+#include "../graphics/Texture.h"
 #include "tmxlite/Tileset.hpp"
 #include <memory>
 #include <vector>

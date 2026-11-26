@@ -37,12 +37,12 @@ def main():
     table = sdl_table(sys.argv[1])
 
     values = {}
-    for line in open(os.path.join(ROOT, 'core', 'Keys.h'), encoding='utf-8'):
+    for line in open(os.path.join(ROOT, 'core', 'input', 'Keys.h'), encoding='utf-8'):
         m = re.match(r'\s*#\s*define\s+(DIK_\w+)\s+(0x[0-9A-Fa-f]+)\b', line)
         if m:
             values[m.group(1)] = int(m.group(2), 16)
 
-    src = open(os.path.join(ROOT, 'core', 'Keys.cpp'), encoding='utf-8').read()
+    src = open(os.path.join(ROOT, 'core', 'input', 'Keys.cpp'), encoding='utf-8').read()
     pairs = re.findall(r'\{\s*(DIK_\w+)\s*,\s*(SDL_SCANCODE_\w+)\s*\}', src)
     problems = []
     seen_sdl = {}

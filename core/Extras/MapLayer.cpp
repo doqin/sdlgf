@@ -4,7 +4,7 @@
 #include "tmxlite/TileLayer.hpp"
 #include <ranges>
 #include <algorithm>
-#include "../Utils.h"
+#include "../util/Utils.h"
 
 bool sdlgf::MapLayer::IsTileIDInTileSet(unsigned int idx, const std::vector<std::uint32_t>& tileIDs, const tmx::Tileset& tileSet)
 {

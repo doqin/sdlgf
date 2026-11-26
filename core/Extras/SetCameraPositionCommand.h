@@ -1,6 +1,6 @@
 #pragma once
 #include "ICommand.h"
-#include "../Camera.h"
+#include "../graphics/Camera.h"
 
 namespace sdlgf {
 	class SetCameraPositionCommand : public ICommand {

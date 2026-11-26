@@ -1,10 +1,8 @@
 # Source list for the core library.
 set(SDLGF_CORE_SOURCES
     Application.cpp
-    Camera.cpp
     DebugDraw.cpp
     Extras/ColliderManager.cpp
-    Extras/ParticleSystem.cpp
     Extras/CommandBuffer.cpp
     Extras/ConcurrentCommand.cpp
     Extras/CustomCommand.cpp
@@ -20,6 +18,7 @@ set(SDLGF_CORE_SOURCES
     Extras/Map.cpp
     Extras/MapLayer.cpp
     Extras/MultiCommand.cpp
+    Extras/ParticleSystem.cpp
     Extras/PlaySoundCommand.cpp
     Extras/RectangleCollider.cpp
     Extras/RectangleTrigger.cpp
@@ -29,20 +28,21 @@ set(SDLGF_CORE_SOURCES
     Extras/SetPositionCommand.cpp
     Extras/TransformManager.cpp
     Extras/ZoomCameraCommand.cpp
-    Font.cpp
-    GraphicsDevice.cpp
     IGame.cpp
-    InputManager.cpp
-    Platform.cpp
-    Keys.cpp
-    Text.cpp
-    CrashHandler.cpp
-    IScene.cpp
-    ISprite.cpp
-    SceneManager.cpp
-    Sprites.cpp
-    Texture.cpp
-    Utils.cpp
-    AudioManager.cpp
-    AudioMixer.cpp
+    audio/AudioManager.cpp
+    audio/AudioMixer.cpp
+    graphics/Camera.cpp
+    graphics/Font.cpp
+    graphics/GraphicsDevice.cpp
+    graphics/ISprite.cpp
+    graphics/Sprites.cpp
+    graphics/Text.cpp
+    graphics/Texture.cpp
+    input/InputManager.cpp
+    input/Keys.cpp
+    platform/CrashHandler.cpp
+    platform/Platform.cpp
+    scene/IScene.cpp
+    scene/SceneManager.cpp
+    util/Utils.cpp
 )

@@ -37,6 +37,12 @@ include(Dependencies)
 add_subdirectory(core)
 add_subdirectory(demo)
 
+# Golden-image generator for the legacy Direct3D 9 renderer (removed together with it).
+option(SDLGF_BUILD_GOLDEN_GEN "Build tools/golden (Windows only, needs the D3D9 renderer)" OFF)
+if(SDLGF_BUILD_GOLDEN_GEN AND WIN32)
+    add_subdirectory(tools/golden)
+endif()
+
 if(SDLGF_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)

@@ -109,6 +109,13 @@ namespace sdlgf::Platform {
 	std::wstring Utf8ToWide(std::string_view utf8);
 
 	/// <summary>
+	/// Asks the C allocator to give freed memory back to the OS. After a scene is destroyed its
+	/// memory is free but the process keeps it (RSS stays high) because glibc only returns the top of
+	/// its heap on its own. Only does something with glibc; elsewhere it is a no-op.
+	/// </summary>
+	void ReleaseFreedMemory();
+
+	/// <summary>
 	/// Converts a platform wide string to UTF-8. Unpaired surrogates / invalid code
 	/// points become U+FFFD.
 	/// </summary>

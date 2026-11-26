@@ -23,6 +23,7 @@ void sdlgf::SceneManager::ChangeScene(IScene* scene)
 {
 	if (!scenes.empty()) {
 		delete scenes[index];
+		Platform::ReleaseFreedMemory();
 	}
 	scenes[index] = scene;
 	scene->Init();
@@ -45,6 +46,7 @@ void sdlgf::SceneManager::PopScene()
 	auto scene = scenes.back();
 	delete scene;
 	scenes.pop_back();
+	Platform::ReleaseFreedMemory();
 }
 
 void sdlgf::SceneManager::RemoveScene(size_t index)
@@ -52,6 +54,7 @@ void sdlgf::SceneManager::RemoveScene(size_t index)
 	auto scene = scenes[index];
 	delete scene;
 	scenes.erase(scenes.begin() + index);
+	Platform::ReleaseFreedMemory();
 }
 
 void sdlgf::SceneManager::BeginLoading(std::unique_ptr<IScene> scene)

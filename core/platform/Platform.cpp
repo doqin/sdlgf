@@ -3,6 +3,9 @@
 #include <SDL3/SDL_messagebox.h>
 #include <cstdio>
 #include <type_traits>
+#if defined(__GLIBC__)
+#include <malloc.h>
+#endif
 
 #if defined(__APPLE__)
 #	include <mach-o/dyld.h>
@@ -215,4 +218,11 @@ std::string sdlgf::Platform::Utf32ToUtf8(std::u32string_view codePoints)
 		AppendUtf8(out, valid ? cp : kReplacement);
 	}
 	return out;
+}
+
+void sdlgf::Platform::ReleaseFreedMemory()
+{
+#if defined(__GLIBC__)
+	malloc_trim(0);
+#endif
 }

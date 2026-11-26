@@ -58,6 +58,7 @@ namespace {
 	}
 
 	constexpr int kEllipseSamples = 36;
+
 }
 
 sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererName) : window(window)

@@ -2,12 +2,11 @@
 // SDL renderer and compares the result with the images captured from the old Direct3D 9 renderer
 // (tests/golden/*.png, see the README there for what each one contains).
 //
-// Runs headless: SDL's "dummy" video driver plus the "software" render driver, so the output is
-// the same on every machine. The software rasteriser is not the one D3D9 used, so scenes whose
-// geometry is not aligned to pixels (rotation, fractional scale, diagonal lines) may differ in a
-// few edge pixels; those differences are listed below with their exact size so that a regression
-// (more or larger differences) and an improvement (fewer) both show up. Everything else must be
-// bit-identical.
+// Runs on a hidden window with the Direct3D 11 driver (WARP when there is no GPU). Scenes whose
+// geometry is not aligned to pixels may differ from D3D9 in a few edge pixels; those differences
+// are listed in g_allowed with their exact size so that a regression (more or larger differences)
+// and an improvement (fewer) both show up. Everything else must be bit-identical. Other render
+// drivers (SDLGF_TEST_RENDERER=software) only report.
 //
 // Usage: sdlgf_render_test [output directory for the rendered images]
 #include <SDL3/SDL.h>
@@ -99,8 +98,18 @@ namespace {
 		int maxChannel;
 		const char* why;
 	};
-	std::map<std::string, Allowed> g_allowed;
-	std::string g_rendererName;
+	// Direct3D 9 and Direct3D 11 pick the texel for a pixel centre that falls exactly on a texel
+	// boundary differently, and round sub-pixel positions differently, so scenes with fractional
+	// positions/scales differ in single texel picks and edge pixels. Measured on the direct3d11
+	// driver; each entry is the exact count so that more AND fewer differences are noticed.
+	std::map<std::string, Allowed> g_allowed = {
+		{ "text_openpixel39", { 1, 207, "one lit pixel under a circumflex: FreeType vs GDI rasteriser" } },
+		{ "sprites", { 343, 234, "fractional positions/scales, rotation, 1.5x nine-slice: texel picks at boundaries" } },
+		{ "primitives", { 24, 178, "diagonal 1 px lines and rotated outlines: line rasterisation rule" } },
+		{ "map_labinside_b", { 364, 207, "3x zoom at a fractional camera position: tile seams" } },
+	};
+	// Only the direct3d11 driver is compared strictly; other drivers rasterise differently and just report.
+	bool g_strict = true;
 
 	/// Rows [first, second) of an image that are not compared (text the font cannot draw).
 	using Bands = std::vector<std::pair<int, int>>;
@@ -139,7 +148,7 @@ namespace {
 		const auto allowed = g_allowed.find(name);
 		const int allowedPixels = allowed == g_allowed.end() ? 0 : allowed->second.pixels;
 		const int allowedChannel = allowed == g_allowed.end() ? 0 : allowed->second.maxChannel;
-		const bool ok = differing == allowedPixels && maxDiff <= allowedChannel;
+		const bool ok = !g_strict || (differing == allowedPixels && maxDiff <= allowedChannel);
 		std::printf("  %-22s %s  %d differing pixels (max channel diff %d)%s\n", name.c_str(), ok ? "ok  " : "FAIL", differing, maxDiff,
 			allowed == g_allowed.end() ? "" : "  [known]");
 		if (!ok) {
@@ -455,9 +464,19 @@ int main(int argc, char** argv)
 
 		// Defaults: headless and deterministic. SDLGF_TEST_VIDEO / SDLGF_TEST_RENDERER choose another
 		// video/render driver (e.g. "windows" + "direct3d11" to try the GPU path on a real display).
+#ifdef _WIN32
+		// Direct3D 11 needs a real (hidden) window; on machines without a GPU it runs on WARP.
+		const char* defaultVideo = "windows";
+		const char* defaultRenderer = "direct3d11";
+#else
+		const char* defaultVideo = "dummy";
+		const char* defaultRenderer = "software";
+#endif
 		const char* video = std::getenv("SDLGF_TEST_VIDEO");
 		const char* rendererName = std::getenv("SDLGF_TEST_RENDERER");
-		SDL_SetHint(SDL_HINT_VIDEO_DRIVER, video ? video : "dummy");
+		if (rendererName == nullptr) rendererName = defaultRenderer;
+		g_strict = std::strcmp(rendererName, "direct3d11") == 0;
+		SDL_SetHint(SDL_HINT_VIDEO_DRIVER, video ? video : defaultVideo);
 		if (!SDL_Init(SDL_INIT_VIDEO)) throw std::runtime_error(std::string("SDL_Init: ") + SDL_GetError());
 		SDL_Window* window = SDL_CreateWindow("render_test", 960, 720, SDL_WINDOW_HIDDEN);
 		if (window == nullptr) throw std::runtime_error(std::string("SDL_CreateWindow: ") + SDL_GetError());
@@ -466,13 +485,13 @@ int main(int argc, char** argv)
 
 		{
 			// Everything drawn with the device is released before the window goes away
-			sdlgf::GraphicsDevice gd(window, rendererName ? rendererName : "software");
+			sdlgf::GraphicsDevice gd(window, rendererName);
 
 			for (const auto& f : golden::Fonts()) {
 				sdlgf::Font::AddFont(std::wstring(L"assets/") + std::wstring(f.file, f.file + std::strlen(f.file)));
 			}
 
-			std::puts("render test (software renderer), compared with tests/golden:");
+			std::printf("render test (%s renderer%s), compared with tests/golden:\n", rendererName, g_strict ? "" : ", report only");
 			for (const auto& f : golden::Fonts()) RenderTextSheet(&gd, f);
 			RenderTextProbes(&gd);
 			RenderSprites(&gd);

@@ -352,7 +352,7 @@ void sdlgf::InputManager::AddCursor(CursorType type, sdlgf::GraphicsDevice* gd, 
 {
     auto tex = std::make_shared<sdlgf::Texture>(gd);
     tex->LoadTexture(path);
-    if (tex->GetRawTexture()) {
+    if (tex->IsLoaded()) {
         auto sprite = std::make_shared<sdlgf::StaticSprite>(tex.get());
         sprite->SetScale(scale, scale);
         this->cursorTextures[type] = tex;

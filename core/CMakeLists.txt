@@ -15,10 +15,10 @@ target_compile_definitions(sdlgf_core PUBLIC UNICODE _UNICODE NOMINMAX)
 
 target_link_libraries(sdlgf_core PUBLIC
     tmxlite
-    sdlgf_d3dx9
     SDL3::SDL3
     SDL3_ttf::SDL3_ttf
-    d3d9 xaudio2 winmm
+    SDL3_image::SDL3_image
+    xaudio2 winmm
     legacy_stdio_definitions
 )
 

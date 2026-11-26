@@ -1,68 +1,82 @@
-﻿#pragma once
-#include <d3d9.h>
-#include <d3dx9.h> // legacy renderer only: removed with the D3D9 backend
+#pragma once
 #include <vector>
 #include "Camera.h"
-#include "IDeviceLostAware.h"
+#include "Platform.h"
+
+struct SDL_Window;
+struct SDL_Renderer;
+struct SDL_Vertex;
+
 namespace sdlgf {
 	class Texture;
 
+	/// 2D renderer on top of SDL_Renderer.
+	///
+	/// Coordinates are pixels of the current render target, origin top-left, +y down. Everything
+	/// is drawn as textured/coloured triangles, so one code path serves every SDL render backend
+	/// (Direct3D 11/12, Metal, Vulkan, OpenGL, software).
+	///
+	/// The drawing functions that take no camera are "instant" draws: they work in virtual
+	/// coordinates and are scaled by the virtual transform (see SetVirtualTransform). The ones
+	/// with a camera apply the camera's matrix instead.
 	class GraphicsDevice final {
 	private:
-		IDirect3DDevice9* d3ddev = NULL; // Đại diện cho card đồ họa máy tính
-		IDirect3DSurface9* backbuffer = NULL;
-		D3DVIEWPORT9 viewport;
+		SDL_Window* window = nullptr;
+		SDL_Renderer* renderer = nullptr;
+		Texture* renderTarget = nullptr; // null = the window
+		unsigned int alphaBlendMode = 0; // an SDL_BlendMode
+		std::vector<Texture*> textures;  // every live Texture made for this device
+		std::vector<SDL_Vertex> scratchVertices;
+		bool alphaBlending = false;
+		bool scissorEnabled = false;
+		RECT scissorRect{};
 		// Virtual-to-backbuffer transform applied to the camera-less (instant) draw calls
 		float virtualScale = 1.0f;
 		float virtualOffsetX = 0.0f;
 		float virtualOffsetY = 0.0f;
+
+		void ApplyBlend();
+		void ApplyScissor();
 		void DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness);
-		// Every live ID3DXSprite/ID3DXFont wrapper (sprites, fonts), so Reset() can be preceded
-		// and followed by OnLostDevice/OnResetDevice on all of them - required by the D3DX
-		// helper library or Reset() can fail outright.
-		std::vector<IDeviceLostAware*> volatileResources;
+		void FillFan(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color);
+		void StrokeStrip(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color);
 	public:
-		GraphicsDevice() {};
-		GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer);
+		/// Creates the renderer for `window`. `rendererName` selects an SDL render driver
+		/// ("direct3d11", "software", ...); null lets SDL pick the best one.
+		/// Throws std::runtime_error if no renderer can be created.
+		explicit GraphicsDevice(SDL_Window* window, const char* rendererName = nullptr);
 		~GraphicsDevice();
+		GraphicsDevice(const GraphicsDevice&) = delete;
+		GraphicsDevice& operator=(const GraphicsDevice&) = delete;
 
-		/// <summary>
-		/// Gets a reference to the Direct3D device pointer.
-		/// </summary>
-		/// <returns>A reference to the Direct3D device pointer.</returns>
-		IDirect3DDevice9*& GetDevice();
-		/// <summary>
-		/// Retrieves a reference to the back buffer surface.
-		/// </summary>
-		/// <returns>A reference to a pointer to the Direct3D surface representing the back buffer.</returns>
-		IDirect3DSurface9*& GetBackBuffer();
-		/// <summary>
-		/// Sets the viewport parameters for rendering.
-		/// </summary>
-		/// <param name="x">The x-coordinate of the upper-left corner of the viewport.</param>
-		/// <param name="y">The y-coordinate of the upper-left corner of the viewport.</param>
-		/// <param name="width">The width of the viewport in pixels.</param>
-		/// <param name="height">The height of the viewport in pixels.</param>
-		/// <param name="minZ">The minimum depth value of the viewport range (typically 0.0).</param>
-		/// <param name="maxZ">The maximum depth value of the viewport range (typically 1.0).</param>
-		HRESULT SetViewport(DWORD x, DWORD y, DWORD width, DWORD height, float minZ, float maxZ);
-		HRESULT SetViewport(D3DVIEWPORT9 viewport);
-		HRESULT BeginDraw();
-		HRESULT Clear(sdlgf::ColorF color);
-		HRESULT Clear();
-		HRESULT EndDraw();
-		HRESULT Present();
-		HRESULT IsValid();
+		SDL_Renderer* GetRenderer() const { return renderer; }
+		SDL_Window* GetWindow() const { return window; }
 
-		HRESULT SetRenderTarget(Texture* renderTarget);
-		HRESULT RestoreRenderTarget();
+		/// The blend mode every sprite and (when SetAlphaBlending(true)) primitive uses:
+		/// result = src * srcAlpha + dst * (1 - srcAlpha), applied to colour AND alpha, exactly as
+		/// the fixed-function pipeline the game was written against did. This is an SDL_BlendMode;
+		/// the software renderer cannot do the separate alpha part and gets SDL_BLENDMODE_BLEND.
+		unsigned int GetAlphaBlendMode() const { return alphaBlendMode; }
 
-		// Sprites and fonts register themselves on construction and unregister on destruction.
-		void RegisterVolatileResource(IDeviceLostAware* resource);
-		void UnregisterVolatileResource(IDeviceLostAware* resource);
-		// Call before IDirect3DDevice9::Reset and after a successful Reset, respectively.
-		void NotifyLostDevice();
-		void NotifyResetDevice();
+		/// Textures register themselves so the device can detach them when it is destroyed.
+		void RegisterTexture(Texture* texture);
+		void UnregisterTexture(Texture* texture);
+
+		/// Size in pixels of what is currently being drawn into: the window, or the render target.
+		void GetOutputSize(int& width, int& height) const;
+
+		void SetViewport(int x, int y, int width, int height);
+		/// Kept for call-site compatibility: SDL needs no begin/end bracket.
+		bool BeginDraw() { return true; }
+		void Clear(sdlgf::ColorF color);
+		void Clear();
+		void EndDraw() {}
+		void Present();
+
+		/// Redirects drawing into a texture created with Texture::CreateRenderTarget.
+		bool SetRenderTarget(Texture* renderTarget);
+		/// Draws into the window again.
+		void RestoreRenderTarget();
 
 		void SetAlphaBlending(bool enabled);
 		void SetScissorTest(bool enabled);
@@ -93,6 +107,8 @@ namespace sdlgf {
 		/// </summary>
 		void DrawTriangle(float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled);
 		void DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled);
+		/// Filled triangle in render-target pixels: the virtual transform is NOT applied.
+		void DrawTriangleScreenSpace(float x1, float y1, float x2, float y2, float x3, float y3, sdlgf::Color color);
 
 		/// <summary>
 		/// Draws a filled, textured convex polygon (as a triangle fan) in screen space.
@@ -101,5 +117,19 @@ namespace sdlgf {
 		/// <param name="uvs">Texture coordinates matching each point in points.</param>
 		void DrawTexturedPolygon(const std::vector<sdlgf::Vec2>& points, const std::vector<sdlgf::Vec2>& uvs, sdlgf::Texture* texture, sdlgf::Color color = 0xFFFFFFFF);
 
+		/// Draws the part (u0,v0)-(u1,v1) of `texture` onto the rectangle (x, y, width, height)
+		/// transformed by `transform`. Always alpha-blended; `color` modulates the texture.
+		/// This is what every sprite draws with.
+		void DrawTexturedQuad(Texture* texture, const sdlgf::Mat4& transform, float x, float y, float width, float height,
+			float u0, float v0, float u1, float v1, sdlgf::Color color);
+
+		/// A vertex of DrawTexturedTriangles: position in render-target pixels, texture coordinates.
+		struct Vertex {
+			float x, y;
+			float u, v;
+			sdlgf::Color color;
+		};
+		/// Draws `vertexCount` / 3 alpha-blended triangles of `texture`.
+		void DrawTexturedTriangles(Texture* texture, const Vertex* vertices, int vertexCount);
 	};
 };

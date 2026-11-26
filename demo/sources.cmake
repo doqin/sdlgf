@@ -7,7 +7,7 @@ set(SDLGF_DEMO_SOURCES
     cards/defs/SparkCards.cpp
     cards/defs/BurnCards.cpp
     cards/defs/UtilityCards.cpp
-    backends/imgui_impl_dx9.cpp
+    backends/imgui_impl_sdlrenderer3.cpp
     backends/imgui_impl_sdl3.cpp
     BossWorldScene.cpp
     CardShop.cpp

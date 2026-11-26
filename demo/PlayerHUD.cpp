@@ -57,7 +57,7 @@ Demo::PlayerHUD::PlayerHUD(Game* game, std::shared_ptr<Player> player, std::shar
 void Demo::PlayerHUD::Init()
 {
 	playerTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-	playerTex->LoadTexture(IDB_PNG1);
+	playerTex->LoadTexture(L"assets/uiter-Sheet.png");
 	playerIcon = std::make_shared<sdlgf::StaticSprite>(playerTex.get());
 	playerIcon->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });
 	playerIcon->SetScale(ICON_SCALE);

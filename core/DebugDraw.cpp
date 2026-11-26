@@ -11,10 +11,10 @@ std::map<int, std::wstring> sdlgf::DebugDraw::coordinateCache;
 bool sdlgf::DebugDraw::drawGrid = false;
 bool sdlgf::DebugDraw::drawAxis = false;
 
-void sdlgf::DebugDraw::Init(GraphicsDevice* graphicsDevice) {
+void sdlgf::DebugDraw::Init(GraphicsDevice* graphicsDevice, const std::wstring& fontName, int fontSize) {
 	if (debugFont) return;
 
-	debugFont = new Font(graphicsDevice, L"Consolas", 14);
+	debugFont = new Font(graphicsDevice, fontName, fontSize);
 
 	debugSprite = new FontSprite(debugFont);
 

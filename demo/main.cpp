@@ -9,7 +9,7 @@
 
 #include "imgui.h"
 #include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 int main(int argc, char** argv)
 {
@@ -24,13 +24,9 @@ int main(int argc, char** argv)
 		app->SetEventHook([](const SDL_Event& event) {
 			ImGui_ImplSDL3_ProcessEvent(&event);
 		});
-		app->SetOnDeviceResetHandler([]() {
-			ImGui_ImplDX9_InvalidateDeviceObjects();
-			ImGui_ImplDX9_CreateDeviceObjects();
-		});
 		app->Init(Demo::GAME_TITLE, 960, 720, false);
 		// Create your game that interfaces with IGame
-		Demo::Game game(app->GetHWnd(), app->GetScreenWidth(), app->GetScreenHeight());
+		Demo::Game game(app->GetScreenWidth(), app->GetScreenHeight());
 		game.Init();
 		// Attach your game to the application
 		app->AttachGame(&game);
@@ -40,8 +36,8 @@ int main(int argc, char** argv)
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 		ImGui::StyleColorsDark();
-		ImGui_ImplSDL3_InitForOther(app->GetWindow());
-		ImGui_ImplDX9_Init(game.GetGraphicsDevice()->GetDevice());
+		ImGui_ImplSDL3_InitForSDLRenderer(app->GetWindow(), game.GetGraphicsDevice()->GetRenderer());
+		ImGui_ImplSDLRenderer3_Init(game.GetGraphicsDevice()->GetRenderer());
 		app->Run();
 	}
 	catch (const std::exception& e) {

@@ -40,7 +40,7 @@ void Demo::Player::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::ColliderMa
 	this->camera = camera;
 	// Create texture
 	spritesheet = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	spritesheet->LoadTexture(IDB_PNG1);
+	spritesheet->LoadTexture(L"assets/uiter-Sheet.png");
 	// Create sprites
 	idleDown = std::make_shared<sdlgf::StaticSprite>(spritesheet.get());
 	idleDown->SetSrcRect({ .left = 0, .top = 0, .right = 32, .bottom = 32 });

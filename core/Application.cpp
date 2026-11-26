@@ -10,16 +10,10 @@
 sdlgf::Application* sdlgf::Application::instance = nullptr;
 sdlgf::IGame* p_game = nullptr;
 sdlgf::Application::EventHook eventHook = nullptr;
-void(*onDeviceResetHandler)() = nullptr;
 
 void sdlgf::Application::SetEventHook(EventHook hook)
 {
 	eventHook = hook;
-}
-
-void sdlgf::Application::SetOnDeviceResetHandler(void(*handler)())
-{
-	onDeviceResetHandler = handler;
 }
 
 void sdlgf::Application::HandleEvent(const SDL_Event& event)
@@ -40,17 +34,17 @@ void sdlgf::Application::HandleEvent(const SDL_Event& event)
 		lastClientWidth = width;
 		lastClientHeight = height;
 
-		if (p_game != nullptr && p_game->GetGraphicsDevice() != nullptr) {
-			if (onDeviceResetHandler != nullptr) {
-				onDeviceResetHandler();
-			}
-		}
 		if (p_game != nullptr) {
 			p_game->OnResize(width, height);
 		}
 		OnResize(width, height);
 		break;
 	}
+	case SDL_EVENT_RENDER_TARGETS_RESET:
+	case SDL_EVENT_RENDER_DEVICE_RESET:
+		// The graphics driver lost the contents of render-target textures
+		if (p_game != nullptr && !gameDisposed) p_game->OnRenderTargetsReset();
+		break;
 	case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 	case SDL_EVENT_QUIT:
 		if (p_game != nullptr && !gameDisposed) {
@@ -102,15 +96,6 @@ SDL_Window* sdlgf::Application::GetWindow() const
 {
 	return window;
 }
-
-#ifdef _WIN32
-HWND sdlgf::Application::GetHWnd() const
-{
-	if (window == nullptr) return nullptr;
-	return static_cast<HWND>(SDL_GetPointerProperty(
-		SDL_GetWindowProperties(window), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
-}
-#endif
 
 sdlgf::Application* sdlgf::Application::GetInstance()
 {
@@ -200,6 +185,11 @@ void sdlgf::Application::Run()
 		else {
 			SDL_Delay(1); // frame not due yet: don't spin a core
 		}
+	}
+	// The renderer belongs to the window: release it (and everything drawn with it) first
+	if (p_game != nullptr && !gameDisposed) {
+		gameDisposed = true;
+		p_game->Dispose();
 	}
 	// Cleanup any fonts added at runtime
 	sdlgf::Font::RemoveAllFonts();

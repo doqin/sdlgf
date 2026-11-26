@@ -1,112 +1,77 @@
 #include "pch.h"
 #include "Texture.h"
-#include <DxErr.h>
-#include <Windows.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include <stdexcept>
+#include <vector>
 #include "Application.h"
-
-namespace
-{
-	static void SafeRelease(IDirect3DTexture9*& tex)
-	{
-		if (tex != nullptr)
-		{
-			tex->Release();
-			tex = nullptr;
-		}
-	}
-
-	static std::runtime_error MakeDxError(HRESULT hr)
-	{
-		auto error = DXGetErrorDescription(hr);
-		std::string what = std::string(error, error + wcslen(error));
-		return std::runtime_error(what);
-	}
-
-	static HRSRC FindImageResource(HMODULE moduleHandle, LPCWSTR resourceName)
-	{
-		HRSRC hrsrc = FindResourceW(moduleHandle, resourceName, RT_RCDATA);
-		if (hrsrc != nullptr) return hrsrc;
-		// Common custom types used in .rc files
-		hrsrc = FindResourceW(moduleHandle, resourceName, L"JPG");
-		if (hrsrc != nullptr) return hrsrc;
-		hrsrc = FindResourceW(moduleHandle, resourceName, L"JPEG");
-		if (hrsrc != nullptr) return hrsrc;
-		hrsrc = FindResourceW(moduleHandle, resourceName, L"PNG");
-		return hrsrc;
-	}
-}
 
 sdlgf::Texture::Texture(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice)
 {
-	
+	if (graphicsDevice != nullptr) graphicsDevice->RegisterTexture(this);
 }
 
 sdlgf::Texture::~Texture()
 {
-	if (isRegisteredVolatile) graphicsDevice->UnregisterVolatileResource(this);
-	SafeRelease(texture);
+	Release();
+	if (graphicsDevice != nullptr) graphicsDevice->UnregisterTexture(this);
 }
 
-void sdlgf::Texture::OnLostDevice()
+void sdlgf::Texture::Release()
 {
-	if (isRenderTarget) SafeRelease(texture);
+	if (texture != nullptr) {
+		SDL_DestroyTexture(texture);
+		texture = nullptr;
+	}
 }
 
-void sdlgf::Texture::OnResetDevice()
+void sdlgf::Texture::OnDeviceDestroyed()
 {
-	if (!isRenderTarget || texture != nullptr || width == 0 || height == 0) return;
-	// Mirrors CreateRenderTarget, but must not throw - this runs from inside Reset()
-	// handling, with no exception handler above it to catch it.
-	graphicsDevice->GetDevice()->CreateTexture(
-		width, height, 1,
-		D3DUSAGE_RENDERTARGET,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_DEFAULT,
-		&texture,
-		nullptr
-	);
+	// The renderer (and with it the SDL texture) is already gone.
+	texture = nullptr;
+	width = 0;
+	height = 0;
+	graphicsDevice = nullptr;
 }
 
-void sdlgf::Texture::CreatePlainTexture(sdlgf::Color color, UINT width, UINT height)
+void sdlgf::Texture::Adopt(SDL_Texture* created, UINT w, UINT h)
 {
-	SafeRelease(texture);
-	HRESULT result = graphicsDevice->GetDevice()->CreateTexture(
-		width, height, 1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		&texture,
-		nullptr
-	);
-	if (result != S_OK) {
-		throw MakeDxError(result);
-	}
-	// Lock the texture
-	D3DLOCKED_RECT lockedRect;
-	result = texture->LockRect(0, &lockedRect, nullptr, 0);
-	if (FAILED(result))
-	{
-		SafeRelease(texture);
-		throw MakeDxError(result);
-	}
+	Release();
+	texture = created;
+	width = w;
+	height = h;
+	blending = true;
+	SDL_SetTextureScaleMode(texture, SDL_SCALEMODE_NEAREST);
+	SDL_SetTextureBlendMode(texture, graphicsDevice->GetAlphaBlendMode());
+}
 
-	// Fill the texture with the color
-	DWORD* pixels = (DWORD*)lockedRect.pBits;
-	UINT pitch = lockedRect.Pitch / sizeof(DWORD);
+void sdlgf::Texture::SetBlending(bool enabled)
+{
+	if (texture == nullptr || blending == enabled) return;
+	blending = enabled;
+	SDL_SetTextureBlendMode(texture, enabled ? graphicsDevice->GetAlphaBlendMode() : SDL_BLENDMODE_NONE);
+}
 
-	for (UINT y = 0; y < height; ++y)
-	{
-		for (UINT x = 0; x < width; ++x)
-		{
-			pixels[y * pitch + x] = color;
-		}
+void sdlgf::Texture::CreateFromPixels(const std::uint32_t* argbPixels, UINT w, UINT h)
+{
+	if (graphicsDevice == nullptr) throw std::runtime_error("Graphics device is null");
+	SDL_Texture* created = SDL_CreateTexture(graphicsDevice->GetRenderer(), SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STATIC, static_cast<int>(w), static_cast<int>(h));
+	if (created == nullptr) {
+		throw std::runtime_error(std::string("Could not create texture: ") + SDL_GetError());
 	}
+	if (!SDL_UpdateTexture(created, nullptr, argbPixels, static_cast<int>(w * sizeof(std::uint32_t)))) {
+		const std::string error = SDL_GetError();
+		SDL_DestroyTexture(created);
+		throw std::runtime_error("Could not upload texture: " + error);
+	}
+	Adopt(created, w, h);
+}
 
-	// Unlock
-	texture->UnlockRect(0);
-	this->width = width;
-	this->height = height;
+void sdlgf::Texture::CreatePlainTexture(sdlgf::Color color, UINT w, UINT h)
+{
+	std::vector<std::uint32_t> pixels(static_cast<size_t>(w) * h, color);
+	CreateFromPixels(pixels.data(), w, h);
 }
 
 void sdlgf::Texture::SetColor(sdlgf::Color color)
@@ -114,267 +79,70 @@ void sdlgf::Texture::SetColor(sdlgf::Color color)
 	if (texture == nullptr) {
 		throw std::runtime_error("Texture is null");
 	}
-	// Lock the texture
-	D3DLOCKED_RECT lockedRect;
-	HRESULT result = texture->LockRect(0, &lockedRect, nullptr, 0);
-	if (FAILED(result))
-	{
-		SafeRelease(texture);
-		throw MakeDxError(result);
-	}
-
-	// Fill the texture with the color
-	DWORD* pixels = (DWORD*)lockedRect.pBits;
-	UINT pitch = lockedRect.Pitch / sizeof(DWORD);
-
-	for (UINT y = 0; y < height; ++y)
-	{
-		for (UINT x = 0; x < width; ++x)
-		{
-			pixels[y * pitch + x] = color;
-		}
-	}
-
-	// Unlock
-	texture->UnlockRect(0);
-}
-
-void sdlgf::Texture::LoadTexture(std::wstring filePath, UINT width, UINT height)
-{
-	SafeRelease(texture);
-	if (graphicsDevice->GetDevice() == nullptr) {
-		throw std::runtime_error("Graphics device is null");
-	}
-	D3DXIMAGE_INFO imageInfo;
-	D3DXGetImageInfoFromFile(filePath.c_str(), &imageInfo);
-	auto result = D3DXCreateTextureFromFileExW(
-		graphicsDevice->GetDevice(),
-		filePath.c_str(),
-		width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
-		height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-
-		D3DX_FILTER_NONE, //test fix blurred image 
-		D3DX_FILTER_NONE,
-
-		//D3DX_FILTER_LINEAR,
-		//D3DX_FILTER_LINEAR,
-		0,
-		nullptr,
-		nullptr,
-		&texture
-	);
-	if (result != D3D_OK) {
-		// DXGetErrorDescription alone (e.g. "Access is denied") doesn't say WHICH
-		// asset died - with dozens of textures loading at startup that is not
-		// diagnosable, so name the file and give the raw HRESULT
-		std::wstring what = std::wstring(L"Could not load texture \"") + filePath + L"\" (HRESULT 0x"
-			+ std::to_wstring(static_cast<unsigned long>(result)) + L")";
-		throw std::runtime_error(std::string(what.begin(), what.end()));
-	}
-
-	if (width == D3DX_DEFAULT_NONPOW2 || width == D3DX_DEFAULT) {
-		this->width = imageInfo.Width;
-	} else {
-		this->width = width;
-	}
-	if (height == D3DX_DEFAULT_NONPOW2 || height == D3DX_DEFAULT) {
-		this->height = imageInfo.Height;
-	} else {
-		this->height = height;
+	std::vector<std::uint32_t> pixels(static_cast<size_t>(width) * height, color);
+	if (!SDL_UpdateTexture(texture, nullptr, pixels.data(), static_cast<int>(width * sizeof(std::uint32_t)))) {
+		throw std::runtime_error(std::string("Could not update texture: ") + SDL_GetError());
 	}
 }
 
-void sdlgf::Texture::LoadTexture(int resourceId, UINT width, UINT height)
+void sdlgf::Texture::LoadTexture(const std::wstring& filePath)
 {
-	SafeRelease(texture);
-	if (graphicsDevice->GetDevice() == nullptr) {
+	if (graphicsDevice == nullptr) {
 		throw std::runtime_error("Graphics device is null");
 	}
-	D3DXIMAGE_INFO imageInfo{};
-	auto handle = GetModuleHandleW(nullptr);
-	auto resName = MAKEINTRESOURCEW(resourceId);
-
-	// First try the standard resource path (expects RT_RCDATA)
-	HRESULT infoHr = D3DXGetImageInfoFromResourceW(handle, resName, &imageInfo);
-	HRESULT createHr = D3DXCreateTextureFromResourceExW(
-		graphicsDevice->GetDevice(),
-		handle,
-		resName,
-		width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
-		height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE,
-		D3DX_FILTER_NONE,
-		0,
-		nullptr,
-		nullptr,
-		&texture);
-
-	// Some JPG resources/drivers can fail when forcing a specific format; retry letting D3DX choose.
-	if (FAILED(createHr))
-	{
-		SafeRelease(texture);
-		createHr = D3DXCreateTextureFromResourceExW(
-			graphicsDevice->GetDevice(),
-			handle,
-			resName,
-			width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
-			height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
-			1,
-			0,
-			D3DFMT_UNKNOWN,
-			D3DPOOL_MANAGED,
-			D3DX_FILTER_NONE,
-			D3DX_FILTER_NONE,
-			0,
-			nullptr,
-			nullptr,
-			&texture);
+	const std::string path = sdlgf::Platform::WideToUtf8(filePath);
+	SDL_Surface* loaded = IMG_Load(path.c_str());
+	if (loaded == nullptr) {
+		// SDL's message alone ("Couldn't open file") doesn't say WHICH asset died - with dozens of
+		// textures loading at startup that is not diagnosable, so name the file
+		throw std::runtime_error("Could not load texture \"" + path + "\": " + SDL_GetError());
 	}
-
-	// If it still fails, fall back to loading the resource bytes and creating from memory.
-	if (FAILED(createHr))
-	{
-		SafeRelease(texture);
-		HRSRC hrsrc = FindImageResource(handle, resName);
-		if (hrsrc == nullptr)
-		{
-			throw std::runtime_error("Resource not found");
-		}
-
-		HGLOBAL hglob = LoadResource(handle, hrsrc);
-		if (hglob == nullptr)
-		{
-			throw std::runtime_error("Failed to load resource");
-		}
-
-		DWORD size = SizeofResource(handle, hrsrc);
-		void* data = LockResource(hglob);
-		if (data == nullptr || size == 0)
-		{
-			throw std::runtime_error("Failed to lock resource");
-		}
-
-		HRESULT memInfoHr = D3DXGetImageInfoFromFileInMemory(data, size, &imageInfo);
-		createHr = D3DXCreateTextureFromFileInMemoryEx(
-			graphicsDevice->GetDevice(),
-			data,
-			size,
-			width == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : width,
-			height == D3DX_DEFAULT_NONPOW2 ? D3DX_DEFAULT_NONPOW2 : height,
-			1,
-			0,
-			D3DFMT_A8R8G8B8,
-			D3DPOOL_MANAGED,
-			D3DX_FILTER_NONE,
-			D3DX_FILTER_NONE,
-			0,
-			nullptr,
-			nullptr,
-			&texture);
-
-		if (SUCCEEDED(memInfoHr))	infoHr = memInfoHr;
+	SDL_Surface* converted = SDL_ConvertSurface(loaded, SDL_PIXELFORMAT_ARGB8888);
+	SDL_DestroySurface(loaded);
+	if (converted == nullptr) {
+		throw std::runtime_error("Could not convert texture \"" + path + "\": " + SDL_GetError());
 	}
-
-	if (FAILED(createHr))
-	{
-		SafeRelease(texture);
-		throw MakeDxError(createHr);
+	SDL_Texture* created = SDL_CreateTextureFromSurface(graphicsDevice->GetRenderer(), converted);
+	const UINT w = static_cast<UINT>(converted->w), h = static_cast<UINT>(converted->h);
+	SDL_DestroySurface(converted);
+	if (created == nullptr) {
+		throw std::runtime_error("Could not create texture \"" + path + "\": " + SDL_GetError());
 	}
-
-	if ((width == D3DX_DEFAULT_NONPOW2 || width == D3DX_DEFAULT) && SUCCEEDED(infoHr)) {
-		this->width = imageInfo.Width;
-	} else {
-		this->width = width;
-	}
-	if ((height == D3DX_DEFAULT_NONPOW2 || height == D3DX_DEFAULT) && SUCCEEDED(infoHr)) {
-		this->height = imageInfo.Height;
-	} else {
-		this->height = height;
-	}
+	Adopt(created, w, h);
 }
 
 void sdlgf::Texture::CaptureCurrentBackBuffer()
 {
-	SafeRelease(texture);
-
-	auto gd = graphicsDevice->GetDevice();
-	if (gd == nullptr) {
+	if (graphicsDevice == nullptr) {
 		throw std::runtime_error("Graphics device is null");
 	}
-
-	IDirect3DSurface9* backBuffer = nullptr;
-	HRESULT hr = gd->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
-	if (FAILED(hr))
-	{
-		throw MakeDxError(hr);
+	SDL_Surface* pixels = SDL_RenderReadPixels(graphicsDevice->GetRenderer(), nullptr);
+	if (pixels == nullptr) {
+		throw std::runtime_error(std::string("Could not read back the screen: ") + SDL_GetError());
 	}
-
-	D3DSURFACE_DESC desc;
-	hr = backBuffer->GetDesc(&desc);
-	if (FAILED(hr))
-	{
-		backBuffer->Release();
-		throw MakeDxError(hr);
+	SDL_Surface* converted = SDL_ConvertSurface(pixels, SDL_PIXELFORMAT_ARGB8888);
+	SDL_DestroySurface(pixels);
+	if (converted == nullptr) {
+		throw std::runtime_error(std::string("Could not convert the screen capture: ") + SDL_GetError());
 	}
-
-	hr = gd->CreateTexture(
-		desc.Width,
-		desc.Height,
-		1,
-		D3DUSAGE_RENDERTARGET,
-		desc.Format,
-		D3DPOOL_DEFAULT,
-		&texture,
-		nullptr
-	);
-
-	if (FAILED(hr))
-	{
-		backBuffer->Release();
-		throw MakeDxError(hr);
+	SDL_Texture* created = SDL_CreateTextureFromSurface(graphicsDevice->GetRenderer(), converted);
+	const UINT w = static_cast<UINT>(converted->w), h = static_cast<UINT>(converted->h);
+	SDL_DestroySurface(converted);
+	if (created == nullptr) {
+		throw std::runtime_error(std::string("Could not create texture from the screen: ") + SDL_GetError());
 	}
-
-	IDirect3DSurface9* textureSurface = nullptr;
-	hr = texture->GetSurfaceLevel(0, &textureSurface);
-	if (FAILED(hr))
-	{
-		backBuffer->Release();
-		SafeRelease(texture);
-		throw MakeDxError(hr);
-	}
-
-	hr = gd->StretchRect(
-		backBuffer,
-		nullptr,
-		textureSurface,
-		nullptr,
-		D3DTEXF_NONE
-	);
-
-	textureSurface->Release();
-	backBuffer->Release();
-
-	if (FAILED(hr))
-	{
-		SafeRelease(texture);
-		throw MakeDxError(hr);
-	}
-
-	this->width = desc.Width;
-	this->height = desc.Height;
+	Adopt(created, w, h);
 }
 
-IDirect3DTexture9* sdlgf::Texture::GetRawTexture()
+void sdlgf::Texture::CreateRenderTarget(UINT w, UINT h)
 {
-	return texture;
+	if (graphicsDevice == nullptr) throw std::runtime_error("Graphics device is null");
+	SDL_Texture* created = SDL_CreateTexture(graphicsDevice->GetRenderer(), SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_TARGET, static_cast<int>(w), static_cast<int>(h));
+	if (created == nullptr) {
+		throw std::runtime_error(std::string("Could not create render target: ") + SDL_GetError());
+	}
+	Adopt(created, w, h);
 }
 
 UINT sdlgf::Texture::GetWidth() const
@@ -395,39 +163,4 @@ std::tuple<UINT, UINT> sdlgf::Texture::GetSize() const
 sdlgf::GraphicsDevice* sdlgf::Texture::GetGraphicsDevice()
 {
 	return graphicsDevice;
-}
-
-void sdlgf::Texture::CreateRenderTarget(UINT width, UINT height)
-{
-	SafeRelease(texture);
-	HRESULT hr = graphicsDevice->GetDevice()->CreateTexture(
-		width, height, 1,
-		D3DUSAGE_RENDERTARGET,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_DEFAULT,
-		&texture,
-		nullptr
-	);
-	if (FAILED(hr)) {
-		throw MakeDxError(hr);
-	}
-	this->width = width;
-	this->height = height;
-	isRenderTarget = true;
-	if (!isRegisteredVolatile) {
-		graphicsDevice->RegisterVolatileResource(this);
-		isRegisteredVolatile = true;
-	}
-}
-
-IDirect3DSurface9* sdlgf::Texture::GetSurface()
-{
-	if (texture == nullptr) return nullptr;
-	IDirect3DSurface9* surface = nullptr;
-	texture->GetSurfaceLevel(0, &surface);
-	return surface;
-}
-void sdlgf::Texture::ReleaseRawTexture()
-{
-	SafeRelease(texture);
 }

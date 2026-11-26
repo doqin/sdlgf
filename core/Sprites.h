@@ -47,7 +47,6 @@ namespace sdlgf {
 
 	class FontSprite : public ISprite {
 	private:
-		RECT* p_src = nullptr;
 		Font* font = nullptr;
 		std::wstring text;
 		bool isBold = false;
@@ -55,7 +54,6 @@ namespace sdlgf {
 		sdlgf::Color outlineColor = 0xFF000000;
 		float outlineThickness = 1.0f;
 		float maxWidth = 0.f;
-		void BuildTextRect(RECT& rect, DWORD& format, bool measure) const;
 	public:
 		FontSprite(Font* font);
 		~FontSprite();

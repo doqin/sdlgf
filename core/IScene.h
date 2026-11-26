@@ -35,8 +35,8 @@ namespace sdlgf {
 		virtual void DrawUI(unsigned long long deltaTime) = 0;
 
 		/// <summary>
-		/// Called after the graphics device has been Reset (e.g. a fullscreen/windowed toggle
-		/// or window resize). D3DPOOL_DEFAULT resources come back empty - a scene holding a
+		/// Called when the graphics driver lost the contents of render-target textures
+		/// (SDL_EVENT_RENDER_TARGETS_RESET, e.g. after a GPU reset). A scene holding a
 		/// pre-rendered snapshot in one (an offscreen render target it drew once and kept,
 		/// rather than a loaded asset) must redraw it here, or it stays blank until the scene
 		/// itself is torn down and rebuilt.

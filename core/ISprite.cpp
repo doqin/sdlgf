@@ -21,19 +21,9 @@ sdlgf::Mat4 sdlgf::ISprite::GetTransformMatrix()
 
 sdlgf::ISprite::ISprite(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {
 	localTransformMatrix = sdlgf::Mat4::Identity();
-	if (graphicsDevice != nullptr) graphicsDevice->RegisterVolatileResource(this);
 }
 
 sdlgf::ISprite::~ISprite() {
-	if (graphicsDevice != nullptr) graphicsDevice->UnregisterVolatileResource(this);
-}
-
-void sdlgf::ISprite::OnLostDevice() {
-	if (p_sprite != nullptr) p_sprite->OnLostDevice();
-}
-
-void sdlgf::ISprite::OnResetDevice() {
-	if (p_sprite != nullptr) p_sprite->OnResetDevice();
 }
 
 void sdlgf::ISprite::Translate(

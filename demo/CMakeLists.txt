@@ -21,7 +21,7 @@ endif()
 # The vendored Dear ImGui sources were compiled without the precompiled header.
 target_precompile_headers(sdlgf_demo PRIVATE "${CMAKE_SOURCE_DIR}/includes/pch.h")
 set_source_files_properties(
-    backends/imgui_impl_dx9.cpp
+    backends/imgui_impl_sdlrenderer3.cpp
     backends/imgui_impl_sdl3.cpp
     imgui.cpp
     imgui_demo.cpp
@@ -32,13 +32,7 @@ set_source_files_properties(
     PROPERTIES SKIP_PRECOMPILE_HEADERS ON
 )
 
-# The game loads "assets/..." relative to the executable and needs the D3DX9
-# runtime DLL next to it (previously handled by scripts/package-portable.ps1).
-add_custom_command(TARGET sdlgf_demo POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDLGF_D3DX9_RUNTIME_DLL}" "$<TARGET_FILE_DIR:sdlgf_demo>"
-    VERBATIM
-)
+# The game loads "assets/..." relative to the executable.
 if(SDLGF_COPY_ASSETS)
     add_custom_command(TARGET sdlgf_demo POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different

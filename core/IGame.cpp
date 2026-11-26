@@ -1,19 +1,16 @@
 #include "pch.h"
 #include "IGame.h"
+#include "Application.h"
 #include "SceneManager.h"
 #include "IScene.h"
 #include "GraphicsDevice.h"
 #include "Texture.h"
 #include "Sprites.h"
+#include <algorithm>
 #include <stdexcept>
 
 sdlgf::IGame::~IGame()
 {
-}
-
-HWND sdlgf::IGame::GetHwnd() const
-{
-	return hwnd;
 }
 
 sdlgf::GraphicsDevice* sdlgf::IGame::GetGraphicsDevice()
@@ -33,25 +30,9 @@ void sdlgf::IGame::Update(unsigned long long deltaTime)
 
 void sdlgf::IGame::Draw(unsigned long long deltaTime)
 {
-	if (pendingDeviceReset) {
-		if (!TryResetDevice(pendingWidth, pendingHeight)) {
-			return;
-		}
-	}
-
-	auto deviceState = graphicsDevice->IsValid();
-	if (deviceState == D3DERR_DEVICELOST) {
-		return;
-	}
-	if (deviceState == D3DERR_DEVICENOTRESET) {
-		if (!TryResetDevice(pendingWidth, pendingHeight)) {
-			return;
-		}
-	}
-
 	//RENDER INTO VIRTUAL TEXTURE (WORLD)
 	graphicsDevice->SetRenderTarget(renderTargetTex.get());
-	graphicsDevice->SetViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0.0f, 1.0f);
+	graphicsDevice->SetViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 	// The virtual render target is 1:1 with virtual coordinates
 	graphicsDevice->ResetVirtualTransform();
 
@@ -61,12 +42,17 @@ void sdlgf::IGame::Draw(unsigned long long deltaTime)
 
 	// Render to actual screen and draw UI
 	graphicsDevice->RestoreRenderTarget();
-	graphicsDevice->SetViewport(0, 0, d3dpp.BackBufferWidth, d3dpp.BackBufferHeight, 0.0f, 1.0f);
+
+	int backBufferWidth = 0, backBufferHeight = 0;
+	graphicsDevice->GetOutputSize(backBufferWidth, backBufferHeight);
+	// A minimized window has nothing to draw into
+	if (backBufferWidth <= 0 || backBufferHeight <= 0) return;
+	graphicsDevice->SetViewport(0, 0, backBufferWidth, backBufferHeight);
 
 	graphicsDevice->Clear(0xFF000000);
 
-	float currentWidth = static_cast<float>(d3dpp.BackBufferWidth);
-	float currentHeight = static_cast<float>(d3dpp.BackBufferHeight);
+	float currentWidth = static_cast<float>(backBufferWidth);
+	float currentHeight = static_cast<float>(backBufferHeight);
 
 	float scaleX = currentWidth / static_cast<float>(SCREEN_WIDTH);
 	float scaleY = currentHeight / static_cast<float>(SCREEN_HEIGHT);
@@ -77,7 +63,7 @@ void sdlgf::IGame::Draw(unsigned long long deltaTime)
 	float offsetX = (currentWidth - finalW) / 2.0f;
 	float offsetY = (currentHeight - finalH) / 2.0f;
 
-	if (SUCCEEDED(graphicsDevice->BeginDraw())) {
+	if (graphicsDevice->BeginDraw()) {
 		auto currentScene = sceneManager->GetCurrentScene();
 		if (currentScene) {
 			currentScene->GetUICamera().SetScreenResolution(static_cast<int>(currentWidth), static_cast<int>(currentHeight));
@@ -108,46 +94,11 @@ void sdlgf::IGame::Draw(unsigned long long deltaTime)
 
 void sdlgf::IGame::Init()
 {
-	d3d = Direct3DCreate9(D3D_SDK_VERSION);
-	if (d3d == NULL) throw std::runtime_error("Error initializing Direct3D");
+	SDL_Window* window = sdlgf::Application::GetInstance()->GetWindow();
+	if (window == nullptr) throw std::runtime_error("IGame::Init needs the Application window: call Application::Init first");
 
-	ZeroMemory(&d3dpp, sizeof(d3dpp));
-
-	d3dpp.Windowed = TRUE;
-	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-	d3dpp.BackBufferFormat = D3DFMT_X8R8G8B8;
-	d3dpp.BackBufferCount = 1;
-	d3dpp.BackBufferWidth = SCREEN_WIDTH;
-	d3dpp.BackBufferHeight = SCREEN_HEIGHT;
-	d3dpp.hDeviceWindow = hwnd;
-
-	graphicsDevice = new GraphicsDevice();
+	graphicsDevice = new GraphicsDevice(window);
 	sceneManager = new SceneManager();
-	// Create Direct3D device
-	HRESULT createResult = d3d->CreateDevice(
-		D3DADAPTER_DEFAULT,
-		D3DDEVTYPE_HAL,
-		hwnd,
-		D3DCREATE_SOFTWARE_VERTEXPROCESSING,
-		&d3dpp,
-		&graphicsDevice->GetDevice()
-	);
-
-	if (FAILED(createResult)) {
-		// Name the adapter that refused the device - on machines without GPU
-		// acceleration (e.g. Windows Sandbox) this shows the real culprit
-		D3DADAPTER_IDENTIFIER9 adapterInfo{};
-		d3d->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adapterInfo);
-		char message[1024];
-		wsprintfA(message,
-			"Error creating Direct3D device (HRESULT 0x%08X)\r\nAdapter: %s",
-			static_cast<UINT>(createResult), adapterInfo.Description);
-		throw std::runtime_error(message);
-	}
-	if (graphicsDevice->GetDevice() == NULL) throw std::runtime_error("Error creating Direct3D device");
-
-	// create pointer to the back buffer
-	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
 
 	// Add letterboxing: initialize the virtual screen
 	renderTargetTex = std::make_shared<sdlgf::Texture>(graphicsDevice);
@@ -157,63 +108,20 @@ void sdlgf::IGame::Init()
 
 void sdlgf::IGame::OnResize(UINT width, UINT height)
 {
-	if (graphicsDevice == nullptr || graphicsDevice->GetDevice() == nullptr) return;
-	if (width == 0 || height == 0) return;
-
-	//sceneManager->OnResize(width, height);
-
-	pendingWidth = width;
-	pendingHeight = height;
-
-	if (!TryResetDevice(width, height)) {
-		pendingDeviceReset = true;
-	}
+	// Nothing to rebuild: the renderer follows the window by itself and Draw() reads the
+	// current output size every frame.
 }
 
-bool sdlgf::IGame::TryResetDevice(UINT width, UINT height)
+void sdlgf::IGame::OnRenderTargetsReset()
 {
-	if (graphicsDevice == nullptr || graphicsDevice->GetDevice() == nullptr) return false;
-	if (width == 0 || height == 0) return false;
-
-	if (graphicsDevice->GetBackBuffer() != nullptr) {
-		graphicsDevice->GetBackBuffer()->Release();
-		graphicsDevice->GetBackBuffer() = nullptr;
-	}
-
-	d3dpp.BackBufferWidth = width;
-	d3dpp.BackBufferHeight = height;
-
-	// Every live ID3DXSprite/ID3DXFont/render-target Texture must release its D3DPOOL_DEFAULT
-	// resources before Reset, or Reset can fail outright - which it did, reliably, on every
-	// fullscreen/windowed toggle once MainMenu's map-preview render targets existed: with
-	// pendingDeviceReset then stuck true, Draw() returned before Present() every frame, leaving
-	// the window showing its WNDCLASS background (WHITE_BRUSH) forever. This also covers
-	// renderTargetTex, so it no longer needs its own release/recreate calls here.
-	graphicsDevice->NotifyLostDevice();
-
-	HRESULT resetResult = graphicsDevice->GetDevice()->Reset(&d3dpp);
-	if (FAILED(resetResult)) {
-		pendingDeviceReset = true;
-		return false;
-	}
-
-	graphicsDevice->GetDevice()->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &graphicsDevice->GetBackBuffer());
-	graphicsDevice->SetViewport(0, 0, width, height, 0.0f, 1.0f);
-
-	// Restores every registered render target, including renderTargetTex, but only as an
-	// empty D3DPOOL_DEFAULT surface - Reset() cannot preserve what was drawn into it.
-	graphicsDevice->NotifyResetDevice();
-	// Let scenes redraw anything they'd rendered into one of those now-blank surfaces
-	// (e.g. MainMenu's map-preview snapshots).
-	sceneManager->OnDeviceReset();
-
-	pendingDeviceReset = false;
-	return true;
+	if (sceneManager != nullptr) sceneManager->OnDeviceReset();
 }
 
 void sdlgf::IGame::Dispose()
 {
-	if (d3d != nullptr) d3d->Release();
-	if (graphicsDevice != nullptr) delete graphicsDevice;
-	if (sceneManager != nullptr) delete sceneManager;
+	// Scenes own textures: free them while the renderer still exists.
+	renderTargetSprite.reset();
+	renderTargetTex.reset();
+	if (sceneManager != nullptr) { delete sceneManager; sceneManager = nullptr; }
+	if (graphicsDevice != nullptr) { delete graphicsDevice; graphicsDevice = nullptr; }
 }

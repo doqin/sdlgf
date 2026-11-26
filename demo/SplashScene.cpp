@@ -83,7 +83,7 @@ namespace Demo {
 
     void SplashScene::DrawWorld(unsigned long long deltaTime) {
         auto gd = game->GetGraphicsDevice();
-        if (SUCCEEDED(gd->BeginDraw())) {
+        if (gd->BeginDraw()) {
             
             //draw bg
             auto [sw, sh] = camera.GetScreenResolution();
@@ -101,7 +101,7 @@ namespace Demo {
     void SplashScene::DrawUI(unsigned long long deltaTime)
     {
         auto gd = game->GetGraphicsDevice();
-        if (SUCCEEDED(gd->BeginDraw())) {
+        if (gd->BeginDraw()) {
             sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
             gd->EndDraw();
         }

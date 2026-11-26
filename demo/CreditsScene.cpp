@@ -140,7 +140,7 @@ namespace Demo
 		fontSprite->SetColor(0xFFFFFFFF);
 
 		//bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		//bgTex->LoadTexture(IDB_PNG2);
+		//bgTex->LoadTexture(L"assets/test-background.png");
 
 		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiSheetTex->LoadTexture(L"./assets/ui.png");
@@ -318,7 +318,7 @@ namespace Demo
 	{
 		auto gd = game->GetGraphicsDevice();
 
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 			DrawBackground(deltaTime);
 			gd->EndDraw();
 		}
@@ -328,7 +328,7 @@ namespace Demo
 	{
 		auto gd = game->GetGraphicsDevice();
 
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 			DrawOverlay(deltaTime);
 
 			for (auto& btn : uiButtons) btn->Draw(gd, deltaTime);

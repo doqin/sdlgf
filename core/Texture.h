@@ -1,36 +1,58 @@
 #pragma once
-#include <d3dx9.h>
-#include "GraphicsDevice.h"
-#include "IDeviceLostAware.h"
+#include <cstdint>
 #include <string>
+#include <tuple>
+#include "GraphicsDevice.h"
+
+struct SDL_Texture;
+
 namespace sdlgf {
-	class Texture : public IDeviceLostAware {
+	/// An image in video memory: loaded from a PNG/BMP/JPG file, filled with a colour, built from
+	/// pixels, or a render target the GraphicsDevice can draw into. Filtering is always
+	/// nearest-neighbour (the game is pixel art).
+	///
+	/// A Texture belongs to the GraphicsDevice it was made for. If the device is destroyed first the
+	/// texture simply becomes empty (IsLoaded() is false).
+	class Texture {
 	private:
 		GraphicsDevice* graphicsDevice;
-		IDirect3DTexture9* texture = nullptr;
+		SDL_Texture* texture = nullptr;
 		UINT width = 0, height = 0;
-		// Only a render target (D3DPOOL_DEFAULT) needs to be released before Reset and
-		// recreated after - a loaded/managed-pool texture survives Reset on its own.
-		bool isRenderTarget = false;
-		bool isRegisteredVolatile = false;
+		bool blending = true;
+		void Release();
+		void Adopt(SDL_Texture* created, UINT w, UINT h);
+		friend class GraphicsDevice;
+		void OnDeviceDestroyed();
 	public:
 		Texture(GraphicsDevice* graphicsDevice);
 		~Texture();
-		void OnLostDevice() override;
-		void OnResetDevice() override;
+		Texture(const Texture&) = delete;
+		Texture& operator=(const Texture&) = delete;
+
 		void CreatePlainTexture(sdlgf::Color color, UINT width, UINT height);
+		/// Fills the whole texture with one colour.
 		void SetColor(sdlgf::Color color);
-		void LoadTexture(std::wstring filePath, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
-		void LoadTexture(int resourceId, UINT width = D3DX_DEFAULT_NONPOW2, UINT height = D3DX_DEFAULT_NONPOW2);
+		/// Loads an image file (paths are relative to the working directory, which the
+		/// Application sets to the executable's directory). Throws std::runtime_error naming
+		/// the file if it cannot be loaded.
+		void LoadTexture(const std::wstring& filePath);
+		/// Creates the texture from `width` x `height` pixels of 0xAARRGGBB, row-major.
+		void CreateFromPixels(const std::uint32_t* argbPixels, UINT width, UINT height);
+		/// Copies what the window currently shows into this texture.
 		void CaptureCurrentBackBuffer();
-		IDirect3DTexture9* GetRawTexture();
+		/// A texture the GraphicsDevice can be redirected into with SetRenderTarget.
+		void CreateRenderTarget(UINT width, UINT height);
+
+		SDL_Texture* GetSDLTexture() const { return texture; }
+		bool IsLoaded() const { return texture != nullptr; }
 		UINT GetWidth() const;
 		UINT GetHeight() const;
 		std::tuple<UINT, UINT> GetSize() const;
 		GraphicsDevice* GetGraphicsDevice();
-		void CreateRenderTarget(UINT width, UINT height);
-		IDirect3DSurface9* GetSurface();
-		void ReleaseRawTexture();
+		void ReleaseTexture() { Release(); width = 0; height = 0; }
 
+		/// Whether drawing this texture blends (see GraphicsDevice::GetAlphaBlendMode) or
+		/// overwrites. Sprites always blend; GraphicsDevice flips this around textured polygons.
+		void SetBlending(bool enabled);
 	};
 }

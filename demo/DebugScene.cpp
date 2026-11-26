@@ -168,7 +168,7 @@ void Demo::DebugScene::Update(unsigned long long deltaTime)
 void Demo::DebugScene::DrawWorld(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 		draggableManager->Draw(deltaTime);
 
 		Demo::DrawAnimatedDashedRectangle(gd, camera, 0, 0, 500, 500, 6.f, 0xFFFF00FF, true, 4.f, 0xFFFFFFFF, 20.f, 10.f, 40.f, sdlgf::Platform::GetTicksMs());
@@ -181,7 +181,7 @@ void Demo::DebugScene::DrawWorld(unsigned long long deltaTime)
 void Demo::DebugScene::DrawUI(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 
 		for (auto& btn : uiButtons) {
 			btn->Draw(gd, deltaTime);

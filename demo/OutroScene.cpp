@@ -45,7 +45,7 @@ void Demo::OutroScene::Update(unsigned long long deltaTime) {
 
 void Demo::OutroScene::DrawWorld(unsigned long long deltaTime) {
     auto gd = game->GetGraphicsDevice();
-    if (SUCCEEDED(gd->BeginDraw())) {
+    if (gd->BeginDraw()) {
         gd->EndDraw();
     }
 }
@@ -53,7 +53,7 @@ void Demo::OutroScene::DrawWorld(unsigned long long deltaTime) {
 void Demo::OutroScene::DrawUI(unsigned long long deltaTime)
 {
     auto gd = game->GetGraphicsDevice();
-    if (SUCCEEDED(gd->BeginDraw())) {
+    if (gd->BeginDraw()) {
 
         if (conversation) {
             conversation->Draw(gd, &this->uiCamera, deltaTime);

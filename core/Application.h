@@ -19,7 +19,7 @@ namespace sdlgf {
 		bool quitRequested = false;
 		bool gameDisposed = false;
 		// Last client size (pixels) forwarded to the game, so redundant resize events
-		// (SDL can report one right after the window is created) don't trigger a device reset.
+		// (SDL can report one right after the window is created) are not forwarded twice.
 		int lastClientWidth = 0;
 		int lastClientHeight = 0;
 		static Application* instance;
@@ -32,7 +32,6 @@ namespace sdlgf {
 		/// </summary>
 		using EventHook = void(*)(const SDL_Event&);
 		void SetEventHook(EventHook hook);
-		void SetOnDeviceResetHandler(void(*handler)());
 
 		/// <summary>
 		/// Initializes SDL and creates the application window.
@@ -56,13 +55,6 @@ namespace sdlgf {
 
 		void SetFramerate(int fps);
 		SDL_Window* GetWindow() const;
-#ifdef _WIN32
-		/// <summary>
-		/// The window's native handle. Only needed by the Direct3D 9 renderer; goes away
-		/// when that is replaced.
-		/// </summary>
-		HWND GetHWnd() const;
-#endif
 		static Application* GetInstance();
 		unsigned int GetScreenWidth() const;
 		unsigned int GetScreenHeight() const;

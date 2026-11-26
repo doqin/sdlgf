@@ -52,19 +52,56 @@ FetchContent_Declare(SDL3_ttf
     EXCLUDE_FROM_ALL
 )
 
+# --- SDL_image --------------------------------------------------------------
+# Image loading. SDL itself only reads PNG and BMP; the game also has JPEG tilesets (XP.jpg).
+# Built with its bundled stb_image decoders only, the same on every platform: the native
+# decoders (WIC on Windows, ImageIO on macOS) and the formats that need vendored libraries
+# (AVIF, JPEG XL, TIFF, WebP, SVG) and the rarely used ones are switched off: only PNG, JPEG,
+# GIF and BMP remain.
+set(SDLIMAGE_VENDORED ON CACHE BOOL "" FORCE)
+set(SDLIMAGE_BACKEND_STB ON CACHE BOOL "" FORCE)
+set(SDLIMAGE_BACKEND_WIC OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_BACKEND_IMAGEIO OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_AVIF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_JXL OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_TIF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_WEBP OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_SVG OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_ANI OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_LBM OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_PCX OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_PNM OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_QOI OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_TGA OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_XCF OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_XPM OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_XV OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_PNG_LIBPNG OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_PNG_SAVE OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
+set(SDLIMAGE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(SDL3_image
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+    GIT_TAG        release-3.4.8
+    GIT_SHALLOW    TRUE
+    GIT_SUBMODULES ""
+    EXCLUDE_FROM_ALL
+)
+
 FetchContent_MakeAvailable(SDL3)
-FetchContent_MakeAvailable(SDL3_ttf tmxlite)
+FetchContent_MakeAvailable(SDL3_image SDL3_ttf tmxlite)
 
 # tmxlite only defines TMXLITE_STATIC for its own Debug/Release flags and does
 # not export it, so consumers would try to dllimport the symbols.
 target_compile_definitions(tmxlite PUBLIC TMXLITE_STATIC)
 
-# --- D3DX9 + DxErr shim (Windows, temporary) --------------------------------
-# D3DX9 is not part of the Windows SDK. Microsoft publishes the June 2010
-# headers/libs/redist as a NuGet package, which avoids needing the legacy
-# DirectX SDK installer (and its hard-coded C:\Program Files (x86) path).
-# Removed in phase 4 when the D3D9 renderer is replaced.
-if(WIN32)
+# --- D3DX9 (Windows, optional, tests only) ---------------------------------
+# The game no longer uses Direct3D or D3DX. This is only for the math test, which can compare
+# the replacement math library against Microsoft's original implementation. Microsoft publishes
+# the June 2010 headers/libs/redist as a NuGet package, which avoids the legacy DirectX SDK
+# installer. Off by default: -DSDLGF_D3DX_CROSSCHECK=ON.
+if(WIN32 AND SDLGF_D3DX_CROSSCHECK)
     FetchContent_Declare(d3dx9_pkg
         URL            https://api.nuget.org/v3-flatcontainer/microsoft.dxsdk.d3dx/9.29.952.8/microsoft.dxsdk.d3dx.9.29.952.8.nupkg
         URL_HASH       SHA256=ead0906ae8a26c18a7525da7490127a2110f7c58f18293738283e30e97c6ea4b
@@ -80,11 +117,7 @@ if(WIN32)
     set(_d3dx9_native "${d3dx9_pkg_SOURCE_DIR}/build/native")
 
     add_library(sdlgf_d3dx9 INTERFACE)
-    target_include_directories(sdlgf_d3dx9 INTERFACE
-        "${_d3dx9_native}/include"
-        "${CMAKE_SOURCE_DIR}/cmake/shims")  # DxErr.h (not in the NuGet package)
-    # The release import lib is used for every configuration: the debug one
-    # needs the DirectX debug runtime, which is not installed by default.
+    target_include_directories(sdlgf_d3dx9 INTERFACE "${_d3dx9_native}/include")
     target_link_libraries(sdlgf_d3dx9 INTERFACE
         "${_d3dx9_native}/release/lib/${_d3dx9_arch}/d3dx9.lib")
     set(SDLGF_D3DX9_RUNTIME_DLL "${_d3dx9_native}/release/bin/${_d3dx9_arch}/D3DX9_43.dll")

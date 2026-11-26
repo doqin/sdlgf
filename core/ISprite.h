@@ -1,15 +1,12 @@
 #pragma once
-#include <d3dx9.h>
 #include "Camera.h"
-#include "IDeviceLostAware.h"
 
 namespace sdlgf {
 	class GraphicsDevice;
 
-	class ISprite : public IDeviceLostAware {
+	class ISprite {
 	protected:
 		GraphicsDevice* graphicsDevice = nullptr;
-		ID3DXSprite* p_sprite = nullptr;
 		sdlgf::Vec3 pos = { 0.0f, 0.0f, 0.0f };
 		sdlgf::Color color = 0xFFFFFFFF;
 		sdlgf::Vec2 scale = sdlgf::Vec2(1.0f, 1.0f);
@@ -22,12 +19,8 @@ namespace sdlgf {
 		ISprite(GraphicsDevice* graphicsDevice);
 		virtual ~ISprite();
 
-		// Default implementation forwards to p_sprite, which every subclass constructs into
-		// this base-class member. FontSprite's underlying sdlgf::Font registers itself
-		// separately and does not need an override here.
-		void OnLostDevice() override;
-		void OnResetDevice() override;
-
+		// Begin/End bracket a batch of Draw calls. SDL batches by itself, so they have nothing to
+		// do any more, but callers keep the pairing.
 		virtual void Begin() = 0;
 		virtual void Draw(const Camera& camera, unsigned long long deltaTime) = 0;
 		virtual void End() = 0;

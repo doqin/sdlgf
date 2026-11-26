@@ -65,9 +65,9 @@ namespace Demo
 		void Update(unsigned long long deltaTime) override;
 		void DrawWorld(unsigned long long deltaTime) override;
 		void DrawUI(unsigned long long deltaTime) override;
-		// The preview textures are D3DPOOL_DEFAULT render targets holding a one-off snapshot,
-		// not a loaded asset - a device Reset (fullscreen/windowed toggle, resize) wipes them
-		// blank, so they need to be redrawn, not just recreated.
+		// The preview textures are render targets holding a one-off snapshot, not a loaded
+		// asset - if the driver loses render-target contents they come back blank, so they
+		// need to be redrawn.
 		void OnDeviceReset() override { RenderMapPreviews(); }
 		void UpdateLayout(int width, int height);
 		void DrawBackground(unsigned long long deltaTime);

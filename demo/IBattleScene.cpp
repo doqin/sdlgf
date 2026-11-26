@@ -27,7 +27,7 @@
 #include "PopupManager.h"
 #include "Debug.h"
 #include "imgui.h"
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "SaveGameState.h"
 #include "MainMenu.h"
@@ -3964,7 +3964,7 @@ void Demo::IBattleScene::DrawWorld(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
 
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 		if (customBackgroundDraw) {
 			customBackgroundDraw(gd, deltaTime);
 		}
@@ -4089,7 +4089,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 		}
 	});
 
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 		auto screenW = (float)game->GetVirtualWidth();
 		auto screenH = (float)game->GetVirtualHeight();
 		const float modifierIconOffsetX = gearButton->GetWorldX() - gearButton->GetWidth();
@@ -4278,7 +4278,7 @@ void Demo::IBattleScene::DrawUI(unsigned long long deltaTime)
 			sdlgf::InputManager::GetInstance()->DrawCursor(&this->uiCamera, deltaTime);
 		}
 		ImGui::Render();
-		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gd->GetRenderer());
 		gd->EndDraw();
 	}
 }

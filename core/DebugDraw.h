@@ -17,7 +17,8 @@ namespace sdlgf {
 		static std::map<int, std::wstring> coordinateCache;
 	public:
 
-		static void Init(GraphicsDevice* graphicsDevice);
+		/// `fontName` must be a family name registered with Font::AddFont.
+		static void Init(GraphicsDevice* graphicsDevice, const std::wstring& fontName, int fontSize = 14);
 		static void Release();
 
 		static void DrawGrid(GraphicsDevice* graphicsDevice, int offsetX, int offsetY, int screenWidth, int screenHeight, int spacingX, int spacingY, sdlgf::Color lineColor);

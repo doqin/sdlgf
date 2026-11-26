@@ -7,7 +7,7 @@ namespace Demo {
 
 	class Game : public sdlgf::IGame {
 	public:
-	Game(HWND hwnd, const UINT screenWidth, const UINT screenHeight) : IGame(hwnd, screenWidth, screenHeight) {}
+	Game(const UINT screenWidth, const UINT screenHeight) : IGame(screenWidth, screenHeight) {}
 	void Init() override;
 	void Update(unsigned long long deltaTime) override;
 	UINT GetVirtualWidth() const { return SCREEN_WIDTH; }

@@ -163,7 +163,7 @@ namespace Demo {
 		const float vw = (float)game->GetVirtualWidth();
 		const float vh = (float)game->GetVirtualHeight();
 
-		if (FAILED(gd->BeginDraw())) return;
+		if (!gd->BeginDraw()) return;
 
 		gd->SetAlphaBlending(true);
 		gd->DrawRectangle(uiCamera, -vw / 2.f, -vh / 2.f, vw, vh, COLOR_ARGB(210, 0, 0, 0), true);

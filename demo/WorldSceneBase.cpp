@@ -13,7 +13,7 @@
 #include "MapBattleScene.h"
 #include "MapView.h"
 #include "RNG.h"
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "backends/imgui_impl_sdl3.h"
 
 namespace {
@@ -344,7 +344,7 @@ void Demo::WorldSceneBase::Update(unsigned long long deltaTime)
 void Demo::WorldSceneBase::DrawWorld(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 
 		DrawBackground(gd, deltaTime);
 		map->Draw(camera);
@@ -387,7 +387,7 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 	CreateImGuiDebugFrame(player, game);
 	auto gd = game->GetGraphicsDevice();
 
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 
 		for (auto& savePoint : savePoints) savePoint->DrawUI(&this->uiCamera, deltaTime);
 		for (auto& shopPoint : shopPoints) shopPoint->DrawUI(&this->uiCamera, deltaTime);
@@ -454,7 +454,7 @@ void Demo::WorldSceneBase::DrawUI(unsigned long long deltaTime)
 		}
 
 		ImGui::Render();
-		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+		ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gd->GetRenderer());
 		gd->EndDraw();
 	}
 }

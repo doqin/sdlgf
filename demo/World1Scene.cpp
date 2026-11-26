@@ -25,7 +25,7 @@ void Demo::World1Scene::Update(unsigned long long deltaTime)
 void Demo::World1Scene::DrawWorld(unsigned long long deltaTime)
 {
 	auto gd = game->GetGraphicsDevice();
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 		auto app = sdlgf::Application::GetInstance();
 		if (sdlgf::DebugDraw::drawGrid) {
 			sdlgf::DebugDraw::DrawGrid(game->GetGraphicsDevice(), camera, 0, 0, app->GetScreenWidth(), app->GetScreenHeight(), 16, 16, 0x88888888);

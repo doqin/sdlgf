@@ -1,159 +1,191 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "GraphicsDevice.h"
-#include <vector>
+#include <SDL3/SDL.h>
 #include <algorithm>
 #include <cmath>
-#include <d3dx9math.h>
-#include "Application.h"
-#include "Utils.h"
+#include <stdexcept>
+#include <string>
 #include "Texture.h"
 
-struct Vertex {
-	float x, y, z, rhw; // rhw is reciprocal of homogenous w
-	DWORD color;
-};
+namespace {
+	// The game was written against Direct3D 9, whose pixel CENTRES lie on integer coordinates;
+	// SDL (like Direct3D 10+) puts them at +0.5. Shapes that were authored in D3D9 screen space
+	// are shifted by half a pixel so that they cover the same pixels (and sample textures at the
+	// same points) as before. Lines go through SDL_RenderLine(s), which applies the same
+	// convention itself.
+	constexpr float kD3D9PixelShift = 0.5f;
 
-struct TexVertex {
-	float x, y, z, rhw; // rhw is reciprocal of homogenous w
-	DWORD color;
-	float u, v;
-};
-#define D3DFVF_TEXVERTEX (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
-static sdlgf::Vec2 TransformPoint(const sdlgf::Mat4& matrix, float x, float y)
-{
-	sdlgf::Vec4 v(x, y, 0.0f, 1.0f);
-	v = sdlgf::Transform(v, matrix);
-	if (v.w != 0.0f) {
-		v.x /= v.w;
-		v.y /= v.w;
+	SDL_FColor ToFColor(sdlgf::Color c)
+	{
+		return SDL_FColor{
+			static_cast<float>((c >> 16) & 0xFF) * (1.0f / 255.0f),
+			static_cast<float>((c >> 8) & 0xFF) * (1.0f / 255.0f),
+			static_cast<float>(c & 0xFF) * (1.0f / 255.0f),
+			static_cast<float>((c >> 24) & 0xFF) * (1.0f / 255.0f)
+		};
 	}
-	return sdlgf::Vec2(v.x, v.y);
+
+	sdlgf::Vec2 TransformPoint(const sdlgf::Mat4& matrix, float x, float y)
+	{
+		sdlgf::Vec4 v(x, y, 0.0f, 1.0f);
+		v = sdlgf::Transform(v, matrix);
+		if (v.w != 0.0f) {
+			v.x /= v.w;
+			v.y /= v.w;
+		}
+		return sdlgf::Vec2(v.x, v.y);
+	}
+
+	sdlgf::Vec2 TransformRectanglePoint(
+		float x,
+		float y,
+		float localX,
+		float localY,
+		float rotation,
+		float scaleX,
+		float scaleY,
+		float offsetX,
+		float offsetY
+	)
+	{
+		float px = (localX - offsetX) * scaleX;
+		float py = (localY - offsetY) * scaleY;
+		float c = std::cos(rotation);
+		float s = std::sin(rotation);
+		float rx = px * c - py * s;
+		float ry = px * s + py * c;
+		return sdlgf::Vec2(x + rx, y + ry);
+	}
+
+	constexpr int kEllipseSamples = 36;
 }
 
-static sdlgf::Vec2 TransformRectanglePoint(
-	float x,
-	float y,
-	float localX,
-	float localY,
-	float rotation,
-	float scaleX,
-	float scaleY,
-	float offsetX,
-	float offsetY
-)
+sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererName) : window(window)
 {
-	float px = (localX - offsetX) * scaleX;
-	float py = (localY - offsetY) * scaleY;
-	float c = std::cos(rotation);
-	float s = std::sin(rotation);
-	float rx = px * c - py * s;
-	float ry = px * s + py * c;
-	return sdlgf::Vec2(x + rx, y + ry);
+	// Thin lines: use the driver's own line rasteriser. SDL's default (Bresenham on rounded
+	// endpoints) moves lines with fractional endpoints by up to a pixel; the hardware rule is the
+	// one Direct3D 9 used, so lines keep the pixels they always had. (The software renderer has
+	// its own line drawing and ignores this.)
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_LINE_METHOD, "2", SDL_HINT_DEFAULT);
+	renderer = SDL_CreateRenderer(window, rendererName);
+	if (renderer == nullptr) {
+		throw std::runtime_error(std::string("Error creating renderer: ") + SDL_GetError());
+	}
+	// Texture coordinates outside [0,1] hold the edge pixel (SDL's default would repeat the
+	// texture); callers pass such coordinates on purpose, e.g. for a cropped screen-space window.
+	SDL_SetRenderTextureAddressMode(renderer, SDL_TEXTURE_ADDRESS_CLAMP, SDL_TEXTURE_ADDRESS_CLAMP);
+	// Not every driver can vsync (software, dummy video); that is fine.
+	SDL_SetRenderVSync(renderer, 1);
+	alphaBlendMode = SDL_ComposeCustomBlendMode(
+		SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
+		SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
+	// The software renderer only knows the standard blend modes; its BLEND differs from the
+	// custom mode only in the alpha channel written to render targets.
+	if (!SDL_SetRenderDrawBlendMode(renderer, alphaBlendMode)) {
+		alphaBlendMode = SDL_BLENDMODE_BLEND;
+	}
+	sdlgf::Platform::DebugLog(std::string("Renderer: ") + SDL_GetRendererName(renderer) + "\n");
 }
 
-sdlgf::GraphicsDevice::GraphicsDevice(IDirect3DDevice9* d3ddev, IDirect3DSurface9* backbuffer) : d3ddev(d3ddev), backbuffer(backbuffer)
+sdlgf::GraphicsDevice::~GraphicsDevice()
 {
-	d3ddev->GetViewport(&viewport);
+	// SDL_DestroyRenderer frees every texture created from it; let the Texture objects that
+	// outlive the device know, so they neither free their texture again nor call back into us.
+	for (Texture* texture : textures) texture->OnDeviceDestroyed();
+	textures.clear();
+	if (renderer != nullptr) SDL_DestroyRenderer(renderer);
 }
 
-sdlgf::GraphicsDevice::~GraphicsDevice() {
-	if (d3ddev != NULL) d3ddev->Release();
-}
-
-IDirect3DDevice9*& sdlgf::GraphicsDevice::GetDevice() {
-	return d3ddev;
-}
-
-LPDIRECT3DSURFACE9& sdlgf::GraphicsDevice::GetBackBuffer() {
-	return backbuffer;
-}
-
-HRESULT sdlgf::GraphicsDevice::SetViewport(D3DVIEWPORT9 viewport)
+void sdlgf::GraphicsDevice::RegisterTexture(Texture* texture)
 {
-	return d3ddev->SetViewport(&viewport);
+	textures.push_back(texture);
 }
 
-HRESULT sdlgf::GraphicsDevice::SetViewport(DWORD x, DWORD y, DWORD width, DWORD height, float minZ, float maxZ)
+void sdlgf::GraphicsDevice::UnregisterTexture(Texture* texture)
 {
-	D3DVIEWPORT9 vp = { x, y, width, height, minZ, maxZ };
-	return d3ddev->SetViewport(&vp);
+	auto it = std::find(textures.begin(), textures.end(), texture);
+	if (it != textures.end()) {
+		*it = textures.back();
+		textures.pop_back();
+	}
 }
 
-HRESULT sdlgf::GraphicsDevice::BeginDraw()
+void sdlgf::GraphicsDevice::GetOutputSize(int& width, int& height) const
 {
-	return d3ddev->BeginScene();
+	width = 0;
+	height = 0;
+	SDL_GetCurrentRenderOutputSize(renderer, &width, &height);
 }
 
-HRESULT sdlgf::GraphicsDevice::Clear(sdlgf::ColorF color)
+void sdlgf::GraphicsDevice::SetViewport(int x, int y, int width, int height)
 {
-	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, color, 1.0f, 0);
+	const SDL_Rect rect{ x, y, width, height };
+	SDL_SetRenderViewport(renderer, &rect);
 }
 
-HRESULT sdlgf::GraphicsDevice::Clear()
+void sdlgf::GraphicsDevice::Clear(sdlgf::ColorF color)
 {
-	return d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, COLOR_XRGB(0, 0, 0), 1.0f, 0);
+	SDL_SetRenderDrawColorFloat(renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderClear(renderer);
 }
 
-void sdlgf::GraphicsDevice::RegisterVolatileResource(IDeviceLostAware* resource)
+void sdlgf::GraphicsDevice::Clear()
 {
-	volatileResources.push_back(resource);
+	Clear(sdlgf::ColorF(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
-void sdlgf::GraphicsDevice::UnregisterVolatileResource(IDeviceLostAware* resource)
+void sdlgf::GraphicsDevice::Present()
 {
-	auto it = std::find(volatileResources.begin(), volatileResources.end(), resource);
-	if (it != volatileResources.end()) volatileResources.erase(it);
+	SDL_RenderPresent(renderer);
 }
 
-void sdlgf::GraphicsDevice::NotifyLostDevice()
+bool sdlgf::GraphicsDevice::SetRenderTarget(Texture* target)
 {
-	for (auto* resource : volatileResources) resource->OnLostDevice();
+	if (target == nullptr || target->GetSDLTexture() == nullptr) return false;
+	if (!SDL_SetRenderTarget(renderer, target->GetSDLTexture())) return false;
+	renderTarget = target;
+	ApplyScissor();
+	return true;
 }
 
-void sdlgf::GraphicsDevice::NotifyResetDevice()
+void sdlgf::GraphicsDevice::RestoreRenderTarget()
 {
-	for (auto* resource : volatileResources) resource->OnResetDevice();
+	SDL_SetRenderTarget(renderer, nullptr);
+	renderTarget = nullptr;
+	ApplyScissor();
 }
 
-HRESULT sdlgf::GraphicsDevice::EndDraw()
+void sdlgf::GraphicsDevice::ApplyBlend()
 {
-	return d3ddev->EndScene();
-}
-
-HRESULT sdlgf::GraphicsDevice::Present()
-{
-	return d3ddev->Present(NULL, NULL, NULL, NULL);
-}
-
-HRESULT sdlgf::GraphicsDevice::IsValid()
-{
-	if (d3ddev == NULL)
-		return E_FAIL;
-
-	return d3ddev->TestCooperativeLevel();
+	SDL_SetRenderDrawBlendMode(renderer, alphaBlending ? alphaBlendMode : SDL_BLENDMODE_NONE);
 }
 
 void sdlgf::GraphicsDevice::SetAlphaBlending(bool enabled)
 {
-	if (enabled) {
-		d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	alphaBlending = enabled;
+}
+
+void sdlgf::GraphicsDevice::ApplyScissor()
+{
+	if (scissorEnabled) {
+		const SDL_Rect rect{ scissorRect.left, scissorRect.top, scissorRect.right - scissorRect.left, scissorRect.bottom - scissorRect.top };
+		SDL_SetRenderClipRect(renderer, &rect);
 	}
 	else {
-		d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+		SDL_SetRenderClipRect(renderer, nullptr);
 	}
 }
 
 void sdlgf::GraphicsDevice::SetScissorTest(bool enabled)
 {
-	d3ddev->SetRenderState(D3DRS_SCISSORTESTENABLE, enabled);
+	scissorEnabled = enabled;
+	ApplyScissor();
 }
 
 void sdlgf::GraphicsDevice::SetScissorRect(const RECT& rect)
 {
-	d3ddev->SetScissorRect(&rect);
+	scissorRect = rect;
+	if (scissorEnabled) ApplyScissor();
 }
 
 void sdlgf::GraphicsDevice::SetVirtualTransform(float scale, float offsetX, float offsetY)
@@ -168,6 +200,40 @@ void sdlgf::GraphicsDevice::ResetVirtualTransform()
 	virtualScale = 1.0f;
 	virtualOffsetX = 0.0f;
 	virtualOffsetY = 0.0f;
+}
+
+// ---- shape helpers -------------------------------------------------------------------------------
+
+void sdlgf::GraphicsDevice::FillFan(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color)
+{
+	if (points.size() < 3) return;
+	ApplyBlend();
+	const SDL_FColor c = ToFColor(color);
+	std::vector<SDL_Vertex> vertices(points.size());
+	for (size_t i = 0; i < points.size(); ++i) {
+		vertices[i].position = SDL_FPoint{ points[i].x + kD3D9PixelShift, points[i].y + kD3D9PixelShift };
+		vertices[i].color = c;
+		vertices[i].tex_coord = SDL_FPoint{ 0.0f, 0.0f };
+	}
+	std::vector<int> indices;
+	indices.reserve((points.size() - 2) * 3);
+	for (size_t i = 1; i + 1 < points.size(); ++i) {
+		indices.push_back(0);
+		indices.push_back(static_cast<int>(i));
+		indices.push_back(static_cast<int>(i + 1));
+	}
+	SDL_RenderGeometry(renderer, nullptr, vertices.data(), static_cast<int>(vertices.size()), indices.data(), static_cast<int>(indices.size()));
+}
+
+void sdlgf::GraphicsDevice::StrokeStrip(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color)
+{
+	if (points.size() < 2) return;
+	ApplyBlend();
+	const SDL_FColor c = ToFColor(color);
+	SDL_SetRenderDrawColorFloat(renderer, c.r, c.g, c.b, c.a);
+	std::vector<SDL_FPoint> pts(points.size());
+	for (size_t i = 0; i < points.size(); ++i) pts[i] = SDL_FPoint{ points[i].x, points[i].y };
+	SDL_RenderLines(renderer, pts.data(), static_cast<int>(pts.size()));
 }
 
 void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
@@ -185,40 +251,34 @@ void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, sdl
 void sdlgf::GraphicsDevice::DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
 {
 	if (thickness <= 1.0f) {
-		Vertex vertices[] = {
-			{ .x=x1, .y=y1, .z=0.0f, .rhw=1.0f, .color=color },
-			{ .x=x2, .y=y2, .z=0.0f, .rhw=1.0f, .color=color }
-		};
-		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINELIST, 1, vertices, sizeof(Vertex));
+		StrokeStrip({ sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2) }, color);
+		return;
 	}
-	else {
-		float dx = x2 - x1;
-		float dy = y2 - y1;
-		float len = std::sqrt(dx * dx + dy * dy);
-		if (len < 0.00001f) return;
 
-		float nx = -dy / len;
-		float ny = dx / len;
+	float dx = x2 - x1;
+	float dy = y2 - y1;
+	float len = std::sqrt(dx * dx + dy * dy);
+	if (len < 0.00001f) return;
 
-		float halfThickness = thickness * 0.5f;
+	float nx = -dy / len;
+	float ny = dx / len;
+	float halfThickness = thickness * 0.5f;
 
-		Vertex vertices[] = {
-			{ .x = x1 + nx * halfThickness, .y = y1 + ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x2 + nx * halfThickness, .y = y2 + ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x1 - nx * halfThickness, .y = y1 - ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x2 - nx * halfThickness, .y = y2 - ny * halfThickness, .z = 0.0f, .rhw = 1.0f, .color = color }
-		};
-
-		DWORD prevCullMode;
-		d3ddev->GetRenderState(D3DRS_CULLMODE, &prevCullMode);
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, vertices, sizeof(Vertex));
-
-		d3ddev->SetRenderState(D3DRS_CULLMODE, prevCullMode);
-	}
+	// Triangle strip order of the original: (p1+n, p2+n, p1-n, p2-n)
+	const sdlgf::Vec2 a(x1 + nx * halfThickness, y1 + ny * halfThickness);
+	const sdlgf::Vec2 b(x2 + nx * halfThickness, y2 + ny * halfThickness);
+	const sdlgf::Vec2 c(x1 - nx * halfThickness, y1 - ny * halfThickness);
+	const sdlgf::Vec2 d(x2 - nx * halfThickness, y2 - ny * halfThickness);
+	ApplyBlend();
+	const SDL_FColor col = ToFColor(color);
+	const SDL_Vertex v[4] = {
+		{ SDL_FPoint{ a.x + kD3D9PixelShift, a.y + kD3D9PixelShift }, col, SDL_FPoint{ 0, 0 } },
+		{ SDL_FPoint{ b.x + kD3D9PixelShift, b.y + kD3D9PixelShift }, col, SDL_FPoint{ 0, 0 } },
+		{ SDL_FPoint{ c.x + kD3D9PixelShift, c.y + kD3D9PixelShift }, col, SDL_FPoint{ 0, 0 } },
+		{ SDL_FPoint{ d.x + kD3D9PixelShift, d.y + kD3D9PixelShift }, col, SDL_FPoint{ 0, 0 } },
+	};
+	const int idx[6] = { 0, 1, 2, 2, 1, 3 };
+	SDL_RenderGeometry(renderer, nullptr, v, 4, idx, 6);
 }
 
 void sdlgf::GraphicsDevice::DrawLine(const sdlgf::Camera& camera, float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
@@ -241,30 +301,23 @@ void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, 
 
 void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
-	auto p0 = TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p1 = TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
-	auto p3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
-
-	for (auto* p : { &p0, &p1, &p2, &p3 }) {
-		p->x = p->x * virtualScale + virtualOffsetX;
-		p->y = p->y * virtualScale + virtualOffsetY;
-	}
-
-	std::vector<Vertex> vertices = {
-		{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
+	std::vector<sdlgf::Vec2> points = {
+		TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY),
+		TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY),
+		TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY),
+		TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY),
 	};
-
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+	for (auto& p : points) {
+		p.x = p.x * virtualScale + virtualOffsetX;
+		p.y = p.y * virtualScale + virtualOffsetY;
 	}
-
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
+	if (isFilled) {
+		FillFan(points, color);
+	}
+	else {
+		points.push_back(points[0]);
+		StrokeStrip(points, color);
+	}
 }
 
 void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
@@ -276,24 +329,19 @@ void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, 
 	auto wp2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
 	auto wp3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
 
-	auto p0 = TransformPoint(matCamera, wp0.x, wp0.y);
-	auto p1 = TransformPoint(matCamera, wp1.x, wp1.y);
-	auto p2 = TransformPoint(matCamera, wp2.x, wp2.y);
-	auto p3 = TransformPoint(matCamera, wp3.x, wp3.y);
-
-	std::vector<Vertex> vertices = {
-		{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p3.x, .y = p3.y, .z = 0.0f, .rhw = 1.0f, .color = color }
+	std::vector<sdlgf::Vec2> points = {
+		TransformPoint(matCamera, wp0.x, wp0.y),
+		TransformPoint(matCamera, wp1.x, wp1.y),
+		TransformPoint(matCamera, wp2.x, wp2.y),
+		TransformPoint(matCamera, wp3.x, wp3.y),
 	};
-
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+	if (isFilled) {
+		FillFan(points, color);
 	}
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 2 : 4, vertices.data(), sizeof(Vertex));
+	else {
+		points.push_back(points[0]);
+		StrokeStrip(points, color);
+	}
 }
 
 void sdlgf::GraphicsDevice::DrawEllipse(float centerX, float centerY, float width, float height, sdlgf::Color color, bool isFilled)
@@ -308,8 +356,8 @@ void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float cente
 
 void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
-	const int SAMPLES = 36;
-	std::vector<Vertex> vertices;
+	std::vector<sdlgf::Vec2> points;
+	points.reserve(kEllipseSamples + 2);
 
 	float rx = width * 0.5f;
 	float ry = height * 0.5f;
@@ -318,32 +366,25 @@ void sdlgf::GraphicsDevice::DrawEllipse(float x, float y, float width, float hei
 
 	if (isFilled) {
 		auto c = TransformRectanglePoint(x, y, cx, cy, rotation, scaleX, scaleY, offsetX, offsetY);
-		vertices.push_back({ .x = c.x * virtualScale + virtualOffsetX, .y = c.y * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color });
+		points.emplace_back(c.x * virtualScale + virtualOffsetX, c.y * virtualScale + virtualOffsetY);
 	}
-	for (int i = 0; i <= SAMPLES; ++i) {
-		float theta = i * (2.0f * sdlgf::Pi / SAMPLES);
+	for (int i = 0; i <= kEllipseSamples; ++i) {
+		float theta = i * (2.0f * sdlgf::Pi / kEllipseSamples);
 		float lx = cx + std::cos(theta) * rx;
 		float ly = cy + std::sin(theta) * ry;
 		auto p = TransformRectanglePoint(x, y, lx, ly, rotation, scaleX, scaleY, offsetX, offsetY);
-		vertices.push_back({
-			.x = p.x * virtualScale + virtualOffsetX,
-			.y = p.y * virtualScale + virtualOffsetY,
-			.z = 0.0f,
-			.rhw = 1.0f,
-			.color = color
-		});
+		points.emplace_back(p.x * virtualScale + virtualOffsetX, p.y * virtualScale + virtualOffsetY);
 	}
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
+	if (isFilled) FillFan(points, color);
+	else StrokeStrip(points, color);
 }
 
 void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
-	const int SAMPLES = 36;
 	auto matCamera = camera.GetTransformMatrix();
 
-	std::vector<Vertex> vertices;
+	std::vector<sdlgf::Vec2> points;
+	points.reserve(kEllipseSamples + 2);
 
 	float rx = width * 0.5f;
 	float ry = height * 0.5f;
@@ -352,112 +393,120 @@ void sdlgf::GraphicsDevice::DrawEllipse(const sdlgf::Camera& camera, float x, fl
 
 	if (isFilled) {
 		auto wc = TransformRectanglePoint(x, y, cx, cy, rotation, scaleX, scaleY, offsetX, offsetY);
-		auto c = TransformPoint(matCamera, wc.x, wc.y);
-		vertices.push_back({ .x = c.x, .y = c.y, .z = 0.0f, .rhw = 1.0f, .color = color });
+		points.push_back(TransformPoint(matCamera, wc.x, wc.y));
 	}
-	for (int i = 0; i <= SAMPLES; ++i) {
-		float theta = i * (2.0f * sdlgf::Pi / SAMPLES);
+	for (int i = 0; i <= kEllipseSamples; ++i) {
+		float theta = i * (2.0f * sdlgf::Pi / kEllipseSamples);
 		float lx = cx + std::cos(theta) * rx;
 		float ly = cy + std::sin(theta) * ry;
 		auto wp = TransformRectanglePoint(x, y, lx, ly, rotation, scaleX, scaleY, offsetX, offsetY);
-		auto p = TransformPoint(matCamera, wp.x, wp.y);
-		vertices.push_back({
-			.x = p.x,
-			.y = p.y,
-			.z = 0.0f,
-			.rhw = 1.0f,
-			.color = color
-		});
+		points.push_back(TransformPoint(matCamera, wp.x, wp.y));
 	}
-
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, SAMPLES, vertices.data(), sizeof(Vertex));
+	if (isFilled) FillFan(points, color);
+	else StrokeStrip(points, color);
 }
 
 void sdlgf::GraphicsDevice::DrawTriangle(float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled)
 {
-	std::vector<Vertex> vertices = {
-		{.x = (centerX - width * 0.5f) * virtualScale + virtualOffsetX, .y = topY * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = (centerX + width * 0.5f) * virtualScale + virtualOffsetX, .y = topY * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = centerX * virtualScale + virtualOffsetX, .y = (topY + height) * virtualScale + virtualOffsetY, .z = 0.0f, .rhw = 1.0f, .color = color }
+	std::vector<sdlgf::Vec2> points = {
+		{ (centerX - width * 0.5f) * virtualScale + virtualOffsetX, topY * virtualScale + virtualOffsetY },
+		{ (centerX + width * 0.5f) * virtualScale + virtualOffsetX, topY * virtualScale + virtualOffsetY },
+		{ centerX * virtualScale + virtualOffsetX, (topY + height) * virtualScale + virtualOffsetY },
 	};
-
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+	if (isFilled) {
+		FillFan(points, color);
 	}
-
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 1 : 3, vertices.data(), sizeof(Vertex));
+	else {
+		points.push_back(points[0]);
+		StrokeStrip(points, color);
+	}
 }
 
 void sdlgf::GraphicsDevice::DrawTriangle(const sdlgf::Camera& camera, float centerX, float topY, float width, float height, sdlgf::Color color, bool isFilled)
 {
 	auto matCamera = camera.GetTransformMatrix();
 
-	auto p0 = TransformPoint(matCamera, centerX - width * 0.5f, topY);
-	auto p1 = TransformPoint(matCamera, centerX + width * 0.5f, topY);
-	auto p2 = TransformPoint(matCamera, centerX, topY + height);
-
-	std::vector<Vertex> vertices = {
-		{.x = p0.x, .y = p0.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p1.x, .y = p1.y, .z = 0.0f, .rhw = 1.0f, .color = color },
-		{.x = p2.x, .y = p2.y, .z = 0.0f, .rhw = 1.0f, .color = color }
+	std::vector<sdlgf::Vec2> points = {
+		TransformPoint(matCamera, centerX - width * 0.5f, topY),
+		TransformPoint(matCamera, centerX + width * 0.5f, topY),
+		TransformPoint(matCamera, centerX, topY + height),
 	};
-
-	if (!isFilled) {
-		vertices.push_back(vertices[0]);
+	if (isFilled) {
+		FillFan(points, color);
 	}
-
-	d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-	D3DPRIMITIVETYPE primitiveType = isFilled ? D3DPT_TRIANGLEFAN : D3DPT_LINESTRIP;
-	d3ddev->DrawPrimitiveUP(primitiveType, isFilled ? 1 : 3, vertices.data(), sizeof(Vertex));
+	else {
+		points.push_back(points[0]);
+		StrokeStrip(points, color);
+	}
 }
+
+void sdlgf::GraphicsDevice::DrawTriangleScreenSpace(float x1, float y1, float x2, float y2, float x3, float y3, sdlgf::Color color)
+{
+	FillFan({ sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2), sdlgf::Vec2(x3, y3) }, color);
+}
+
+// ---- textured drawing ------------------------------------------------------------------------------
+
 void sdlgf::GraphicsDevice::DrawTexturedPolygon(const std::vector<sdlgf::Vec2>& points, const std::vector<sdlgf::Vec2>& uvs, sdlgf::Texture* texture, sdlgf::Color color)
 {
-	if (points.size() < 3 || points.size() != uvs.size() || texture == nullptr) return;
+	if (points.size() < 3 || points.size() != uvs.size() || texture == nullptr || texture->GetSDLTexture() == nullptr) return;
 
-	std::vector<TexVertex> vertices;
-	vertices.reserve(points.size());
+	const SDL_FColor c = ToFColor(color);
+	std::vector<SDL_Vertex> vertices(points.size());
 	for (size_t i = 0; i < points.size(); ++i) {
-		vertices.push_back({
-			.x = points[i].x * virtualScale + virtualOffsetX,
-			.y = points[i].y * virtualScale + virtualOffsetY,
-			.z = 0.0f,
-			.rhw = 1.0f,
-			.color = color,
-			.u = uvs[i].x,
-			.v = uvs[i].y
-			});
+		vertices[i].position = SDL_FPoint{
+			points[i].x * virtualScale + virtualOffsetX + kD3D9PixelShift,
+			points[i].y * virtualScale + virtualOffsetY + kD3D9PixelShift
+		};
+		vertices[i].color = c;
+		vertices[i].tex_coord = SDL_FPoint{ uvs[i].x, uvs[i].y };
+	}
+	std::vector<int> indices;
+	indices.reserve((points.size() - 2) * 3);
+	for (size_t i = 1; i + 1 < points.size(); ++i) {
+		indices.push_back(0);
+		indices.push_back(static_cast<int>(i));
+		indices.push_back(static_cast<int>(i + 1));
 	}
 
-	// Clamp rather than wrap/tile: callers may pass UVs outside [0,1] on purpose (e.g. a
-	// screen-space-projected crop window), and clamping just holds the edge pixel there
-	// instead of repeating the texture.
-	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
-	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
-	d3ddev->SetTexture(0, texture->GetRawTexture());
-	d3ddev->SetFVF(D3DFVF_TEXVERTEX);
-	d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, static_cast<UINT>(points.size() - 2), vertices.data(), sizeof(TexVertex));
-	d3ddev->SetTexture(0, nullptr);
-	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
-	d3ddev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
+	// UVs outside [0,1] are clamped to the edge pixel (SDL's default texture addressing), which is
+	// what callers rely on for screen-space-projected crop windows. Unlike sprites, this honours
+	// SetAlphaBlending.
+	texture->SetBlending(alphaBlending);
+	SDL_RenderGeometry(renderer, texture->GetSDLTexture(), vertices.data(), static_cast<int>(vertices.size()), indices.data(), static_cast<int>(indices.size()));
+	texture->SetBlending(true);
 }
 
-HRESULT sdlgf::GraphicsDevice::SetRenderTarget(Texture* renderTarget)
+void sdlgf::GraphicsDevice::DrawTexturedQuad(Texture* texture, const sdlgf::Mat4& transform, float x, float y, float width, float height,
+	float u0, float v0, float u1, float v1, sdlgf::Color color)
 {
-	if (renderTarget == nullptr) return E_POINTER;
-	IDirect3DSurface9* surface = renderTarget->GetSurface();
-	HRESULT hr = d3ddev->SetRenderTarget(0, surface);
+	if (texture == nullptr || texture->GetSDLTexture() == nullptr) return;
 
-	// COM object automatically increments its reference count when calling GetSurfaceLevel; must Release after use
-	if (surface != nullptr) surface->Release();
-	return hr;
+	const sdlgf::Vec2 p0 = TransformPoint(transform, x, y);
+	const sdlgf::Vec2 p1 = TransformPoint(transform, x + width, y);
+	const sdlgf::Vec2 p2 = TransformPoint(transform, x + width, y + height);
+	const sdlgf::Vec2 p3 = TransformPoint(transform, x, y + height);
+	const SDL_FColor c = ToFColor(color);
+	const SDL_Vertex v[4] = {
+		{ SDL_FPoint{ p0.x, p0.y }, c, SDL_FPoint{ u0, v0 } },
+		{ SDL_FPoint{ p1.x, p1.y }, c, SDL_FPoint{ u1, v0 } },
+		{ SDL_FPoint{ p2.x, p2.y }, c, SDL_FPoint{ u1, v1 } },
+		{ SDL_FPoint{ p3.x, p3.y }, c, SDL_FPoint{ u0, v1 } },
+	};
+	const int idx[6] = { 0, 1, 2, 0, 2, 3 };
+	texture->SetBlending(true);
+	SDL_RenderGeometry(renderer, texture->GetSDLTexture(), v, 4, idx, 6);
 }
 
-HRESULT sdlgf::GraphicsDevice::RestoreRenderTarget()
+void sdlgf::GraphicsDevice::DrawTexturedTriangles(Texture* texture, const Vertex* vertices, int vertexCount)
 {
-	// Restore the render target back to the actual screen
-	return d3ddev->SetRenderTarget(0, backbuffer);
+	if (texture == nullptr || texture->GetSDLTexture() == nullptr || vertexCount < 3) return;
+
+	scratchVertices.resize(static_cast<size_t>(vertexCount));
+	for (int i = 0; i < vertexCount; ++i) {
+		const Vertex& in = vertices[i];
+		scratchVertices[i] = SDL_Vertex{ SDL_FPoint{ in.x, in.y }, ToFColor(in.color), SDL_FPoint{ in.u, in.v } };
+	}
+	texture->SetBlending(true);
+	SDL_RenderGeometry(renderer, texture->GetSDLTexture(), scratchVertices.data(), vertexCount, nullptr, 0);
 }

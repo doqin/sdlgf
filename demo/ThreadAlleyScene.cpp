@@ -21,7 +21,7 @@
 #include "CardCatalog.h"
 #include "Debug.h"
 #include "imgui.h"
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 
 void Demo::ThreadAlleyScene::OnInit()
 {

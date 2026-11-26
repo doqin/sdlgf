@@ -738,7 +738,7 @@ void Demo::IShopScene::DrawUI(unsigned long long deltaTime)
 		}
 	}
 
-	if (SUCCEEDED(gd->BeginDraw())) {
+	if (gd->BeginDraw()) {
 		gd->SetAlphaBlending(true);
 
 		// Dim the world scene underneath.

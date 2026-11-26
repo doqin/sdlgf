@@ -21,10 +21,10 @@ target_include_directories(sdlgf_keys_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
 target_link_libraries(sdlgf_keys_test PRIVATE SDL3::SDL3)
 add_test(NAME keys COMMAND sdlgf_keys_test)
 
-# --- Math types (Vec/Mat/Colour); on Windows also compared against the real D3DX9 -----
+# --- Math types (Vec/Mat/Colour); with -DSDLGF_D3DX_CROSSCHECK=ON also compared against the real D3DX9 --
 add_executable(sdlgf_math_test math_test.cpp)
 target_include_directories(sdlgf_math_test PRIVATE "${CMAKE_SOURCE_DIR}/core")
-if(WIN32)
+if(WIN32 AND SDLGF_D3DX_CROSSCHECK)
     target_compile_definitions(sdlgf_math_test PRIVATE SDLGF_HAVE_D3DX)
     target_link_libraries(sdlgf_math_test PRIVATE sdlgf_d3dx9)
     add_custom_command(TARGET sdlgf_math_test POST_BUILD
@@ -45,6 +45,16 @@ target_compile_definitions(sdlgf_text_test PRIVATE
     SDLGF_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
 target_link_libraries(sdlgf_text_test PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3)
 add_test(NAME text COMMAND sdlgf_text_test)
+
+# --- Renderer: golden scenes drawn with the SDL renderer (software driver, headless) and compared
+#     with the images the old Direct3D 9 renderer produced ----------------------------------------
+add_executable(sdlgf_render_test render_test.cpp)
+target_include_directories(sdlgf_render_test PRIVATE "${CMAKE_SOURCE_DIR}/core/Extras" "${CMAKE_CURRENT_SOURCE_DIR}/golden")
+target_compile_definitions(sdlgf_render_test PRIVATE
+    SDLGF_ASSET_DIR="${CMAKE_SOURCE_DIR}/demo"
+    SDLGF_GOLDEN_DIR="${CMAKE_CURRENT_SOURCE_DIR}/golden")
+target_link_libraries(sdlgf_render_test PRIVATE sdlgf::core)
+add_test(NAME render COMMAND sdlgf_render_test "${CMAKE_BINARY_DIR}/render_test_out")
 
 # --- Application window + InputManager, headless (SDL "dummy" video driver) ---------
 add_executable(sdlgf_input_test input_test.cpp)

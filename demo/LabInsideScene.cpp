@@ -12,7 +12,7 @@
 #include "EnemyFactory.h"
 #include "MapBattleScene.h"
 #include "RNG.h"
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "backends/imgui_impl_sdl3.h"
 
 void Demo::LabInsideScene::OnInit()

@@ -108,7 +108,7 @@ namespace Demo
 			mapPreviews[index]->CreateRenderTarget(PREVIEW_SIZE, PREVIEW_SIZE);
 
 			gd->SetRenderTarget(mapPreviews[index].get());
-			gd->SetViewport(0, 0, PREVIEW_SIZE, PREVIEW_SIZE, 0.0f, 1.0f);
+			gd->SetViewport(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
 			gd->ResetVirtualTransform();
 			gd->Clear(0xFF000000);
 			scene->DrawWorld(0);
@@ -123,7 +123,7 @@ namespace Demo
 		captureOne(2, new ThreadAlleyScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), -544.5f, 128.5f, PREVIEW_ZOOM);
 		captureOne(3, new BossWorldScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), 360.0f, 190.0f, PREVIEW_ZOOM);
 
-		gd->SetViewport(0, 0, lastScreenWidth, lastScreenHeight, 0.0f, 1.0f);
+		gd->SetViewport(0, 0, lastScreenWidth, lastScreenHeight);
 	}
 
 	void MainMenu::DrawBackground(unsigned long long deltaTime)
@@ -265,10 +265,10 @@ namespace Demo
 		buttonSheetTex->LoadTexture(L"assets/ui.png");
 
 		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		bgTex->LoadTexture(IDB_PNG2);
+		bgTex->LoadTexture(L"assets/test-background.png");
 
 		titleTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		titleTex->LoadTexture(IDB_PNG3);
+		titleTex->LoadTexture(L"assets/test-title.png");
 
 
 		// Sprites
@@ -489,7 +489,7 @@ namespace Demo
 	{
 		auto gd = game->GetGraphicsDevice();
 
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 			DrawBackground(deltaTime);
 			gd->EndDraw();
 		}
@@ -499,7 +499,7 @@ namespace Demo
 	{
 		auto gd = game->GetGraphicsDevice();
 
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 
 			fontSprite->Begin();
 			fontSprite->SetScale(2.f, 2.f);

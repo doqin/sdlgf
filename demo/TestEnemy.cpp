@@ -7,12 +7,12 @@
 void Demo::TestEnemy::Init(sdlgf::GraphicsDevice* graphicsDevice, sdlgf::Camera* camera)
 {
 	texture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	texture->LoadTexture(IDB_PNG4);
+	texture->LoadTexture(L"assets/placeholder.png");
 	sprite = std::make_shared<sdlgf::StaticSprite>(texture.get());
 	sprite->SetOrigin(32, 32);
 
 	roundProjectileTexture = std::make_shared<sdlgf::Texture>(graphicsDevice);
-	roundProjectileTexture->LoadTexture(IDB_PNG5);
+	roundProjectileTexture->LoadTexture(L"assets/placeholder-round-projectile.png");
 
 	SetGoldReward(static_cast<int>(std::round(GetMaxHealth())));
 	InitCardSpawnTrigger(camera, 64.f, 64.f);

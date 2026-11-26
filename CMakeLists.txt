@@ -6,9 +6,8 @@ project(sdlgf
     LANGUAGES CXX
 )
 
-# Phase 1 of the port: the existing Direct3D 9 / DirectInput / XAudio2 code still
-# builds as-is, on Windows only. Later phases replace those pieces with SDL3 and
-# this guard goes away.
+# Mid-port: window, input and rendering are SDL3 now, but audio is still XAudio2, so
+# the build is Windows-only until that is replaced; this guard goes away then.
 if(NOT WIN32)
     message(FATAL_ERROR
         "sdlgf is mid-port: the code still depends on Win32/DirectX and only "
@@ -27,6 +26,7 @@ endif()
 option(SDLGF_TESTING "Define TESTING (demo boots into DebugScene)" OFF)
 option(SDLGF_BUILD_TESTS "Build the unit tests (run with ctest)" ON)
 option(SDLGF_COPY_ASSETS "Copy demo/assets next to the demo executable after building" ON)
+option(SDLGF_D3DX_CROSSCHECK "Windows only: also compare the math library with the real D3DX9 (downloads the D3DX NuGet package)" OFF)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/$<CONFIG>")
@@ -36,12 +36,6 @@ include(Dependencies)
 
 add_subdirectory(core)
 add_subdirectory(demo)
-
-# Golden-image generator for the legacy Direct3D 9 renderer (removed together with it).
-option(SDLGF_BUILD_GOLDEN_GEN "Build tools/golden (Windows only, needs the D3D9 renderer)" OFF)
-if(SDLGF_BUILD_GOLDEN_GEN AND WIN32)
-    add_subdirectory(tools/golden)
-endif()
 
 if(SDLGF_BUILD_TESTS)
     enable_testing()

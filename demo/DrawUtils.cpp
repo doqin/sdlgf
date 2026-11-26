@@ -5,11 +5,8 @@
 #include <cmath>
 
 namespace {
-	struct DrawUtilsVertex {
-		float x, y, z, rhw;
-		DWORD color;
-	};
-
+	// Drawn in render-target pixels: unlike the lines of the same arrow, the virtual transform is
+	// not applied (this is how it always behaved).
 	void DrawFilledTriangle(
 		sdlgf::GraphicsDevice* graphicsDevice,
 		float x1,
@@ -20,25 +17,7 @@ namespace {
 		float y3,
 		sdlgf::Color color)
 	{
-		auto d3ddev = graphicsDevice->GetDevice();
-		if (d3ddev == nullptr) {
-			return;
-		}
-
-		DrawUtilsVertex vertices[] = {
-			{ .x = x1, .y = y1, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x2, .y = y2, .z = 0.0f, .rhw = 1.0f, .color = color },
-			{ .x = x3, .y = y3, .z = 0.0f, .rhw = 1.0f, .color = color }
-		};
-
-		DWORD prevCullMode;
-		d3ddev->GetRenderState(D3DRS_CULLMODE, &prevCullMode);
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-
-		d3ddev->SetFVF(D3DFVF_XYZRHW | D3DFVF_DIFFUSE);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, vertices, sizeof(DrawUtilsVertex));
-
-		d3ddev->SetRenderState(D3DRS_CULLMODE, prevCullMode);
+		graphicsDevice->DrawTriangleScreenSpace(x1, y1, x2, y2, x3, y3, color);
 	}
 }
 

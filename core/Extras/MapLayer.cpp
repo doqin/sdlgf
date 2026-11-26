@@ -11,16 +11,6 @@ bool sdlgf::MapLayer::IsTileIDInTileSet(unsigned int idx, const std::vector<std:
 	return idx < tileIDs.size() && tileIDs[idx] >= tileSet.getFirstGID() && tileIDs[idx] < (tileSet.getFirstGID() + tileSet.getTileCount());
 }
 
-sdlgf::MapLayer::~MapLayer()
-{
-	for (auto& subset : subsets) {
-		if (subset.vertexBuffer) {
-			subset.vertexBuffer->Release();
-			subset.vertexBuffer = nullptr;
-		}
-	}
-}
-
 void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 {
 	auto& tmxMap = map->map;
@@ -31,7 +21,7 @@ void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 	const auto gridSize = tmxMap.getTileSize(); // returns the size of a grid
 	const auto& tileSets = tmxMap.getTilesets();
 	const auto tintColour = layer.getTintColour();
-	sdlgf::ColorF vertexColour(
+	const sdlgf::Color vertexColour = sdlgf::ColorF(
 		static_cast<float>(tintColour.r) / 0xFF,
 		static_cast<float>(tintColour.g) / 0xFF,
 		static_cast<float>(tintColour.b) / 0xFF,
@@ -149,17 +139,7 @@ void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 		}
 
 		if (!subsetVertices.empty()) {
-			auto* device = graphicsDevice != nullptr ? graphicsDevice->GetDevice() : nullptr;
-			if (device) {
-				UINT totalBytes = static_cast<UINT>(subsetVertices.size() * sizeof(TileVertex));
-				if (SUCCEEDED(device->CreateVertexBuffer(totalBytes, D3DUSAGE_WRITEONLY, D3DFVF_TILEVERTEX, D3DPOOL_MANAGED, &subset.vertexBuffer, nullptr))) {
-					void* pVoid;
-					if (SUCCEEDED(subset.vertexBuffer->Lock(0, 0, (void**)&pVoid, 0))) {
-						memcpy(pVoid, subsetVertices.data(), totalBytes);
-						subset.vertexBuffer->Unlock();
-					}
-				}
-			}
+			subset.vertices = std::move(subsetVertices);
 			subsets.emplace_back(std::move(subset));
 		}
 	}
@@ -167,8 +147,7 @@ void sdlgf::MapLayer::Create(Map* map, std::uint32_t layerIndex)
 
 void sdlgf::MapLayer::Draw(const Camera& camera, const ViewBounds& viewBounds)
 {
-	auto* device = graphicsDevice != nullptr ? graphicsDevice->GetDevice() : nullptr;
-	if (device == nullptr || subsets.empty()) return;
+	if (graphicsDevice == nullptr || subsets.empty()) return;
 
 	const float overlapEpsilon = 0.01f;
 	const auto intersectsView = [&](float x, float y, float width, float height) {
@@ -178,52 +157,34 @@ void sdlgf::MapLayer::Draw(const Camera& camera, const ViewBounds& viewBounds)
 			&& x < viewBounds.maxX - overlapEpsilon
 			&& rectMaxY > viewBounds.minY + overlapEpsilon
 			&& y < viewBounds.maxY - overlapEpsilon;
-		};
+	};
+	const sdlgf::Mat4 matCamera = camera.GetTransformMatrix();
 
 	for (const auto& subset : subsets) {
-		if (subset.chunks.empty() || subset.vertexBuffer == nullptr) continue;
+		if (subset.chunks.empty() || subset.texture == nullptr || !subset.texture->IsLoaded()) continue;
 
-		if (auto texture = subset.texture; texture != nullptr) {
-			device->SetTexture(0, texture->GetRawTexture());
-		}
-		else {
-			device->SetTexture(0, nullptr);
-		}
-
-		device->SetStreamSource(0, subset.vertexBuffer, 0, sizeof(TileVertex));
-
-		// Coalescing consecutive chunks is an optional optimization mentioned.
-		// I will just draw per chunk for simplicity, or we can coalesce:
-		UINT currentStart = 0;
-		UINT currentCount = 0;
-		bool inDraw = false;
-
+		visibleVertices.clear();
 		for (const auto& chunk : subset.chunks) {
-			if (!intersectsView(chunk.x, chunk.y, chunk.width, chunk.height)) {
-				if (inDraw) {
-					device->DrawPrimitive(D3DPT_TRIANGLELIST, currentStart, currentCount);
-					inDraw = false;
-				}
-				continue;
-			}
-			
-			if (!inDraw) {
-				currentStart = chunk.startVertex;
-				currentCount = chunk.primitiveCount;
-				inDraw = true;
-			} else {
-				if (currentStart + currentCount * 3 == chunk.startVertex) {
-					currentCount += chunk.primitiveCount;
-				} else {
-					device->DrawPrimitive(D3DPT_TRIANGLELIST, currentStart, currentCount);
-					currentStart = chunk.startVertex;
-					currentCount = chunk.primitiveCount;
+			if (!intersectsView(chunk.x, chunk.y, chunk.width, chunk.height)) continue;
+
+			// A chunk can be a whole map, so also skip the tiles inside it that are off screen.
+			// Vertices 0 and 4 of a tile (6 vertices) are its top-left and bottom-right corners.
+			for (UINT tile = 0; tile < chunk.primitiveCount / 2; ++tile) {
+				const TileVertex* quad = &subset.vertices[chunk.startVertex + tile * 6];
+				const TileVertex& topLeft = quad[0];
+				const TileVertex& bottomRight = quad[4];
+				if (!intersectsView(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y)) continue;
+
+				for (int i = 0; i < 6; ++i) {
+					sdlgf::Vec4 p = sdlgf::Transform(sdlgf::Vec4(quad[i].x, quad[i].y, quad[i].z, 1.0f), matCamera);
+					if (p.w != 0.0f) {
+						p.x /= p.w;
+						p.y /= p.w;
+					}
+					visibleVertices.push_back({ p.x, p.y, quad[i].u, quad[i].v, quad[i].color });
 				}
 			}
 		}
-		
-		if (inDraw) {
-			device->DrawPrimitive(D3DPT_TRIANGLELIST, currentStart, currentCount);
-		}
+		graphicsDevice->DrawTexturedTriangles(subset.texture, visibleVertices.data(), static_cast<int>(visibleVertices.size()));
 	}
 }

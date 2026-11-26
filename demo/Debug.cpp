@@ -7,7 +7,7 @@
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
 #include <string>
-#include "backends/imgui_impl_dx9.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "backends/imgui_impl_sdl3.h"
 
 bool Demo::Pointable::isDrawing = false;
@@ -16,7 +16,7 @@ std::shared_ptr<sdlgf::FontSprite> Demo::Pointable::fontSprite = nullptr;
 
 void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 {
-	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 #ifdef _DEBUG
 	ImGui::NewFrame();
@@ -115,7 +115,7 @@ void Demo::CreateImGuiDebugFrame(std::shared_ptr<Player> player, Game* game)
 
 void Demo::CreateImGuiBattleDebugFrame(const std::function<void()>& onKillAllEnemies)
 {
-	ImGui_ImplDX9_NewFrame();
+	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 #ifdef _DEBUG
 	ImGui::NewFrame();

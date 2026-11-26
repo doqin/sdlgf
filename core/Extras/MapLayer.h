@@ -10,11 +10,9 @@ namespace sdlgf {
 	class Map;
 	class MapLayer {
 	private:
-		// info about the vertex for the graphics device
-		const DWORD D3DFVF_TILEVERTEX = (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
 		struct TileVertex {
 			float x, y, z;
-			DWORD color;
+			sdlgf::Color color;
 			float u, v;
 		};
 
@@ -26,7 +24,8 @@ namespace sdlgf {
 			};
 			std::vector<ChunkRange> chunks;
 			Texture* texture = nullptr;
-			IDirect3DVertexBuffer9* vertexBuffer = nullptr;
+			// Two triangles (6 vertices) per tile, in world coordinates; chunks index into this.
+			std::vector<TileVertex> vertices;
 		};
 		
 		std::vector<Subset> subsets;
@@ -37,9 +36,11 @@ namespace sdlgf {
 			const tmx::Tileset& tileSet
 		);
 		GraphicsDevice* graphicsDevice;
+		// Scratch space for the tiles of one subset that are on screen, reused every frame
+		std::vector<GraphicsDevice::Vertex> visibleVertices;
 	public:
 		MapLayer(GraphicsDevice* graphicsDevice) : graphicsDevice(graphicsDevice) {}
-		~MapLayer();
+		~MapLayer() = default;
 		void Create(Map* map, std::uint32_t layerIndex);
 		
 		struct ViewBounds { float minX, minY, maxX, maxY; };

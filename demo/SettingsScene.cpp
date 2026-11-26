@@ -253,7 +253,7 @@ namespace Demo
 		uiSheetTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
 		uiSheetTex->LoadTexture(L"assets/ui.png");
 		bgTex = std::make_shared<sdlgf::Texture>(game->GetGraphicsDevice());
-		bgTex->LoadTexture(IDB_PNG2);
+		bgTex->LoadTexture(L"assets/test-background.png");
 
 		//LOCAL FUNCTION to init track and trackfill
 		auto InitTrack = [&](std::shared_ptr<sdlgf::NineSliceSprite>& track, std::shared_ptr<sdlgf::NineSliceSprite>& fill, RECT trackR, RECT fillR) {
@@ -544,7 +544,7 @@ namespace Demo
 	void SettingsScene::DrawWorld(unsigned long long deltaTime)
 	{
 		auto gd = game->GetGraphicsDevice();
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 			DrawBackground(deltaTime);
 			gd->EndDraw();
 		}
@@ -553,7 +553,7 @@ namespace Demo
 	void SettingsScene::DrawUI(unsigned long long deltaTime)
 	{
 		auto gd = game->GetGraphicsDevice();
-		if (SUCCEEDED(gd->BeginDraw())) {
+		if (gd->BeginDraw()) {
 
 			gd->SetAlphaBlending(true);
 			gd->DrawRectangle(uiCamera, -lastScreenWidth / 2.f, -lastScreenHeight / 2.f, lastScreenWidth, lastScreenHeight, COLOR_ARGB(200, 0, 0, 0), true);

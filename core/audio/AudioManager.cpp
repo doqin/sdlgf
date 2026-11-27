@@ -66,8 +66,8 @@ void sdlgf::AudioManager::Load(std::string name, const std::string& path)
 	entry.path = path;
 	SDL_PathInfo info;
 	// A file that cannot even be stat'ed goes through the decoder too, so the log says why
-	const bool small = !SDL_GetPathInfo(path.c_str(), &info) || static_cast<size_t>(info.size) <= residentFileLimit;
-	if (small) {
+	const bool resident = !SDL_GetPathInfo(path.c_str(), &info) || static_cast<size_t>(info.size) <= residentFileLimit;
+	if (resident) {
 		std::string error;
 		auto sound = LoadSoundFile(path, &error);
 		if (!sound) {

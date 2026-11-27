@@ -203,7 +203,7 @@ void Demo::IContainer::Draw(unsigned long long deltaTime)
 		}
 
 		if (GetHeightOfChildren() > maxHeight && scrollOffset < (float)GetHeightOfChildren() - maxHeight) {
-			if (auto manager = draggableManager) {
+			if (auto manager = draggableManager.lock()) {
 				auto cmd = std::make_shared<sdlgf::CustomCommand>([this, deltaTime](std::function<void()> markFinished) {
 					if (debugFontSprite) {
 						auto [worldX, worldY] = GetWorldPosition();

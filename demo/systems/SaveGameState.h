@@ -76,6 +76,11 @@ namespace Demo {
         /// scene) is captured fresh, the rest come from the cache.
         std::vector<std::shared_ptr<WorldOverview>> CollectWorldOverviews(const WorldSceneBase& current);
 
+        /// Points the shared UI services (quest panel, popups) back at the live world. Building any other
+        /// world scene, even briefly (travel map overviews, the main menu's map previews), re-points them
+        /// at that scene, which dangles once it is destroyed. Does nothing if no world is loaded.
+        void RebindUiServices();
+
         /// Developer tool: builds every world once while logging the textures it requests and writes
         /// `<dir>/<world id>.txt` for each (the loading screen's manifests). Returns false on write failure.
         bool RecordWorldManifests(const std::string& dir);

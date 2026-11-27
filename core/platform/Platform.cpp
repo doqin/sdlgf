@@ -1,6 +1,7 @@
 #include "Platform.h"
 #include <chrono>
 #include <SDL3/SDL_messagebox.h>
+#include <SDL3/SDL_thread.h>
 #include <cstdio>
 #include <type_traits>
 #if defined(__GLIBC__)
@@ -225,4 +226,9 @@ void sdlgf::Platform::ReleaseFreedMemory()
 #if defined(__GLIBC__)
 	malloc_trim(0);
 #endif
+}
+
+sdlgf::Platform::SdlThreadCleanup::~SdlThreadCleanup()
+{
+	SDL_CleanupTLS();
 }

@@ -151,7 +151,7 @@ namespace Demo {
 				slot->overview = scene->CaptureOverview(false);
 				scene.reset();
 				// Building it pointed the shared UI services at the scene that was just destroyed
-				if (auto* live = self->ResidentWorld()) live->RebindUiServices();
+				self->RebindUiServices();
 			} });
 		}
 		if (steps.empty()) {
@@ -159,6 +159,10 @@ namespace Demo {
 			return;
 		}
 		RunLoading(std::move(steps), "", std::move(onReady));
+	}
+
+	void SaveGameState::RebindUiServices() {
+		if (auto* live = ResidentWorld()) live->RebindUiServices();
 	}
 
 	std::vector<std::shared_ptr<WorldOverview>> SaveGameState::CollectWorldOverviews(const WorldSceneBase& current) {

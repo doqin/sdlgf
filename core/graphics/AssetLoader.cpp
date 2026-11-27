@@ -20,6 +20,7 @@ sdlgf::AssetLoader::~AssetLoader()
 
 void sdlgf::AssetLoader::WorkerMain()
 {
+	Platform::SdlThreadCleanup sdlCleanup; // IMG_Load sets SDL's per-thread error buffer
 	for (;;) {
 		std::wstring path;
 		{

@@ -133,7 +133,7 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 		pointerSprite->Draw(*camera, deltaTime);
 		pointerSprite->End();
 	}
-	for (auto& draggable : draggableManager->GetDraggingDraggables()) {
+	for (auto& draggable : Manager()->GetDraggingDraggables()) {
 		if (auto lock = draggable->GetParent(); lock.has_value()) {
 			if (auto parentLock = lock.value().lock()) {
 				if (parentLock.get() == this) {
@@ -160,14 +160,14 @@ void Demo::IBlockCard::Draw(unsigned long long deltaTime)
 				if (slotY != NO_SLOT) {
 					const float barX = thisX;
 					const float barW = static_cast<float>(width);
-					draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([this, barX, slotY, barW](std::function<void(void)> markFinished) {
+					Manager()->QueueDraw(std::make_shared<sdlgf::CustomCommand>([this, barX, slotY, barW](std::function<void(void)> markFinished) {
 						graphicsDevice->DrawRectangle(*camera, barX, slotY - 2.f, barW, 4.f, 0xFFFFD700, true);
 						markFinished();
 						}));
 					return;
 				}
 			}
-			draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([&, width, height, thisX, thisY](std::function<void(void)> markFinished) {
+			Manager()->QueueDraw(std::make_shared<sdlgf::CustomCommand>([&, width, height, thisX, thisY](std::function<void(void)> markFinished) {
 				graphicsDevice->SetAlphaBlending(true);
 				Demo::DrawAnimatedDashedRectangle(
 					graphicsDevice,

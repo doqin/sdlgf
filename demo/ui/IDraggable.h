@@ -14,7 +14,10 @@ namespace Demo {
 		size_t dragAreaWidth;
 		size_t dragAreaHeight;
 		std::shared_ptr<sdlgf::RectangleTrigger> trigger;
-		std::shared_ptr<Demo::DraggableManager> draggableManager;
+		// Weak: the manager owns every draggable (objectMap), so a strong pointer back would be a
+		// reference cycle that keeps a whole battle's cards alive after the scene is gone
+		std::weak_ptr<Demo::DraggableManager> draggableManager;
+		std::shared_ptr<Demo::DraggableManager> Manager() const { return draggableManager.lock(); }
 		sdlgf::Camera* camera = nullptr;
 		sdlgf::GraphicsDevice* graphicsDevice = nullptr;
 		sdlgf::ColorF color;

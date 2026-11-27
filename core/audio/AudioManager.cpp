@@ -365,6 +365,7 @@ void sdlgf::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, flo
 	pending->duration = duration;
 	pending->names = std::move(missing);
 	pending->decoding = std::async(std::launch::async, [paths = std::move(paths)]() {
+		Platform::SdlThreadCleanup sdlCleanup; // the decoder sets SDL's per-thread error buffer
 		std::vector<std::shared_ptr<const Sound>> decoded;
 		for (const auto& path : paths) decoded.push_back(LoadSoundFile(path));
 		return decoded;

@@ -331,8 +331,9 @@ void Demo::IDraggable::SetParent(std::weak_ptr<IGameObject> parent)
 	auto [parentX, parentY] = parent.lock()->GetWorldPosition();
 	auto [objX, objY] = this->GetWorldPosition();
 	this->SetLocalPosition(objX - parentX, objY - parentY);
-	const bool defer = draggableManager && draggableManager->IsDeferRebuild();
-	if (draggableManager && !defer) draggableManager->RebuildHierarchy();
+	auto manager = Manager();
+	const bool defer = manager && manager->IsDeferRebuild();
+	if (manager && !defer) manager->RebuildHierarchy();
 	if (auto lock = GetTransformManager().lock()) {
 		lock->SetParent(transformHandle, parent.lock()->GetTransformHandle().slotIndex);
 		if (!defer) lock->RebuildHierarchy();
@@ -342,8 +343,9 @@ void Demo::IDraggable::SetParent(std::weak_ptr<IGameObject> parent)
 void Demo::IDraggable::DetachParent()
 {
 	this->parent.reset();
-	const bool defer = draggableManager && draggableManager->IsDeferRebuild();
-	if (draggableManager && !defer) draggableManager->RebuildHierarchy();
+	auto manager = Manager();
+	const bool defer = manager && manager->IsDeferRebuild();
+	if (manager && !defer) manager->RebuildHierarchy();
 	if (auto lock = GetTransformManager().lock()) {
 		lock->SetParent(transformHandle, -1);
 		if (!defer) lock->RebuildHierarchy();
@@ -407,7 +409,7 @@ void Demo::IDraggable::Draw(unsigned long long deltaTime)
 		auto height = trigger->GetHeight();
 		auto gd = this->graphicsDevice;
 		auto cam = this->camera;
-		draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>([gd, cam, thisX, thisY, width, height](std::function<void(void)> markFinished) {
+		Manager()->QueueDraw(std::make_shared<sdlgf::CustomCommand>([gd, cam, thisX, thisY, width, height](std::function<void(void)> markFinished) {
 			gd->SetAlphaBlending(true);
 			float alphaPhase = (sin(sdlgf::Platform::GetTicksMs() / 150.0f) + 1.0f) / 2.0f;
 			int alpha = static_cast<int>(alphaPhase * 80.0f);

@@ -116,6 +116,18 @@ namespace sdlgf::Platform {
 	void ReleaseFreedMemory();
 
 	/// <summary>
+	/// Put one of these first in the body of a thread that is NOT created by SDL (std::thread,
+	/// std::async) and that calls SDL functions: SDL keeps per-thread data (the SDL_GetError buffer)
+	/// that it only frees if the thread calls SDL_CleanupTLS before it ends.
+	/// </summary>
+	struct SdlThreadCleanup {
+		SdlThreadCleanup() = default;
+		SdlThreadCleanup(const SdlThreadCleanup&) = delete;
+		SdlThreadCleanup& operator=(const SdlThreadCleanup&) = delete;
+		~SdlThreadCleanup();
+	};
+
+	/// <summary>
 	/// Converts a platform wide string to UTF-8. Unpaired surrogates / invalid code
 	/// points become U+FFFD.
 	/// </summary>

@@ -139,7 +139,7 @@ namespace Demo {
 		IStatementCard::Draw(deltaTime);
 
 		// Highlight the card while a lone enemy card is being dragged and could still be dropped here.
-		const auto dragging = draggableManager->GetDraggingDraggables();
+		const auto dragging = Manager()->GetDraggingDraggables();
 		if (dragging.size() != 1) return;
 		auto draggedEnemyCard = std::dynamic_pointer_cast<EnemyCard>(dragging[0]);
 		if (!draggedEnemyCard || !CanAcceptEnemyCard()) return;
@@ -153,7 +153,7 @@ namespace Demo {
 		const float thisY = GetWorldY();
 		// Captures the device and camera rather than `this`: the command runs when the manager
 		// flushes its draw buffer, by which time the card may be gone.
-		draggableManager->QueueDraw(std::make_shared<sdlgf::CustomCommand>(
+		Manager()->QueueDraw(std::make_shared<sdlgf::CustomCommand>(
 			[gd = graphicsDevice, cam = camera, width, height, thisX, thisY](std::function<void(void)> markFinished) {
 				gd->SetAlphaBlending(true);
 				Demo::DrawAnimatedDashedRectangle(gd, *cam, thisX, thisY, width, height,

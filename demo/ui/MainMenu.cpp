@@ -123,6 +123,8 @@ namespace Demo
 		captureOne(3, new BossWorldScene(game, saveManager, PREVIEW_SIZE, PREVIEW_SIZE), 360.0f, 190.0f, PREVIEW_ZOOM);
 
 		gd->SetViewport(0, 0, lastScreenWidth, lastScreenHeight);
+		// The preview scenes took over the shared UI services (quest panel, popups) and are gone now
+		if (gameSaveState) gameSaveState->RebindUiServices();
 	}
 
 	void MainMenu::DrawBackground(unsigned long long deltaTime)

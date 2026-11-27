@@ -25,6 +25,8 @@ namespace Demo
 		this->SetMasterVolume(1.0f);
 		this->SetFullscreen(false);
 		this->currentLanguage = Language::EN;
+		this->rendererBackend.clear();
+		this->vsync = true;
 		this->movementStyle = MovementStyle::ShiftToSprint;
 
 		keybinds["MOVE_LEFT"] = DIK_A;
@@ -77,6 +79,8 @@ namespace Demo
 			else if (key == "RESOLUTION_INDEX") this->SetResolutionIndex(std::stoi(value));
 			else if (key == "LANGUAGE") this->currentLanguage = (value == "VI") ? Language::VI : Language::EN;
 			else if (key == "MOVEMENT_STYLE") this->movementStyle = (value == "SHIFT_TO_SLOW") ? MovementStyle::ShiftToSlow : MovementStyle::ShiftToSprint;
+			else if (key == "RENDERER") this->rendererBackend = (value == "AUTO") ? "" : value;
+			else if (key == "VSYNC") this->vsync = (value != "0");
 			else this->keybinds[key] = std::stoi(value);
 		}
 
@@ -96,6 +100,8 @@ namespace Demo
 		file << "RESOLUTION_INDEX=" << currentResIndex << "\n";
 		file << "LANGUAGE=" << (currentLanguage == Language::VI ? "VI" : "EN") << "\n";
 		file << "MOVEMENT_STYLE=" << (movementStyle == MovementStyle::ShiftToSlow ? "SHIFT_TO_SLOW" : "SHIFT_TO_SPRINT") << "\n";
+		file << "RENDERER=" << (rendererBackend.empty() ? "AUTO" : rendererBackend) << "\n";
+		file << "VSYNC=" << (vsync ? 1 : 0) << "\n";
 		for (const auto& pair : keybinds)
 		{
 			file << pair.first << "=" << pair.second << "\n";

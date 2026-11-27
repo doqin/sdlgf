@@ -2,6 +2,7 @@
 // upload), headless on SDL's dummy video driver + software renderer.
 #include <SDL3/SDL.h>
 #include <cstdio>
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <stdexcept>
@@ -102,6 +103,18 @@ static void TestFontCache(sdlgf::GraphicsDevice& gd)
 	sdlgf::Font::RemoveAllFonts();
 }
 
+static void TestRendererSettings(sdlgf::GraphicsDevice& gd)
+{
+	const auto drivers = sdlgf::GraphicsDevice::GetRenderDrivers();
+	CHECK(std::find(drivers.begin(), drivers.end(), "software") != drivers.end());
+	CHECK(gd.GetRendererName() == "software");
+	// The software renderer under the dummy video driver may refuse vsync; it must not crash,
+	// and a refusal leaves the mode unchanged.
+	const bool before = gd.GetVSync();
+	if (!gd.SetVSync(!before)) CHECK(gd.GetVSync() == before);
+	gd.SetVSync(before);
+}
+
 int main()
 {
 	try {
@@ -115,6 +128,7 @@ int main()
 			TestPool(gd);
 			TestLoader(gd);
 			TestFontCache(gd);
+			TestRendererSettings(gd);
 		}
 		SDL_DestroyWindow(window);
 		SDL_Quit();

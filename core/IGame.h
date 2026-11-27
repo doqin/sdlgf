@@ -1,6 +1,7 @@
 #pragma once
 #include "framework.h"
 #include <memory>
+#include <string>
 #include "Camera.h"
 namespace sdlgf {
 	class GraphicsDevice;
@@ -23,6 +24,9 @@ namespace sdlgf {
 
 		GraphicsDevice* graphicsDevice = nullptr;
 		SceneManager* sceneManager = nullptr;
+
+		std::string rendererName; // empty = let SDL pick
+		bool vsync = true;
 	public:
 		IGame(const UINT screenWidth, const UINT screenHeight)
 			: SCREEN_WIDTH(screenWidth), SCREEN_HEIGHT(screenHeight),
@@ -32,6 +36,10 @@ namespace sdlgf {
 
 		GraphicsDevice* GetGraphicsDevice();
 		SceneManager* GetSceneManager();
+
+		/// Render driver and V-Sync mode Init() will create the renderer with; call before Init().
+		/// An empty name lets SDL pick the best driver (and honours SDL_RENDER_DRIVER).
+		void SetRendererPreference(std::string name, bool enableVSync) { rendererName = std::move(name); vsync = enableVSync; }
 
 		/// Creates the renderer for the Application's window and the scene manager.
 		virtual void Init();

@@ -98,17 +98,55 @@ namespace Demo
 		return std::any_of(keybindRows.begin(), keybindRows.end(), [](const KeybindRow& row) { return row.listening; });
 	}
 
-	SettingsScene::KeybindRowPos SettingsScene::GetKeybindRowPos(size_t index, float startY, float rowSpacing) const
+	SettingsScene::Layout SettingsScene::ComputeLayout(int screenH) const
 	{
-		const size_t rowsPerColumn = (keybindRows.size() + 1) / 2;
-		const size_t column = rowsPerColumn > 0 ? index / rowsPerColumn : 0;
-		const size_t row = rowsPerColumn > 0 ? index % rowsPerColumn : 0;
-		const float labelX = KEYBIND_COL_LABEL_X[std::min<size_t>(column, 1)];
-		return {
-			labelX,
-			labelX + KEYBIND_BUTTON_OFFSET_X,
-			startY + rowSpacing * (KEYBIND_ROW_START + KEYBIND_ROW_STEP * row)
-		};
+		Layout l{};
+		float y = -screenH / 2.0f + HEADING_TOP;
+
+		l.audioHeadingY = y;
+		l.masterY = y + HEADING_H;
+		l.musicY = l.masterY + ROW_H;
+		l.sfxY = l.musicY + ROW_H;
+
+		l.videoHeadingY = l.sfxY + ROW_H + SECTION_GAP;
+		l.displayY = l.videoHeadingY + HEADING_H;
+		l.resolutionY = l.displayY + ROW_H;
+		l.rendererY = l.resolutionY + ROW_H;
+		l.vsyncY = l.rendererY + ROW_H;
+
+		l.generalHeadingY = l.vsyncY + ROW_H + SECTION_GAP;
+		l.languageY = l.generalHeadingY + HEADING_H;
+		l.moveSprintY = l.languageY + ROW_H;
+		l.moveSlowY = l.moveSprintY + ROW_H;
+		l.footnoteY = l.moveSlowY + ROW_H;
+
+		l.controlsHeadingY = y;
+		l.keybindStartY = y + HEADING_H;
+		return l;
+	}
+
+	void SettingsScene::DrawHeading(const std::wstring& text, float x, float y, float width)
+	{
+		const sdlgf::Color accent = 0xFF9cdb43;
+		DrawString(text, x, y, accent);
+		game->GetGraphicsDevice()->DrawRectangle(uiCamera, x, y + 22.0f, width, 1.0f, accent, true);
+	}
+
+	int SettingsScene::CurrentBackendIndex() const
+	{
+		const std::string& saved = SettingsManager::GetInstance()->GetRendererBackend();
+		for (size_t i = 0; i < backendOptions.size(); ++i) {
+			if (backendOptions[i] == saved) return static_cast<int>(i);
+		}
+		return 0; // a driver this build does not have is shown (and replaced) as Auto
+	}
+
+	void SettingsScene::SetBackendIndex(int index)
+	{
+		if (index < 0 || index >= static_cast<int>(backendOptions.size())) return;
+		auto sm = SettingsManager::GetInstance();
+		sm->SetRendererBackend(backendOptions[index]);
+		sm->SaveSettings();
 	}
 
 	std::vector<KeyboardNavigator::Candidate> SettingsScene::CollectKeyboardCandidates()
@@ -145,6 +183,14 @@ namespace Demo
 			}
 		}
 
+		const int backendIdx = CurrentBackendIndex();
+		if (backendIdx > 0) {
+			addButton(btnRendPrev);
+		}
+		if (backendIdx < static_cast<int>(backendOptions.size()) - 1) {
+			addButton(btnRendNext);
+		}
+
 		return candidates;
 	}
 
@@ -172,8 +218,7 @@ namespace Demo
 		bgSprite->SetPosition(0, 0);
 
 		//UI Elements
-		float startY = -screenH / 2.f + 64.f;
-		float rowSpacing = SPACING_Y * 1.5f;
+		const Layout l = ComputeLayout(screenH);
 
 		//LOCAL FUNCTION to set Row Slider positions to keep the code clean
 		auto SetVolumeRowPosition = [&](std::shared_ptr<sdlgf::NineSliceSprite> track, std::shared_ptr<sdlgf::NineSliceSprite> fill,
@@ -195,35 +240,35 @@ namespace Demo
 				if (btnI) btnI->SetLocalPosition(SLIDER_COLUMN_X + SLIDER_DESIRED_WIDTH + gap, trackAlignY + (7.0f - btnI->GetHeight()) / 2.0f);
 			};
 
-		SetVolumeRowPosition(trackMaster, trackMasterFill, btnMasterDec, btnMasterInc, startY);
-		SetVolumeRowPosition(trackMusic, trackMusicFill, btnMusicDec, btnMusicInc, startY + rowSpacing);
-		SetVolumeRowPosition(trackSFX, trackSFXFill, btnSFXDec, btnSFXInc, startY + rowSpacing * 2);
+		SetVolumeRowPosition(trackMaster, trackMasterFill, btnMasterDec, btnMasterInc, l.masterY);
+		SetVolumeRowPosition(trackMusic, trackMusicFill, btnMusicDec, btnMusicInc, l.musicY);
+		SetVolumeRowPosition(trackSFX, trackSFXFill, btnSFXDec, btnSFXInc, l.sfxY);
 
 		backButton->SetLocalPosition(-screenW / 2.0f + 32.f, -screenH / 2.0f + 32.f);
 
-		float displayModeY = startY + rowSpacing * 3.0f;
-		float resRowY = startY + rowSpacing * 4.0f;
+		const float btnOffsetY = ROW_CONTROL_OFFSET_Y;
 
-		float btnOffsetY = -8.0f;
+		btnWindowedCheck->SetLocalPosition(CONTROL_COLUMN_X, l.displayY + btnOffsetY);
+		btnFullscreenCheck->SetLocalPosition(CONTROL_COLUMN_X + OPTION_SECOND_X, l.displayY + btnOffsetY);
 
-		btnWindowedCheck->SetLocalPosition(SLIDER_COLUMN_X, displayModeY + btnOffsetY);
-		btnFullscreenCheck->SetLocalPosition(SLIDER_COLUMN_X + 130.f, displayModeY + btnOffsetY);
+		btnResPrev->SetLocalPosition(CONTROL_COLUMN_X, l.resolutionY + btnOffsetY);
+		btnResNext->SetLocalPosition(CONTROL_COLUMN_X + RES_NEXT_X, l.resolutionY + btnOffsetY);
 
-		btnResPrev->SetLocalPosition(SLIDER_COLUMN_X, resRowY + btnOffsetY);
-		btnResNext->SetLocalPosition(SLIDER_COLUMN_X + 180.f, resRowY + btnOffsetY);
+		btnRendPrev->SetLocalPosition(CONTROL_COLUMN_X, l.rendererY + btnOffsetY);
+		btnRendNext->SetLocalPosition(CONTROL_COLUMN_X + RES_NEXT_X, l.rendererY + btnOffsetY);
 
-		float langRowY = startY + rowSpacing * 5.0f;
-		btnLangEN->SetLocalPosition(SLIDER_COLUMN_X, langRowY + btnOffsetY);
-		btnLangVI->SetLocalPosition(SLIDER_COLUMN_X + 130.f, langRowY + btnOffsetY);
+		btnVSyncOn->SetLocalPosition(CONTROL_COLUMN_X, l.vsyncY + btnOffsetY);
+		btnVSyncOff->SetLocalPosition(CONTROL_COLUMN_X + OPTION_SECOND_X, l.vsyncY + btnOffsetY);
 
-		float moveRowY = startY + rowSpacing * 6.0f;
-		btnMoveSprint->SetLocalPosition(SLIDER_COLUMN_X, moveRowY + btnOffsetY);
-		btnMoveSlow->SetLocalPosition(SLIDER_COLUMN_X, moveRowY + rowSpacing + btnOffsetY);
+		btnLangEN->SetLocalPosition(CONTROL_COLUMN_X, l.languageY + btnOffsetY);
+		btnLangVI->SetLocalPosition(CONTROL_COLUMN_X + OPTION_SECOND_X, l.languageY + btnOffsetY);
+
+		btnMoveSprint->SetLocalPosition(CONTROL_COLUMN_X, l.moveSprintY + btnOffsetY);
+		btnMoveSlow->SetLocalPosition(CONTROL_COLUMN_X, l.moveSlowY + btnOffsetY);
 
 		for (size_t i = 0; i < keybindRows.size(); ++i) {
 			if (keybindRows[i].button) {
-				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
-				keybindRows[i].button->SetLocalPosition(pos.buttonX, pos.y);
+				keybindRows[i].button->SetLocalPosition(KEYBIND_BUTTON_X, l.keybindStartY + KEYBIND_ROW_H * i);
 			}
 		}
 	}
@@ -387,6 +432,43 @@ namespace Demo
 			});
 		btnResNext->Init(&uiCamera);
 
+		// Renderer backend selector (arrows like Resolution). The driver is chosen when the renderer
+		// is created, so a change is saved now and applies on the next launch.
+		backendOptions.push_back("");
+		for (auto& name : sdlgf::GraphicsDevice::GetRenderDrivers()) backendOptions.push_back(name);
+
+		auto MakeArrow = [&](int srcY, const std::function<void()>& action) {
+			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+			btn->SetSpriteCoords(240, srcY, 16, 16, 0);
+			btn->SetSpriteScale(2.f, 2.f);
+			btn->SetSpriteOrigin(8.f, 8.f);
+			btn->SetSpriteRotation(1.5708f);
+			btn->SetSpriteOffset(16.f, 16.f);
+			btn->SetOnReleaseLeft([action](sdlgf::ITrigger*) { action(); });
+			btn->Init(&uiCamera);
+			return btn;
+			};
+		btnRendPrev = MakeArrow(96, [this]() { SetBackendIndex(CurrentBackendIndex() - 1); });
+		btnRendNext = MakeArrow(112, [this]() { SetBackendIndex(CurrentBackendIndex() + 1); });
+
+		// V-Sync checkboxes (On / Off), applied to the renderer immediately
+		auto MakeVSyncCheck = [&](bool value) {
+			auto btn = std::make_shared<Demo::IconButton>(transformManager, 0, 0, 32, 32, uiSheetTex, 3);
+			btn->SetSpriteCoords(sm->GetVSync() == value ? 272 : 256, 352, 16, 16, 0, true);
+			btn->SetSpriteScale(2.f, 2.f);
+			btn->SetOnReleaseLeft([this, value](sdlgf::ITrigger*) {
+				auto sm = SettingsManager::GetInstance();
+				if (sm->GetVSync() != value) {
+					sm->SetVSync(value);
+					sm->SaveSettings();
+					game->GetGraphicsDevice()->SetVSync(value);
+				}
+				});
+			return btn;
+			};
+		btnVSyncOn = MakeVSyncCheck(true);
+		btnVSyncOff = MakeVSyncCheck(false);
+
 		auto SetupKeybindBtn = [&](const std::string& action, const wchar_t* label) {
 			const size_t rowIndex = keybindRows.size();
 			keybindRows.push_back({ action, label, nullptr, false });
@@ -430,7 +512,7 @@ namespace Demo
 		SetupKeybindBtn("OPEN_MAP", L"Open map");
 
 		// Active Buttons
-		std::vector<std::shared_ptr<Demo::IButton>> buttons = { backButton, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnLangEN, btnLangVI, btnMoveSprint, btnMoveSlow };
+		std::vector<std::shared_ptr<Demo::IButton>> buttons = { backButton, btnMasterDec, btnMasterInc, btnMusicDec, btnMusicInc, btnSFXDec, btnSFXInc, btnWindowedCheck, btnFullscreenCheck, btnVSyncOn, btnVSyncOff, btnLangEN, btnLangVI, btnMoveSprint, btnMoveSlow };
 		for (auto& row : keybindRows) buttons.push_back(row.button);
 		for (auto& btn : buttons)
 		{
@@ -472,6 +554,9 @@ namespace Demo
 			btnLangVI->SetSpriteCoords(256, 352, 16, 16, 0, true);
 		}
 
+		btnVSyncOn->SetSpriteCoords(sm->GetVSync() ? 272 : 256, 352, 16, 16, 0, true);
+		btnVSyncOff->SetSpriteCoords(sm->GetVSync() ? 256 : 272, 352, 16, 16, 0, true);
+
 		const bool slowStyle = sm->GetMovementStyle() == MovementStyle::ShiftToSlow;
 		btnMoveSprint->SetSpriteCoords(slowStyle ? 256 : 272, 352, 16, 16, 0, true);
 		btnMoveSlow->SetSpriteCoords(slowStyle ? 272 : 256, 352, 16, 16, 0, true);
@@ -484,6 +569,10 @@ namespace Demo
 			if (resIdx > 0) btnResPrev->Update(deltaTime);
 			if (resIdx < maxIdx) btnResNext->Update(deltaTime);
 		}
+		const int backendIdx = CurrentBackendIndex();
+		if (backendIdx > 0) btnRendPrev->Update(deltaTime);
+		if (backendIdx < static_cast<int>(backendOptions.size()) - 1) btnRendNext->Update(deltaTime);
+
 		transformManager->UpdateAll();
 		camera.Update();
 
@@ -548,77 +637,72 @@ namespace Demo
 			gd->DrawRectangle(uiCamera, -lastScreenWidth / 2.f, -lastScreenHeight / 2.f, lastScreenWidth, lastScreenHeight, COLOR_ARGB(200, 0, 0, 0), true);
 			gd->SetAlphaBlending(false);
 
-			float startY = -lastScreenHeight / 2.f + 64.f;
-			float rowSpacing = SPACING_Y * 1.5f;
-
-			//Draw label
-			DrawString(Tr(L"Master Volume"), LABEL_COLUMN_X, startY, 0xFFFFFFFF);
-			DrawString(Tr(L"Music Volume"), LABEL_COLUMN_X, startY + rowSpacing, 0xFFFFFFFF);
-			DrawString(Tr(L"Sfx Volume"), LABEL_COLUMN_X, startY + rowSpacing * 2, 0xFFFFFFFF);
-
-			float displayModeY = startY + rowSpacing * 3.0f;
-			float resRowY = startY + rowSpacing * 4.0f;
-			float langRowY = startY + rowSpacing * 5.0f;
-
-			DrawString(Tr(L"Display Mode"), LABEL_COLUMN_X, displayModeY, 0xFFFFFFFF);
-
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, displayModeY);
-			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(Tr(L"Windowed"));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
-
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 165.f, displayModeY);
-			fontSprite->SetText(Tr(L"Fullscreen"));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
-
+			const Layout l = ComputeLayout(lastScreenHeight);
 			auto sm = SettingsManager::GetInstance();
+			const sdlgf::Color white = 0xFFFFFFFF;
+
+			//Draw text at the same x as the label/option column, via the shared font sprite
+			auto drawText = [&](const std::wstring& text, float x, float y, sdlgf::Color color) { DrawString(text, x, y, color); };
+
+			//Audio
+			DrawHeading(Tr(L"Audio"), PANEL_LEFT_X, l.audioHeadingY, PANEL_LEFT_W);
+			drawText(Tr(L"Master Volume"), LABEL_COLUMN_X, l.masterY, white);
+			drawText(Tr(L"Music Volume"), LABEL_COLUMN_X, l.musicY, white);
+			drawText(Tr(L"Sfx Volume"), LABEL_COLUMN_X, l.sfxY, white);
+
+			//Video
+			DrawHeading(Tr(L"Video"), PANEL_LEFT_X, l.videoHeadingY, PANEL_LEFT_W);
+			drawText(Tr(L"Display Mode"), LABEL_COLUMN_X, l.displayY, white);
+			drawText(Tr(L"Windowed"), CONTROL_COLUMN_X + OPTION_TEXT_GAP, l.displayY, white);
+			drawText(Tr(L"Fullscreen"), CONTROL_COLUMN_X + OPTION_SECOND_X + OPTION_TEXT_GAP, l.displayY, white);
 
 			sdlgf::Color resColor = sm->GetFullscreen() ? 0xFF888888 : 0xFFFFFFFF;
-			DrawString(Tr(L"Resolution"), LABEL_COLUMN_X, resRowY, resColor);
+			drawText(Tr(L"Resolution"), LABEL_COLUMN_X, l.resolutionY, resColor);
 
 			int resIdx = sm->GetCurrentResolutionIndex();
 			auto resList = sm->GetSupportedResolutions();
-
-			std::string resStr = resList[resIdx].label;
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 45.f, resRowY);
-			fontSprite->SetColor(resColor);
-			fontSprite->SetText(ToWString(resStr));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+			drawText(ToWString(resList[resIdx].label), CONTROL_COLUMN_X + RES_LABEL_X, l.resolutionY, resColor);
 
 			if (!sm->GetFullscreen()) {
 				if (resIdx > 0) btnResPrev->Draw(gd, deltaTime);
 				if (resIdx < resList.size() - 1) btnResNext->Draw(gd, deltaTime);
 			}
 
-			DrawString(Tr(L"Language"), LABEL_COLUMN_X, langRowY, 0xFFFFFFFF);
+			//Renderer backend (applies on the next launch) and V-Sync (applies immediately)
+			drawText(Tr(L"Renderer"), LABEL_COLUMN_X, l.rendererY, white);
+			const int backendIdx = CurrentBackendIndex();
+			const bool restartPending = sm->IsRendererRestartPending();
+			std::wstring backendText = backendIdx == 0
+				? Tr(L"Auto") + L" (" + ToWString(gd->GetRendererName()) + L")"
+				: ToWString(backendOptions[backendIdx]);
+			if (restartPending) backendText += L" *";
+			drawText(backendText, CONTROL_COLUMN_X + RES_LABEL_X, l.rendererY, restartPending ? 0xFFFFD34D : white);
+			if (backendIdx > 0) btnRendPrev->Draw(gd, deltaTime);
+			if (backendIdx < static_cast<int>(backendOptions.size()) - 1) btnRendNext->Draw(gd, deltaTime);
 
+			drawText(Tr(L"V-Sync"), LABEL_COLUMN_X, l.vsyncY, white);
+			drawText(Tr(L"On"), CONTROL_COLUMN_X + OPTION_TEXT_GAP, l.vsyncY, white);
+			drawText(Tr(L"Off"), CONTROL_COLUMN_X + OPTION_SECOND_X + OPTION_TEXT_GAP, l.vsyncY, white);
+
+			//General
+			DrawHeading(Tr(L"General"), PANEL_LEFT_X, l.generalHeadingY, PANEL_LEFT_W);
+			drawText(Tr(L"Language"), LABEL_COLUMN_X, l.languageY, white);
 			// Language names are shown as endonyms, not translated.
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, langRowY);
-			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(L"English");
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+			drawText(L"English", CONTROL_COLUMN_X + OPTION_TEXT_GAP, l.languageY, white);
+			drawText(L"Tiếng Việt", CONTROL_COLUMN_X + OPTION_SECOND_X + OPTION_TEXT_GAP, l.languageY, white);
 
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 165.f, langRowY);
-			fontSprite->SetText(L"Tiếng Việt");
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
+			drawText(Tr(L"Movement Style"), LABEL_COLUMN_X, l.moveSprintY, white);
+			drawText(Tr(L"Hold to sprint"), CONTROL_COLUMN_X + OPTION_TEXT_GAP, l.moveSprintY, white);
+			drawText(Tr(L"Hold to slow"), CONTROL_COLUMN_X + OPTION_TEXT_GAP, l.moveSlowY, white);
 
-			float moveRowY = startY + rowSpacing * 6.0f;
-			DrawString(Tr(L"Movement Style"), LABEL_COLUMN_X, moveRowY, 0xFFFFFFFF);
+			if (restartPending) drawText(L"* " + Tr(L"Restart required to change renderer"), LABEL_COLUMN_X, l.footnoteY, 0xFFFFD34D);
 
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, moveRowY);
-			fontSprite->SetColor(0xFFFFFFFF);
-			fontSprite->SetText(Tr(L"Hold to sprint"));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
-
-			fontSprite->SetPosition(SLIDER_COLUMN_X + 35.f, moveRowY + rowSpacing);
-			fontSprite->SetText(Tr(L"Hold to slow"));
-			fontSprite->Begin(); fontSprite->Draw(uiCamera, 0); fontSprite->End();
-
+			//Controls
+			DrawHeading(Tr(L"Controls"), PANEL_RIGHT_X, l.controlsHeadingY, PANEL_RIGHT_W);
 			for (size_t i = 0; i < keybindRows.size(); ++i) {
-				const auto pos = GetKeybindRowPos(i, startY, rowSpacing);
 				const wchar_t* label = keybindRows[i].label;
 				if (keybindRows[i].action == "SPRINT" && sm->GetMovementStyle() == MovementStyle::ShiftToSlow) label = L"Focus";
-				DrawString(Tr(label), pos.labelX, pos.y, 0xFFFFFFFF);
+				drawText(Tr(label), KEYBIND_LABEL_X, l.keybindStartY + KEYBIND_ROW_H * i, white);
 			}
 
 			//draw tracks

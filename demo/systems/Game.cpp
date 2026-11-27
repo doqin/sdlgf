@@ -13,7 +13,10 @@
 #include "AssetManifest.h"
 void Demo::Game::Init() {
 	srand(static_cast<unsigned int>(time(NULL)));
+	// The first GetInstance() loads config.ini; the renderer is created from it
+	SetRendererPreference(SettingsManager::GetInstance()->GetRendererBackend(), SettingsManager::GetInstance()->GetVSync());
 	IGame::Init();
+	SettingsManager::GetInstance()->SetLaunchedRendererBackend(rendererName); // may differ from the config after a fallback
 	SettingsManager::GetInstance()->LoadSettings();
 	SettingsManager::GetInstance()->ApplyResolution();
 

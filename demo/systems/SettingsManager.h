@@ -37,6 +37,10 @@ namespace Demo
 		std::vector<Resolution> supportedResolutions;
 		int currentResIndex;
 
+		std::string rendererBackend;   // SDL render driver name; empty = Auto
+		std::string launchedRendererBackend;  // what the running renderer was created with
+		bool vsync = true;
+
 		Language currentLanguage;
 		MovementStyle movementStyle = MovementStyle::ShiftToSprint;
 	public:
@@ -78,6 +82,18 @@ namespace Demo
 
 		// Helper function to apply immediately
 		void ApplyResolution();
+
+		// Render driver ("" = Auto). Only read when the renderer is created, so a change applies on the next launch.
+		void SetRendererBackend(const std::string& name) { this->rendererBackend = name; }
+		const std::string& GetRendererBackend() const { return this->rendererBackend; }
+
+		void SetLaunchedRendererBackend(const std::string& name) { this->launchedRendererBackend = name; }
+		// True when the saved backend differs from the one the running renderer uses.
+		bool IsRendererRestartPending() const { return rendererBackend != launchedRendererBackend; }
+
+		// Stored only; the caller pushes it to the GraphicsDevice so it applies immediately.
+		void SetVSync(bool enabled) { this->vsync = enabled; }
+		bool GetVSync() const { return this->vsync; }
 
 		void SetLanguage(Language lang) { this->currentLanguage = lang; }
 		Language GetLanguage() const { return this->currentLanguage; }

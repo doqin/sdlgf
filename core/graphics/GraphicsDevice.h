@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include <vector>
 #include "Camera.h"
 #include "Platform.h"
@@ -52,14 +53,25 @@ namespace sdlgf {
 	public:
 		/// Creates the renderer for `window`. `rendererName` selects an SDL render driver
 		/// ("direct3d11", "software", ...); null lets SDL pick the best one.
+		/// `vsync` is the initial presentation mode (see SetVSync).
 		/// Throws std::runtime_error if no renderer can be created.
-		explicit GraphicsDevice(SDL_Window* window, const char* rendererName = nullptr);
+		explicit GraphicsDevice(SDL_Window* window, const char* rendererName = nullptr, bool vsync = true);
 		~GraphicsDevice();
 		GraphicsDevice(const GraphicsDevice&) = delete;
 		GraphicsDevice& operator=(const GraphicsDevice&) = delete;
 
 		SDL_Renderer* GetRenderer() const { return renderer; }
 		SDL_Window* GetWindow() const { return window; }
+
+		/// Names of the render drivers this SDL build offers ("opengl", "vulkan", "software", ...),
+		/// valid values for the constructor's `rendererName`.
+		static std::vector<std::string> GetRenderDrivers();
+		/// Name of the driver actually in use.
+		std::string GetRendererName() const;
+		/// Turns vertical sync on or off. Returns false when the driver cannot (software, dummy
+		/// video): the previous mode then stays in effect.
+		bool SetVSync(bool enabled);
+		bool GetVSync() const;
 		/// The shared pool of textures and fonts for this device (see AssetManager).
 		AssetManager& GetAssets() { return *assets; }
 

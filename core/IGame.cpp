@@ -97,7 +97,16 @@ void sdlgf::IGame::Init()
 	SDL_Window* window = sdlgf::Application::GetInstance()->GetWindow();
 	if (window == nullptr) throw std::runtime_error("IGame::Init needs the Application window: call Application::Init first");
 
-	graphicsDevice = new GraphicsDevice(window);
+	try {
+		graphicsDevice = new GraphicsDevice(window, rendererName.empty() ? nullptr : rendererName.c_str(), vsync);
+	}
+	catch (const std::runtime_error&) {
+		// The preferred driver is gone or broken (e.g. config.ini copied from another machine):
+		// fall back to SDL's own choice. If that fails too the exception reaches the caller.
+		if (rendererName.empty()) throw;
+		rendererName.clear();
+		graphicsDevice = new GraphicsDevice(window, nullptr, vsync);
+	}
 	sceneManager = new SceneManager();
 
 	// Add letterboxing: initialize the virtual screen

@@ -7,27 +7,31 @@
 #include "KeyboardNavigator.h"
 namespace Demo
 {
-    //UI constants
-    constexpr float LABEL_COLUMN_X = -216.0f;
-    constexpr float SLIDER_COLUMN_X = 20.0f;
+    //UI constants. The scene is laid out in the 960x720 virtual UI space, origin at the centre:
+    //  left panel  = Audio / Video / General settings, right panel = Controls (keybinds).
+    constexpr float PANEL_LEFT_X = -456.0f;   // label column of the left panel
+    constexpr float PANEL_RIGHT_X = 119.0f;   // label column of the right panel
+    constexpr float PANEL_LEFT_W = 551.0f;    // width of the left panel (ends 24px before the right one)
+    constexpr float PANEL_RIGHT_W = 337.0f;
+
+    constexpr float LABEL_COLUMN_X = PANEL_LEFT_X;
+    constexpr float CONTROL_COLUMN_X = LABEL_COLUMN_X + 215.0f;  // checkboxes / resolution arrows start here
+    constexpr float SLIDER_COLUMN_X = CONTROL_COLUMN_X + 22.0f;  // room on the left for the "-" button
     constexpr float SLIDER_DESIRED_WIDTH = 100.0f;
-    constexpr float SLIDER_ORIGINAL_WIDTH = 47.0f;
-    constexpr float SLIDER_SCALE_X = SLIDER_DESIRED_WIDTH / SLIDER_ORIGINAL_WIDTH;
+    constexpr float OPTION_SECOND_X = 145.0f;                    // second checkbox of a pair, relative to CONTROL_COLUMN_X
+    constexpr float OPTION_TEXT_GAP = 35.0f;                     // checkbox -> its text
+    constexpr float RES_LABEL_X = 40.0f;                         // resolution text, relative to CONTROL_COLUMN_X
+    constexpr float RES_NEXT_X = 248.0f;                         // "next" arrow, relative to CONTROL_COLUMN_X
 
-    constexpr float SPACING_Y = 30.0f;
-    constexpr float BUTTON_OFFSET_X = 25.0f;
-    constexpr float ALIGN_OFFSET_Y = 10.0f;
+    constexpr float KEYBIND_LABEL_X = PANEL_RIGHT_X;
+    constexpr float KEYBIND_BUTTON_X = PANEL_RIGHT_X + 190.0f;
 
-    // Shift Keybind rows start value so Display Mode, Resolution, and Language rows fit cleanly
-    constexpr float KEYBIND_ROW_START = 8.0f;
-    constexpr float KEYBIND_ROW_STEP = 1.1f;
-
-    // Keybinds flow into two columns so the list never runs off the bottom of the screen
-    constexpr float KEYBIND_COL_LABEL_X[2] = { -216.0f, 100.0f };
-    constexpr float KEYBIND_BUTTON_OFFSET_X = 170.0f;
-
-    //save offset to center the keybinds into box (just UI)
-    constexpr int BTN_VISUAL_SHADOW_OFFSET = -2;
+    constexpr float HEADING_TOP = 80.0f;     // heading baseline offset from the top of the screen
+    constexpr float HEADING_H = 34.0f;       // heading text + rule, before the first row
+    constexpr float ROW_H = 38.0f;           // pitch of a settings row (controls are 32px tall)
+    constexpr float KEYBIND_ROW_H = 44.0f;
+    constexpr float SECTION_GAP = 12.0f;
+    constexpr float ROW_CONTROL_OFFSET_Y = -8.0f;  // control top relative to the label's top, centres 32px controls on the text
 
     class SettingsScene : public sdlgf::IScene
     {
@@ -46,6 +50,17 @@ namespace Demo
         std::shared_ptr<IconButton> backButton;
         std::shared_ptr<Demo::IconButton> btnResPrev;
         std::shared_ptr<Demo::IconButton> btnResNext;
+
+        // Renderer backend selector: backendOptions[0] is Auto (""), the rest are SDL render drivers
+        std::vector<std::string> backendOptions;
+        std::shared_ptr<Demo::IconButton> btnRendPrev;
+        std::shared_ptr<Demo::IconButton> btnRendNext;
+        int CurrentBackendIndex() const;
+        void SetBackendIndex(int index);
+
+        // V-Sync Checkboxes
+        std::shared_ptr<Demo::IconButton> btnVSyncOn;
+        std::shared_ptr<Demo::IconButton> btnVSyncOff;
 
         // Display Mode Checkboxes
         std::shared_ptr<Demo::IconButton> btnWindowedCheck;
@@ -81,8 +96,17 @@ namespace Demo
         };
         std::vector<KeybindRow> keybindRows;
 
-        struct KeybindRowPos { float labelX, buttonX, y; };
-        KeybindRowPos GetKeybindRowPos(size_t index, float startY, float rowSpacing) const;
+        // Y (top of the label text) of every row.
+        struct Layout {
+            float audioHeadingY, masterY, musicY, sfxY;
+            float videoHeadingY, displayY, resolutionY;
+            float rendererY, vsyncY;
+            float generalHeadingY, languageY, moveSprintY, moveSlowY;
+            float footnoteY;
+            float controlsHeadingY, keybindStartY;
+        };
+        Layout ComputeLayout(int screenH) const;
+        void DrawHeading(const std::wstring& text, float x, float y, float width);
 
         KeyboardNavigator keyboardNavigator;
         std::vector<KeyboardNavigator::Candidate> CollectKeyboardCandidates();

@@ -62,7 +62,7 @@ namespace {
 
 }
 
-sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererName) : window(window)
+sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererName, bool vsync) : window(window)
 {
 	// Thin lines: use the driver's own line rasteriser. SDL's default (Bresenham on rounded
 	// endpoints) moves lines with fractional endpoints by up to a pixel; the hardware rule is the
@@ -77,7 +77,7 @@ sdlgf::GraphicsDevice::GraphicsDevice(SDL_Window* window, const char* rendererNa
 	// texture); callers pass such coordinates on purpose, e.g. for a cropped screen-space window.
 	SDL_SetRenderTextureAddressMode(renderer, SDL_TEXTURE_ADDRESS_CLAMP, SDL_TEXTURE_ADDRESS_CLAMP);
 	// Not every driver can vsync (software, dummy video); that is fine.
-	SDL_SetRenderVSync(renderer, 1);
+	SetVSync(vsync);
 	alphaBlendMode = SDL_ComposeCustomBlendMode(
 		SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD,
 		SDL_BLENDFACTOR_SRC_ALPHA, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, SDL_BLENDOPERATION_ADD);
@@ -97,6 +97,34 @@ sdlgf::GraphicsDevice::~GraphicsDevice()
 	for (Texture* texture : textures) texture->OnDeviceDestroyed();
 	textures.clear();
 	if (renderer != nullptr) SDL_DestroyRenderer(renderer);
+}
+
+std::vector<std::string> sdlgf::GraphicsDevice::GetRenderDrivers()
+{
+	std::vector<std::string> names;
+	const int count = SDL_GetNumRenderDrivers();
+	for (int i = 0; i < count; ++i) {
+		const char* name = SDL_GetRenderDriver(i);
+		if (name != nullptr) names.emplace_back(name);
+	}
+	return names;
+}
+
+std::string sdlgf::GraphicsDevice::GetRendererName() const
+{
+	const char* name = SDL_GetRendererName(renderer);
+	return name != nullptr ? name : "";
+}
+
+bool sdlgf::GraphicsDevice::SetVSync(bool enabled)
+{
+	return SDL_SetRenderVSync(renderer, enabled ? 1 : 0);
+}
+
+bool sdlgf::GraphicsDevice::GetVSync() const
+{
+	int mode = 0;
+	return SDL_GetRenderVSync(renderer, &mode) && mode != 0;
 }
 
 void sdlgf::GraphicsDevice::RegisterTexture(Texture* texture)

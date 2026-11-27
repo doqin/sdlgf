@@ -49,20 +49,33 @@ namespace {
 
 		const SDL_AudioSpec target{ SDL_AUDIO_S16, 2, sdlgf::kMixRate };
 		auto sound = std::make_shared<sdlgf::Sound>();
-		std::vector<std::int16_t> chunk(sdlgf::kMixRate); // 0.5 s of stereo per read
+		// Collect the decoded chunks and copy them into ONE exactly-sized buffer at the end. Growing a
+		// single vector while decoding keeps up to 2x the track (doubling) and shrink_to_fit then needs
+		// a third copy - tens of MB of transient peak for a long track.
+		constexpr size_t kChunkSamples = sdlgf::kMixRate; // 0.5 s of stereo per read
+		std::vector<std::vector<std::int16_t>> chunks;
+		size_t total = 0;
 		std::string failure;
 		for (;;) {
+			std::vector<std::int16_t> chunk(kChunkSamples);
 			const int bytes = MIX_DecodeAudio(decoder, chunk.data(), static_cast<int>(chunk.size() * sizeof(std::int16_t)), &target);
 			if (bytes < 0) { failure = std::string("cannot decode audio: ") + SDL_GetError(); break; }
 			if (bytes == 0) break;
-			sound->samples.insert(sound->samples.end(), chunk.begin(), chunk.begin() + bytes / sizeof(std::int16_t));
+			chunk.resize(bytes / sizeof(std::int16_t));
+			chunk.shrink_to_fit();
+			total += chunk.size();
+			chunks.push_back(std::move(chunk));
 		}
 		MIX_DestroyAudioDecoder(decoder);
 		SDL_CloseIO(io);
 
 		if (!failure.empty()) return fail(failure);
-		if (sound->samples.empty()) return fail("audio file contains no samples");
-		sound->samples.shrink_to_fit();
+		if (total == 0) return fail("audio file contains no samples");
+		sound->samples.reserve(total);
+		for (auto& chunk : chunks) {
+			sound->samples.insert(sound->samples.end(), chunk.begin(), chunk.end());
+			std::vector<std::int16_t>().swap(chunk); // free as we go, so the peak stays near 1x + one chunk
+		}
 		return sound;
 	}
 }

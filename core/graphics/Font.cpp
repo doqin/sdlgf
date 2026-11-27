@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "Font.h"
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
 namespace {
-	// Text is cached by content; dynamic strings (scores, timers) would otherwise grow the cache
-	// without bound, so it is simply emptied when it gets large.
+	// Text is cached by content. Dynamic strings (scores, timers) would otherwise grow the cache without
+	// bound, so when it is full the least recently used half is dropped (not everything: the strings drawn
+	// every frame must not be re-rasterised each time).
 	constexpr size_t kMaxCachedStrings = 1024;
 }
 
@@ -25,16 +27,37 @@ sdlgf::Font::Entry& sdlgf::Font::Lookup(const std::wstring& text, float maxWidth
 {
 	// Layout only sees whole pixels of the wrap width
 	const int wrap = maxWidth > 0.0f ? static_cast<int>(maxWidth) : 0;
-	std::wstring key = std::to_wstring(wrap);
-	key += L'|';
-	key += text;
-	auto it = cache.find(key);
-	if (it != cache.end()) return it->second;
+	auto& byText = cache[wrap];
+	auto it = byText.find(text);
+	if (it != byText.end()) {
+		it->second.lastUse = ++useCounter;
+		return it->second;
+	}
 
-	if (cache.size() >= kMaxCachedStrings) cache.clear();
+	if (cachedCount >= kMaxCachedStrings) EvictOldest();
 	Entry entry;
+	entry.lastUse = ++useCounter;
 	entry.size = face->Measure(text, static_cast<float>(wrap));
-	return cache.emplace(std::move(key), std::move(entry)).first->second;
+	++cachedCount;
+	// `byText` stays valid: EvictOldest erases entries but never removes the per-width maps
+	return cache[wrap].emplace(text, std::move(entry)).first->second;
+}
+
+void sdlgf::Font::EvictOldest()
+{
+	std::vector<std::uint64_t> uses;
+	uses.reserve(cachedCount);
+	for (const auto& [wrap, byText] : cache) {
+		for (const auto& [text, entry] : byText) uses.push_back(entry.lastUse);
+	}
+	std::nth_element(uses.begin(), uses.begin() + uses.size() / 2, uses.end());
+	const std::uint64_t cutoff = uses[uses.size() / 2];
+	for (auto& [wrap, byText] : cache) {
+		for (auto it = byText.begin(); it != byText.end();) {
+			if (it->second.lastUse < cutoff) { it = byText.erase(it); --cachedCount; }
+			else ++it;
+		}
+	}
 }
 
 sdlgf::text::Size sdlgf::Font::Measure(const std::wstring& text, float maxWidth)

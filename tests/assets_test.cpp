@@ -84,6 +84,24 @@ static void TestLoader(sdlgf::GraphicsDevice& gd)
 	CHECK(empty.IsDone() && empty.GetProgress() == 1.0f);
 }
 
+static void TestFontCache(sdlgf::GraphicsDevice& gd)
+{
+	sdlgf::Font::AddFont(L"assets/135openpixel-v2-3.ttf");
+	auto font = gd.GetAssets().GetFont(L"135OpenPixel v2.3", 13);
+	CHECK(font == gd.GetAssets().GetFont(L"135OpenPixel v2.3", 13)); // fonts are pooled too
+	const auto hot = font->Render(L"always drawn").texture;
+	CHECK(hot != nullptr);
+	// A stream of one-off strings (scores, timers) must not grow the cache without bound, nor push out
+	// the string that is drawn all the time
+	for (int i = 0; i < 5000; ++i) {
+		font->Render(std::to_wstring(i));
+		if (i % 100 == 0) font->Render(L"always drawn");
+	}
+	CHECK(font->GetCachedStringCount() <= 1024);
+	CHECK(font->Render(L"always drawn").texture == hot);
+	sdlgf::Font::RemoveAllFonts();
+}
+
 int main()
 {
 	try {
@@ -96,6 +114,7 @@ int main()
 			sdlgf::GraphicsDevice gd(window, "software");
 			TestPool(gd);
 			TestLoader(gd);
+			TestFontCache(gd);
 		}
 		SDL_DestroyWindow(window);
 		SDL_Quit();

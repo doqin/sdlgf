@@ -18,13 +18,18 @@ namespace sdlgf {
 		std::unique_ptr<text::Face> face;
 
 		struct Entry {
+			std::uint64_t lastUse = 0;        // Font::useCounter when last looked up, for eviction
 			text::Size size;
 			bool rendered = false;
 			int offsetX = 0, offsetY = 0; // of the mask relative to the text's layout origin
 			std::unique_ptr<Texture> texture; // white, alpha = glyph coverage; null for empty text
 		};
-		std::unordered_map<std::wstring, Entry> cache;
+		// text -> entry, one map per wrap width (whole pixels), so a lookup builds no key string
+		std::unordered_map<int, std::unordered_map<std::wstring, Entry>> cache;
+		size_t cachedCount = 0;
+		std::uint64_t useCounter = 0;
 		Entry& Lookup(const std::wstring& text, float maxWidth);
+		void EvictOldest();
 	public:
 		/// Throws std::invalid_argument if no registered file has the family name `fontName`.
 		Font(GraphicsDevice* graphicsDevice, std::wstring fontName, INT height);
@@ -34,6 +39,9 @@ namespace sdlgf {
 
 		GraphicsDevice* GetGraphicsDevice();
 		const text::Face& GetFace() const { return *face; }
+
+		/// How many strings are cached right now (bounded; for tests).
+		size_t GetCachedStringCount() const { return cachedCount; }
 
 		/// Size of `text` laid out with word wrapping at `maxWidth` (0 = no wrapping).
 		text::Size Measure(const std::wstring& text, float maxWidth = 0.0f);

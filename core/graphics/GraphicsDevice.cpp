@@ -207,36 +207,35 @@ void sdlgf::GraphicsDevice::ResetVirtualTransform()
 
 // ---- shape helpers -------------------------------------------------------------------------------
 
-void sdlgf::GraphicsDevice::FillFan(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color)
+void sdlgf::GraphicsDevice::FillFan(const sdlgf::Vec2* points, size_t count, sdlgf::Color color)
 {
-	if (points.size() < 3) return;
+	if (count < 3) return;
 	ApplyBlend();
 	const SDL_FColor c = ToFColor(color);
-	std::vector<SDL_Vertex> vertices(points.size());
-	for (size_t i = 0; i < points.size(); ++i) {
-		vertices[i].position = SDL_FPoint{ points[i].x + kD3D9PixelShift, points[i].y + kD3D9PixelShift };
-		vertices[i].color = c;
-		vertices[i].tex_coord = SDL_FPoint{ 0.0f, 0.0f };
+	scratchVertices.resize(count);
+	for (size_t i = 0; i < count; ++i) {
+		scratchVertices[i].position = SDL_FPoint{ points[i].x + kD3D9PixelShift, points[i].y + kD3D9PixelShift };
+		scratchVertices[i].color = c;
+		scratchVertices[i].tex_coord = SDL_FPoint{ 0.0f, 0.0f };
 	}
-	std::vector<int> indices;
-	indices.reserve((points.size() - 2) * 3);
-	for (size_t i = 1; i + 1 < points.size(); ++i) {
-		indices.push_back(0);
-		indices.push_back(static_cast<int>(i));
-		indices.push_back(static_cast<int>(i + 1));
+	scratchIndices.clear();
+	for (size_t i = 1; i + 1 < count; ++i) {
+		scratchIndices.push_back(0);
+		scratchIndices.push_back(static_cast<int>(i));
+		scratchIndices.push_back(static_cast<int>(i + 1));
 	}
-	SDL_RenderGeometry(renderer, nullptr, vertices.data(), static_cast<int>(vertices.size()), indices.data(), static_cast<int>(indices.size()));
+	SDL_RenderGeometry(renderer, nullptr, scratchVertices.data(), static_cast<int>(count), scratchIndices.data(), static_cast<int>(scratchIndices.size()));
 }
 
-void sdlgf::GraphicsDevice::StrokeStrip(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color)
+void sdlgf::GraphicsDevice::StrokeStrip(const sdlgf::Vec2* points, size_t count, sdlgf::Color color)
 {
-	if (points.size() < 2) return;
+	if (count < 2) return;
 	ApplyBlend();
 	const SDL_FColor c = ToFColor(color);
 	SDL_SetRenderDrawColorFloat(renderer, c.r, c.g, c.b, c.a);
-	std::vector<SDL_FPoint> pts(points.size());
-	for (size_t i = 0; i < points.size(); ++i) pts[i] = SDL_FPoint{ points[i].x, points[i].y };
-	SDL_RenderLines(renderer, pts.data(), static_cast<int>(pts.size()));
+	scratchPoints.resize(count);
+	for (size_t i = 0; i < count; ++i) scratchPoints[i] = SDL_FPoint{ points[i].x, points[i].y };
+	SDL_RenderLines(renderer, scratchPoints.data(), static_cast<int>(count));
 }
 
 void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
@@ -254,7 +253,8 @@ void sdlgf::GraphicsDevice::DrawLine(float x1, float y1, float x2, float y2, sdl
 void sdlgf::GraphicsDevice::DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness)
 {
 	if (thickness <= 1.0f) {
-		StrokeStrip({ sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2) }, color);
+		const sdlgf::Vec2 ends[2] = { sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2) };
+		StrokeStrip(ends, 2, color);
 		return;
 	}
 
@@ -304,22 +304,22 @@ void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, 
 
 void sdlgf::GraphicsDevice::DrawRectangle(float x, float y, float width, float height, float rotation, float scaleX, float scaleY, float offsetX, float offsetY, sdlgf::Color color, bool isFilled)
 {
-	std::vector<sdlgf::Vec2> points = {
+	sdlgf::Vec2 points[5] = {
 		TransformRectanglePoint(x, y, 0.0f, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY),
 		TransformRectanglePoint(x, y, width, 0.0f, rotation, scaleX, scaleY, offsetX, offsetY),
 		TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY),
 		TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY),
 	};
-	for (auto& p : points) {
-		p.x = p.x * virtualScale + virtualOffsetX;
-		p.y = p.y * virtualScale + virtualOffsetY;
+	for (int i = 0; i < 4; ++i) {
+		points[i].x = points[i].x * virtualScale + virtualOffsetX;
+		points[i].y = points[i].y * virtualScale + virtualOffsetY;
 	}
 	if (isFilled) {
-		FillFan(points, color);
+		FillFan(points, 4, color);
 	}
 	else {
-		points.push_back(points[0]);
-		StrokeStrip(points, color);
+		points[4] = points[0]; // close the outline
+		StrokeStrip(points, 5, color);
 	}
 }
 
@@ -332,18 +332,18 @@ void sdlgf::GraphicsDevice::DrawRectangle(const sdlgf::Camera& camera, float x, 
 	auto wp2 = TransformRectanglePoint(x, y, width, height, rotation, scaleX, scaleY, offsetX, offsetY);
 	auto wp3 = TransformRectanglePoint(x, y, 0.0f, height, rotation, scaleX, scaleY, offsetX, offsetY);
 
-	std::vector<sdlgf::Vec2> points = {
+	sdlgf::Vec2 points[5] = {
 		TransformPoint(matCamera, wp0.x, wp0.y),
 		TransformPoint(matCamera, wp1.x, wp1.y),
 		TransformPoint(matCamera, wp2.x, wp2.y),
 		TransformPoint(matCamera, wp3.x, wp3.y),
 	};
 	if (isFilled) {
-		FillFan(points, color);
+		FillFan(points, 4, color);
 	}
 	else {
-		points.push_back(points[0]);
-		StrokeStrip(points, color);
+		points[4] = points[0]; // close the outline
+		StrokeStrip(points, 5, color);
 	}
 }
 
@@ -445,7 +445,8 @@ void sdlgf::GraphicsDevice::DrawTriangle(const sdlgf::Camera& camera, float cent
 
 void sdlgf::GraphicsDevice::DrawTriangleScreenSpace(float x1, float y1, float x2, float y2, float x3, float y3, sdlgf::Color color)
 {
-	FillFan({ sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2), sdlgf::Vec2(x3, y3) }, color);
+	const sdlgf::Vec2 corners[3] = { sdlgf::Vec2(x1, y1), sdlgf::Vec2(x2, y2), sdlgf::Vec2(x3, y3) };
+	FillFan(corners, 3, color);
 }
 
 // ---- textured drawing ------------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Vertex;
+struct SDL_FPoint;
 
 namespace sdlgf {
 	class Texture;
@@ -29,7 +30,10 @@ namespace sdlgf {
 		unsigned int alphaBlendMode = 0; // an SDL_BlendMode
 		std::vector<Texture*> textures;  // every live Texture made for this device
 		std::unique_ptr<AssetManager> assets;
+		// Reused by every draw call so drawing allocates nothing per call (the game issues thousands a frame)
 		std::vector<SDL_Vertex> scratchVertices;
+		std::vector<SDL_FPoint> scratchPoints;
+		std::vector<int> scratchIndices;
 		bool alphaBlending = false;
 		bool scissorEnabled = false;
 		RECT scissorRect{};
@@ -41,8 +45,10 @@ namespace sdlgf {
 		void ApplyBlend();
 		void ApplyScissor();
 		void DrawLineInternal(float x1, float y1, float x2, float y2, sdlgf::Color color, float thickness);
-		void FillFan(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color);
-		void StrokeStrip(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color);
+		void FillFan(const sdlgf::Vec2* points, size_t count, sdlgf::Color color);
+		void StrokeStrip(const sdlgf::Vec2* points, size_t count, sdlgf::Color color);
+		void FillFan(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color) { FillFan(points.data(), points.size(), color); }
+		void StrokeStrip(const std::vector<sdlgf::Vec2>& points, sdlgf::Color color) { StrokeStrip(points.data(), points.size(), color); }
 	public:
 		/// Creates the renderer for `window`. `rendererName` selects an SDL render driver
 		/// ("direct3d11", "software", ...); null lets SDL pick the best one.

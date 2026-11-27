@@ -1,4 +1,5 @@
 #pragma once
+#include <future>
 #include <map>
 #include <memory>
 #include <string>
@@ -48,7 +49,31 @@ namespace sdlgf {
 	private:
 		SDL_AudioStream* stream = nullptr;        //the output device; null when there is no audio device
 		Mixer mixer;                              //called from the audio thread, see Init
-		std::map<std::string, std::shared_ptr<const Sound>> cache; //cache will save the loaded files (avoid disk loading latency)
+		// Every registered sound. Small ones (sound effects) are decoded at Load and pinned for good;
+		// big ones (music) are decoded when first needed and only stay in memory while something
+		// uses them (a playing voice, a pending start): `weak` finds one that is still loaded.
+		struct SoundEntry {
+			std::string path;
+			std::shared_ptr<const Sound> pinned;
+			std::weak_ptr<const Sound> weak;
+		};
+		std::map<std::string, SoundEntry> sounds;
+		size_t residentFileLimit = 64 * 1024;     // files up to this many bytes on disk stay decoded
+		std::shared_ptr<const Sound> Acquire(const std::string& name); // decodes on the calling thread if needed
+
+		// A background track whose files are being decoded on a worker thread. The music already playing
+		// carries on until the new one is ready, then crossfades exactly as PlayBGM_Fade always did.
+		struct PendingBgm {
+			std::string name;
+			float volume;
+			float duration;
+			bool cancelled = false;                                                // Stop/StopAll came first
+			std::vector<std::string> names;                                        // sounds being decoded
+			std::future<std::vector<std::shared_ptr<const Sound>>> decoding;
+		};
+		std::unique_ptr<PendingBgm> pendingBgm;
+		std::vector<std::string> SoundsOfTrack(const std::string& name) const;
+		void StartBgm(std::string name, float targetVolume, float duration);
 		std::map<std::string, std::vector<std::string>> soundBanks;
 		std::vector<ActiveVoice*> activeVoices; //list of playing sound
 		std::map<std::string, StemSet> stemSets;
@@ -85,10 +110,19 @@ namespace sdlgf {
 		/// silently: every Play call does nothing).
 		bool Init();
 
-		/// Loads a WAV or OGG file (UTF-8 path relative to the working directory) into the cache under
-		/// `name`. Failures are logged and the name stays unknown, so Play(name) does nothing.
+		/// Registers a WAV or OGG file (UTF-8 path relative to the working directory) under `name`.
+		/// Small files are decoded now; big ones (music) when first used, so registering all the
+		/// game's music costs no memory. Failures are logged and the name stays unknown, so
+		/// Play(name) does nothing.
 		void Load(std::string name, const std::string& path);
-		bool HasSound(const std::string& name) const { return cache.count(name) != 0; }
+		bool HasSound(const std::string& name) const { return sounds.count(name) != 0; }
+		/// Files up to `bytes` on disk are decoded at Load and stay in memory; larger ones are decoded when
+		/// first played and freed once nothing plays them. Applies to later Load calls.
+		void SetResidentFileLimit(size_t bytes) { residentFileLimit = bytes; }
+		/// Memory of the decoded sounds that are in memory right now (for the debug overlay and tests).
+		size_t GetLoadedSoundBytes() const;
+		/// True while a PlayBGM_Fade is waiting for its files to finish decoding.
+		bool IsMusicLoading() const { return pendingBgm != nullptr; }
 
 		void Play(std::string name, bool loop = false, float volume = 1.0f, AudioType type = AudioType::SFX);
 		void Update(unsigned long long deltaTime);

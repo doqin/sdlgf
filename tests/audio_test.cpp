@@ -340,6 +340,9 @@ static void TestManager()
 	CHECK(audio->Init()); // second call is harmless
 	std::fputs("audio_test:   manager: load\n", stderr);
 
+	// The checks below are about playing, not memory: decode every fixture at Load, as small files are
+	audio->SetResidentFileLimit(static_cast<size_t>(-1));
+
 	audio->Load("click", click);
 	audio->Load("loopA", loopA);
 	audio->Load("loopB", loopB);
@@ -398,6 +401,40 @@ static void TestManager()
 	audio->StopAll();
 	audio->Update(10);
 	CHECK(audio->GetActiveVoiceCount() == 0);
+
+	std::fputs("audio_test:   manager: lazy music\n", stderr);
+	// Big files (music) are only decoded when played and freed when nothing plays them
+	audio->SetResidentFileLimit(0);
+	audio->Load("lazyA", loopA);
+	audio->Load("lazyClick", click);
+	CHECK(audio->HasSound("lazyA"));
+	const size_t baseline = audio->GetLoadedSoundBytes();
+	audio->PlayBGM_Fade("lazyA", 0.5f, 0.1f);
+	CHECK(audio->IsMusicLoading());
+	CHECK(audio->GetActiveVoiceCount() == 0); // still decoding on the worker thread, the frame is not blocked
+	WaitFor([&] { audio->Update(10); return !audio->IsMusicLoading(); }, 5000, [] { SDL_Delay(5); });
+	CHECK(!audio->IsMusicLoading());
+	CHECK(audio->GetActiveVoiceCount() == 1);
+	CHECK(audio->GetLoadedSoundBytes() > baseline);
+	audio->PlayBGM_Fade("lazyA", 0.5f, 0.1f); // already playing: no second voice, nothing to decode
+	CHECK(!audio->IsMusicLoading() && audio->GetActiveVoiceCount() == 1);
+	audio->StopAll();
+	WaitFor([&] { audio->Update(10); return audio->GetActiveVoiceCount() == 0; }, 3000, [] { SDL_Delay(5); });
+	CHECK(audio->GetLoadedSoundBytes() == baseline); // the decoded music was released with its voice
+
+	// stopping before the decode finishes cancels the start
+	audio->PlayBGM_Fade("lazyA", 0.5f, 0.1f);
+	audio->StopAll();
+	WaitFor([&] { audio->Update(10); return !audio->IsMusicLoading(); }, 5000, [] { SDL_Delay(5); });
+	CHECK(audio->GetActiveVoiceCount() == 0);
+	CHECK(audio->GetLoadedSoundBytes() == baseline);
+
+	// a one-shot that is not decoded yet plays at once (decoded on the spot)
+	audio->Play("lazyClick");
+	CHECK(audio->GetActiveVoiceCount() == 1);
+	audio->StopAll();
+	audio->Update(10);
+	audio->SetResidentFileLimit(static_cast<size_t>(-1));
 
 	std::fputs("audio_test:   manager: volumes\n", stderr);
 	// volumes can be changed while sounds play

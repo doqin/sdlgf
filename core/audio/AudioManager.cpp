@@ -4,6 +4,7 @@
 #include <SDL3/SDL.h>
 #include <cmath>
 #include <algorithm>
+#include <chrono>
 
 sdlgf::AudioManager* sdlgf::AudioManager::instance = nullptr;
 
@@ -60,14 +61,47 @@ bool sdlgf::AudioManager::Init()
 
 void sdlgf::AudioManager::Load(std::string name, const std::string& path)
 {
-	if (cache.count(name)) return;
-	std::string error;
-	auto sound = LoadSoundFile(path, &error);
-	if (!sound) {
-		sdlgf::Platform::DebugLog("Could not load sound '" + name + "' from '" + path + "': " + error + "\n");
-		return;
+	if (sounds.count(name)) return;
+	SoundEntry entry;
+	entry.path = path;
+	SDL_PathInfo info;
+	// A file that cannot even be stat'ed goes through the decoder too, so the log says why
+	const bool small = !SDL_GetPathInfo(path.c_str(), &info) || static_cast<size_t>(info.size) <= residentFileLimit;
+	if (small) {
+		std::string error;
+		auto sound = LoadSoundFile(path, &error);
+		if (!sound) {
+			sdlgf::Platform::DebugLog("Could not load sound '" + name + "' from '" + path + "': " + error + "\n");
+			return;
+		}
+		entry.weak = sound;
+		entry.pinned = std::move(sound);
 	}
-	cache[name] = std::move(sound);
+	sounds[name] = std::move(entry);
+}
+
+std::shared_ptr<const sdlgf::Sound> sdlgf::AudioManager::Acquire(const std::string& name)
+{
+	auto it = sounds.find(name);
+	if (it == sounds.end()) return nullptr;
+	if (auto sound = it->second.weak.lock()) return sound;
+	std::string error;
+	auto sound = LoadSoundFile(it->second.path, &error);
+	if (!sound) {
+		sdlgf::Platform::DebugLog("Could not load sound '" + name + "' from '" + it->second.path + "': " + error + "\n");
+		return nullptr;
+	}
+	it->second.weak = sound;
+	return sound;
+}
+
+size_t sdlgf::AudioManager::GetLoadedSoundBytes() const
+{
+	size_t bytes = 0;
+	for (const auto& [name, entry] : sounds) {
+		if (auto sound = entry.weak.lock()) bytes += sound->samples.size() * sizeof(std::int16_t);
+	}
+	return bytes;
 }
 
 bool sdlgf::AudioManager::IsFinished(const ActiveVoice* av) const
@@ -94,8 +128,7 @@ sdlgf::ActiveVoice* sdlgf::AudioManager::PlayInternal(std::string name, bool loo
 	}
 
 	//can't find sound name from cache
-	auto soundIt = cache.find(name);
-	if (soundIt == cache.end()) return nullptr;
+	if (sounds.find(name) == sounds.end()) return nullptr;
 
 	// Init() can fail on machines with no audio device (VMs, RDP sessions,
 	// sandbox). stream stays null then - stay silent instead of piling up voices
@@ -103,12 +136,11 @@ sdlgf::ActiveVoice* sdlgf::AudioManager::PlayInternal(std::string name, bool loo
 
 	//optional intro: played once first, the main sound follows gaplessly
 	std::shared_ptr<const Sound> intro;
-	if (!introName.empty()) {
-		auto introIt = cache.find(introName);
-		if (introIt != cache.end()) intro = introIt->second;
-	}
+	if (!introName.empty()) intro = Acquire(introName);
 
-	Voice* voice = mixer.AddVoice(soundIt->second, intro, loop, 0.0f, startNow);
+	auto main = Acquire(name);
+	if (!main) return nullptr;
+	Voice* voice = mixer.AddVoice(std::move(main), std::move(intro), loop, 0.0f, startNow);
 	ActiveVoice* av = new ActiveVoice{ name, voice, type, volume };
 	av->group = group;
 	av->fadeMul = fadeMul;
@@ -121,6 +153,20 @@ sdlgf::ActiveVoice* sdlgf::AudioManager::PlayInternal(std::string name, bool loo
 }
 
 void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
+
+	// A track that was being decoded in the background is ready: install it and start it
+	if (pendingBgm && pendingBgm->decoding.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
+		std::unique_ptr<PendingBgm> pending = std::move(pendingBgm);
+		auto decoded = pending->decoding.get();
+		for (size_t i = 0; i < decoded.size() && i < pending->names.size(); ++i) {
+			auto it = sounds.find(pending->names[i]);
+			if (it == sounds.end()) continue;
+			if (decoded[i]) it->second.weak = decoded[i];
+			else sdlgf::Platform::DebugLog("Could not load sound '" + pending->names[i] + "' from '" + it->second.path + "'\n");
+		}
+		// `decoded` keeps the sounds alive until the voices created by StartBgm hold them
+		if (!pending->cancelled) StartBgm(pending->name, pending->volume, pending->duration);
+	}
 
 	if (isFading) {
 		fadeTimer += (deltaTime / 1000.0f);
@@ -168,10 +214,12 @@ void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
 		ApplyVoiceVolume(av);
 	}
 
+	bool musicEnded = false;
 	for (auto it = activeVoices.begin(); it != activeVoices.end(); )
 	{
 		if (IsFinished(*it)) //finished sound should be destroyed
 		{
+			musicEnded = musicEnded || (*it)->type == AudioType::MUSIC;
 			mixer.RemoveVoice((*it)->voice);
 			delete (*it);
 			it = activeVoices.erase(it);
@@ -181,10 +229,13 @@ void sdlgf::AudioManager::Update(unsigned long long deltaTime) {
 			++it;
 		}
 	}
+	// A finished track's decoded audio (tens of MB) was just freed: give it back to the OS
+	if (musicEnded) sdlgf::Platform::ReleaseFreedMemory();
 }
 
 void sdlgf::AudioManager::Stop(std::string name)
 {
+	if (pendingBgm && pendingBgm->name == name) pendingBgm->cancelled = true;
 	for (auto av : activeVoices)
 	{
 		if ((av->name == name || av->group == name) && !IsFinished(av))
@@ -197,6 +248,7 @@ void sdlgf::AudioManager::Stop(std::string name)
 
 void sdlgf::AudioManager::StopAll()
 {
+	if (pendingBgm) pendingBgm->cancelled = true;
 	for (auto av : activeVoices)
 	{
 		if (!IsFinished(av))
@@ -220,7 +272,8 @@ void sdlgf::AudioManager::Shutdown() {
 	activeVoices.clear();
 	mixer.Clear();
 	soundBanks.clear();
-	cache.clear();
+	pendingBgm.reset();
+	sounds.clear();
 }
 
 void sdlgf::AudioManager::SetMasterVolume(float volume)
@@ -272,7 +325,54 @@ void sdlgf::AudioManager::PlayRandom(std::string bankName, float volume, AudioTy
 	Play(selectedSound, false, volume, type);
 }
 
+std::vector<std::string> sdlgf::AudioManager::SoundsOfTrack(const std::string& name) const
+{
+	auto stems = stemSets.find(name);
+	if (stems != stemSets.end()) return stems->second.stems;
+	auto introLoop = introLoops.find(name);
+	if (introLoop != introLoops.end()) return { introLoop->second.intro, introLoop->second.loop };
+	return { name };
+}
+
 void sdlgf::AudioManager::PlayBGM_Fade(std::string name, float targetVolume, float duration)
+{
+	if (pendingBgm && !pendingBgm->cancelled && pendingBgm->name == name) return; // already on its way
+	if (!activeVoices.empty()) {
+		for (auto av : activeVoices) {
+			if (av->group == name && av->type == AudioType::MUSIC && !IsFinished(av)) return;
+		}
+	}
+
+	// Music is only in memory while it plays: if any file of this track is not decoded, decode it on a
+	// worker thread (a few hundred ms for a long track) and start the track from Update when ready,
+	// instead of freezing the frame.
+	std::vector<std::string> missing, paths;
+	for (const auto& soundName : SoundsOfTrack(name)) {
+		auto it = sounds.find(soundName);
+		if (it != sounds.end() && !it->second.weak.lock()) {
+			missing.push_back(soundName);
+			paths.push_back(it->second.path);
+		}
+	}
+	if (missing.empty() || stream == nullptr) {
+		pendingBgm.reset();
+		StartBgm(std::move(name), targetVolume, duration);
+		return;
+	}
+	auto pending = std::make_unique<PendingBgm>();
+	pending->name = name;
+	pending->volume = targetVolume;
+	pending->duration = duration;
+	pending->names = std::move(missing);
+	pending->decoding = std::async(std::launch::async, [paths = std::move(paths)]() {
+		std::vector<std::shared_ptr<const Sound>> decoded;
+		for (const auto& path : paths) decoded.push_back(LoadSoundFile(path));
+		return decoded;
+	});
+	pendingBgm = std::move(pending); // replaces (and waits for) an older request, the newest one wins
+}
+
+void sdlgf::AudioManager::StartBgm(std::string name, float targetVolume, float duration)
 {
 	if (!activeVoices.empty()) {
 		bool isAlreadyPlaying = false;
